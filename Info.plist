@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.getoverhim.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>getoverhim</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.87946294443-icka49fug40v86vqo59fg13ue0tj94na</string>
+			</array>
+		</dict>
+	</array>
+	<key>GIDClientID</key>
+	<string>87946294443-icka49fug40v86vqo59fg13ue0tj94na.apps.googleusercontent.com</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>prefs</string>
+		<string>App-Prefs</string>
+		<string>mailto</string>
+	</array>
+	<key>NSFamilyControlsUsageDescription</key>
+	<string>Get Over Him uses Screen Time to help you stay focused on your goals.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This helps us understand which features are most effective in supporting your recovery journey and measure the impact of our app.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Get Over Him may use the microphone for voice journaling features.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Satoshi-Black.otf</string>
+		<string>Satoshi-BlackItalic.otf</string>
+		<string>Satoshi-Bold.otf</string>
+		<string>Satoshi-BoldItalic.otf</string>
+		<string>Satoshi-Italic.otf</string>
+		<string>Satoshi-Light.otf</string>
+		<string>Satoshi-LightItalic.otf</string>
+		<string>Satoshi-Medium.otf</string>
+		<string>Satoshi-MediumItalic.otf</string>
+		<string>Satoshi-Regular.otf</string>
+	</array>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>hand.raised.fill</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>GET</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.getoverhim.get</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>checkmark.circle.fill</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>OVER</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.getoverhim.over</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>trash.fill</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>HIM</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.getoverhim.him</string>
+		</dict>
+	</array>
+	<key>UILaunchScreen</key>
+	<dict/>
+</dict>
+</plist>

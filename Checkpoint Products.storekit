@@ -1,0 +1,272 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "EC3EA90A",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21811912",
+      "localizations" : [
+
+      ],
+      "name" : "Checkpoint Subscriptions",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "5.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6755244153",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "App blocking, strict mode, text simulator, analytics",
+              "displayName" : "Checkpoint Plus",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.checkpointapp.ios.Checkpoint.weekly",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "Checkpoint Weekly",
+          "subscriptionGroupID" : "21811912",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "18.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6755244240",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "App blocking, strict mode, text simulator, analytics",
+              "displayName" : "Checkpoint Plus",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.checkpointapp.ios.Checkpoint.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Checkpoint Monthly",
+          "subscriptionGroupID" : "21811912",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "39.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "6755244328",
+          "introductoryOffer" : {
+            "internalID" : "intro_annual",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P3D"
+          },
+          "localizations" : [
+            {
+              "description" : "App blocking, strict mode, text simulator, analytics",
+              "displayName" : "Checkpoint Plus",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.checkpointapp.ios.Checkpoint.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Checkpoint Annual",
+          "subscriptionGroupID" : "21811912",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "19.99",
+          "familyShareable" : false,
+          "groupNumber" : 4,
+          "internalID" : "6755244374",
+          "introductoryOffer" : {
+            "internalID" : "intro_annual_discount",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P3D"
+          },
+          "localizations" : [
+            {
+              "description" : "App blocking, strict mode, text simulator, analytics",
+              "displayName" : "Checkpoint Plus",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.checkpointapp.ios.Checkpoint.annualDiscount",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Checkpoint Annual Discount",
+          "subscriptionGroupID" : "21811912",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "89.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "900B9FD5",
+          "introductoryOffer" : {
+            "internalID" : "120C797F",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P3D"
+          },
+          "localizations" : [
+            {
+              "description" : "",
+              "displayName" : "",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "checkpoint_annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Annual 2",
+          "subscriptionGroupID" : "21811912",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "49.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "7E13F1D3",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "",
+              "displayName" : "",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "checkpoint_annual_abandon",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Annual Abandon",
+          "subscriptionGroupID" : "21811912",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

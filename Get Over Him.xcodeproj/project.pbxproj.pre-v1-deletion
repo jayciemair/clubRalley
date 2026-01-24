@@ -1,0 +1,2457 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 90;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		481388F529ABE0F6001B8A55 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 481388F429ABE0F6001B8A55 /* Assets.xcassets */; };
+		481388F829ABE0F6001B8A55 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 481388F729ABE0F6001B8A55 /* Preview Assets.xcassets */; };
+		481388FD29ABE0F6001B8A55 /* Dial.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 481388FB29ABE0F6001B8A55 /* Dial.xcdatamodeld */; };
+		4846CFBD29D1039E005D018E /* ReportExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4846CFBC29D1039E005D018E /* ReportExtension.swift */; };
+		4846CFC629D1039E005D018E /* ReportExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 4846CFBA29D1039E005D018E /* ReportExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4846CFD829D1E94F005D018E /* DeviceActivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4846CF9C29CCA40C005D018E /* DeviceActivity.framework */; };
+		4846CFDB29D1E94F005D018E /* DeviceActivityMonitorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4846CFDA29D1E94F005D018E /* DeviceActivityMonitorExtension.swift */; };
+		4846CFE029D1E94F005D018E /* DeviceActivityMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4846CFD729D1E94F005D018E /* DeviceActivityMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		48AE9A1F29E22DEF0092766C /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48AE9A1E29E22DEF0092766C /* ManagedSettings.framework */; };
+		48AE9A2129E22DEF0092766C /* ManagedSettingsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48AE9A2029E22DEF0092766C /* ManagedSettingsUI.framework */; };
+		48AE9A2429E22DEF0092766C /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48AE9A2329E22DEF0092766C /* ShieldConfigurationExtension.swift */; };
+		48AE9A2829E22DEF0092766E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48AE9A2729E22DEF0092766D /* Assets.xcassets */; };
+		48AE9A2929E22DEF0092766C /* shield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 48AE9A1D29E22DEF0092766C /* shield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		48AE9A3A29E38FD90092766C /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48AE9A3929E38FD90092766C /* Colors.xcassets */; };
+		48AE9A8C29E5D0AF0092766C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48AE9A4029E479640092766C /* WidgetKit.framework */; };
+		48AE9A8D29E5D0AF0092766C /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48AE9A4229E479640092766C /* SwiftUI.framework */; };
+		48AE9A9029E5D0AF0092766C /* RestrictionWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48AE9A8F29E5D0AF0092766C /* RestrictionWidgetBundle.swift */; };
+		48AE9A9229E5D0AF0092766C /* RestrictionWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48AE9A9129E5D0AF0092766C /* RestrictionWidget.swift */; };
+		48AE9A9429E5D0B00092766C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48AE9A9329E5D0B00092766C /* Assets.xcassets */; };
+		48AE9A9829E5D0B00092766C /* RestrictionWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 48AE9A8B29E5D0AF0092766C /* RestrictionWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		48AE9A9C29E5D1BC0092766C /* RestrictionWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48AE9A9129E5D0AF0092766C /* RestrictionWidget.swift */; };
+		48AE9A9D29E5D0AF0092766D /* DialInWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48AE9A9E29E5D0AF0092766E /* DialInWidget.swift */; };
+		910265092E4CE1E200250BE9 /* ManifestoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910265082E4CE1E200250BE9 /* ManifestoView.swift */; };
+		9102650A2E4CE1E200250BE9 /* LaunchScreenState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910265072E4CE1E200250BE9 /* LaunchScreenState.swift */; };
+		9102650D2E4CF86F00250BE9 /* LegalLinksSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9102650B2E4CF86F00250BE9 /* LegalLinksSection.swift */; };
+		9102650E2E4CF86F00250BE9 /* StrictModeToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9102650C2E4CF86F00250BE9 /* StrictModeToggle.swift */; };
+		910265132E4CF87D00250BE9 /* DeviceManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910265112E4CF87D00250BE9 /* DeviceManagementView.swift */; };
+		910265262E4CFFCD00250BE9 /* SignUpScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910265252E4CFFCD00250BE9 /* SignUpScreen.swift */; };
+		9102653D2E4D37AB00250BE9 /* LifetimeImpactProblemContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9102653B2E4D37AB00250BE9 /* LifetimeImpactProblemContent.swift */; };
+		9103D9892E2EB0EC003DFC34 /* DialApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103D9862E2EB0EC003DFC34 /* DialApp.swift */; };
+		9103D98A2E2EB0EC003DFC34 /* LaunchScreenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103D9822E2EB0EC003DFC34 /* LaunchScreenManager.swift */; };
+		9103D98B2E2EB0EC003DFC34 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103D9852E2EB0EC003DFC34 /* ContentView.swift */; };
+		9103D98C2E2EB0EC003DFC34 /* LaunchScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103D9832E2EB0EC003DFC34 /* LaunchScreenView.swift */; };
+		9103D98D2E2EB0EC003DFC34 /* STProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103D9872E2EB0EC003DFC34 /* STProgressView.swift */; };
+		9103DA002E2F21C8003DFC34 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103D9FF2E2F21C8003DFC34 /* AppTheme.swift */; };
+		9103DA012E2F21C8003DFC34 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103D9FF2E2F21C8003DFC34 /* AppTheme.swift */; };
+		9103DA022E2F21C8003DFC34 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103D9FF2E2F21C8003DFC34 /* AppTheme.swift */; };
+		9103DAC02E33B4E0003DFC34 /* OnboardingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103DAA22E33B4E0003DFC34 /* OnboardingCoordinator.swift */; };
+		9103DAC12E33B4E0003DFC34 /* OnboardingFlowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103DAA32E33B4E0003DFC34 /* OnboardingFlowController.swift */; };
+		911FFFA82E7E2B680088F219 /* TopAppsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 911FFFA62E7E2B680088F219 /* TopAppsData.swift */; };
+		911FFFA92E7E2B680088F219 /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 911FFFA52E7E2B680088F219 /* AppInfo.swift */; };
+		911FFFAC2E7E2B700088F219 /* AppCategorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 911FFFAA2E7E2B700088F219 /* AppCategorization.swift */; };
+		911FFFB32E7F344E0088F219 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 911FFFB12E7F344E0088F219 /* AuthenticationManager.swift */; };
+		911FFFB72E7F389F0088F219 /* CognitoResponseParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 911FFFB62E7F389F0088F219 /* CognitoResponseParser.swift */; };
+		911FFFBC2E7F3A240088F219 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 911FFFBB2E7F3A240088F219 /* KeychainManager.swift */; };
+		91339F562E3A97EB00F38A31 /* Alarm+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F502E3A97EB00F38A31 /* Alarm+CoreDataClass.swift */; };
+		91339F572E3A97EB00F38A31 /* Item+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F532E3A97EB00F38A31 /* Item+CoreDataProperties.swift */; };
+		91339F582E3A97EB00F38A31 /* RestrictionBlock+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F542E3A97EB00F38A31 /* RestrictionBlock+CoreDataClass.swift */; };
+		91339F592E3A97EB00F38A31 /* RestrictionBlock+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F552E3A97EB00F38A31 /* RestrictionBlock+CoreDataProperties.swift */; };
+		91339F5A2E3A97EB00F38A31 /* Alarm+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F512E3A97EB00F38A31 /* Alarm+CoreDataProperties.swift */; };
+		91339F5B2E3A97EB00F38A31 /* Item+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F522E3A97EB00F38A31 /* Item+CoreDataClass.swift */; };
+		91339F662E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F612E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift */; };
+		91339F672E3A9E6700F38A31 /* Item+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F622E3A9E6700F38A31 /* Item+CoreDataClass.swift */; };
+		91339F682E3A9E6700F38A31 /* Item+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F632E3A9E6700F38A31 /* Item+CoreDataProperties.swift */; };
+		91339F692E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F642E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift */; };
+		91339F6A2E3A9E6700F38A31 /* Alarm+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F602E3A9E6700F38A31 /* Alarm+CoreDataClass.swift */; };
+		91339F6B2E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F652E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift */; };
+		91339F6C2E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F612E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift */; };
+		91339F6D2E3A9E6700F38A31 /* Item+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F622E3A9E6700F38A31 /* Item+CoreDataClass.swift */; };
+		91339F6E2E3A9E6700F38A31 /* Item+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F632E3A9E6700F38A31 /* Item+CoreDataProperties.swift */; };
+		91339F6F2E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F642E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift */; };
+		91339F702E3A9E6700F38A31 /* Alarm+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F602E3A9E6700F38A31 /* Alarm+CoreDataClass.swift */; };
+		91339F712E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F652E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift */; };
+		91339F722E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F612E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift */; };
+		91339F732E3A9E6700F38A31 /* Item+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F622E3A9E6700F38A31 /* Item+CoreDataClass.swift */; };
+		91339F742E3A9E6700F38A31 /* Item+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F632E3A9E6700F38A31 /* Item+CoreDataProperties.swift */; };
+		91339F752E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F642E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift */; };
+		91339F762E3A9E6700F38A31 /* Alarm+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F602E3A9E6700F38A31 /* Alarm+CoreDataClass.swift */; };
+		91339F772E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F652E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift */; };
+		91339F792E3A9F0400F38A31 /* Alarm+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F782E3A9F0400F38A31 /* Alarm+Extension.swift */; };
+		91339F7A2E3A9F0400F38A31 /* Alarm+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F782E3A9F0400F38A31 /* Alarm+Extension.swift */; };
+		91339F7B2E3A9F0400F38A31 /* Alarm+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F782E3A9F0400F38A31 /* Alarm+Extension.swift */; };
+		91339F892E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F872E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift */; };
+		91339F8A2E3AAA9A00F38A31 /* BluetoothStatusSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F862E3AAA9A00F38A31 /* BluetoothStatusSheet.swift */; };
+		91339F8B2E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F872E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift */; };
+		91339F8C2E3AAA9A00F38A31 /* BluetoothStatusSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F862E3AAA9A00F38A31 /* BluetoothStatusSheet.swift */; };
+		91339F8D2E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F872E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift */; };
+		91339F8E2E3AAA9A00F38A31 /* BluetoothStatusSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F862E3AAA9A00F38A31 /* BluetoothStatusSheet.swift */; };
+		91339F932E3AAB7800F38A31 /* BluetoothDeviceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F922E3AAB7800F38A31 /* BluetoothDeviceRow.swift */; };
+		91339F942E3AAB7800F38A31 /* BluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F912E3AAB7800F38A31 /* BluetoothDevice.swift */; };
+		91339F952E3AAB7800F38A31 /* BluetoothDeviceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F922E3AAB7800F38A31 /* BluetoothDeviceRow.swift */; };
+		91339F962E3AAB7800F38A31 /* BluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F912E3AAB7800F38A31 /* BluetoothDevice.swift */; };
+		91339F972E3AAB7800F38A31 /* BluetoothDeviceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F922E3AAB7800F38A31 /* BluetoothDeviceRow.swift */; };
+		91339F982E3AAB7800F38A31 /* BluetoothDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339F912E3AAB7800F38A31 /* BluetoothDevice.swift */; };
+		91339FDE2E3C12BD00F38A31 /* DialActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339FDB2E3C12BD00F38A31 /* DialActivityAttributes.swift */; };
+		91339FDF2E3C12BD00F38A31 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339FD92E3C12BD00F38A31 /* LiveActivityManager.swift */; };
+		91339FE02E3C12CA00F38A31 /* DialActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339FDB2E3C12BD00F38A31 /* DialActivityAttributes.swift */; };
+		91339FE52E3C14D800F38A31 /* RestrictionWidgetLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91339FE42E3C14D800F38A31 /* RestrictionWidgetLiveActivity.swift */; };
+		9133A0052E3FDCCA00F38A31 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0022E3FDCCA00F38A31 /* NotificationService.swift */; };
+		9133A0062E3FDCCA00F38A31 /* NotificationContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0012E3FDCCA00F38A31 /* NotificationContent.swift */; };
+		9133A0072E3FDCCA00F38A31 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9133A0032E3FDCCA00F38A31 /* README.md */; };
+		9133A0082E3FDCCA00F38A31 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9133A0032E3FDCCA00F38A31 /* README.md */; };
+		9133A0092E3FDCCA00F38A31 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0022E3FDCCA00F38A31 /* NotificationService.swift */; };
+		9133A00A2E3FDCCA00F38A31 /* NotificationContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0012E3FDCCA00F38A31 /* NotificationContent.swift */; };
+		9133A00B2E3FDCCA00F38A31 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9133A0032E3FDCCA00F38A31 /* README.md */; };
+		9133A00C2E3FDCCA00F38A31 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0022E3FDCCA00F38A31 /* NotificationService.swift */; };
+		9133A00D2E3FDCCA00F38A31 /* NotificationContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0012E3FDCCA00F38A31 /* NotificationContent.swift */; };
+		9133A00F2E3FE2DF00F38A31 /* Weekday.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A00E2E3FE2DF00F38A31 /* Weekday.swift */; };
+		9133A0102E3FE2DF00F38A31 /* Weekday.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A00E2E3FE2DF00F38A31 /* Weekday.swift */; };
+		9133A0112E3FE2DF00F38A31 /* Weekday.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A00E2E3FE2DF00F38A31 /* Weekday.swift */; };
+		9133A0132E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0122E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift */; };
+		9133A0142E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0122E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift */; };
+		9133A0152E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0122E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift */; };
+		9133A02E2E4011B400F38A31 /* SoundLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A02B2E4011B400F38A31 /* SoundLibrary.swift */; };
+		9133A02F2E4011B400F38A31 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A02C2E4011B400F38A31 /* SoundManager.swift */; };
+		9133A0302E4011B400F38A31 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A02A2E4011B400F38A31 /* AudioPlayer.swift */; };
+		9133A0312E4011B400F38A31 /* SoundLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A02B2E4011B400F38A31 /* SoundLibrary.swift */; };
+		9133A0322E4011B400F38A31 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A02C2E4011B400F38A31 /* SoundManager.swift */; };
+		9133A0332E4011B400F38A31 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A02A2E4011B400F38A31 /* AudioPlayer.swift */; };
+		9133A0342E4011B400F38A31 /* SoundLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A02B2E4011B400F38A31 /* SoundLibrary.swift */; };
+		9133A0352E4011B400F38A31 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A02C2E4011B400F38A31 /* SoundManager.swift */; };
+		9133A0362E4011B400F38A31 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A02A2E4011B400F38A31 /* AudioPlayer.swift */; };
+		9133A0382E4011C900F38A31 /* metadata.json in Resources */ = {isa = PBXBuildFile; fileRef = 9133A0372E4011C900F38A31 /* metadata.json */; };
+		9133A03A2E40126700F38A31 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0392E40126700F38A31 /* AlarmSound.swift */; };
+		9133A03B2E40126700F38A31 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0392E40126700F38A31 /* AlarmSound.swift */; };
+		9133A03C2E40126700F38A31 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0392E40126700F38A31 /* AlarmSound.swift */; };
+		9133A03E2E4255D900F38A31 /* digital_beep.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 9133A03D2E4255D900F38A31 /* digital_beep.mp3 */; };
+		9133A05D2E42A0A000F38A31 /* KeyboardPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A05C2E42A0A000F38A31 /* KeyboardPreloader.swift */; };
+		9133A05E2E42A0A000F38A31 /* KeyboardPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A05C2E42A0A000F38A31 /* KeyboardPreloader.swift */; };
+		9133A05F2E42A0A000F38A31 /* KeyboardPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A05C2E42A0A000F38A31 /* KeyboardPreloader.swift */; };
+		9133A0852E42E78000F38A31 /* ErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0842E42E78000F38A31 /* ErrorHandler.swift */; };
+		9133A0862E42E78000F38A31 /* DialError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0832E42E78000F38A31 /* DialError.swift */; };
+		9133A0872E42E78000F38A31 /* ErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0842E42E78000F38A31 /* ErrorHandler.swift */; };
+		9133A0882E42E78000F38A31 /* DialError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0832E42E78000F38A31 /* DialError.swift */; };
+		9133A0892E42E78000F38A31 /* ErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0842E42E78000F38A31 /* ErrorHandler.swift */; };
+		9133A08A2E42E78000F38A31 /* DialError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0832E42E78000F38A31 /* DialError.swift */; };
+		9133A0922E4422C500F38A31 /* HabitModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0912E4422C500F38A31 /* HabitModels.swift */; };
+		9133A0932E4422C500F38A31 /* HabitModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0912E4422C500F38A31 /* HabitModels.swift */; };
+		9133A0942E4422C500F38A31 /* HabitModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0912E4422C500F38A31 /* HabitModels.swift */; };
+		9133A0962E4422D700F38A31 /* habits.json in Resources */ = {isa = PBXBuildFile; fileRef = 9133A0952E4422D700F38A31 /* habits.json */; };
+		9133A0D22E442E5B00F38A31 /* OnboardingQuestionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0B32E442E5B00F38A31 /* OnboardingQuestionScreen.swift */; };
+		9133A0D42E442E5B00F38A31 /* PhoneFreeBedroomBenefitsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0AA2E442E5B00F38A31 /* PhoneFreeBedroomBenefitsScreen.swift */; };
+		9133A0D52E442E5B00F38A31 /* MotionDataPermissionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0CC2E442E5B00F38A31 /* MotionDataPermissionScreen.swift */; };
+		9133A0D62E442E5B00F38A31 /* ScreenTimePermissionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0CE2E442E5B00F38A31 /* ScreenTimePermissionScreen.swift */; };
+		9133A0D72E442E5B00F38A31 /* PushNotificationPermissionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0CD2E442E5B00F38A31 /* PushNotificationPermissionScreen.swift */; };
+		9133A0D82E442E5B00F38A31 /* CueExplanationScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0C02E442E5B00F38A31 /* CueExplanationScreen.swift */; };
+		9133A0D92E442E5B00F38A31 /* LoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0A52E442E5B00F38A31 /* LoginScreen.swift */; };
+		9133A0DA2E442E5B00F38A31 /* UsernameSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0B72E442E5B00F38A31 /* UsernameSelectionScreen.swift */; };
+		9133A0DB2E442E5B00F38A31 /* DialDownScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0C12E442E5B00F38A31 /* DialDownScreen.swift */; };
+		9133A0DC2E442E5B00F38A31 /* OccupationSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0B62E442E5B00F38A31 /* OccupationSelectionScreen.swift */; };
+		9133A0E12E442E5B00F38A31 /* OnboardingBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0B12E442E5B00F38A31 /* OnboardingBackButton.swift */; };
+		9133A0E42E442E5B00F38A31 /* GenderSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0B52E442E5B00F38A31 /* GenderSelectionScreen.swift */; };
+		9133A0E52E442E5B00F38A31 /* NotificationPoolIntroScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0C42E442E5B00F38A31 /* NotificationPoolIntroScreen.swift */; };
+		9133A0E62E442E5B00F38A31 /* SleepQualityScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0AF2E442E5B00F38A31 /* SleepQualityScreen.swift */; };
+		9133A0E72E442E5B00F38A31 /* FlowConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0C62E442E5B00F38A31 /* FlowConfiguration.swift */; };
+		9133A0E82E442E5B00F38A31 /* BrainFogFrequencyScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0AD2E442E5B00F38A31 /* BrainFogFrequencyScreen.swift */; };
+		9133A0EA2E442E5B00F38A31 /* SignInHelpSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0A72E442E5B00F38A31 /* SignInHelpSheet.swift */; };
+		9133A0EB2E442E5B00F38A31 /* OnboardingOptionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0B22E442E5B00F38A31 /* OnboardingOptionButton.swift */; };
+		9133A0EC2E442E5B00F38A31 /* DialIntroductionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0A92E442E5B00F38A31 /* DialIntroductionScreen.swift */; };
+		9133A0ED2E442E5B00F38A31 /* OnboardingWelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0D02E442E5B00F38A31 /* OnboardingWelcomeScreen.swift */; };
+		9133A0EE2E442E5B00F38A31 /* DialDownTimelineScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0C22E442E5B00F38A31 /* DialDownTimelineScreen.swift */; };
+		9133A0F02E442E5B00F38A31 /* AppRatingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0BF2E442E5B00F38A31 /* AppRatingScreen.swift */; };
+		9133A0F12E442E5B00F38A31 /* OTPVerificationScreenV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0A62E442E5B00F38A31 /* OTPVerificationScreenV2.swift */; };
+		9133A0F42E442E5B00F38A31 /* ScreenTimeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0AE2E442E5B00F38A31 /* ScreenTimeScreen.swift */; };
+		9133A0FC2E44306500F38A31 /* HabitSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0FB2E44306500F38A31 /* HabitSelectionScreen.swift */; };
+		9133A0FD2E44306500F38A31 /* CustomHabitInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0F52E44306500F38A31 /* CustomHabitInput.swift */; };
+		9133A0FE2E44306500F38A31 /* HabitSelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0F92E44306500F38A31 /* HabitSelectionViewModel.swift */; };
+		9133A0FF2E44306500F38A31 /* HabitCategoryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0F62E44306500F38A31 /* HabitCategoryCard.swift */; };
+		9133A1002E44306500F38A31 /* HabitRowItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A0F72E44306500F38A31 /* HabitRowItem.swift */; };
+		9133A1062E44398100F38A31 /* DeviceFunctionalityScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A1042E44398100F38A31 /* DeviceFunctionalityScreen.swift */; };
+		9133A1082E443A1F00F38A31 /* DeviceFeatureItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A1072E443A1F00F38A31 /* DeviceFeatureItem.swift */; };
+		9133A10B2E4441F300F38A31 /* DialSetupIntroScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A1092E4441F300F38A31 /* DialSetupIntroScreen.swift */; };
+		9133A10E2E4443E000F38A31 /* OnboardingBluetoothViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A10D2E4443E000F38A31 /* OnboardingBluetoothViewModel.swift */; };
+		9133A10F2E4443E000F38A31 /* DialDeviceDiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133A10C2E4443E000F38A31 /* DialDeviceDiscoveryView.swift */; };
+		914A85A92E7F48A50024CA43 /* Valet in Frameworks */ = {isa = PBXBuildFile; productRef = 914A85A82E7F48A50024CA43 /* Valet */; };
+		914A85AB2E7F48CD0024CA43 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = 914A85AA2E7F48CD0024CA43 /* SwiftUICharts */; };
+		914A85AD2E7F48E20024CA43 /* Valet in Frameworks */ = {isa = PBXBuildFile; productRef = 914A85AC2E7F48E20024CA43 /* Valet */; };
+		914A85AF2E7F4D8D0024CA43 /* TokenRefreshManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 914A85AE2E7F4D8D0024CA43 /* TokenRefreshManager.swift */; };
+		91628CA82E39AB4400B06101 /* CustomFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628CA72E39AB4400B06101 /* CustomFont.swift */; };
+		91628CA92E39AB4400B06101 /* CustomFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628CA72E39AB4400B06101 /* CustomFont.swift */; };
+		91628CAA2E39AB4400B06101 /* CustomFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628CA72E39AB4400B06101 /* CustomFont.swift */; };
+		91628CFF2E3A862100B06101 /* TabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628CFE2E3A862100B06101 /* TabBar.swift */; };
+		91628D0B2E3A886400B06101 /* CorrectButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D032E3A886400B06101 /* CorrectButton.swift */; };
+		91628D0E2E3A886400B06101 /* DialInProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D042E3A886400B06101 /* DialInProgressBar.swift */; };
+		91628D0F2E3A886400B06101 /* LoadingAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D072E3A886400B06101 /* LoadingAnimation.swift */; };
+		91628D122E3A886400B06101 /* CorrectButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D032E3A886400B06101 /* CorrectButton.swift */; };
+		91628D162E3A886400B06101 /* LoadingAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D072E3A886400B06101 /* LoadingAnimation.swift */; };
+		91628D192E3A886400B06101 /* CorrectButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D032E3A886400B06101 /* CorrectButton.swift */; };
+		91628D1D2E3A886400B06101 /* LoadingAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D072E3A886400B06101 /* LoadingAnimation.swift */; };
+		91628D272E3A8C1100B06101 /* UniversalHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D262E3A8C1100B06101 /* UniversalHeader.swift */; };
+		91628D282E3A8C1100B06101 /* UniversalHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D262E3A8C1100B06101 /* UniversalHeader.swift */; };
+		91628D292E3A8C1100B06101 /* UniversalHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D262E3A8C1100B06101 /* UniversalHeader.swift */; };
+		91628D312E3A8FF900B06101 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D2E2E3A8FF900B06101 /* Persistence.swift */; };
+		91628D332E3A8FF900B06101 /* BluetoothAlarmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D2B2E3A8FF900B06101 /* BluetoothAlarmService.swift */; };
+		91628D362E3A8FF900B06101 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D2E2E3A8FF900B06101 /* Persistence.swift */; };
+		91628D382E3A8FF900B06101 /* BluetoothAlarmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D2B2E3A8FF900B06101 /* BluetoothAlarmService.swift */; };
+		91628D3B2E3A8FF900B06101 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D2E2E3A8FF900B06101 /* Persistence.swift */; };
+		91628D3D2E3A8FF900B06101 /* BluetoothAlarmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91628D2B2E3A8FF900B06101 /* BluetoothAlarmService.swift */; };
+		9189027E2E450B5900A8F0E1 /* DevicePlacementGuideScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9189027D2E450B5900A8F0E1 /* DevicePlacementGuideScreen.swift */; };
+		918902812E45146200A8F0E1 /* ImportantContactsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918902802E45146200A8F0E1 /* ImportantContactsScreen.swift */; };
+		918903002E463F3B00A8F0E1 /* MoreInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918902FD2E463F3B00A8F0E1 /* MoreInsightsView.swift */; };
+		918903062E463F3B00A8F0E1 /* AlarmSoundSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918902B72E463F3B00A8F0E1 /* AlarmSoundSelectionView.swift */; };
+		9189030E2E463F3B00A8F0E1 /* AppByAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918902FC2E463F3B00A8F0E1 /* AppByAppView.swift */; };
+		9189031A2E463F3B00A8F0E1 /* SimpleAlarmViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918902BC2E463F3B00A8F0E1 /* SimpleAlarmViewModel.swift */; };
+		9189031C2E463F3B00A8F0E1 /* AlarmViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918902BB2E463F3B00A8F0E1 /* AlarmViewModel.swift */; };
+		918903262E463F3B00A8F0E1 /* CreateAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918902B82E463F3B00A8F0E1 /* CreateAlarmSheet.swift */; };
+		918903292E463F3B00A8F0E1 /* AlarmsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918902BE2E463F3B00A8F0E1 /* AlarmsView.swift */; };
+		9189032F2E463F3B00A8F0E1 /* AlarmRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918902B62E463F3B00A8F0E1 /* AlarmRowView.swift */; };
+		918903422E463F5600A8F0E1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9189033E2E463F5600A8F0E1 /* SettingsView.swift */; };
+		918903442E463F5600A8F0E1 /* ProfileCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9189033C2E463F5600A8F0E1 /* ProfileCardView.swift */; };
+		918903462E463F5600A8F0E1 /* SettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918903352E463F5600A8F0E1 /* SettingsSection.swift */; };
+		918903472E463F5600A8F0E1 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918903342E463F5600A8F0E1 /* SettingsRow.swift */; };
+		9189034A2E4662F200A8F0E1 /* OnboardingTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918903492E4662F200A8F0E1 /* OnboardingTextField.swift */; };
+		9189034B2E4662F200A8F0E1 /* ConsentRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918903482E4662F200A8F0E1 /* ConsentRow.swift */; };
+		9189034D2E46701900A8F0E1 /* PermissionRequestScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9189034C2E46701900A8F0E1 /* PermissionRequestScreen.swift */; };
+		91AA5CA32E47AEC20050C177 /* ExplainerHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CA02E47AEC20050C177 /* ExplainerHeader.swift */; };
+		91AA5CA42E47AEC20050C177 /* ExplainerSectionContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CA12E47AEC20050C177 /* ExplainerSectionContainer.swift */; };
+		91AA5CA52E47AEC20050C177 /* OnboardingExplainerScaffold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CA22E47AEC20050C177 /* OnboardingExplainerScaffold.swift */; };
+		91AA5CAB2E47BF8F0050C177 /* RepeatedCallRuleScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CA92E47BF8F0050C177 /* RepeatedCallRuleScreen.swift */; };
+		91AA5CAF2E47C0800050C177 /* RepeatedCallExplainerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CAD2E47C0800050C177 /* RepeatedCallExplainerCard.swift */; };
+		91AA5CB02E47C0800050C177 /* NotificationRulesTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CAC2E47C0800050C177 /* NotificationRulesTheme.swift */; };
+		91AA5CB12E47C0800050C177 /* RepeatedCallThresholdSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CAE2E47C0800050C177 /* RepeatedCallThresholdSlider.swift */; };
+		91AA5CB32E47C1100050C177 /* SuccessHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CB22E47C1100050C177 /* SuccessHUD.swift */; };
+		91AA5CB42E47C1100050C177 /* SuccessHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CB22E47C1100050C177 /* SuccessHUD.swift */; };
+		91AA5CB52E47C1100050C177 /* SuccessHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CB22E47C1100050C177 /* SuccessHUD.swift */; };
+		91AA5CB92E47C7250050C177 /* OnboardingProgressModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CB62E47C7250050C177 /* OnboardingProgressModel.swift */; };
+		91AA5CBA2E47C7250050C177 /* OnboardingStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CB72E47C7250050C177 /* OnboardingStateManager.swift */; };
+		91AA5CBB2E47C7250050C177 /* OnboardingProgressModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CB62E47C7250050C177 /* OnboardingProgressModel.swift */; };
+		91AA5CBC2E47C7250050C177 /* OnboardingStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CB72E47C7250050C177 /* OnboardingStateManager.swift */; };
+		91AA5CBD2E47C7250050C177 /* OnboardingProgressModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CB62E47C7250050C177 /* OnboardingProgressModel.swift */; };
+		91AA5CBE2E47C7250050C177 /* OnboardingStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CB72E47C7250050C177 /* OnboardingStateManager.swift */; };
+		91AA5CC02E4918B10050C177 /* DebugOnboardingHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CBF2E4918B10050C177 /* DebugOnboardingHelper.swift */; };
+		91AA5CC32E4918BB0050C177 /* HardwareArrivalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CC12E4918BB0050C177 /* HardwareArrivalView.swift */; };
+		91AA5CC42E4918BB0050C177 /* HardwareSetupScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CC22E4918BB0050C177 /* HardwareSetupScreens.swift */; };
+		91AA5CC62E4918C30050C177 /* OnboardingTypeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CC52E4918C30050C177 /* OnboardingTypeManager.swift */; };
+		91AA5CEC2E49272D0050C177 /* BirthdateSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CEB2E49272D0050C177 /* BirthdateSelectionScreen.swift */; };
+		91AA5CEF2E4931B80050C177 /* LifetimeCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CED2E4931B80050C177 /* LifetimeCalculator.swift */; };
+		91AA5CF02E4931B80050C177 /* LifetimeCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CEE2E4931B80050C177 /* LifetimeCounterView.swift */; };
+		91AA5CF22E4931BE0050C177 /* TimeMetricRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5CF12E4931BE0050C177 /* TimeMetricRow.swift */; };
+		91AA5D0E2E4935230050C177 /* Satoshi-BoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D062E4935230050C177 /* Satoshi-BoldItalic.otf */; };
+		91AA5D0F2E4935230050C177 /* Satoshi-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D052E4935230050C177 /* Satoshi-Bold.otf */; };
+		91AA5D102E4935230050C177 /* Satoshi-MediumItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D0B2E4935230050C177 /* Satoshi-MediumItalic.otf */; };
+		91AA5D112E4935230050C177 /* Satoshi-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D082E4935230050C177 /* Satoshi-Light.otf */; };
+		91AA5D122E4935230050C177 /* Satoshi-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D042E4935230050C177 /* Satoshi-BlackItalic.otf */; };
+		91AA5D132E4935230050C177 /* Satoshi-LightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D092E4935230050C177 /* Satoshi-LightItalic.otf */; };
+		91AA5D142E4935230050C177 /* Satoshi-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D0C2E4935230050C177 /* Satoshi-Regular.otf */; };
+		91AA5D152E4935230050C177 /* Satoshi-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D032E4935230050C177 /* Satoshi-Black.otf */; };
+		91AA5D162E4935230050C177 /* Satoshi-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D0A2E4935230050C177 /* Satoshi-Medium.otf */; };
+		91AA5D172E4935230050C177 /* Satoshi-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D072E4935230050C177 /* Satoshi-Italic.otf */; };
+		91AA5D1F2E4A5D930050C177 /* LifetimeUsageHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D1B2E4A5D930050C177 /* LifetimeUsageHelper.swift */; };
+		91AA5D202E4A5D930050C177 /* CounterAnimationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D182E4A5D930050C177 /* CounterAnimationManager.swift */; };
+		91AA5D5C2E4A85EC0050C177 /* AnalyticsHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D562E4A85D50050C177 /* AnalyticsHomeView.swift */; };
+		91AA5D5D2E4A85FC0050C177 /* AppUsageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D572E4A85D50050C177 /* AppUsageRow.swift */; };
+		91AA5D5E2E4A86000050C177 /* MetricCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D582E4A85D50050C177 /* MetricCard.swift */; };
+		91AA5D5F2E4A86030050C177 /* UsageChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D592E4A85D50050C177 /* UsageChart.swift */; };
+		91AA5D692E4A86780050C177 /* ScreenTimeMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D4D2E4A855D0050C177 /* ScreenTimeMetrics.swift */; };
+		91AA5D6A2E4A86780050C177 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D502E4A855D0050C177 /* AnalyticsService.swift */; };
+		91AA5D6B2E4A86780050C177 /* AnalyticsCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D4F2E4A855D0050C177 /* AnalyticsCache.swift */; };
+		91AA5D6C2E4A86780050C177 /* AppUsageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D4C2E4A855D0050C177 /* AppUsageData.swift */; };
+		91AA5D6D2E4A867D0050C177 /* AnalyticsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D542E4A85650050C177 /* AnalyticsViewModel.swift */; };
+		91AA5D872E4ACFC00050C177 /* AppCategoryClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D862E4ACFC00050C177 /* AppCategoryClassification.swift */; };
+		91AA5D882E4ACFC00050C177 /* AppCategoryClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D862E4ACFC00050C177 /* AppCategoryClassification.swift */; };
+		91AA5D892E4ACFC00050C177 /* AppCategoryClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D862E4ACFC00050C177 /* AppCategoryClassification.swift */; };
+		91AA5D912E4BC3C90050C177 /* software_onboarding.json in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D8F2E4BC3C90050C177 /* software_onboarding.json */; };
+		91AA5D922E4BC3C90050C177 /* flow_test.json in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D8C2E4BC3C90050C177 /* flow_test.json */; };
+		91AA5D932E4BC3C90050C177 /* sign_in.json in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D8E2E4BC3C90050C177 /* sign_in.json */; };
+		91AA5D942E4BC3C90050C177 /* hardware_setup.json in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D8D2E4BC3C90050C177 /* hardware_setup.json */; };
+		91AA5D962E4C16960050C177 /* AlarmsTeaserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AA5D952E4C16960050C177 /* AlarmsTeaserView.swift */; };
+		91AE176F2E82C967001328DC /* NameCollectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE176E2E82C967001328DC /* NameCollectionScreen.swift */; };
+		91AE17BF2E84E958001328DC /* HourlyProductivityChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17BB2E84E958001328DC /* HourlyProductivityChart.swift */; };
+		91AE17C12E84EABD001328DC /* AnalyticsHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17C02E84EABD001328DC /* AnalyticsHeader.swift */; };
+		91AE17D42E86206F001328DC /* TopAppsListReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17D32E86206F001328DC /* TopAppsListReport.swift */; };
+		91AE17D52E86206F001328DC /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17D22E86206F001328DC /* AppIconView.swift */; };
+		91AE17E42E86F841001328DC /* MinimalDeviceMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17D62E86F841001328DC /* MinimalDeviceMonitor.swift */; };
+		91AE17E52E86F841001328DC /* SimpleDialInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17DD2E86F841001328DC /* SimpleDialInView.swift */; };
+		91AE17E62E86F841001328DC /* SimpleConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17DB2E86F841001328DC /* SimpleConstants.swift */; };
+		91AE17E72E86F841001328DC /* SimpleNotificationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17E02E86F841001328DC /* SimpleNotificationHelper.swift */; };
+		91AE17E82E86F841001328DC /* SimpleDialInManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17DC2E86F841001328DC /* SimpleDialInManager.swift */; };
+		91AE17E92E86F841001328DC /* SimplePersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17E12E86F841001328DC /* SimplePersistence.swift */; };
+		91AE17EA2E86F841001328DC /* SimpleActiveSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17DA2E86F841001328DC /* SimpleActiveSessionView.swift */; };
+		91AE17EB2E86F841001328DC /* SimpleFamilyPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17DE2E86F841001328DC /* SimpleFamilyPicker.swift */; };
+		91AE17EC2E86F841001328DC /* MinimalShieldConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17D72E86F841001328DC /* MinimalShieldConfig.swift */; };
+		91AE17ED2E86F841001328DC /* SimpleModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17DF2E86F841001328DC /* SimpleModels.swift */; };
+		91AE17EF2E872BF4001328DC /* SimpleDialInMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17EE2E872BF4001328DC /* SimpleDialInMainView.swift */; };
+		91AE17F22E873229001328DC /* SimpleScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17F12E873229001328DC /* SimpleScheduleView.swift */; };
+		91AE17F32E873229001328DC /* SimpleScheduleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17F02E873229001328DC /* SimpleScheduleManager.swift */; };
+		91AE17F82E8764D7001328DC /* SimpleAppGroupEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17F42E8764D7001328DC /* SimpleAppGroupEditor.swift */; };
+		91AE17FC2E8764E8001328DC /* SimpleAppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17F92E8764E8001328DC /* SimpleAppGroup.swift */; };
+		91AE17FD2E8764E8001328DC /* SimpleAppGroupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17FA2E8764E8001328DC /* SimpleAppGroupManager.swift */; };
+		91AE17FF2E876604001328DC /* SimpleAppGroupSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE17FE2E876604001328DC /* SimpleAppGroupSection.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4846CFC429D1039E005D018E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 481388E529ABE0F1001B8A55 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4846CFB929D1039E005D018E;
+			remoteInfo = ReportExtension;
+		};
+		4846CFDE29D1E94F005D018E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 481388E529ABE0F1001B8A55 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4846CFD629D1E94F005D018E;
+			remoteInfo = DeviceActivityMonitor;
+		};
+		48AE9A2729E22DEF0092766C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 481388E529ABE0F1001B8A55 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48AE9A1C29E22DEF0092766C;
+			remoteInfo = shield;
+		};
+		48AE9A9629E5D0B00092766C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 481388E529ABE0F1001B8A55 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48AE9A8A29E5D0AF0092766C;
+			remoteInfo = RestrictionWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4846CFA629CCA40C005D018E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				4846CFE029D1E94F005D018E /* DeviceActivityMonitor.appex in Embed Foundation Extensions */,
+				48AE9A9829E5D0B00092766C /* RestrictionWidgetExtension.appex in Embed Foundation Extensions */,
+				48AE9A2929E22DEF0092766C /* shield.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+		4846CFCA29D1039E005D018E /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolder = Product;
+			files = (
+				4846CFC629D1039E005D018E /* ReportExtension.appex in Embed ExtensionKit Extensions */,
+			);
+			name = "Embed ExtensionKit Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		481388ED29ABE0F2001B8A55 /* Dial.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dial.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		481388F429ABE0F6001B8A55 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		481388F729ABE0F6001B8A55 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		481388FC29ABE0F6001B8A55 /* Dial.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Dial.xcdatamodel; sourceTree = "<group>"; };
+		4846CF9C29CCA40C005D018E /* DeviceActivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeviceActivity.framework; path = System/Library/Frameworks/DeviceActivity.framework; sourceTree = SDKROOT; };
+		4846CFB429CCB2C4005D018E /* Dial.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Dial.entitlements; sourceTree = "<group>"; };
+		4846CFBA29D1039E005D018E /* ReportExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = ReportExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4846CFBC29D1039E005D018E /* ReportExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportExtension.swift; sourceTree = "<group>"; };
+		4846CFC229D1039E005D018E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4846CFC329D1039E005D018E /* ReportExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ReportExtension.entitlements; sourceTree = "<group>"; };
+		4846CFD729D1E94F005D018E /* DeviceActivityMonitor.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DeviceActivityMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4846CFDA29D1E94F005D018E /* DeviceActivityMonitorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceActivityMonitorExtension.swift; sourceTree = "<group>"; };
+		4846CFDC29D1E94F005D018E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4846CFDD29D1E94F005D018E /* DeviceActivityMonitor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DeviceActivityMonitor.entitlements; sourceTree = "<group>"; };
+		488340BD29C8AA8800910A27 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		48AE9A1D29E22DEF0092766C /* shield.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = shield.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		48AE9A1E29E22DEF0092766C /* ManagedSettings.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettings.framework; path = System/Library/Frameworks/ManagedSettings.framework; sourceTree = SDKROOT; };
+		48AE9A2029E22DEF0092766C /* ManagedSettingsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettingsUI.framework; path = System/Library/Frameworks/ManagedSettingsUI.framework; sourceTree = SDKROOT; };
+		48AE9A2329E22DEF0092766C /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
+		48AE9A2529E22DEF0092766C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		48AE9A2629E22DEF0092766C /* shield.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = shield.entitlements; sourceTree = "<group>"; };
+		48AE9A2729E22DEF0092766D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		48AE9A3929E38FD90092766C /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
+		48AE9A4029E479640092766C /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		48AE9A4229E479640092766C /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		48AE9A8B29E5D0AF0092766C /* RestrictionWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RestrictionWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		48AE9A8F29E5D0AF0092766C /* RestrictionWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestrictionWidgetBundle.swift; sourceTree = "<group>"; };
+		48AE9A9129E5D0AF0092766C /* RestrictionWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestrictionWidget.swift; sourceTree = "<group>"; };
+		48AE9A9329E5D0B00092766C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		48AE9A9529E5D0B00092766C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		48AE9A9E29E5D0AF0092766E /* DialInWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialInWidget.swift; sourceTree = "<group>"; };
+		910265072E4CE1E200250BE9 /* LaunchScreenState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenState.swift; sourceTree = "<group>"; };
+		910265082E4CE1E200250BE9 /* ManifestoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManifestoView.swift; sourceTree = "<group>"; };
+		9102650B2E4CF86F00250BE9 /* LegalLinksSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalLinksSection.swift; sourceTree = "<group>"; };
+		9102650C2E4CF86F00250BE9 /* StrictModeToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrictModeToggle.swift; sourceTree = "<group>"; };
+		910265112E4CF87D00250BE9 /* DeviceManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManagementView.swift; sourceTree = "<group>"; };
+		910265252E4CFFCD00250BE9 /* SignUpScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpScreen.swift; sourceTree = "<group>"; };
+		9102653B2E4D37AB00250BE9 /* LifetimeImpactProblemContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifetimeImpactProblemContent.swift; sourceTree = "<group>"; };
+		9103D9822E2EB0EC003DFC34 /* LaunchScreenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenManager.swift; sourceTree = "<group>"; };
+		9103D9832E2EB0EC003DFC34 /* LaunchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenView.swift; sourceTree = "<group>"; };
+		9103D9852E2EB0EC003DFC34 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		9103D9862E2EB0EC003DFC34 /* DialApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialApp.swift; sourceTree = "<group>"; };
+		9103D9872E2EB0EC003DFC34 /* STProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STProgressView.swift; sourceTree = "<group>"; };
+		9103D99A2E2EB100003DFC34 /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
+		9103D9FF2E2F21C8003DFC34 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		9103DAA22E33B4E0003DFC34 /* OnboardingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCoordinator.swift; sourceTree = "<group>"; };
+		9103DAA32E33B4E0003DFC34 /* OnboardingFlowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowController.swift; sourceTree = "<group>"; };
+		911FFFA52E7E2B680088F219 /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
+		911FFFA62E7E2B680088F219 /* TopAppsData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopAppsData.swift; sourceTree = "<group>"; };
+		911FFFAA2E7E2B700088F219 /* AppCategorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCategorization.swift; sourceTree = "<group>"; };
+		911FFFB12E7F344E0088F219 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		911FFFB62E7F389F0088F219 /* CognitoResponseParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitoResponseParser.swift; sourceTree = "<group>"; };
+		911FFFBB2E7F3A240088F219 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+		91339F502E3A97EB00F38A31 /* Alarm+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Alarm+CoreDataClass.swift"; path = "Shared/Models/CoreData/Alarm+CoreDataClass.swift"; sourceTree = "<group>"; };
+		91339F512E3A97EB00F38A31 /* Alarm+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Alarm+CoreDataProperties.swift"; path = "Shared/Models/CoreData/Alarm+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		91339F522E3A97EB00F38A31 /* Item+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Item+CoreDataClass.swift"; path = "Shared/Models/CoreData/Item+CoreDataClass.swift"; sourceTree = "<group>"; };
+		91339F532E3A97EB00F38A31 /* Item+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Item+CoreDataProperties.swift"; path = "Shared/Models/CoreData/Item+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		91339F542E3A97EB00F38A31 /* RestrictionBlock+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "RestrictionBlock+CoreDataClass.swift"; path = "Shared/Models/CoreData/RestrictionBlock+CoreDataClass.swift"; sourceTree = "<group>"; };
+		91339F552E3A97EB00F38A31 /* RestrictionBlock+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "RestrictionBlock+CoreDataProperties.swift"; path = "Shared/Models/CoreData/RestrictionBlock+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		91339F602E3A9E6700F38A31 /* Alarm+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Alarm+CoreDataClass.swift"; sourceTree = "<group>"; };
+		91339F612E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Alarm+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		91339F622E3A9E6700F38A31 /* Item+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Item+CoreDataClass.swift"; sourceTree = "<group>"; };
+		91339F632E3A9E6700F38A31 /* Item+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Item+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		91339F642E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RestrictionBlock+CoreDataClass.swift"; sourceTree = "<group>"; };
+		91339F652E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RestrictionBlock+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		91339F782E3A9F0400F38A31 /* Alarm+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Alarm+Extension.swift"; sourceTree = "<group>"; };
+		91339F862E3AAA9A00F38A31 /* BluetoothStatusSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStatusSheet.swift; sourceTree = "<group>"; };
+		91339F872E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStatusViewModel.swift; sourceTree = "<group>"; };
+		91339F912E3AAB7800F38A31 /* BluetoothDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDevice.swift; sourceTree = "<group>"; };
+		91339F922E3AAB7800F38A31 /* BluetoothDeviceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDeviceRow.swift; sourceTree = "<group>"; };
+		91339FD92E3C12BD00F38A31 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		91339FDB2E3C12BD00F38A31 /* DialActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialActivityAttributes.swift; sourceTree = "<group>"; };
+		91339FE42E3C14D800F38A31 /* RestrictionWidgetLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestrictionWidgetLiveActivity.swift; sourceTree = "<group>"; };
+		9133A0012E3FDCCA00F38A31 /* NotificationContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationContent.swift; sourceTree = "<group>"; };
+		9133A0022E3FDCCA00F38A31 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		9133A0032E3FDCCA00F38A31 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		9133A00E2E3FE2DF00F38A31 /* Weekday.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weekday.swift; sourceTree = "<group>"; };
+		9133A0122E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RestrictionBlock+Extension.swift"; sourceTree = "<group>"; };
+		9133A02A2E4011B400F38A31 /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
+		9133A02B2E4011B400F38A31 /* SoundLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundLibrary.swift; sourceTree = "<group>"; };
+		9133A02C2E4011B400F38A31 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
+		9133A0372E4011C900F38A31 /* metadata.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = metadata.json; sourceTree = "<group>"; };
+		9133A0392E40126700F38A31 /* AlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSound.swift; sourceTree = "<group>"; };
+		9133A03D2E4255D900F38A31 /* digital_beep.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = digital_beep.mp3; sourceTree = "<group>"; };
+		9133A05C2E42A0A000F38A31 /* KeyboardPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPreloader.swift; sourceTree = "<group>"; };
+		9133A0832E42E78000F38A31 /* DialError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialError.swift; sourceTree = "<group>"; };
+		9133A0842E42E78000F38A31 /* ErrorHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandler.swift; sourceTree = "<group>"; };
+		9133A0912E4422C500F38A31 /* HabitModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitModels.swift; sourceTree = "<group>"; };
+		9133A0952E4422D700F38A31 /* habits.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = habits.json; sourceTree = "<group>"; };
+		9133A0A52E442E5B00F38A31 /* LoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginScreen.swift; sourceTree = "<group>"; };
+		9133A0A62E442E5B00F38A31 /* OTPVerificationScreenV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPVerificationScreenV2.swift; sourceTree = "<group>"; };
+		9133A0A72E442E5B00F38A31 /* SignInHelpSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInHelpSheet.swift; sourceTree = "<group>"; };
+		9133A0A92E442E5B00F38A31 /* DialIntroductionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialIntroductionScreen.swift; sourceTree = "<group>"; };
+		9133A0AA2E442E5B00F38A31 /* PhoneFreeBedroomBenefitsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneFreeBedroomBenefitsScreen.swift; sourceTree = "<group>"; };
+		9133A0AD2E442E5B00F38A31 /* BrainFogFrequencyScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainFogFrequencyScreen.swift; sourceTree = "<group>"; };
+		9133A0AE2E442E5B00F38A31 /* ScreenTimeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeScreen.swift; sourceTree = "<group>"; };
+		9133A0AF2E442E5B00F38A31 /* SleepQualityScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepQualityScreen.swift; sourceTree = "<group>"; };
+		9133A0B12E442E5B00F38A31 /* OnboardingBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingBackButton.swift; sourceTree = "<group>"; };
+		9133A0B22E442E5B00F38A31 /* OnboardingOptionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingOptionButton.swift; sourceTree = "<group>"; };
+		9133A0B32E442E5B00F38A31 /* OnboardingQuestionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQuestionScreen.swift; sourceTree = "<group>"; };
+		9133A0B52E442E5B00F38A31 /* GenderSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenderSelectionScreen.swift; sourceTree = "<group>"; };
+		9133A0B62E442E5B00F38A31 /* OccupationSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OccupationSelectionScreen.swift; sourceTree = "<group>"; };
+		9133A0B72E442E5B00F38A31 /* UsernameSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameSelectionScreen.swift; sourceTree = "<group>"; };
+		9133A0BF2E442E5B00F38A31 /* AppRatingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRatingScreen.swift; sourceTree = "<group>"; };
+		9133A0C02E442E5B00F38A31 /* CueExplanationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CueExplanationScreen.swift; sourceTree = "<group>"; };
+		9133A0C12E442E5B00F38A31 /* DialDownScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialDownScreen.swift; sourceTree = "<group>"; };
+		9133A0C22E442E5B00F38A31 /* DialDownTimelineScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialDownTimelineScreen.swift; sourceTree = "<group>"; };
+		9133A0C42E442E5B00F38A31 /* NotificationPoolIntroScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPoolIntroScreen.swift; sourceTree = "<group>"; };
+		9133A0C62E442E5B00F38A31 /* FlowConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowConfiguration.swift; sourceTree = "<group>"; };
+		9133A0CC2E442E5B00F38A31 /* MotionDataPermissionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDataPermissionScreen.swift; sourceTree = "<group>"; };
+		9133A0CD2E442E5B00F38A31 /* PushNotificationPermissionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationPermissionScreen.swift; sourceTree = "<group>"; };
+		9133A0CE2E442E5B00F38A31 /* ScreenTimePermissionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimePermissionScreen.swift; sourceTree = "<group>"; };
+		9133A0D02E442E5B00F38A31 /* OnboardingWelcomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWelcomeScreen.swift; sourceTree = "<group>"; };
+		9133A0F52E44306500F38A31 /* CustomHabitInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomHabitInput.swift; sourceTree = "<group>"; };
+		9133A0F62E44306500F38A31 /* HabitCategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitCategoryCard.swift; sourceTree = "<group>"; };
+		9133A0F72E44306500F38A31 /* HabitRowItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitRowItem.swift; sourceTree = "<group>"; };
+		9133A0F92E44306500F38A31 /* HabitSelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitSelectionViewModel.swift; sourceTree = "<group>"; };
+		9133A0FB2E44306500F38A31 /* HabitSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitSelectionScreen.swift; sourceTree = "<group>"; };
+		9133A1042E44398100F38A31 /* DeviceFunctionalityScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceFunctionalityScreen.swift; sourceTree = "<group>"; };
+		9133A1072E443A1F00F38A31 /* DeviceFeatureItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceFeatureItem.swift; sourceTree = "<group>"; };
+		9133A1092E4441F300F38A31 /* DialSetupIntroScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialSetupIntroScreen.swift; sourceTree = "<group>"; };
+		9133A10C2E4443E000F38A31 /* DialDeviceDiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialDeviceDiscoveryView.swift; sourceTree = "<group>"; };
+		9133A10D2E4443E000F38A31 /* OnboardingBluetoothViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingBluetoothViewModel.swift; sourceTree = "<group>"; };
+		914A85AE2E7F4D8D0024CA43 /* TokenRefreshManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenRefreshManager.swift; sourceTree = "<group>"; };
+		91628CA72E39AB4400B06101 /* CustomFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomFont.swift; sourceTree = "<group>"; };
+		91628CFE2E3A862100B06101 /* TabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBar.swift; sourceTree = "<group>"; };
+		91628D032E3A886400B06101 /* CorrectButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorrectButton.swift; sourceTree = "<group>"; };
+		91628D042E3A886400B06101 /* DialInProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialInProgressBar.swift; sourceTree = "<group>"; };
+		91628D072E3A886400B06101 /* LoadingAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingAnimation.swift; sourceTree = "<group>"; };
+		91628D262E3A8C1100B06101 /* UniversalHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalHeader.swift; sourceTree = "<group>"; };
+		91628D2B2E3A8FF900B06101 /* BluetoothAlarmService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothAlarmService.swift; sourceTree = "<group>"; };
+		91628D2E2E3A8FF900B06101 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		9189027D2E450B5900A8F0E1 /* DevicePlacementGuideScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePlacementGuideScreen.swift; sourceTree = "<group>"; };
+		918902802E45146200A8F0E1 /* ImportantContactsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportantContactsScreen.swift; sourceTree = "<group>"; };
+		918902B62E463F3B00A8F0E1 /* AlarmRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmRowView.swift; sourceTree = "<group>"; };
+		918902B72E463F3B00A8F0E1 /* AlarmSoundSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSoundSelectionView.swift; sourceTree = "<group>"; };
+		918902B82E463F3B00A8F0E1 /* CreateAlarmSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAlarmSheet.swift; sourceTree = "<group>"; };
+		918902BB2E463F3B00A8F0E1 /* AlarmViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmViewModel.swift; sourceTree = "<group>"; };
+		918902BC2E463F3B00A8F0E1 /* SimpleAlarmViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleAlarmViewModel.swift; sourceTree = "<group>"; };
+		918902BE2E463F3B00A8F0E1 /* AlarmsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmsView.swift; sourceTree = "<group>"; };
+		918902FC2E463F3B00A8F0E1 /* AppByAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppByAppView.swift; sourceTree = "<group>"; };
+		918902FD2E463F3B00A8F0E1 /* MoreInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreInsightsView.swift; sourceTree = "<group>"; };
+		918903342E463F5600A8F0E1 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
+		918903352E463F5600A8F0E1 /* SettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSection.swift; sourceTree = "<group>"; };
+		9189033C2E463F5600A8F0E1 /* ProfileCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileCardView.swift; sourceTree = "<group>"; };
+		9189033E2E463F5600A8F0E1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		918903482E4662F200A8F0E1 /* ConsentRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsentRow.swift; sourceTree = "<group>"; };
+		918903492E4662F200A8F0E1 /* OnboardingTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTextField.swift; sourceTree = "<group>"; };
+		9189034C2E46701900A8F0E1 /* PermissionRequestScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRequestScreen.swift; sourceTree = "<group>"; };
+		91AA5CA02E47AEC20050C177 /* ExplainerHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExplainerHeader.swift; sourceTree = "<group>"; };
+		91AA5CA12E47AEC20050C177 /* ExplainerSectionContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExplainerSectionContainer.swift; sourceTree = "<group>"; };
+		91AA5CA22E47AEC20050C177 /* OnboardingExplainerScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingExplainerScaffold.swift; sourceTree = "<group>"; };
+		91AA5CA92E47BF8F0050C177 /* RepeatedCallRuleScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatedCallRuleScreen.swift; sourceTree = "<group>"; };
+		91AA5CAC2E47C0800050C177 /* NotificationRulesTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRulesTheme.swift; sourceTree = "<group>"; };
+		91AA5CAD2E47C0800050C177 /* RepeatedCallExplainerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatedCallExplainerCard.swift; sourceTree = "<group>"; };
+		91AA5CAE2E47C0800050C177 /* RepeatedCallThresholdSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatedCallThresholdSlider.swift; sourceTree = "<group>"; };
+		91AA5CB22E47C1100050C177 /* SuccessHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuccessHUD.swift; sourceTree = "<group>"; };
+		91AA5CB62E47C7250050C177 /* OnboardingProgressModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingProgressModel.swift; sourceTree = "<group>"; };
+		91AA5CB72E47C7250050C177 /* OnboardingStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStateManager.swift; sourceTree = "<group>"; };
+		91AA5CBF2E4918B10050C177 /* DebugOnboardingHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugOnboardingHelper.swift; sourceTree = "<group>"; };
+		91AA5CC12E4918BB0050C177 /* HardwareArrivalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareArrivalView.swift; sourceTree = "<group>"; };
+		91AA5CC22E4918BB0050C177 /* HardwareSetupScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareSetupScreens.swift; sourceTree = "<group>"; };
+		91AA5CC52E4918C30050C177 /* OnboardingTypeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTypeManager.swift; sourceTree = "<group>"; };
+		91AA5CEB2E49272D0050C177 /* BirthdateSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BirthdateSelectionScreen.swift; sourceTree = "<group>"; };
+		91AA5CED2E4931B80050C177 /* LifetimeCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifetimeCalculator.swift; sourceTree = "<group>"; };
+		91AA5CEE2E4931B80050C177 /* LifetimeCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifetimeCounterView.swift; sourceTree = "<group>"; };
+		91AA5CF12E4931BE0050C177 /* TimeMetricRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeMetricRow.swift; sourceTree = "<group>"; };
+		91AA5D032E4935230050C177 /* Satoshi-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-Black.otf"; sourceTree = "<group>"; };
+		91AA5D042E4935230050C177 /* Satoshi-BlackItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-BlackItalic.otf"; sourceTree = "<group>"; };
+		91AA5D052E4935230050C177 /* Satoshi-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-Bold.otf"; sourceTree = "<group>"; };
+		91AA5D062E4935230050C177 /* Satoshi-BoldItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-BoldItalic.otf"; sourceTree = "<group>"; };
+		91AA5D072E4935230050C177 /* Satoshi-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-Italic.otf"; sourceTree = "<group>"; };
+		91AA5D082E4935230050C177 /* Satoshi-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-Light.otf"; sourceTree = "<group>"; };
+		91AA5D092E4935230050C177 /* Satoshi-LightItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-LightItalic.otf"; sourceTree = "<group>"; };
+		91AA5D0A2E4935230050C177 /* Satoshi-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-Medium.otf"; sourceTree = "<group>"; };
+		91AA5D0B2E4935230050C177 /* Satoshi-MediumItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-MediumItalic.otf"; sourceTree = "<group>"; };
+		91AA5D0C2E4935230050C177 /* Satoshi-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-Regular.otf"; sourceTree = "<group>"; };
+		91AA5D182E4A5D930050C177 /* CounterAnimationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterAnimationManager.swift; sourceTree = "<group>"; };
+		91AA5D1B2E4A5D930050C177 /* LifetimeUsageHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifetimeUsageHelper.swift; sourceTree = "<group>"; };
+		91AA5D4C2E4A855D0050C177 /* AppUsageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUsageData.swift; sourceTree = "<group>"; };
+		91AA5D4D2E4A855D0050C177 /* ScreenTimeMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeMetrics.swift; sourceTree = "<group>"; };
+		91AA5D4F2E4A855D0050C177 /* AnalyticsCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsCache.swift; sourceTree = "<group>"; };
+		91AA5D502E4A855D0050C177 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		91AA5D542E4A85650050C177 /* AnalyticsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsViewModel.swift; sourceTree = "<group>"; };
+		91AA5D562E4A85D50050C177 /* AnalyticsHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsHomeView.swift; sourceTree = "<group>"; };
+		91AA5D572E4A85D50050C177 /* AppUsageRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUsageRow.swift; sourceTree = "<group>"; };
+		91AA5D582E4A85D50050C177 /* MetricCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricCard.swift; sourceTree = "<group>"; };
+		91AA5D592E4A85D50050C177 /* UsageChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageChart.swift; sourceTree = "<group>"; };
+		91AA5D862E4ACFC00050C177 /* AppCategoryClassification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCategoryClassification.swift; sourceTree = "<group>"; };
+		91AA5D8C2E4BC3C90050C177 /* flow_test.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = flow_test.json; sourceTree = "<group>"; };
+		91AA5D8D2E4BC3C90050C177 /* hardware_setup.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = hardware_setup.json; sourceTree = "<group>"; };
+		91AA5D8E2E4BC3C90050C177 /* sign_in.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sign_in.json; sourceTree = "<group>"; };
+		91AA5D8F2E4BC3C90050C177 /* software_onboarding.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = software_onboarding.json; sourceTree = "<group>"; };
+		91AA5D952E4C16960050C177 /* AlarmsTeaserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmsTeaserView.swift; sourceTree = "<group>"; };
+		91AE176E2E82C967001328DC /* NameCollectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameCollectionScreen.swift; sourceTree = "<group>"; };
+		91AE17BB2E84E958001328DC /* HourlyProductivityChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyProductivityChart.swift; sourceTree = "<group>"; };
+		91AE17C02E84EABD001328DC /* AnalyticsHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsHeader.swift; sourceTree = "<group>"; };
+		91AE17D22E86206F001328DC /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
+		91AE17D32E86206F001328DC /* TopAppsListReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopAppsListReport.swift; sourceTree = "<group>"; };
+		91AE17D62E86F841001328DC /* MinimalDeviceMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimalDeviceMonitor.swift; sourceTree = "<group>"; };
+		91AE17D72E86F841001328DC /* MinimalShieldConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimalShieldConfig.swift; sourceTree = "<group>"; };
+		91AE17DA2E86F841001328DC /* SimpleActiveSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleActiveSessionView.swift; sourceTree = "<group>"; };
+		91AE17DB2E86F841001328DC /* SimpleConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleConstants.swift; sourceTree = "<group>"; };
+		91AE17DC2E86F841001328DC /* SimpleDialInManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleDialInManager.swift; sourceTree = "<group>"; };
+		91AE17DD2E86F841001328DC /* SimpleDialInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleDialInView.swift; sourceTree = "<group>"; };
+		91AE17DE2E86F841001328DC /* SimpleFamilyPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleFamilyPicker.swift; sourceTree = "<group>"; };
+		91AE17DF2E86F841001328DC /* SimpleModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleModels.swift; sourceTree = "<group>"; };
+		91AE17E02E86F841001328DC /* SimpleNotificationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleNotificationHelper.swift; sourceTree = "<group>"; };
+		91AE17E12E86F841001328DC /* SimplePersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplePersistence.swift; sourceTree = "<group>"; };
+		91AE17EE2E872BF4001328DC /* SimpleDialInMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleDialInMainView.swift; sourceTree = "<group>"; };
+		91AE17F02E873229001328DC /* SimpleScheduleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleScheduleManager.swift; sourceTree = "<group>"; };
+		91AE17F12E873229001328DC /* SimpleScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleScheduleView.swift; sourceTree = "<group>"; };
+		91AE17F42E8764D7001328DC /* SimpleAppGroupEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleAppGroupEditor.swift; sourceTree = "<group>"; };
+		91AE17F92E8764E8001328DC /* SimpleAppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleAppGroup.swift; sourceTree = "<group>"; };
+		91AE17FA2E8764E8001328DC /* SimpleAppGroupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleAppGroupManager.swift; sourceTree = "<group>"; };
+		91AE17FE2E876604001328DC /* SimpleAppGroupSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleAppGroupSection.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		481388EA29ABE0F2001B8A55 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				914A85A92E7F48A50024CA43 /* Valet in Frameworks */,
+			);
+		};
+		4846CFB729D1039E005D018E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				914A85AB2E7F48CD0024CA43 /* SwiftUICharts in Frameworks */,
+			);
+		};
+		4846CFD429D1E94F005D018E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				4846CFD829D1E94F005D018E /* DeviceActivity.framework in Frameworks */,
+			);
+		};
+		48AE9A1A29E22DEF0092766C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				48AE9A1F29E22DEF0092766C /* ManagedSettings.framework in Frameworks */,
+				48AE9A2129E22DEF0092766C /* ManagedSettingsUI.framework in Frameworks */,
+			);
+		};
+		48AE9A8829E5D0AF0092766C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				914A85AD2E7F48E20024CA43 /* Valet in Frameworks */,
+				48AE9A8D29E5D0AF0092766C /* SwiftUI.framework in Frameworks */,
+				48AE9A8C29E5D0AF0092766C /* WidgetKit.framework in Frameworks */,
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2F4B5DC001A081F93FA3B5F6 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Fonts;
+			sourceTree = "<group>";
+		};
+		481388E429ABE0F1001B8A55 = {
+			isa = PBXGroup;
+			children = (
+				91AE17E22E86F841001328DC /* FamilyControlsV3 */,
+				9133A0272E3FFF5400F38A31 /* Resources */,
+				91339F502E3A97EB00F38A31 /* Alarm+CoreDataClass.swift */,
+				91339F512E3A97EB00F38A31 /* Alarm+CoreDataProperties.swift */,
+				91339F522E3A97EB00F38A31 /* Item+CoreDataClass.swift */,
+				91339F532E3A97EB00F38A31 /* Item+CoreDataProperties.swift */,
+				91339F542E3A97EB00F38A31 /* RestrictionBlock+CoreDataClass.swift */,
+				91339F552E3A97EB00F38A31 /* RestrictionBlock+CoreDataProperties.swift */,
+				9103D9A82E2EB100003DFC34 /* Features */,
+				9103D9882E2EB0EC003DFC34 /* App */,
+				913073452E2AB01100994CEE /* Shared */,
+				481388EF29ABE0F2001B8A55,
+				4846CFBB29D1039E005D018E /* ReportExtension */,
+				4846CFD929D1E94F005D018E /* DeviceActivityMonitor */,
+				48AE9A2229E22DEF0092766C /* shield */,
+				48AE9A8E29E5D0AF0092766C /* RestrictionWidget */,
+				4846CF9B29CCA40C005D018E /* Frameworks */,
+				481388EE29ABE0F2001B8A55 /* Products */,
+				F564395BFA6FF217C5961B06 /* Dial */,
+			);
+			sourceTree = "<group>";
+		};
+		481388EE29ABE0F2001B8A55 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				481388ED29ABE0F2001B8A55 /* Dial.app */,
+				4846CFBA29D1039E005D018E /* ReportExtension.appex */,
+				4846CFD729D1E94F005D018E /* DeviceActivityMonitor.appex */,
+				48AE9A1D29E22DEF0092766C /* shield.appex */,
+				48AE9A8B29E5D0AF0092766C /* RestrictionWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		481388EF29ABE0F2001B8A55 = {
+			isa = PBXGroup;
+			children = (
+				4846CFB429CCB2C4005D018E /* Dial.entitlements */,
+				488340BD29C8AA8800910A27 /* Info.plist */,
+				481388F429ABE0F6001B8A55 /* Assets.xcassets */,
+				481388FB29ABE0F6001B8A55 /* Dial.xcdatamodeld */,
+				481388F629ABE0F6001B8A55 /* Preview Content */,
+			);
+			sourceTree = "<group>";
+		};
+		481388F629ABE0F6001B8A55 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				481388F729ABE0F6001B8A55 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		4846CF9B29CCA40C005D018E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4846CF9C29CCA40C005D018E /* DeviceActivity.framework */,
+				48AE9A1E29E22DEF0092766C /* ManagedSettings.framework */,
+				48AE9A2029E22DEF0092766C /* ManagedSettingsUI.framework */,
+				48AE9A4029E479640092766C /* WidgetKit.framework */,
+				48AE9A4229E479640092766C /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4846CFBB29D1039E005D018E /* ReportExtension */ = {
+			isa = PBXGroup;
+			children = (
+				91AE17BD2E84E958001328DC /* Views */,
+				911FFFAB2E7E2B700088F219 /* Utilities */,
+				911FFFA72E7E2B680088F219 /* Models */,
+				4846CFBC29D1039E005D018E /* ReportExtension.swift */,
+				48AE9A3929E38FD90092766C /* Colors.xcassets */,
+				4846CFC229D1039E005D018E /* Info.plist */,
+				4846CFC329D1039E005D018E /* ReportExtension.entitlements */,
+			);
+			path = ReportExtension;
+			sourceTree = "<group>";
+		};
+		4846CFD929D1E94F005D018E /* DeviceActivityMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				4846CFDA29D1E94F005D018E /* DeviceActivityMonitorExtension.swift */,
+				4846CFDC29D1E94F005D018E /* Info.plist */,
+				4846CFDD29D1E94F005D018E /* DeviceActivityMonitor.entitlements */,
+			);
+			path = DeviceActivityMonitor;
+			sourceTree = "<group>";
+		};
+		48AE9A2229E22DEF0092766C /* shield */ = {
+			isa = PBXGroup;
+			children = (
+				48AE9A2329E22DEF0092766C /* ShieldConfigurationExtension.swift */,
+				48AE9A2529E22DEF0092766C /* Info.plist */,
+				48AE9A2629E22DEF0092766C /* shield.entitlements */,
+				48AE9A2729E22DEF0092766D /* Assets.xcassets */,
+			);
+			path = shield;
+			sourceTree = "<group>";
+		};
+		48AE9A8E29E5D0AF0092766C /* RestrictionWidget */ = {
+			isa = PBXGroup;
+			children = (
+				91339FE42E3C14D800F38A31 /* RestrictionWidgetLiveActivity.swift */,
+				48AE9A8F29E5D0AF0092766C /* RestrictionWidgetBundle.swift */,
+				48AE9A9129E5D0AF0092766C /* RestrictionWidget.swift */,
+				48AE9A9E29E5D0AF0092766E /* DialInWidget.swift */,
+				48AE9A9329E5D0B00092766C /* Assets.xcassets */,
+				48AE9A9529E5D0B00092766C /* Info.plist */,
+			);
+			path = RestrictionWidget;
+			sourceTree = "<group>";
+		};
+		9103D9842E2EB0EC003DFC34 /* LaunchScreen */ = {
+			isa = PBXGroup;
+			children = (
+				910265072E4CE1E200250BE9 /* LaunchScreenState.swift */,
+				910265082E4CE1E200250BE9 /* ManifestoView.swift */,
+				9103D9822E2EB0EC003DFC34 /* LaunchScreenManager.swift */,
+				9103D9832E2EB0EC003DFC34 /* LaunchScreenView.swift */,
+			);
+			path = LaunchScreen;
+			sourceTree = "<group>";
+		};
+		9103D9882E2EB0EC003DFC34 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				91628CFE2E3A862100B06101 /* TabBar.swift */,
+				9103D9842E2EB0EC003DFC34 /* LaunchScreen */,
+				9103D9852E2EB0EC003DFC34 /* ContentView.swift */,
+				9103D9862E2EB0EC003DFC34 /* DialApp.swift */,
+				9103D9872E2EB0EC003DFC34 /* STProgressView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		9103D99C2E2EB100003DFC34 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D562E4A85D50050C177 /* AnalyticsHomeView.swift */,
+				91AA5D5A2E4A85D50050C177 /* Components */,
+				9103D99A2E2EB100003DFC34 /* LeaderboardView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		9103D99D2E2EB100003DFC34 /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D552E4A85650050C177 /* ViewModels */,
+				91AA5D512E4A855D0050C177 /* Core */,
+				9103D99C2E2EB100003DFC34 /* Views */,
+			);
+			path = Analytics;
+			sourceTree = "<group>";
+		};
+		9103D9A82E2EB100003DFC34 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				9189033F2E463F5600A8F0E1 /* Settings */,
+				918902BF2E463F3B00A8F0E1 /* Alarms */,
+				918902FE2E463F3B00A8F0E1 /* Insights */,
+				91339FDD2E3C12BD00F38A31 /* LiveActivity */,
+				9103DAA42E33B4E0003DFC34 /* Onboarding */,
+				9103D99D2E2EB100003DFC34 /* Analytics */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		9103DAA42E33B4E0003DFC34 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D902E4BC3C90050C177 /* Flows */,
+				91AA5CC52E4918C30050C177 /* OnboardingTypeManager.swift */,
+				91AA5CC12E4918BB0050C177 /* HardwareArrivalView.swift */,
+				91AA5CC22E4918BB0050C177 /* HardwareSetupScreens.swift */,
+				91AA5CBF2E4918B10050C177 /* DebugOnboardingHelper.swift */,
+				91AA5CAA2E47BF8F0050C177 /* NotificationRules */,
+				9133A10A2E4441F300F38A31 /* Setup */,
+				9133A0A82E442E5B00F38A31 /* Auth */,
+				9133A0AC2E442E5B00F38A31 /* Awareness */,
+				9133A0B02E442E5B00F38A31 /* Baseline */,
+				9133A0B42E442E5B00F38A31 /* Components */,
+				9133A0B82E442E5B00F38A31 /* Demographics */,
+				9133A0C52E442E5B00F38A31 /* Education */,
+				9133A0C62E442E5B00F38A31 /* FlowConfiguration.swift */,
+				9133A0CF2E442E5B00F38A31 /* Permissions */,
+				9133A0D12E442E5B00F38A31 /* Welcome */,
+				9103DAA22E33B4E0003DFC34 /* OnboardingCoordinator.swift */,
+				9103DAA32E33B4E0003DFC34 /* OnboardingFlowController.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		911FFFA72E7E2B680088F219 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				911FFFA52E7E2B680088F219 /* AppInfo.swift */,
+				911FFFA62E7E2B680088F219 /* TopAppsData.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		911FFFAB2E7E2B700088F219 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				911FFFAA2E7E2B700088F219 /* AppCategorization.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		911FFFB22E7F344E0088F219 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				914A85AE2E7F4D8D0024CA43 /* TokenRefreshManager.swift */,
+				911FFFBB2E7F3A240088F219 /* KeychainManager.swift */,
+				911FFFB62E7F389F0088F219 /* CognitoResponseParser.swift */,
+				911FFFB12E7F344E0088F219 /* AuthenticationManager.swift */,
+			);
+			path = Authentication;
+			sourceTree = "<group>";
+		};
+		913073432E2AB01100994CEE /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D862E4ACFC00050C177 /* AppCategoryClassification.swift */,
+				9103D9FF2E2F21C8003DFC34 /* AppTheme.swift */,
+				91628CA72E39AB4400B06101 /* CustomFont.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		913073452E2AB01100994CEE /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				91628D462E3A901500B06101 /* Models */,
+				91628D2F2E3A8FF900B06101 /* Services */,
+				91628D092E3A886400B06101 /* Components */,
+				913073432E2AB01100994CEE /* Extensions */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		91339F882E3AAA9A00F38A31 /* Bluetooth */ = {
+			isa = PBXGroup;
+			children = (
+				91339F912E3AAB7800F38A31 /* BluetoothDevice.swift */,
+				91339F922E3AAB7800F38A31 /* BluetoothDeviceRow.swift */,
+				91339F862E3AAA9A00F38A31 /* BluetoothStatusSheet.swift */,
+				91339F872E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift */,
+			);
+			path = Bluetooth;
+			sourceTree = "<group>";
+		};
+		91339FDA2E3C12BD00F38A31 /* Manager */ = {
+			isa = PBXGroup;
+			children = (
+				91339FD92E3C12BD00F38A31 /* LiveActivityManager.swift */,
+			);
+			path = Manager;
+			sourceTree = "<group>";
+		};
+		91339FDC2E3C12BD00F38A31 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				91339FDB2E3C12BD00F38A31 /* DialActivityAttributes.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		91339FDD2E3C12BD00F38A31 /* LiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				91339FDA2E3C12BD00F38A31 /* Manager */,
+				91339FDC2E3C12BD00F38A31 /* Models */,
+			);
+			path = LiveActivity;
+			sourceTree = "<group>";
+		};
+		9133A0042E3FDCCA00F38A31 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				9133A0012E3FDCCA00F38A31 /* NotificationContent.swift */,
+				9133A0022E3FDCCA00F38A31 /* NotificationService.swift */,
+				9133A0032E3FDCCA00F38A31 /* README.md */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		9133A01A2E3FFF5400F38A31 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				9133A0952E4422D700F38A31 /* habits.json */,
+				9133A0372E4011C900F38A31 /* metadata.json */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		9133A01D2E3FFF5400F38A31 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				9133A01A2E3FFF5400F38A31 /* Config */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		9133A01E2E3FFF5400F38A31 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D0D2E4935230050C177 /* Satoshi */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
+		9133A01F2E3FFF5400F38A31 /* Ambient */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Ambient;
+			sourceTree = "<group>";
+		};
+		9133A0202E3FFF5400F38A31 /* Classic */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Classic;
+			sourceTree = "<group>";
+		};
+		9133A0212E3FFF5400F38A31 /* Digital */ = {
+			isa = PBXGroup;
+			children = (
+				9133A03D2E4255D900F38A31 /* digital_beep.mp3 */,
+			);
+			path = Digital;
+			sourceTree = "<group>";
+		};
+		9133A0222E3FFF5400F38A31 /* Musical */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Musical;
+			sourceTree = "<group>";
+		};
+		9133A0232E3FFF5400F38A31 /* Nature */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Nature;
+			sourceTree = "<group>";
+		};
+		9133A0242E3FFF5400F38A31 /* Alarms */ = {
+			isa = PBXGroup;
+			children = (
+				9133A01F2E3FFF5400F38A31 /* Ambient */,
+				9133A0202E3FFF5400F38A31 /* Classic */,
+				9133A0212E3FFF5400F38A31 /* Digital */,
+				9133A0222E3FFF5400F38A31 /* Musical */,
+				9133A0232E3FFF5400F38A31 /* Nature */,
+			);
+			path = Alarms;
+			sourceTree = "<group>";
+		};
+		9133A0262E3FFF5400F38A31 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				9133A0242E3FFF5400F38A31 /* Alarms */,
+			);
+			path = Sounds;
+			sourceTree = "<group>";
+		};
+		9133A0272E3FFF5400F38A31 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				9133A01D2E3FFF5400F38A31 /* Data */,
+				9133A01E2E3FFF5400F38A31 /* Fonts */,
+				9133A0262E3FFF5400F38A31 /* Sounds */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		9133A02D2E4011B400F38A31 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				9133A0392E40126700F38A31 /* AlarmSound.swift */,
+				9133A02A2E4011B400F38A31 /* AudioPlayer.swift */,
+				9133A02B2E4011B400F38A31 /* SoundLibrary.swift */,
+				9133A02C2E4011B400F38A31 /* SoundManager.swift */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		9133A0A82E442E5B00F38A31 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				910265252E4CFFCD00250BE9 /* SignUpScreen.swift */,
+				9133A0A52E442E5B00F38A31 /* LoginScreen.swift */,
+				9133A0A62E442E5B00F38A31 /* OTPVerificationScreenV2.swift */,
+				9133A0A72E442E5B00F38A31 /* SignInHelpSheet.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		9133A0AC2E442E5B00F38A31 /* Awareness */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D1D2E4A5D930050C177 /* Components */,
+				9133A0A92E442E5B00F38A31 /* DialIntroductionScreen.swift */,
+				9133A0AA2E442E5B00F38A31 /* PhoneFreeBedroomBenefitsScreen.swift */,
+			);
+			path = Awareness;
+			sourceTree = "<group>";
+		};
+		9133A0B02E442E5B00F38A31 /* Baseline */ = {
+			isa = PBXGroup;
+			children = (
+				9133A0FA2E44306500F38A31 /* HabitSelection */,
+				9133A0FB2E44306500F38A31 /* HabitSelectionScreen.swift */,
+				9133A0AD2E442E5B00F38A31 /* BrainFogFrequencyScreen.swift */,
+				9133A0AE2E442E5B00F38A31 /* ScreenTimeScreen.swift */,
+				9133A0AF2E442E5B00F38A31 /* SleepQualityScreen.swift */,
+			);
+			path = Baseline;
+			sourceTree = "<group>";
+		};
+		9133A0B42E442E5B00F38A31 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5CF12E4931BE0050C177 /* TimeMetricRow.swift */,
+				91AA5CED2E4931B80050C177 /* LifetimeCalculator.swift */,
+				91AA5CEE2E4931B80050C177 /* LifetimeCounterView.swift */,
+				91AA5CA02E47AEC20050C177 /* ExplainerHeader.swift */,
+				91AA5CA12E47AEC20050C177 /* ExplainerSectionContainer.swift */,
+				91AA5CA22E47AEC20050C177 /* OnboardingExplainerScaffold.swift */,
+				918903482E4662F200A8F0E1 /* ConsentRow.swift */,
+				918903492E4662F200A8F0E1 /* OnboardingTextField.swift */,
+				9133A0B12E442E5B00F38A31 /* OnboardingBackButton.swift */,
+				9133A0B22E442E5B00F38A31 /* OnboardingOptionButton.swift */,
+				9133A0B32E442E5B00F38A31 /* OnboardingQuestionScreen.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		9133A0B82E442E5B00F38A31 /* Demographics */ = {
+			isa = PBXGroup;
+			children = (
+				91AE176E2E82C967001328DC /* NameCollectionScreen.swift */,
+				91AA5CEB2E49272D0050C177 /* BirthdateSelectionScreen.swift */,
+				9133A0B52E442E5B00F38A31 /* GenderSelectionScreen.swift */,
+				9133A0B62E442E5B00F38A31 /* OccupationSelectionScreen.swift */,
+				9133A0B72E442E5B00F38A31 /* UsernameSelectionScreen.swift */,
+			);
+			path = Demographics;
+			sourceTree = "<group>";
+		};
+		9133A0C52E442E5B00F38A31 /* Education */ = {
+			isa = PBXGroup;
+			children = (
+				9189027D2E450B5900A8F0E1 /* DevicePlacementGuideScreen.swift */,
+				9133A1032E44398100F38A31 /* DeviceFunctionality */,
+				9133A1042E44398100F38A31 /* DeviceFunctionalityScreen.swift */,
+				9133A0BF2E442E5B00F38A31 /* AppRatingScreen.swift */,
+				9133A0C02E442E5B00F38A31 /* CueExplanationScreen.swift */,
+				9133A0C12E442E5B00F38A31 /* DialDownScreen.swift */,
+				9133A0C22E442E5B00F38A31 /* DialDownTimelineScreen.swift */,
+				9133A0C42E442E5B00F38A31 /* NotificationPoolIntroScreen.swift */,
+			);
+			path = Education;
+			sourceTree = "<group>";
+		};
+		9133A0CF2E442E5B00F38A31 /* Permissions */ = {
+			isa = PBXGroup;
+			children = (
+				9189034C2E46701900A8F0E1 /* PermissionRequestScreen.swift */,
+				918902802E45146200A8F0E1 /* ImportantContactsScreen.swift */,
+				9133A0CC2E442E5B00F38A31 /* MotionDataPermissionScreen.swift */,
+				9133A0CD2E442E5B00F38A31 /* PushNotificationPermissionScreen.swift */,
+				9133A0CE2E442E5B00F38A31 /* ScreenTimePermissionScreen.swift */,
+			);
+			path = Permissions;
+			sourceTree = "<group>";
+		};
+		9133A0D12E442E5B00F38A31 /* Welcome */ = {
+			isa = PBXGroup;
+			children = (
+				9133A0D02E442E5B00F38A31 /* OnboardingWelcomeScreen.swift */,
+			);
+			path = Welcome;
+			sourceTree = "<group>";
+		};
+		9133A0F82E44306500F38A31 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				9133A0F52E44306500F38A31 /* CustomHabitInput.swift */,
+				9133A0F62E44306500F38A31 /* HabitCategoryCard.swift */,
+				9133A0F72E44306500F38A31 /* HabitRowItem.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		9133A0FA2E44306500F38A31 /* HabitSelection */ = {
+			isa = PBXGroup;
+			children = (
+				9133A0F82E44306500F38A31 /* Components */,
+				9133A0F92E44306500F38A31 /* HabitSelectionViewModel.swift */,
+			);
+			path = HabitSelection;
+			sourceTree = "<group>";
+		};
+		9133A1032E44398100F38A31 /* DeviceFunctionality */ = {
+			isa = PBXGroup;
+			children = (
+				9133A1072E443A1F00F38A31 /* DeviceFeatureItem.swift */,
+			);
+			path = DeviceFunctionality;
+			sourceTree = "<group>";
+		};
+		9133A10A2E4441F300F38A31 /* Setup */ = {
+			isa = PBXGroup;
+			children = (
+				9133A10C2E4443E000F38A31 /* DialDeviceDiscoveryView.swift */,
+				9133A10D2E4443E000F38A31 /* OnboardingBluetoothViewModel.swift */,
+				9133A1092E4441F300F38A31 /* DialSetupIntroScreen.swift */,
+			);
+			path = Setup;
+			sourceTree = "<group>";
+		};
+		91628D092E3A886400B06101 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5CB22E47C1100050C177 /* SuccessHUD.swift */,
+				9133A05C2E42A0A000F38A31 /* KeyboardPreloader.swift */,
+				91339F882E3AAA9A00F38A31 /* Bluetooth */,
+				91628D262E3A8C1100B06101 /* UniversalHeader.swift */,
+				91628D032E3A886400B06101 /* CorrectButton.swift */,
+				91628D042E3A886400B06101 /* DialInProgressBar.swift */,
+				91628D072E3A886400B06101 /* LoadingAnimation.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		91628D2F2E3A8FF900B06101 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				911FFFB22E7F344E0088F219 /* Authentication */,
+				91AA5CB82E47C7250050C177 /* Onboarding */,
+				9133A0832E42E78000F38A31 /* DialError.swift */,
+				9133A0842E42E78000F38A31 /* ErrorHandler.swift */,
+				9133A02D2E4011B400F38A31 /* Audio */,
+				9133A0042E3FDCCA00F38A31 /* Notifications */,
+				91628D2B2E3A8FF900B06101 /* BluetoothAlarmService.swift */,
+				91628D2E2E3A8FF900B06101 /* Persistence.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		91628D432E3A901500B06101 /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				9133A0122E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift */,
+				91339F782E3A9F0400F38A31 /* Alarm+Extension.swift */,
+				91339F602E3A9E6700F38A31 /* Alarm+CoreDataClass.swift */,
+				91339F612E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift */,
+				91339F622E3A9E6700F38A31 /* Item+CoreDataClass.swift */,
+				91339F632E3A9E6700F38A31 /* Item+CoreDataProperties.swift */,
+				91339F642E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift */,
+				91339F652E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift */,
+			);
+			path = CoreData;
+			sourceTree = "<group>";
+		};
+		91628D462E3A901500B06101 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				9133A0912E4422C500F38A31 /* HabitModels.swift */,
+				9133A00E2E3FE2DF00F38A31 /* Weekday.swift */,
+				91628D432E3A901500B06101 /* CoreData */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		918902B92E463F3B00A8F0E1 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				918902B62E463F3B00A8F0E1 /* AlarmRowView.swift */,
+				918902B72E463F3B00A8F0E1 /* AlarmSoundSelectionView.swift */,
+				918902B82E463F3B00A8F0E1 /* CreateAlarmSheet.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		918902BD2E463F3B00A8F0E1 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				918902BB2E463F3B00A8F0E1 /* AlarmViewModel.swift */,
+				918902BC2E463F3B00A8F0E1 /* SimpleAlarmViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		918902BF2E463F3B00A8F0E1 /* Alarms */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D952E4C16960050C177 /* AlarmsTeaserView.swift */,
+				918902B92E463F3B00A8F0E1 /* Components */,
+				918902BD2E463F3B00A8F0E1 /* ViewModels */,
+				918902BE2E463F3B00A8F0E1 /* AlarmsView.swift */,
+			);
+			path = Alarms;
+			sourceTree = "<group>";
+		};
+		918902FE2E463F3B00A8F0E1 /* Insights */ = {
+			isa = PBXGroup;
+			children = (
+				918902FC2E463F3B00A8F0E1 /* AppByAppView.swift */,
+				918902FD2E463F3B00A8F0E1 /* MoreInsightsView.swift */,
+			);
+			path = Insights;
+			sourceTree = "<group>";
+		};
+		918903372E463F5600A8F0E1 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				9102650B2E4CF86F00250BE9 /* LegalLinksSection.swift */,
+				9102650C2E4CF86F00250BE9 /* StrictModeToggle.swift */,
+				918903342E463F5600A8F0E1 /* SettingsRow.swift */,
+				918903352E463F5600A8F0E1 /* SettingsSection.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		9189033D2E463F5600A8F0E1 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				9189033C2E463F5600A8F0E1 /* ProfileCardView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		9189033F2E463F5600A8F0E1 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				910265112E4CF87D00250BE9 /* DeviceManagementView.swift */,
+				918903372E463F5600A8F0E1 /* Components */,
+				9189033D2E463F5600A8F0E1 /* Profile */,
+				9189033E2E463F5600A8F0E1 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		91AA5CA82E47BF8F0050C177 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5CAC2E47C0800050C177 /* NotificationRulesTheme.swift */,
+				91AA5CAD2E47C0800050C177 /* RepeatedCallExplainerCard.swift */,
+				91AA5CAE2E47C0800050C177 /* RepeatedCallThresholdSlider.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		91AA5CAA2E47BF8F0050C177 /* NotificationRules */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5CA82E47BF8F0050C177 /* Components */,
+				91AA5CA92E47BF8F0050C177 /* RepeatedCallRuleScreen.swift */,
+			);
+			path = NotificationRules;
+			sourceTree = "<group>";
+		};
+		91AA5CB82E47C7250050C177 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5CB62E47C7250050C177 /* OnboardingProgressModel.swift */,
+				91AA5CB72E47C7250050C177 /* OnboardingStateManager.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		91AA5D0D2E4935230050C177 /* Satoshi */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D032E4935230050C177 /* Satoshi-Black.otf */,
+				91AA5D042E4935230050C177 /* Satoshi-BlackItalic.otf */,
+				91AA5D052E4935230050C177 /* Satoshi-Bold.otf */,
+				91AA5D062E4935230050C177 /* Satoshi-BoldItalic.otf */,
+				91AA5D072E4935230050C177 /* Satoshi-Italic.otf */,
+				91AA5D082E4935230050C177 /* Satoshi-Light.otf */,
+				91AA5D092E4935230050C177 /* Satoshi-LightItalic.otf */,
+				91AA5D0A2E4935230050C177 /* Satoshi-Medium.otf */,
+				91AA5D0B2E4935230050C177 /* Satoshi-MediumItalic.otf */,
+				91AA5D0C2E4935230050C177 /* Satoshi-Regular.otf */,
+			);
+			path = Satoshi;
+			sourceTree = "<group>";
+		};
+		91AA5D1D2E4A5D930050C177 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				9102653B2E4D37AB00250BE9 /* LifetimeImpactProblemContent.swift */,
+				91AA5D182E4A5D930050C177 /* CounterAnimationManager.swift */,
+				91AA5D1B2E4A5D930050C177 /* LifetimeUsageHelper.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		91AA5D4E2E4A855D0050C177 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D4C2E4A855D0050C177 /* AppUsageData.swift */,
+				91AA5D4D2E4A855D0050C177 /* ScreenTimeMetrics.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		91AA5D512E4A855D0050C177 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D4E2E4A855D0050C177 /* Models */,
+				91AA5D4F2E4A855D0050C177 /* AnalyticsCache.swift */,
+				91AA5D502E4A855D0050C177 /* AnalyticsService.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		91AA5D552E4A85650050C177 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D542E4A85650050C177 /* AnalyticsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		91AA5D5A2E4A85D50050C177 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D572E4A85D50050C177 /* AppUsageRow.swift */,
+				91AA5D582E4A85D50050C177 /* MetricCard.swift */,
+				91AA5D592E4A85D50050C177 /* UsageChart.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		91AA5D902E4BC3C90050C177 /* Flows */ = {
+			isa = PBXGroup;
+			children = (
+				91AA5D8C2E4BC3C90050C177 /* flow_test.json */,
+				91AA5D8D2E4BC3C90050C177 /* hardware_setup.json */,
+				91AA5D8E2E4BC3C90050C177 /* sign_in.json */,
+				91AA5D8F2E4BC3C90050C177 /* software_onboarding.json */,
+			);
+			path = Flows;
+			sourceTree = "<group>";
+		};
+		91AE17BD2E84E958001328DC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				91AE17D22E86206F001328DC /* AppIconView.swift */,
+				91AE17D32E86206F001328DC /* TopAppsListReport.swift */,
+				91AE17C02E84EABD001328DC /* AnalyticsHeader.swift */,
+				91AE17BB2E84E958001328DC /* HourlyProductivityChart.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		91AE17D82E86F841001328DC /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				91AE17D62E86F841001328DC /* MinimalDeviceMonitor.swift */,
+				91AE17D72E86F841001328DC /* MinimalShieldConfig.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		91AE17E22E86F841001328DC /* FamilyControlsV3 */ = {
+			isa = PBXGroup;
+			children = (
+				91AE17FB2E8764E8001328DC /* Core */,
+				91AE17F62E8764D7001328DC /* UI */,
+				91AE17F02E873229001328DC /* SimpleScheduleManager.swift */,
+				91AE17F12E873229001328DC /* SimpleScheduleView.swift */,
+				91AE17EE2E872BF4001328DC /* SimpleDialInMainView.swift */,
+				91AE17D82E86F841001328DC /* Extensions */,
+				91AE17DA2E86F841001328DC /* SimpleActiveSessionView.swift */,
+				91AE17DB2E86F841001328DC /* SimpleConstants.swift */,
+				91AE17DC2E86F841001328DC /* SimpleDialInManager.swift */,
+				91AE17DD2E86F841001328DC /* SimpleDialInView.swift */,
+				91AE17DE2E86F841001328DC /* SimpleFamilyPicker.swift */,
+				91AE17DF2E86F841001328DC /* SimpleModels.swift */,
+				91AE17E02E86F841001328DC /* SimpleNotificationHelper.swift */,
+				91AE17E12E86F841001328DC /* SimplePersistence.swift */,
+			);
+			path = FamilyControlsV3;
+			sourceTree = "<group>";
+		};
+		91AE17F62E8764D7001328DC /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				91AE17FE2E876604001328DC /* SimpleAppGroupSection.swift */,
+				91AE17F42E8764D7001328DC /* SimpleAppGroupEditor.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		91AE17FB2E8764E8001328DC /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				91AE17F92E8764E8001328DC /* SimpleAppGroup.swift */,
+				91AE17FA2E8764E8001328DC /* SimpleAppGroupManager.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		E033CCFD819AF25E17C3B5DB /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2F4B5DC001A081F93FA3B5F6 /* Fonts */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		F564395BFA6FF217C5961B06 /* Dial */ = {
+			isa = PBXGroup;
+			children = (
+				E033CCFD819AF25E17C3B5DB /* Resources */,
+			);
+			name = Dial;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		481388EC29ABE0F2001B8A55 /* Dial */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4813891629ABE0F6001B8A55 /* Build configuration list for PBXNativeTarget "Dial" */;
+			buildPhases = (
+				481388E929ABE0F2001B8A55 /* Sources */,
+				481388EA29ABE0F2001B8A55 /* Frameworks */,
+				481388EB29ABE0F2001B8A55 /* Resources */,
+				4846CFA629CCA40C005D018E /* Embed Foundation Extensions */,
+				4846CFCA29D1039E005D018E /* Embed ExtensionKit Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4846CFC529D1039E005D018E /* PBXTargetDependency */,
+				4846CFDF29D1E94F005D018E /* PBXTargetDependency */,
+				48AE9A2829E22DEF0092766C /* PBXTargetDependency */,
+				48AE9A9729E5D0B00092766C /* PBXTargetDependency */,
+			);
+			name = Dial;
+			packageProductDependencies = (
+				914A85A82E7F48A50024CA43 /* Valet */,
+			);
+			productName = Dial;
+			productReference = 481388ED29ABE0F2001B8A55 /* Dial.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4846CFB929D1039E005D018E /* ReportExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4846CFC729D1039E005D018E /* Build configuration list for PBXNativeTarget "ReportExtension" */;
+			buildPhases = (
+				4846CFB629D1039E005D018E /* Sources */,
+				4846CFB729D1039E005D018E /* Frameworks */,
+				4846CFB829D1039E005D018E /* Resources */,
+			);
+			buildRules = (
+			);
+			name = ReportExtension;
+			packageProductDependencies = (
+				914A85AA2E7F48CD0024CA43 /* SwiftUICharts */,
+			);
+			productName = ReportExtension;
+			productReference = 4846CFBA29D1039E005D018E /* ReportExtension.appex */;
+			productType = "com.apple.product-type.extensionkit-extension";
+		};
+		4846CFD629D1E94F005D018E /* DeviceActivityMonitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4846CFE129D1E94F005D018E /* Build configuration list for PBXNativeTarget "DeviceActivityMonitor" */;
+			buildPhases = (
+				4846CFD329D1E94F005D018E /* Sources */,
+				4846CFD429D1E94F005D018E /* Frameworks */,
+				4846CFD529D1E94F005D018E /* Resources */,
+			);
+			buildRules = (
+			);
+			name = DeviceActivityMonitor;
+			productName = DeviceActivityMonitor;
+			productReference = 4846CFD729D1E94F005D018E /* DeviceActivityMonitor.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		48AE9A1C29E22DEF0092766C /* shield */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 48AE9A2A29E22DEF0092766C /* Build configuration list for PBXNativeTarget "shield" */;
+			buildPhases = (
+				48AE9A1929E22DEF0092766C /* Sources */,
+				48AE9A1A29E22DEF0092766C /* Frameworks */,
+				48AE9A1B29E22DEF0092766C /* Resources */,
+			);
+			buildRules = (
+			);
+			name = shield;
+			productName = shield;
+			productReference = 48AE9A1D29E22DEF0092766C /* shield.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		48AE9A8A29E5D0AF0092766C /* RestrictionWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 48AE9A9929E5D0B00092766C /* Build configuration list for PBXNativeTarget "RestrictionWidgetExtension" */;
+			buildPhases = (
+				48AE9A8729E5D0AF0092766C /* Sources */,
+				48AE9A8829E5D0AF0092766C /* Frameworks */,
+				48AE9A8929E5D0AF0092766C /* Resources */,
+			);
+			buildRules = (
+			);
+			name = RestrictionWidgetExtension;
+			packageProductDependencies = (
+				914A85AC2E7F48E20024CA43 /* Valet */,
+			);
+			productName = RestrictionWidgetExtension;
+			productReference = 48AE9A8B29E5D0AF0092766C /* RestrictionWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		481388E529ABE0F1001B8A55 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1420;
+				LastUpgradeCheck = 1340;
+				TargetAttributes = {
+					481388EC29ABE0F2001B8A55 = {
+						CreatedOnToolsVersion = 13.4;
+					};
+					4846CFB929D1039E005D018E = {
+						CreatedOnToolsVersion = 14.2;
+					};
+					4846CFD629D1E94F005D018E = {
+						CreatedOnToolsVersion = 14.2;
+					};
+					48AE9A1C29E22DEF0092766C = {
+						CreatedOnToolsVersion = 14.2;
+					};
+					48AE9A8A29E5D0AF0092766C = {
+						CreatedOnToolsVersion = 14.2;
+					};
+				};
+			};
+			buildConfigurationList = 481388E829ABE0F1001B8A55 /* Build configuration list for PBXProject "Dial" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 481388E429ABE0F1001B8A55;
+			packageReferences = (
+				914A85A62E7F489C0024CA43 /* XCRemoteSwiftPackageReference "ChartView" */,
+				914A85A72E7F48A50024CA43 /* XCRemoteSwiftPackageReference "Valet" */,
+			);
+			preferredProjectObjectVersion = 90;
+			productRefGroup = 481388EE29ABE0F2001B8A55 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				481388EC29ABE0F2001B8A55 /* Dial */,
+				4846CFB929D1039E005D018E /* ReportExtension */,
+				4846CFD629D1E94F005D018E /* DeviceActivityMonitor */,
+				48AE9A1C29E22DEF0092766C /* shield */,
+				48AE9A8A29E5D0AF0092766C /* RestrictionWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		481388EB29ABE0F2001B8A55 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				9133A03E2E4255D900F38A31 /* digital_beep.mp3 in Resources */,
+				481388F829ABE0F6001B8A55 /* Preview Assets.xcassets in Resources */,
+				9133A0082E3FDCCA00F38A31 /* README.md in Resources */,
+				9133A0382E4011C900F38A31 /* metadata.json in Resources */,
+				91AA5D912E4BC3C90050C177 /* software_onboarding.json in Resources */,
+				91AA5D922E4BC3C90050C177 /* flow_test.json in Resources */,
+				91AA5D932E4BC3C90050C177 /* sign_in.json in Resources */,
+				91AA5D942E4BC3C90050C177 /* hardware_setup.json in Resources */,
+				9133A0962E4422D700F38A31 /* habits.json in Resources */,
+				481388F529ABE0F6001B8A55 /* Assets.xcassets in Resources */,
+				91AA5D0E2E4935230050C177 /* Satoshi-BoldItalic.otf in Resources */,
+				91AA5D0F2E4935230050C177 /* Satoshi-Bold.otf in Resources */,
+				91AA5D102E4935230050C177 /* Satoshi-MediumItalic.otf in Resources */,
+				91AA5D112E4935230050C177 /* Satoshi-Light.otf in Resources */,
+				91AA5D122E4935230050C177 /* Satoshi-BlackItalic.otf in Resources */,
+				91AA5D132E4935230050C177 /* Satoshi-LightItalic.otf in Resources */,
+				91AA5D142E4935230050C177 /* Satoshi-Regular.otf in Resources */,
+				91AA5D152E4935230050C177 /* Satoshi-Black.otf in Resources */,
+				91AA5D162E4935230050C177 /* Satoshi-Medium.otf in Resources */,
+				91AA5D172E4935230050C177 /* Satoshi-Italic.otf in Resources */,
+			);
+		};
+		4846CFB829D1039E005D018E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				9133A00B2E3FDCCA00F38A31 /* README.md in Resources */,
+				48AE9A3A29E38FD90092766C /* Colors.xcassets in Resources */,
+			);
+		};
+		4846CFD529D1E94F005D018E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		48AE9A1B29E22DEF0092766C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				48AE9A2829E22DEF0092766E /* Assets.xcassets in Resources */,
+			);
+		};
+		48AE9A8929E5D0AF0092766C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				9133A0072E3FDCCA00F38A31 /* README.md in Resources */,
+				48AE9A9429E5D0B00092766C /* Assets.xcassets in Resources */,
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		481388E929ABE0F2001B8A55 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				481388FD29ABE0F6001B8A55 /* Dial.xcdatamodeld in Sources */,
+				91AE17E42E86F841001328DC /* MinimalDeviceMonitor.swift in Sources */,
+				91AE17E52E86F841001328DC /* SimpleDialInView.swift in Sources */,
+				91AE17F22E873229001328DC /* SimpleScheduleView.swift in Sources */,
+				91AE17F32E873229001328DC /* SimpleScheduleManager.swift in Sources */,
+				91AE17E62E86F841001328DC /* SimpleConstants.swift in Sources */,
+				91AE17E72E86F841001328DC /* SimpleNotificationHelper.swift in Sources */,
+				91AE17E82E86F841001328DC /* SimpleDialInManager.swift in Sources */,
+				91AE17E92E86F841001328DC /* SimplePersistence.swift in Sources */,
+				91AE17EA2E86F841001328DC /* SimpleActiveSessionView.swift in Sources */,
+				91AE17EB2E86F841001328DC /* SimpleFamilyPicker.swift in Sources */,
+				91AE17FF2E876604001328DC /* SimpleAppGroupSection.swift in Sources */,
+				91AE17EC2E86F841001328DC /* MinimalShieldConfig.swift in Sources */,
+				91AE17ED2E86F841001328DC /* SimpleModels.swift in Sources */,
+				91AA5D5D2E4A85FC0050C177 /* AppUsageRow.swift in Sources */,
+				9133A0922E4422C500F38A31 /* HabitModels.swift in Sources */,
+				9133A03C2E40126700F38A31 /* AlarmSound.swift in Sources */,
+				9133A10B2E4441F300F38A31 /* DialSetupIntroScreen.swift in Sources */,
+				9133A05D2E42A0A000F38A31 /* KeyboardPreloader.swift in Sources */,
+				9133A02E2E4011B400F38A31 /* SoundLibrary.swift in Sources */,
+				9133A02F2E4011B400F38A31 /* SoundManager.swift in Sources */,
+				9133A0302E4011B400F38A31 /* AudioPlayer.swift in Sources */,
+				91339F8B2E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift in Sources */,
+				91339F8C2E3AAA9A00F38A31 /* BluetoothStatusSheet.swift in Sources */,
+				91628D0B2E3A886400B06101 /* CorrectButton.swift in Sources */,
+				91628D0E2E3A886400B06101 /* DialInProgressBar.swift in Sources */,
+				9133A1062E44398100F38A31 /* DeviceFunctionalityScreen.swift in Sources */,
+				91628D0F2E3A886400B06101 /* LoadingAnimation.swift in Sources */,
+				9133A0112E3FE2DF00F38A31 /* Weekday.swift in Sources */,
+				9133A0092E3FDCCA00F38A31 /* NotificationService.swift in Sources */,
+				9133A00A2E3FDCCA00F38A31 /* NotificationContent.swift in Sources */,
+				91628CA92E39AB4400B06101 /* CustomFont.swift in Sources */,
+				91339F792E3A9F0400F38A31 /* Alarm+Extension.swift in Sources */,
+				9103DAC02E33B4E0003DFC34 /* OnboardingCoordinator.swift in Sources */,
+				911FFFB32E7F344E0088F219 /* AuthenticationManager.swift in Sources */,
+				9133A0892E42E78000F38A31 /* ErrorHandler.swift in Sources */,
+				910265262E4CFFCD00250BE9 /* SignUpScreen.swift in Sources */,
+				9133A08A2E42E78000F38A31 /* DialError.swift in Sources */,
+				9103DAC12E33B4E0003DFC34 /* OnboardingFlowController.swift in Sources */,
+				910265132E4CF87D00250BE9 /* DeviceManagementView.swift in Sources */,
+				91339F932E3AAB7800F38A31 /* BluetoothDeviceRow.swift in Sources */,
+				91339F942E3AAB7800F38A31 /* BluetoothDevice.swift in Sources */,
+				91339F562E3A97EB00F38A31 /* Alarm+CoreDataClass.swift in Sources */,
+				918903422E463F5600A8F0E1 /* SettingsView.swift in Sources */,
+				918903442E463F5600A8F0E1 /* ProfileCardView.swift in Sources */,
+				918903462E463F5600A8F0E1 /* SettingsSection.swift in Sources */,
+				911FFFB72E7F389F0088F219 /* CognitoResponseParser.swift in Sources */,
+				918903472E463F5600A8F0E1 /* SettingsRow.swift in Sources */,
+				91339F572E3A97EB00F38A31 /* Item+CoreDataProperties.swift in Sources */,
+				91339F582E3A97EB00F38A31 /* RestrictionBlock+CoreDataClass.swift in Sources */,
+				91339F592E3A97EB00F38A31 /* RestrictionBlock+CoreDataProperties.swift in Sources */,
+				91339F5A2E3A97EB00F38A31 /* Alarm+CoreDataProperties.swift in Sources */,
+				91339F5B2E3A97EB00F38A31 /* Item+CoreDataClass.swift in Sources */,
+				9103D9892E2EB0EC003DFC34 /* DialApp.swift in Sources */,
+				91628CFF2E3A862100B06101 /* TabBar.swift in Sources */,
+				91339F662E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift in Sources */,
+				91AE17EF2E872BF4001328DC /* SimpleDialInMainView.swift in Sources */,
+				9133A1082E443A1F00F38A31 /* DeviceFeatureItem.swift in Sources */,
+				9102653D2E4D37AB00250BE9 /* LifetimeImpactProblemContent.swift in Sources */,
+				91339F672E3A9E6700F38A31 /* Item+CoreDataClass.swift in Sources */,
+				91339F682E3A9E6700F38A31 /* Item+CoreDataProperties.swift in Sources */,
+				91AA5CC32E4918BB0050C177 /* HardwareArrivalView.swift in Sources */,
+				91AA5CC42E4918BB0050C177 /* HardwareSetupScreens.swift in Sources */,
+				91AA5D1F2E4A5D930050C177 /* LifetimeUsageHelper.swift in Sources */,
+				91AA5D202E4A5D930050C177 /* CounterAnimationManager.swift in Sources */,
+				91339F692E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift in Sources */,
+				91339F6A2E3A9E6700F38A31 /* Alarm+CoreDataClass.swift in Sources */,
+				91339F6B2E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift in Sources */,
+				9103D98A2E2EB0EC003DFC34 /* LaunchScreenManager.swift in Sources */,
+				9103D98B2E2EB0EC003DFC34 /* ContentView.swift in Sources */,
+				91AA5D5E2E4A86000050C177 /* MetricCard.swift in Sources */,
+				9103D98C2E2EB0EC003DFC34 /* LaunchScreenView.swift in Sources */,
+				91339FDE2E3C12BD00F38A31 /* DialActivityAttributes.swift in Sources */,
+				91339FDF2E3C12BD00F38A31 /* LiveActivityManager.swift in Sources */,
+				9133A0152E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift in Sources */,
+				9189034A2E4662F200A8F0E1 /* OnboardingTextField.swift in Sources */,
+				9189034B2E4662F200A8F0E1 /* ConsentRow.swift in Sources */,
+				9103D98D2E2EB0EC003DFC34 /* STProgressView.swift in Sources */,
+				9133A10E2E4443E000F38A31 /* OnboardingBluetoothViewModel.swift in Sources */,
+				9133A10F2E4443E000F38A31 /* DialDeviceDiscoveryView.swift in Sources */,
+				91AA5CC02E4918B10050C177 /* DebugOnboardingHelper.swift in Sources */,
+				91AA5CAF2E47C0800050C177 /* RepeatedCallExplainerCard.swift in Sources */,
+				91AA5CF22E4931BE0050C177 /* TimeMetricRow.swift in Sources */,
+				914A85AF2E7F4D8D0024CA43 /* TokenRefreshManager.swift in Sources */,
+				91AA5CB02E47C0800050C177 /* NotificationRulesTheme.swift in Sources */,
+				91AA5CB12E47C0800050C177 /* RepeatedCallThresholdSlider.swift in Sources */,
+				91628D272E3A8C1100B06101 /* UniversalHeader.swift in Sources */,
+				9133A0FC2E44306500F38A31 /* HabitSelectionScreen.swift in Sources */,
+				91AE17F82E8764D7001328DC /* SimpleAppGroupEditor.swift in Sources */,
+				91AA5D692E4A86780050C177 /* ScreenTimeMetrics.swift in Sources */,
+				91AA5D6A2E4A86780050C177 /* AnalyticsService.swift in Sources */,
+				91AA5D6B2E4A86780050C177 /* AnalyticsCache.swift in Sources */,
+				91AA5D6C2E4A86780050C177 /* AppUsageData.swift in Sources */,
+				918903002E463F3B00A8F0E1 /* MoreInsightsView.swift in Sources */,
+				918903062E463F3B00A8F0E1 /* AlarmSoundSelectionView.swift in Sources */,
+				91AA5CA32E47AEC20050C177 /* ExplainerHeader.swift in Sources */,
+				91AA5CAB2E47BF8F0050C177 /* RepeatedCallRuleScreen.swift in Sources */,
+				91AA5CA42E47AEC20050C177 /* ExplainerSectionContainer.swift in Sources */,
+				91AA5CA52E47AEC20050C177 /* OnboardingExplainerScaffold.swift in Sources */,
+				9189030E2E463F3B00A8F0E1 /* AppByAppView.swift in Sources */,
+				91AA5CBD2E47C7250050C177 /* OnboardingProgressModel.swift in Sources */,
+				91AA5CBE2E47C7250050C177 /* OnboardingStateManager.swift in Sources */,
+				91AA5CB32E47C1100050C177 /* SuccessHUD.swift in Sources */,
+				9189031A2E463F3B00A8F0E1 /* SimpleAlarmViewModel.swift in Sources */,
+				9189031C2E463F3B00A8F0E1 /* AlarmViewModel.swift in Sources */,
+				91AA5D5F2E4A86030050C177 /* UsageChart.swift in Sources */,
+				918903262E463F3B00A8F0E1 /* CreateAlarmSheet.swift in Sources */,
+				918903292E463F3B00A8F0E1 /* AlarmsView.swift in Sources */,
+				9189032F2E463F3B00A8F0E1 /* AlarmRowView.swift in Sources */,
+				91AA5CC62E4918C30050C177 /* OnboardingTypeManager.swift in Sources */,
+				9133A0FD2E44306500F38A31 /* CustomHabitInput.swift in Sources */,
+				9102650D2E4CF86F00250BE9 /* LegalLinksSection.swift in Sources */,
+				9102650E2E4CF86F00250BE9 /* StrictModeToggle.swift in Sources */,
+				9133A0FE2E44306500F38A31 /* HabitSelectionViewModel.swift in Sources */,
+				9133A0FF2E44306500F38A31 /* HabitCategoryCard.swift in Sources */,
+				9133A1002E44306500F38A31 /* HabitRowItem.swift in Sources */,
+				918902812E45146200A8F0E1 /* ImportantContactsScreen.swift in Sources */,
+				9133A0D22E442E5B00F38A31 /* OnboardingQuestionScreen.swift in Sources */,
+				9133A0D42E442E5B00F38A31 /* PhoneFreeBedroomBenefitsScreen.swift in Sources */,
+				9133A0D52E442E5B00F38A31 /* MotionDataPermissionScreen.swift in Sources */,
+				91AA5D5C2E4A85EC0050C177 /* AnalyticsHomeView.swift in Sources */,
+				9133A0D62E442E5B00F38A31 /* ScreenTimePermissionScreen.swift in Sources */,
+				9133A0D72E442E5B00F38A31 /* PushNotificationPermissionScreen.swift in Sources */,
+				911FFFBC2E7F3A240088F219 /* KeychainManager.swift in Sources */,
+				9133A0D82E442E5B00F38A31 /* CueExplanationScreen.swift in Sources */,
+				9133A0D92E442E5B00F38A31 /* LoginScreen.swift in Sources */,
+				91AA5CEC2E49272D0050C177 /* BirthdateSelectionScreen.swift in Sources */,
+				9133A0DA2E442E5B00F38A31 /* UsernameSelectionScreen.swift in Sources */,
+				9133A0DB2E442E5B00F38A31 /* DialDownScreen.swift in Sources */,
+				91AA5D962E4C16960050C177 /* AlarmsTeaserView.swift in Sources */,
+				91AA5D882E4ACFC00050C177 /* AppCategoryClassification.swift in Sources */,
+				9133A0DC2E442E5B00F38A31 /* OccupationSelectionScreen.swift in Sources */,
+				9133A0E12E442E5B00F38A31 /* OnboardingBackButton.swift in Sources */,
+				91AA5CEF2E4931B80050C177 /* LifetimeCalculator.swift in Sources */,
+				91AA5CF02E4931B80050C177 /* LifetimeCounterView.swift in Sources */,
+				9133A0E42E442E5B00F38A31 /* GenderSelectionScreen.swift in Sources */,
+				9133A0E52E442E5B00F38A31 /* NotificationPoolIntroScreen.swift in Sources */,
+				9133A0E62E442E5B00F38A31 /* SleepQualityScreen.swift in Sources */,
+				91AA5D6D2E4A867D0050C177 /* AnalyticsViewModel.swift in Sources */,
+				9133A0E72E442E5B00F38A31 /* FlowConfiguration.swift in Sources */,
+				9133A0E82E442E5B00F38A31 /* BrainFogFrequencyScreen.swift in Sources */,
+				9133A0EA2E442E5B00F38A31 /* SignInHelpSheet.swift in Sources */,
+				9189027E2E450B5900A8F0E1 /* DevicePlacementGuideScreen.swift in Sources */,
+				9133A0EB2E442E5B00F38A31 /* OnboardingOptionButton.swift in Sources */,
+				9189034D2E46701900A8F0E1 /* PermissionRequestScreen.swift in Sources */,
+				9133A0EC2E442E5B00F38A31 /* DialIntroductionScreen.swift in Sources */,
+				9133A0ED2E442E5B00F38A31 /* OnboardingWelcomeScreen.swift in Sources */,
+				9133A0EE2E442E5B00F38A31 /* DialDownTimelineScreen.swift in Sources */,
+				9133A0F02E442E5B00F38A31 /* AppRatingScreen.swift in Sources */,
+				91AE17FC2E8764E8001328DC /* SimpleAppGroup.swift in Sources */,
+				91AE17FD2E8764E8001328DC /* SimpleAppGroupManager.swift in Sources */,
+				9133A0F12E442E5B00F38A31 /* OTPVerificationScreenV2.swift in Sources */,
+				9133A0F42E442E5B00F38A31 /* ScreenTimeScreen.swift in Sources */,
+				9103DA022E2F21C8003DFC34 /* AppTheme.swift in Sources */,
+				91628D3B2E3A8FF900B06101 /* Persistence.swift in Sources */,
+				910265092E4CE1E200250BE9 /* ManifestoView.swift in Sources */,
+				9102650A2E4CE1E200250BE9 /* LaunchScreenState.swift in Sources */,
+				91AE176F2E82C967001328DC /* NameCollectionScreen.swift in Sources */,
+				91628D3D2E3A8FF900B06101 /* BluetoothAlarmService.swift in Sources */,
+			);
+		};
+		4846CFB629D1039E005D018E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				9133A05E2E42A0A000F38A31 /* KeyboardPreloader.swift in Sources */,
+				9133A00C2E3FDCCA00F38A31 /* NotificationService.swift in Sources */,
+				9133A00D2E3FDCCA00F38A31 /* NotificationContent.swift in Sources */,
+				91628D192E3A886400B06101 /* CorrectButton.swift in Sources */,
+				91628D1D2E3A886400B06101 /* LoadingAnimation.swift in Sources */,
+				9133A0312E4011B400F38A31 /* SoundLibrary.swift in Sources */,
+				9133A0322E4011B400F38A31 /* SoundManager.swift in Sources */,
+				9133A0332E4011B400F38A31 /* AudioPlayer.swift in Sources */,
+				91AE17BF2E84E958001328DC /* HourlyProductivityChart.swift in Sources */,
+				91628CAA2E39AB4400B06101 /* CustomFont.swift in Sources */,
+				9133A0872E42E78000F38A31 /* ErrorHandler.swift in Sources */,
+				91AA5D872E4ACFC00050C177 /* AppCategoryClassification.swift in Sources */,
+				9133A0882E42E78000F38A31 /* DialError.swift in Sources */,
+				9133A0102E3FE2DF00F38A31 /* Weekday.swift in Sources */,
+				4846CFBD29D1039E005D018E /* ReportExtension.swift in Sources */,
+				91339F7B2E3A9F0400F38A31 /* Alarm+Extension.swift in Sources */,
+				911FFFA82E7E2B680088F219 /* TopAppsData.swift in Sources */,
+				911FFFA92E7E2B680088F219 /* AppInfo.swift in Sources */,
+				911FFFAC2E7E2B700088F219 /* AppCategorization.swift in Sources */,
+				9103DA002E2F21C8003DFC34 /* AppTheme.swift in Sources */,
+				91628D312E3A8FF900B06101 /* Persistence.swift in Sources */,
+				91628D332E3A8FF900B06101 /* BluetoothAlarmService.swift in Sources */,
+				9133A0142E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift in Sources */,
+				91AA5CB92E47C7250050C177 /* OnboardingProgressModel.swift in Sources */,
+				91AA5CBA2E47C7250050C177 /* OnboardingStateManager.swift in Sources */,
+				9133A03B2E40126700F38A31 /* AlarmSound.swift in Sources */,
+				91339F8D2E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift in Sources */,
+				91AE17D42E86206F001328DC /* TopAppsListReport.swift in Sources */,
+				91AE17D52E86206F001328DC /* AppIconView.swift in Sources */,
+				91339F8E2E3AAA9A00F38A31 /* BluetoothStatusSheet.swift in Sources */,
+				91628D282E3A8C1100B06101 /* UniversalHeader.swift in Sources */,
+				91339F6C2E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift in Sources */,
+				9133A0942E4422C500F38A31 /* HabitModels.swift in Sources */,
+				91339F6D2E3A9E6700F38A31 /* Item+CoreDataClass.swift in Sources */,
+				91339F6E2E3A9E6700F38A31 /* Item+CoreDataProperties.swift in Sources */,
+				91339F6F2E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift in Sources */,
+				91339F702E3A9E6700F38A31 /* Alarm+CoreDataClass.swift in Sources */,
+				91339F712E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift in Sources */,
+				48AE9A9C29E5D1BC0092766C /* RestrictionWidget.swift in Sources */,
+				91339F952E3AAB7800F38A31 /* BluetoothDeviceRow.swift in Sources */,
+				91AE17C12E84EABD001328DC /* AnalyticsHeader.swift in Sources */,
+				91339F962E3AAB7800F38A31 /* BluetoothDevice.swift in Sources */,
+				91AA5CB52E47C1100050C177 /* SuccessHUD.swift in Sources */,
+			);
+		};
+		4846CFD329D1E94F005D018E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				4846CFDB29D1E94F005D018E /* DeviceActivityMonitorExtension.swift in Sources */,
+			);
+		};
+		48AE9A1929E22DEF0092766C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				48AE9A2429E22DEF0092766C /* ShieldConfigurationExtension.swift in Sources */,
+			);
+		};
+		48AE9A8729E5D0AF0092766C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				91628D122E3A886400B06101 /* CorrectButton.swift in Sources */,
+				91628D162E3A886400B06101 /* LoadingAnimation.swift in Sources */,
+				91628D292E3A8C1100B06101 /* UniversalHeader.swift in Sources */,
+				91339FE02E3C12CA00F38A31 /* DialActivityAttributes.swift in Sources */,
+				9133A0052E3FDCCA00F38A31 /* NotificationService.swift in Sources */,
+				9133A05F2E42A0A000F38A31 /* KeyboardPreloader.swift in Sources */,
+				9133A0932E4422C500F38A31 /* HabitModels.swift in Sources */,
+				9133A0062E3FDCCA00F38A31 /* NotificationContent.swift in Sources */,
+				91AA5D892E4ACFC00050C177 /* AppCategoryClassification.swift in Sources */,
+				91339F7A2E3A9F0400F38A31 /* Alarm+Extension.swift in Sources */,
+				91628CA82E39AB4400B06101 /* CustomFont.swift in Sources */,
+				9103DA012E2F21C8003DFC34 /* AppTheme.swift in Sources */,
+				9133A00F2E3FE2DF00F38A31 /* Weekday.swift in Sources */,
+				48AE9A9229E5D0AF0092766C /* RestrictionWidget.swift in Sources */,
+				48AE9A9D29E5D0AF0092766D /* DialInWidget.swift in Sources */,
+				91339F972E3AAB7800F38A31 /* BluetoothDeviceRow.swift in Sources */,
+				91339F982E3AAB7800F38A31 /* BluetoothDevice.swift in Sources */,
+				91628D362E3A8FF900B06101 /* Persistence.swift in Sources */,
+				9133A0852E42E78000F38A31 /* ErrorHandler.swift in Sources */,
+				9133A0862E42E78000F38A31 /* DialError.swift in Sources */,
+				91339F722E3A9E6700F38A31 /* Alarm+CoreDataProperties.swift in Sources */,
+				91339F732E3A9E6700F38A31 /* Item+CoreDataClass.swift in Sources */,
+				91339F742E3A9E6700F38A31 /* Item+CoreDataProperties.swift in Sources */,
+				91339F752E3A9E6700F38A31 /* RestrictionBlock+CoreDataClass.swift in Sources */,
+				91339FE52E3C14D800F38A31 /* RestrictionWidgetLiveActivity.swift in Sources */,
+				9133A0132E3FE2FA00F38A31 /* RestrictionBlock+Extension.swift in Sources */,
+				9133A03A2E40126700F38A31 /* AlarmSound.swift in Sources */,
+				91339F762E3A9E6700F38A31 /* Alarm+CoreDataClass.swift in Sources */,
+				91339F772E3A9E6700F38A31 /* RestrictionBlock+CoreDataProperties.swift in Sources */,
+				91628D382E3A8FF900B06101 /* BluetoothAlarmService.swift in Sources */,
+				91AA5CB42E47C1100050C177 /* SuccessHUD.swift in Sources */,
+				91339F892E3AAA9A00F38A31 /* BluetoothStatusViewModel.swift in Sources */,
+				91AA5CBB2E47C7250050C177 /* OnboardingProgressModel.swift in Sources */,
+				91AA5CBC2E47C7250050C177 /* OnboardingStateManager.swift in Sources */,
+				91339F8A2E3AAA9A00F38A31 /* BluetoothStatusSheet.swift in Sources */,
+				9133A0342E4011B400F38A31 /* SoundLibrary.swift in Sources */,
+				9133A0352E4011B400F38A31 /* SoundManager.swift in Sources */,
+				9133A0362E4011B400F38A31 /* AudioPlayer.swift in Sources */,
+				48AE9A9029E5D0AF0092766C /* RestrictionWidgetBundle.swift in Sources */,
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4846CFC529D1039E005D018E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4846CFB929D1039E005D018E /* ReportExtension */;
+			targetProxy = 4846CFC429D1039E005D018E /* PBXContainerItemProxy */;
+		};
+		4846CFDF29D1E94F005D018E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4846CFD629D1E94F005D018E /* DeviceActivityMonitor */;
+			targetProxy = 4846CFDE29D1E94F005D018E /* PBXContainerItemProxy */;
+		};
+		48AE9A2829E22DEF0092766C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48AE9A1C29E22DEF0092766C /* shield */;
+			targetProxy = 48AE9A2729E22DEF0092766C /* PBXContainerItemProxy */;
+		};
+		48AE9A9729E5D0B00092766C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48AE9A8A29E5D0AF0092766C /* RestrictionWidgetExtension */;
+			targetProxy = 48AE9A9629E5D0B00092766C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		4813891429ABE0F6001B8A55 /* Debug configuration for PBXProject "Dial" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		4813891529ABE0F6001B8A55 /* Release configuration for PBXProject "Dial" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		4813891729ABE0F6001B8A55 /* Debug configuration for PBXNativeTarget "Dial" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Dial.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
+				DEVELOPMENT_TEAM = RY3462YL48;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DIAL;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dialup.test.Dial;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		4813891829ABE0F6001B8A55 /* Release configuration for PBXNativeTarget "Dial" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Dial.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
+				DEVELOPMENT_TEAM = RY3462YL48;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DIAL;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dialup.test.Dial;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		4846CFC829D1039E005D018E /* Debug configuration for PBXNativeTarget "ReportExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = ReportExtension/ReportExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RY3462YL48;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ReportExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ReportExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dialup.test.Dial.ReportExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4846CFC929D1039E005D018E /* Release configuration for PBXNativeTarget "ReportExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = ReportExtension/ReportExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RY3462YL48;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ReportExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ReportExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dialup.test.Dial.ReportExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		4846CFE229D1E94F005D018E /* Debug configuration for PBXNativeTarget "DeviceActivityMonitor" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = DeviceActivityMonitor/DeviceActivityMonitor.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RY3462YL48;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DeviceActivityMonitor/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DeviceActivityMonitor;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dialup.test.Dial.DeviceActivityMonitor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4846CFE329D1E94F005D018E /* Release configuration for PBXNativeTarget "DeviceActivityMonitor" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = DeviceActivityMonitor/DeviceActivityMonitor.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RY3462YL48;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DeviceActivityMonitor/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DeviceActivityMonitor;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dialup.test.Dial.DeviceActivityMonitor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		48AE9A2B29E22DEF0092766C /* Debug configuration for PBXNativeTarget "shield" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = shield/shield.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RY3462YL48;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = shield/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = shield;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dialup.test.Dial.shield;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		48AE9A2C29E22DEF0092766C /* Release configuration for PBXNativeTarget "shield" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = shield/shield.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RY3462YL48;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = shield/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = shield;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dialup.test.Dial.shield;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		48AE9A9A29E5D0B00092766C /* Debug configuration for PBXNativeTarget "RestrictionWidgetExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = RestrictionWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RY3462YL48;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RestrictionWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RestrictionWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dialup.test.Dial.RestrictionWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		48AE9A9B29E5D0B00092766C /* Release configuration for PBXNativeTarget "RestrictionWidgetExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = RestrictionWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RY3462YL48;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RestrictionWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RestrictionWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dialup.test.Dial.RestrictionWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		481388E829ABE0F1001B8A55 /* Build configuration list for PBXProject "Dial" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4813891429ABE0F6001B8A55 /* Debug configuration for PBXProject "Dial" */,
+				4813891529ABE0F6001B8A55 /* Release configuration for PBXProject "Dial" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		4813891629ABE0F6001B8A55 /* Build configuration list for PBXNativeTarget "Dial" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4813891729ABE0F6001B8A55 /* Debug configuration for PBXNativeTarget "Dial" */,
+				4813891829ABE0F6001B8A55 /* Release configuration for PBXNativeTarget "Dial" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		4846CFC729D1039E005D018E /* Build configuration list for PBXNativeTarget "ReportExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4846CFC829D1039E005D018E /* Debug configuration for PBXNativeTarget "ReportExtension" */,
+				4846CFC929D1039E005D018E /* Release configuration for PBXNativeTarget "ReportExtension" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		4846CFE129D1E94F005D018E /* Build configuration list for PBXNativeTarget "DeviceActivityMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4846CFE229D1E94F005D018E /* Debug configuration for PBXNativeTarget "DeviceActivityMonitor" */,
+				4846CFE329D1E94F005D018E /* Release configuration for PBXNativeTarget "DeviceActivityMonitor" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		48AE9A2A29E22DEF0092766C /* Build configuration list for PBXNativeTarget "shield" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				48AE9A2B29E22DEF0092766C /* Debug configuration for PBXNativeTarget "shield" */,
+				48AE9A2C29E22DEF0092766C /* Release configuration for PBXNativeTarget "shield" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		48AE9A9929E5D0B00092766C /* Build configuration list for PBXNativeTarget "RestrictionWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				48AE9A9A29E5D0B00092766C /* Debug configuration for PBXNativeTarget "RestrictionWidgetExtension" */,
+				48AE9A9B29E5D0B00092766C /* Release configuration for PBXNativeTarget "RestrictionWidgetExtension" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		914A85A62E7F489C0024CA43 /* XCRemoteSwiftPackageReference "ChartView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AppPear/ChartView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.5;
+			};
+		};
+		914A85A72E7F48A50024CA43 /* XCRemoteSwiftPackageReference "Valet" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Square/Valet";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		914A85A82E7F48A50024CA43 /* Valet */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 914A85A72E7F48A50024CA43 /* XCRemoteSwiftPackageReference "Valet" */;
+			productName = Valet;
+		};
+		914A85AA2E7F48CD0024CA43 /* SwiftUICharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 914A85A62E7F489C0024CA43 /* XCRemoteSwiftPackageReference "ChartView" */;
+			productName = SwiftUICharts;
+		};
+		914A85AC2E7F48E20024CA43 /* Valet */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 914A85A72E7F48A50024CA43 /* XCRemoteSwiftPackageReference "Valet" */;
+			productName = Valet;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		481388FB29ABE0F6001B8A55 /* Dial.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				481388FC29ABE0F6001B8A55 /* Dial.xcdatamodel */,
+			);
+			currentVersion = 481388FC29ABE0F6001B8A55 /* Dial.xcdatamodel */;
+			path = Dial.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 481388E529ABE0F1001B8A55 /* Project object */;
+}
