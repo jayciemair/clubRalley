@@ -509,27 +509,6 @@
 		91F1B4872E88632200C5B1E2 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		915B1A2F2F1F008E00D125A7 /* Exceptions for "GetOverHimWidget" folder in "GetOverHimWidgetExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 915B1A1A2F1F008D00D125A7 /* GetOverHimWidgetExtension */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		915B1A1E2F1F008D00D125A7 /* GetOverHimWidget */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				915B1A2F2F1F008E00D125A7 /* Exceptions for "GetOverHimWidget" folder in "GetOverHimWidgetExtension" target */,
-			);
-			path = GetOverHimWidget;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
-
 /* Begin PBXFrameworksBuildPhase section */
 		481388EA29ABE0F2001B8A55 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -575,7 +554,6 @@
 				9133A0272E3FFF5400F38A31 /* Resources */,
 				9103D9882E2EB0EC003DFC34 /* App */,
 				481388EF29ABE0F2001B8A55,
-				915B1A1E2F1F008D00D125A7 /* GetOverHimWidget */,
 				4846CF9B29CCA40C005D018E /* Frameworks */,
 				481388EE29ABE0F2001B8A55 /* Products */,
 			);
@@ -1518,9 +1496,6 @@
 				915B1A192F1F008D00D125A7 /* Resources */,
 			);
 			buildRules = (
-			);
-			fileSystemSynchronizedGroups = (
-				915B1A1E2F1F008D00D125A7 /* GetOverHimWidget */,
 			);
 			name = GetOverHimWidgetExtension;
 			productName = GetOverHimWidgetExtension;
