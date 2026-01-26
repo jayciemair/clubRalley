@@ -2,25 +2,46 @@
 //  SupabaseAuthProvider.swift
 //  Checkpoint
 //
-//  Supabase implementation of the AuthProvider protocol
+//  Mock Supabase implementation of the AuthProvider protocol
 //
 
 import Foundation
 import Supabase
 
-// MARK: - Supabase Auth Provider
+// MARK: - Mock Supabase Auth Provider
 
-/// Supabase implementation of the AuthProvider protocol
+/// Mock Supabase implementation of the AuthProvider protocol
 public class SupabaseAuthProvider: AuthProvider {
 
     // MARK: - Properties
-
-    private let client: SupabaseClientManager
+    
+    private let client: SupabaseClient
+    private var mockUser: AuthUserProfile?
 
     // MARK: - Initialization
 
-    public init() {
-        self.client = SupabaseClientManager.shared
+    public init(client: SupabaseClient, useMockUser: Bool = true) {
+        self.client = client
+        if useMockUser {
+            let now = Date()
+            self.mockUser = AuthUserProfile(
+                id: UUID().uuidString,
+                email: "test@example.com",
+                fullName: nil,
+                firstName: "Test",
+                lastName: "User",
+                provider: .anonymous,
+                createdAt: now,
+                updatedAt: now
+            )
+        } else {
+            self.mockUser = nil
+        }
+    }
+
+    public convenience init(supabaseURL: URL, supabaseKey: String, useMockUser: Bool = true) {
+        let client = SupabaseClient(supabaseURL: supabaseURL, supabaseKey: supabaseKey)
+        self.init(client: client, useMockUser: useMockUser)
     }
 
     // MARK: - Authentication Methods
@@ -85,17 +106,10 @@ public class SupabaseAuthProvider: AuthProvider {
     /// Get the current authenticated session
     public func getCurrentSession() async -> AuthSession? {
         do {
-            let session = try await client.getCurrentSession()
-
-            guard let session = session else {
-                return nil
-            }
-
+            let session = try await client.auth.session
             // Determine provider from user metadata
             let provider = detectProvider(from: session.user)
-
-            let authSession = try? convertToAuthSession(session, provider: provider)
-            return authSession
+            return try convertToAuthSession(session, provider: provider)
         } catch {
             return nil
         }
@@ -105,10 +119,7 @@ public class SupabaseAuthProvider: AuthProvider {
     public func refreshSession() async throws -> AuthSession? {
         do {
             let session = try await client.auth.refreshSession()
-
-            // Determine provider from user metadata
             let provider = detectProvider(from: session.user)
-
             return try convertToAuthSession(session, provider: provider)
         } catch {
             throw mapSupabaseError(error)
@@ -117,26 +128,31 @@ public class SupabaseAuthProvider: AuthProvider {
 
     /// Check if the current session is valid
     public func isSessionValid() async -> Bool {
-        return await client.isAuthenticated()
+        do {
+            _ = try await client.auth.session
+            return true
+        } catch {
+            return false
+        }
     }
 
     // MARK: - User Profile
 
     /// Get the current user's profile
-    public func getUserProfile() async throws -> UserProfile? {
+    public func getUserProfile() async throws -> AuthUserProfile? {
         do {
-            guard let user = try await client.getCurrentUser() else {
-                return nil
-            }
-
+            // Access the current session via async API to respect actor isolation
+            let session = try await client.auth.session
+            let user = session.user
             return convertToUserProfile(user)
         } catch {
+            // If there's no session or another error occurs, propagate mapped error
             throw mapSupabaseError(error)
         }
     }
 
     /// Update the user's profile
-    public func updateUserProfile(_ profile: UserProfile) async throws {
+    public func updateUserProfile(_ profile: AuthUserProfile) async throws {
         do {
             // Update user metadata in Supabase
             let attributes = UserAttributes(
@@ -183,8 +199,8 @@ public class SupabaseAuthProvider: AuthProvider {
     /// Get the current access token
     public func getAccessToken() async -> String? {
         do {
-            let session = try await client.getCurrentSession()
-            return session?.accessToken
+            let session = try await client.auth.session
+            return session.accessToken
         } catch {
             return nil
         }
@@ -193,8 +209,8 @@ public class SupabaseAuthProvider: AuthProvider {
     /// Get the current refresh token
     public func getRefreshToken() async -> String? {
         do {
-            let session = try await client.getCurrentSession()
-            return session?.refreshToken
+            let session = try await client.auth.session
+            return session.refreshToken
         } catch {
             return nil
         }
@@ -219,13 +235,33 @@ public class SupabaseAuthProvider: AuthProvider {
             provider: provider,
             accessToken: session.accessToken,
             refreshToken: session.refreshToken,
-            expiresAt: Date(timeIntervalSince1970: TimeInterval(session.expiresAt ?? 0)),
+            expiresAt: {
+                // Supabase SDK variations:
+                // - Some versions expose `expiresAt` as a non-optional TimeInterval (Double)
+                // - Others expose it as an optional
+                // Handle both by checking at runtime in a type-safe manner
+                // If not available, default to distantFuture
+                // First, try to read as optional via key-path using Mirror
+                let mirror = Mirror(reflecting: session)
+                if let child = mirror.children.first(where: { $0.label == "expiresAt" }) {
+                    if let optional = child.value as? TimeInterval? {
+                        if let value = optional {
+                            return Date(timeIntervalSince1970: value)
+                        } else {
+                            return .distantFuture
+                        }
+                    } else if let value = child.value as? TimeInterval {
+                        return Date(timeIntervalSince1970: value)
+                    }
+                }
+                return .distantFuture
+            }(),
             userMetadata: metadata
         )
     }
 
-    /// Convert Supabase User to our UserProfile
-    private func convertToUserProfile(_ user: User) -> UserProfile {
+    /// Convert Supabase User to our AuthUserProfile
+    private func convertToUserProfile(_ user: Auth.User) -> AuthUserProfile {
         // Extract names from metadata
         let fullName = user.userMetadata["full_name"]?.stringValue
         let firstName = user.userMetadata["first_name"]?.stringValue
@@ -234,7 +270,7 @@ public class SupabaseAuthProvider: AuthProvider {
         // Detect provider
         let provider = detectProvider(from: user)
 
-        return UserProfile(
+        return AuthUserProfile(
             id: user.id.uuidString,
             email: user.email,
             fullName: fullName,
@@ -247,7 +283,7 @@ public class SupabaseAuthProvider: AuthProvider {
     }
 
     /// Detect provider from user metadata
-    private func detectProvider(from user: User) -> AuthProviderType {
+    private func detectProvider(from user: Auth.User) -> AuthProviderType {
         // Check app metadata for provider
         if let provider = user.appMetadata["provider"]?.stringValue {
             switch provider {
@@ -307,3 +343,4 @@ public class SupabaseAuthProvider: AuthProvider {
         return .unknownError(error.localizedDescription)
     }
 }
+

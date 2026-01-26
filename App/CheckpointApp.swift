@@ -1,12 +1,12 @@
 //
-//  CheckpointApp.swift
-//  Checkpoint
+//  ClubRalleyApp.swift
+//  Club Ralley
 //
 
 import SwiftUI
 
 @main
-struct CheckpointApp: App {
+struct ClubRalleyApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     let persistenceController = PersistenceController.shared
@@ -14,25 +14,24 @@ struct CheckpointApp: App {
     @StateObject var storeManager = StoreManager.shared  // Initialize StoreManager
     @StateObject var versionService = AppVersionService.shared  // Version check service
     @StateObject var appearanceManager = AppearanceManager.shared  // Appearance mode manager
-    @State var selectedTab: Int = -1  // -1 means no override, let ContentView use its default
-    @State var showAnalytics = false
+    @State var selectedTab: MainTab = .home  // Default to home tab
 
 
 
     var body: some Scene {
         WindowGroup {
             ZStack {
-                ContentView(selectedTab: $selectedTab, showAnalytics: $showAnalytics)
+                ContentView(selectedTab: $selectedTab)
                     .environment(\.managedObjectContext, persistenceController.container.viewContext)
                     .environmentObject(onboardingFlowController)
                     .environmentObject(storeManager)
                     .preferredColorScheme(appearanceManager.colorScheme)  // Apply user's appearance preference
                     .onAppear {
                         // Fix alert button colors for system alerts
-                        UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = .systemBlue
+                        UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor.systemBlue
                     }
                     .onOpenURL { url in
-                        handleQuickAction(from: url)
+                        handleDeepLink(from: url)
                     }
 
                 // Force update overlay
@@ -73,25 +72,36 @@ struct CheckpointApp: App {
         }
     }
     
-    func handleQuickAction(from url: URL) {
-        guard url.scheme == "getoverhim" else { return }
+    func handleDeepLink(from url: URL) {
+        // Handle Club Ralley deep links
+        if let deepLink = DeepLink(url: url) {
+            selectedTab = deepLink.type.targetTab
+            
+            // Post notification for navigation handling
+            NotificationCenter.default.post(
+                name: NSNotification.Name("ClubRalleyDeepLink"),
+                object: deepLink
+            )
+            return
+        }
+        
+        // Handle custom URL schemes for Club Ralley
+        guard url.scheme == "clubralley" else { return }
 
         switch url.host {
-        case "endSession":
-            // Post notification to end session
-            NotificationCenter.default.post(
-                name: NSNotification.Name("EndCheckpointSession"),
-                object: nil
-            )
-        case "viewSession", "openMain":
-            // Navigate to main tab (assuming it's tab index 2)
-            selectedTab = 2
-            showAnalytics = false
-        case "moment", "easy", "problem":
-            // All three messages navigate to home - showing the user what they'd be giving up
-            selectedTab = 0
+        case "home":
+            selectedTab = .home
+        case "league-finder", "discover":
+            selectedTab = .leagueFinder
+        case "post", "create":
+            selectedTab = .post
+        case "teams", "ralleys":
+            selectedTab = .teams
+        case "profile":
+            selectedTab = .profile
         default:
-            break
+            // Default to home for unknown deep links
+            selectedTab = .home
         }
     }
 }

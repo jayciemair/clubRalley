@@ -8,51 +8,58 @@
 import SwiftUI
 
 struct CustomTabBar: View {
-    @Binding var selectedTab: Tab
-    @AppStorage("community_chat_enabled") private var communityChatEnabled = false
+    @Binding var selectedTab: MainTab
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         HStack(spacing: 40) {
-            // Main Tab
+            // Home Tab
             TabBarButton(
-                icon: "heart.fill",
+                icon: "house.fill",
                 isSystemIcon: true,
-                isSelected: selectedTab == .v3test,
+                isSelected: selectedTab == .home,
                 action: {
-                    selectedTab = .v3test
+                    selectedTab = .home
                 }
             )
 
-            // Text Him Tab
+            // League Finder Tab
             TabBarButton(
-                icon: "trash.fill",
+                icon: "magnifyingglass",
                 isSystemIcon: true,
-                isSelected: selectedTab == .textSimulator,
+                isSelected: selectedTab == .leagueFinder,
                 action: {
-                    selectedTab = .textSimulator
+                    selectedTab = .leagueFinder
                 }
             )
 
-            // Community Tab (only shown if feature flag enabled)
-            if communityChatEnabled {
-                TabBarButton(
-                    icon: "message.fill",
-                    isSystemIcon: true,
-                    isSelected: selectedTab == .community,
-                    action: {
-                        selectedTab = .community
-                    }
-                )
-            }
-
-            // Settings Tab
+            // Post Tab
             TabBarButton(
-                icon: "gearshape.fill",
+                icon: "camera.fill",
                 isSystemIcon: true,
-                isSelected: selectedTab == .settings,
+                isSelected: selectedTab == .post,
                 action: {
-                    selectedTab = .settings
+                    selectedTab = .post
+                }
+            )
+
+            // Teams Tab
+            TabBarButton(
+                icon: "person.2.fill",
+                isSystemIcon: true,
+                isSelected: selectedTab == .teams,
+                action: {
+                    selectedTab = .teams
+                }
+            )
+
+            // Profile Tab
+            TabBarButton(
+                icon: "person.fill",
+                isSystemIcon: true,
+                isSelected: selectedTab == .profile,
+                action: {
+                    selectedTab = .profile
                 }
             )
         }
@@ -97,7 +104,7 @@ struct TabBarButton: View {
                         .frame(width: 26, height: 26)
                 }
             }
-            .foregroundColor(isSelected ? Color(hex: "#E05A9C") : Color(hex: "#8A8A8A"))
+            .foregroundColor(isSelected ? Color(hex: "#2C4F40") : Color(hex: "#8A8A8A"))
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())

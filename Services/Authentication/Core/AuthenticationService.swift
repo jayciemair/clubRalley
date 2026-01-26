@@ -30,7 +30,7 @@ public class AuthenticationService: ObservableObject {
     @Published public private(set) var currentSession: AuthSession?
 
     /// Current user profile
-    @Published public private(set) var currentProfile: UserProfile?
+    @Published public private(set) var currentProfile: AuthUserProfile?
 
     /// Whether user has completed onboarding (from Supabase users table)
     @Published public private(set) var hasCompletedOnboarding: Bool? = nil
@@ -61,7 +61,7 @@ public class AuthenticationService: ObservableObject {
         // Initialize with the configured provider
         switch AuthConfiguration.currentBackend {
         case .supabase:
-            self.provider = SupabaseAuthProvider()
+            self.provider = SupabaseAuthProvider(client: SupabaseClientManager.shared.client)
         case .awsCognito:
             // Future: self.provider = CognitoAuthProvider()
             fatalError("AWS Cognito provider not yet implemented")
@@ -275,12 +275,12 @@ public class AuthenticationService: ObservableObject {
     // MARK: - User Profile
 
     /// Get the current user's profile
-    public func getUserProfile() async throws -> UserProfile? {
+    public func getUserProfile() async throws -> AuthUserProfile? {
         return try await provider.getUserProfile()
     }
 
     /// Update the user's profile
-    public func updateUserProfile(_ profile: UserProfile) async throws {
+    public func updateUserProfile(_ profile: AuthUserProfile) async throws {
         try await provider.updateUserProfile(profile)
 
         // Update local profile

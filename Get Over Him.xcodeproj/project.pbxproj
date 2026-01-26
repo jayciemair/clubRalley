@@ -25,8 +25,6 @@
 		915B1A072F1EFB7700D125A7 /* LoveIsADrugScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 915B1A012F1EFB7700D125A7 /* LoveIsADrugScreen.swift */; };
 		915B1A0B2F1EFCA000D125A7 /* MochiPromiseScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 915B1A092F1EFCA000D125A7 /* MochiPromiseScreen.swift */; };
 		915B1A0C2F1EFCA000D125A7 /* SocialProofScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 915B1A0A2F1EFCA000D125A7 /* SocialProofScreen.swift */; };
-		915B1A1C2F1F008D00D125A7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48AE9A4029E479640092766C /* WidgetKit.framework */; };
-		915B1A1D2F1F008D00D125A7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48AE9A4229E479640092766C /* SwiftUI.framework */; };
 		915B1A3D2F1F04BA00D125A7 /* MochiJourneyScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 915B1A3C2F1F04BA00D125A7 /* MochiJourneyScreen.swift */; };
 		915B1A492F202D3200D125A7 /* UrgeToTextScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 915B1A482F202D3200D125A7 /* UrgeToTextScreen.swift */; };
 		915B1A4D2F2037F500D125A7 /* CommitToChangeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 915B1A4A2F2037F500D125A7 /* CommitToChangeScreen.swift */; };
@@ -143,7 +141,6 @@
 		918D2B362EC78308008ABBC0 /* OnboardingHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918D2B2D2EC78308008ABBC0 /* OnboardingHeader.swift */; };
 		918D2B382EC7831A008ABBC0 /* OnboardingFlowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918D2B372EC7831A008ABBC0 /* OnboardingFlowController.swift */; };
 		918D2B3A2EC783EF008ABBC0 /* SimplifiedOnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918D2B392EC783EF008ABBC0 /* SimplifiedOnboardingFlow.swift */; };
-		918D2B3E2EC79CC2008ABBC0 /* NavigationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918D2B3D2EC79CC2008ABBC0 /* NavigationModels.swift */; };
 		918D2B442EC79CD7008ABBC0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918D2B402EC79CD7008ABBC0 /* ContentView.swift */; };
 		918D2B452EC79CD7008ABBC0 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918D2B422EC79CD7008ABBC0 /* MainTabView.swift */; };
 		918D2B462EC79CD7008ABBC0 /* AuthLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918D2B3F2EC79CD7008ABBC0 /* AuthLoadingView.swift */; };
@@ -244,10 +241,14 @@
 		91E5C0352F1015E70032FC66 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91E5C0342F1015E70032FC66 /* SceneDelegate.swift */; };
 		91EC4B6A2EA4585F00EE99D3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91EC4B692EA4585F00EE99D3 /* AppDelegate.swift */; };
 		91F1B4882E88632200C5B1E2 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 91F1B4872E88632200C5B1E2 /* StoreKit.framework */; };
+		C9665BA42F26E3E60055C54F /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BA32F26E3E60055C54F /* SupabaseConfig.swift */; };
+		C9665BBA2F26E7C40055C54F /* Sport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BB82F26E7C40055C54F /* Sport.swift */; };
+		C9665BBE2F26E7DF0055C54F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BBB2F26E7DF0055C54F /* User.swift */; };
+		C9665BBF2F26E7DF0055C54F /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BBC2F26E7DF0055C54F /* UserProfile.swift */; };
+		C9665BC22F26E7F90055C54F /* Ralley.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC02F26E7F90055C54F /* Ralley.swift */; };
+		C9665BC52F26E80F0055C54F /* NavigationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC32F26E80F0055C54F /* NavigationModels.swift */; };
+		C9665BCB2F26E83C0055C54F /* Social.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC92F26E83C0055C54F /* Social.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		4846CFA629CCA40C005D018E /* Embed Foundation Extensions */ = {
@@ -402,7 +403,6 @@
 		918D2B302EC78308008ABBC0 /* OnboardingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCoordinator.swift; sourceTree = "<group>"; };
 		918D2B372EC7831A008ABBC0 /* OnboardingFlowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowController.swift; sourceTree = "<group>"; };
 		918D2B392EC783EF008ABBC0 /* SimplifiedOnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplifiedOnboardingFlow.swift; sourceTree = "<group>"; };
-		918D2B3D2EC79CC2008ABBC0 /* NavigationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationModels.swift; sourceTree = "<group>"; };
 		918D2B3F2EC79CD7008ABBC0 /* AuthLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthLoadingView.swift; sourceTree = "<group>"; };
 		918D2B402EC79CD7008ABBC0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		918D2B412EC79CD7008ABBC0 /* CustomTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBar.swift; sourceTree = "<group>"; };
@@ -497,6 +497,13 @@
 		91E5C0342F1015E70032FC66 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		91EC4B692EA4585F00EE99D3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		91F1B4872E88632200C5B1E2 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		C9665BA32F26E3E60055C54F /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
+		C9665BB82F26E7C40055C54F /* Sport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sport.swift; sourceTree = "<group>"; };
+		C9665BBB2F26E7DF0055C54F /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		C9665BBC2F26E7DF0055C54F /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		C9665BC02F26E7F90055C54F /* Ralley.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ralley.swift; sourceTree = "<group>"; };
+		C9665BC32F26E80F0055C54F /* NavigationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationModels.swift; sourceTree = "<group>"; };
+		C9665BC92F26E83C0055C54F /* Social.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Social.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -519,13 +526,6 @@
 				91BBFB792EDE4DD50083AB35 /* AdjustSdk in Frameworks */,
 				919DBAD82F1D45910091D8E2 /* RevenueCatUI in Frameworks */,
 				91BBFB772EDE4DD50083AB35 /* AdjustGoogleOdm in Frameworks */,
-			);
-		};
-		915B1A182F1F008D00D125A7 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			files = (
-				915B1A1D2F1F008D00D125A7 /* SwiftUI.framework in Frameworks */,
-				915B1A1C2F1F008D00D125A7 /* WidgetKit.framework in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -609,13 +609,18 @@
 		913D90CB2EB6859C00A067AD /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				915B1A712F22997B00D125A7 /* TextSimulator */,
-				918D2D7E2ED10256008ABBC0 /* Recovery */,
-				918D2B202EC77E37008ABBC0 /* Onboarding */,
-				918D2A4C2EC75EF6008ABBC0 /* Settings */,
-				917267CD2EC41C040037F74F /* App */,
 				917267A62EC371490037F74F /* Analytics */,
+				917267CD2EC41C040037F74F /* App */,
 				917267862EC2B3830037F74F /* Chat */,
+				C9665BC42F26E80F0055C54F /* Navigation */,
+				918D2B202EC77E37008ABBC0 /* Onboarding */,
+				C9665BC12F26E7F90055C54F /* Ralley */,
+				918D2D7E2ED10256008ABBC0 /* Recovery */,
+				918D2A4C2EC75EF6008ABBC0 /* Settings */,
+				C9665BCA2F26E83C0055C54F /* Social */,
+				C9665BB92F26E7C40055C54F /* Sport */,
+				915B1A712F22997B00D125A7 /* TextSimulator */,
+				C9665BBD2F26E7DF0055C54F /* User */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -909,7 +914,6 @@
 		917267CD2EC41C040037F74F /* App */ = {
 			isa = PBXGroup;
 			children = (
-				918D2B3D2EC79CC2008ABBC0 /* NavigationModels.swift */,
 				917267CC2EC41C040037F74F /* AppState.swift */,
 			);
 			path = App;
@@ -1165,6 +1169,7 @@
 			children = (
 				918D2B602EC7A49E008ABBC0 /* AppConfig.swift */,
 				918D2B612EC7A49E008ABBC0 /* AppLinks.swift */,
+				C9665BA32F26E3E60055C54F /* SupabaseConfig.swift */,
 			);
 			path = Configuration;
 			sourceTree = "<group>";
@@ -1436,6 +1441,47 @@
 			path = Adjust;
 			sourceTree = "<group>";
 		};
+		C9665BB92F26E7C40055C54F /* Sport */ = {
+			isa = PBXGroup;
+			children = (
+				C9665BB82F26E7C40055C54F /* Sport.swift */,
+			);
+			path = Sport;
+			sourceTree = "<group>";
+		};
+		C9665BBD2F26E7DF0055C54F /* User */ = {
+			isa = PBXGroup;
+			children = (
+				C9665BBB2F26E7DF0055C54F /* User.swift */,
+				C9665BBC2F26E7DF0055C54F /* UserProfile.swift */,
+			);
+			path = User;
+			sourceTree = "<group>";
+		};
+		C9665BC12F26E7F90055C54F /* Ralley */ = {
+			isa = PBXGroup;
+			children = (
+				C9665BC02F26E7F90055C54F /* Ralley.swift */,
+			);
+			path = Ralley;
+			sourceTree = "<group>";
+		};
+		C9665BC42F26E80F0055C54F /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				C9665BC32F26E80F0055C54F /* NavigationModels.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		C9665BCA2F26E83C0055C54F /* Social */ = {
+			isa = PBXGroup;
+			children = (
+				C9665BC92F26E83C0055C54F /* Social.swift */,
+			);
+			path = Social;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1450,8 +1496,6 @@
 				4846CFCA29D1039E005D018E /* Embed ExtensionKit Extensions */,
 			);
 			buildRules = (
-			);
-			dependencies = (
 			);
 			name = "Get Over Him";
 			packageProductDependencies = (
@@ -1487,9 +1531,6 @@
 				TargetAttributes = {
 					481388EC29ABE0F2001B8A55 = {
 						CreatedOnToolsVersion = 13.4;
-					};
-					915B1A1A2F1F008D00D125A7 = {
-						CreatedOnToolsVersion = 26.1.1;
 					};
 				};
 			};
@@ -1537,11 +1578,6 @@
 				91AA5D172E4935230050C177 /* Satoshi-Italic.otf in Resources */,
 			);
 		};
-		915B1A192F1F008D00D125A7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			files = (
-			);
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1574,6 +1610,7 @@
 				91BBFB6A2ED76B8F0083AB35 /* OnboardingProgressBar.swift in Sources */,
 				91BBFB6B2ED76B8F0083AB35 /* PlaceholderOnboardingScreen.swift in Sources */,
 				917267942EC2CC980037F74F /* BreathingExerciseScreen.swift in Sources */,
+				C9665BCB2F26E83C0055C54F /* Social.swift in Sources */,
 				917267952EC2CC980037F74F /* BreathingIntroScreen.swift in Sources */,
 				918D2D762ED0BC13008ABBC0 /* RecoveryComponents.swift in Sources */,
 				91BBFB302ED65A070083AB35 /* DailyCheckInManager.swift in Sources */,
@@ -1599,8 +1636,10 @@
 				917267A42EC36D0E0037F74F /* AnalyticsView.swift in Sources */,
 				918D2A642EC760D8008ABBC0 /* FrozenAnalyticsBannerViewModel.swift in Sources */,
 				918D2B382EC7831A008ABBC0 /* OnboardingFlowController.swift in Sources */,
+				C9665BC22F26E7F90055C54F /* Ralley.swift in Sources */,
 				917267B32EC3A86D0037F74F /* CompactTierCard.swift in Sources */,
 				91967F312F0D78F5002BF7B5 /* EventLoggingService.swift in Sources */,
+				C9665BBA2F26E7C40055C54F /* Sport.swift in Sources */,
 				91A0C6872F16B13600D273FC /* EditAccountabilityAnchorsView.swift in Sources */,
 				9171865A2EB04E08003C401D /* SupabaseAuthProvider.swift in Sources */,
 				91BBFB372ED68CC30083AB35 /* ModuleCompletionHUD.swift in Sources */,
@@ -1661,6 +1700,7 @@
 				918D2A6E2EC7626B008ABBC0 /* UserProfileDataResponse.swift in Sources */,
 				918D2A6F2EC7626B008ABBC0 /* ServerSavingsCalculation.swift in Sources */,
 				91B017EC2EA1BF700032AF9C /* NotificationContent.swift in Sources */,
+				C9665BA42F26E3E60055C54F /* SupabaseConfig.swift in Sources */,
 				9172679E2EC36A5E0037F74F /* QuitDateCard.swift in Sources */,
 				918D2D7F2ED10256008ABBC0 /* RecoveryModels.swift in Sources */,
 				917267CE2EC41C040037F74F /* AppState.swift in Sources */,
@@ -1675,7 +1715,6 @@
 				918D2B2A2EC782B2008ABBC0 /* OnboardingTypeManager.swift in Sources */,
 				918D2B672EC7A4AE008ABBC0 /* AppVersionService.swift in Sources */,
 				91BBFB652ED76A130083AB35 /* OnboardingCompletionViewModel.swift in Sources */,
-				918D2B3E2EC79CC2008ABBC0 /* NavigationModels.swift in Sources */,
 				918D2D282ECEA800008ABBC0 /* PaywallTestingView.swift in Sources */,
 				918D2D822ED10263008ABBC0 /* RecoveryProgressService.swift in Sources */,
 				91BBFB342ED65A120083AB35 /* CheckInSuccessHUD.swift in Sources */,
@@ -1689,6 +1728,8 @@
 				91987B572EB9ACCD000CF2AB /* FeatureRequestService.swift in Sources */,
 				913D90B12EB54BA400A067AD /* OnboardingDataService.swift in Sources */,
 				918D2D8E2ED11E49008ABBC0 /* RecoveryLessonContent.swift in Sources */,
+				C9665BBE2F26E7DF0055C54F /* User.swift in Sources */,
+				C9665BBF2F26E7DF0055C54F /* UserProfile.swift in Sources */,
 				918D2B742EC7CFCB008ABBC0 /* TierProgressManager.swift in Sources */,
 				918D2A1B2EC6C364008ABBC0 /* SettingsSection.swift in Sources */,
 				91260AC72ED4CF23003A574B /* RecoveryProgramCoordinator.swift in Sources */,
@@ -1729,6 +1770,7 @@
 				9160C34C2F199C3800016128 /* RecoveryGoalsSection.swift in Sources */,
 				918D2A5E2EC7605A008ABBC0 /* StatsGridCard.swift in Sources */,
 				918D2A5F2EC7605A008ABBC0 /* AccountabilityAnchorCard.swift in Sources */,
+				C9665BC52F26E80F0055C54F /* NavigationModels.swift in Sources */,
 				91BBFB672ED76B700083AB35 /* OnboardingResult.swift in Sources */,
 				918D2D722ED0B2FC008ABBC0 /* MochiChatView.swift in Sources */,
 				918D2A602EC7605A008ABBC0 /* AnalyticsHeaderView.swift in Sources */,
@@ -1756,15 +1798,7 @@
 				918D2D782ED0C0BD008ABBC0 /* BoxBreathingPracticeView.swift in Sources */,
 			);
 		};
-		915B1A172F1F008D00D125A7 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			files = (
-			);
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		4813891429ABE0F6001B8A55 /* Debug configuration for PBXProject "Get Over Him" */ = {

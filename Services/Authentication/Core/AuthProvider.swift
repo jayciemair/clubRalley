@@ -48,11 +48,11 @@ public protocol AuthProvider {
 
     /// Get the current user's profile
     /// - Returns: User profile or nil if not authenticated
-    func getUserProfile() async throws -> UserProfile?
+    func getUserProfile() async throws -> AuthUserProfile?
 
     /// Update the user's profile
     /// - Parameter profile: Updated profile information
-    func updateUserProfile(_ profile: UserProfile) async throws
+    func updateUserProfile(_ profile: AuthUserProfile) async throws
 
     // MARK: - Account Management
 

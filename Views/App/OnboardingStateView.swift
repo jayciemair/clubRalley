@@ -1,8 +1,8 @@
 //
 //  OnboardingStateView.swift
-//  Checkpoint
+//  Club Ralley
 //
-//  View for .onboardingRequired app state
+//  View for .onboardingRequired app state - now uses Club Ralley onboarding
 //  Part of MVVM refactor - extracted from ContentView
 //
 
@@ -15,27 +15,14 @@ struct OnboardingStateView: View {
     @EnvironmentObject var onboardingFlowController: OnboardingFlowController
 
     var body: some View {
-        AuthLoadingView()
-            .id("authLoadingViewWithOnboarding")
-            .fullScreenCover(isPresented: .constant(true)) {
-                let actualFlowType: FlowType = flowType == .software ? .software : .dataRecovery
-                OnboardingCoordinator(flowType: actualFlowType) { result in
-                    print("[debugRefactorFlows] 📬 OnboardingStateView received completion result: \(result)")
-                    switch result {
-                    case .completed(_):
-                        print("[debugRefactorFlows] 📬 Calling onComplete() callback to ContentView")
-                        onComplete()
-                        print("[debugRefactorFlows] 📬 onComplete() callback executed")
-                    case .cancelled:
-                        print("[debugRefactorFlows] 📬 Onboarding cancelled")
-                        break
-                    case .failed(_):
-                        print("[debugRefactorFlows] 📬 Onboarding failed")
-                        break
-                    }
+        // Temporary: Skip onboarding for now to get app running
+        Color.clear
+            .onAppear {
+                // Mark onboarding as completed so we go straight to main app
+                UserDefaults.standard.set(true, forKey: "hasCompletedInitialOnboarding")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    onComplete()
                 }
-                .environmentObject(onboardingFlowController)
-                .interactiveDismissDisabled()
             }
     }
 }

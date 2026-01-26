@@ -1,8 +1,8 @@
 //
 //  AppCoordinator.swift
-//  Checkpoint
+//  Club Ralley
 //
-//  App-level coordinator managing app state, health checks, and DNS monitoring
+//  App-level coordinator managing app state and navigation for Club Ralley
 //  Extracted from ContentView as part of MVVM refactoring
 //
 
@@ -18,9 +18,9 @@ class AppCoordinator: ObservableObject {
     /// Current application state
     @Published var appState: AppState = .initializing {
         didSet {
-            print("[debugFlowTransition] ⚡ AppCoordinator.appState CHANGED:")
-            print("[debugFlowTransition] ⚡   FROM: \(oldValue)")
-            print("[debugFlowTransition] ⚡   TO:   \(appState)")
+            print("[Club Ralley] ⚡ AppCoordinator.appState CHANGED:")
+            print("[Club Ralley] ⚡   FROM: \(oldValue)")
+            print("[Club Ralley] ⚡   TO:   \(appState)")
         }
     }
 
@@ -128,7 +128,7 @@ class AppCoordinator: ObservableObject {
                 } else {
                     // Authenticated but hasn't completed onboarding
                     print("[debugFlowTransition] 🚀 User needs onboarding")
-                    appState = .onboardingRequired(flowType: .software)
+                    appState = .onboardingRequired(flowType: .firstTime)
                 }
             } else {
                 // Onboarding status unknown - wait for it to load
@@ -137,7 +137,7 @@ class AppCoordinator: ObservableObject {
 
         case .unauthenticated, .error:
             print("[debugFlowTransition] 🚀 User not authenticated - showing onboarding")
-            appState = .onboardingRequired(flowType: .software)
+            appState = .onboardingRequired(flowType: .firstTime)
 
         case .authenticating:
             print("[debugFlowTransition] 🚀 Authentication in progress - waiting")
@@ -162,7 +162,7 @@ class AppCoordinator: ObservableObject {
         case .unauthenticated, .error:
             // User signed out or auth error - ALWAYS go to onboarding (don't skip!)
             print("[debugFlowTransition] 🔄 User unauthenticated - showing onboarding")
-            appState = .onboardingRequired(flowType: .software)
+            appState = .onboardingRequired(flowType: .firstTime)
 
         case .authenticated:
             // Only update state during initialization or onboarding
@@ -193,28 +193,35 @@ class AppCoordinator: ObservableObject {
 
     /// Perform health check - simplified, just go to ready
     func performHealthCheck() {
-        print("[debugFlowTransition] 🏥 performHealthCheck() CALLED")
-        print("[debugFlowTransition] 🏥 Setting appState = .ready(showSuccessHUD: false)")
-        appState = .ready(showSuccessHUD: false)
+        print("[Club Ralley] 🏥 performHealthCheck() CALLED")
+        print("[Club Ralley] 🏥 Setting appState = .ready(selectedTab: .home, showSuccessHUD: false)")
+        appState = .ready(selectedTab: .home, showSuccessHUD: false)
     }
 
     /// Handle onboarding completion - go directly to ready state with celebration
     func handleOnboardingCompletion() {
-        print("[debugFlowTransition] 🎬 AppCoordinator.handleOnboardingCompletion() CALLED")
-        print("[debugFlowTransition] 🎬 Current appState: \(appState)")
+        print("[Club Ralley] 🎬 AppCoordinator.handleOnboardingCompletion() CALLED")
+        print("[Club Ralley] 🎬 Current appState: \(appState)")
 
         // Mark onboarding as completed
         UserDefaults.standard.set(true, forKey: "hasCompletedInitialOnboarding")
 
         // Go to ready state WITH success celebration
-        print("[debugFlowTransition] 🎉 Setting appState = .ready(showSuccessHUD: true)")
-        appState = .ready(showSuccessHUD: true)
+        print("[Club Ralley] 🎉 Setting appState = .ready(selectedTab: .home, showSuccessHUD: true)")
+        appState = .ready(selectedTab: .home, showSuccessHUD: true)
     }
 
     /// Clear the success HUD after it's been shown
     func clearSuccessHUD() {
-        if case .ready(showSuccessHUD: true) = appState {
-            appState = .ready(showSuccessHUD: false)
+        if case .ready(let selectedTab, showSuccessHUD: true) = appState {
+            appState = .ready(selectedTab: selectedTab, showSuccessHUD: false)
+        }
+    }
+    
+    /// Update selected tab for Club Ralley navigation
+    func updateSelectedTab(_ tab: MainTab) {
+        if case .ready(_, let showSuccessHUD) = appState {
+            appState = .ready(selectedTab: tab, showSuccessHUD: showSuccessHUD)
         }
     }
 }

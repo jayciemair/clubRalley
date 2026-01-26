@@ -46,8 +46,8 @@ public enum AuthProviderType: String, Codable, CaseIterable {
 
 // MARK: - User Profile
 
-/// User profile information
-public struct UserProfile: Codable, Equatable {
+/// User authentication profile information
+public struct AuthUserProfile: Codable, Equatable {
     var id: String
     var email: String?
     var fullName: String?

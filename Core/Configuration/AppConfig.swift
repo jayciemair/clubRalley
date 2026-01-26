@@ -1,6 +1,6 @@
 //
 //  AppConfig.swift
-//  Checkpoint
+//  Club Ralley
 //
 //  Centralized configuration for app settings
 //  These are PUBLIC keys safe for client-side use
@@ -9,10 +9,28 @@
 import Foundation
 
 enum AppConfig {
+    
+    // MARK: - App Information
+    
+    enum App {
+        static let name = "Club Ralley"
+        static let tagline = "GFTO - Get the F*** Outside"
+        static let version = "1.0.0"
+        static let buildNumber = "1"
+        
+        // App Store Information
+        static let appStoreID = "1234567890" // Replace with actual App Store ID
+        static let bundleIdentifier = "com.clubralley.app"
+        
+        // Support & Social
+        static let supportEmail = "support@clubralley.com"
+        static let websiteURL = "https://clubralley.com"
+        static let instagramHandle = "@clubralley"
+        static let twitterHandle = "@clubralley"
+    }
 
     // MARK: - Supabase Configuration
 
-    // TODO: Replace Supabase with AWS backend
     enum Supabase {
         /// Your Supabase project URL (public, safe to include)
         /// Get this from: Supabase Dashboard → Settings → API → Project URL
@@ -21,7 +39,7 @@ enum AppConfig {
             // Development environment
             return "https://yzjasxkathlqmysdtoji.supabase.co"
             #else
-            // Production environment
+            // Production environment - replace with Club Ralley production URL
             return "https://yzjasxkathlqmysdtoji.supabase.co"
             #endif
         }()
@@ -34,7 +52,7 @@ enum AppConfig {
             // Development anon key
             return "sb_publishable_nWGsQ3b1rRHrGF91VXZcpA_96pO6-W1"
             #else
-            // Production anon key
+            // Production anon key - replace with Club Ralley production key
             return "sb_publishable_nWGsQ3b1rRHrGF91VXZcpA_96pO6-W1"
             #endif
         }()
@@ -50,14 +68,23 @@ enum AppConfig {
             // Test/sandbox key
             return "appl_hnYiEvNaJsxBfuyPvhzLZXzpSBw"
             #else
-            // Production key - replace with production key when ready
+            // Production key - replace with Club Ralley production key when ready
             return "appl_hnYiEvNaJsxBfuyPvhzLZXzpSBw"
             #endif
         }()
 
         /// Entitlement identifier for premium access
         /// Must match what's configured in RevenueCat dashboard
-        static let premiumEntitlement = "Get Over Him Pro"
+        static let premiumEntitlement = "Club Ralley Pro"
+        
+        // Premium features
+        static let premiumFeatures = [
+            "Advanced search filters",
+            "Priority ralley visibility",
+            "Unlimited saved locations",
+            "Enhanced profile features",
+            "Premium athlete badges"
+        ]
     }
 
     // MARK: - Google Sign In Configuration
@@ -70,6 +97,52 @@ enum AppConfig {
             // This is safe to include - it's restricted to your bundle ID
             return "87946294443-icka49fug40v86vqo59fg13ue0tj94na.apps.googleusercontent.com"
         }()
+    }
+    
+    // MARK: - Maps & Location Configuration
+    
+    enum Maps {
+        // Default search radius in miles
+        static let defaultSearchRadius: Double = 25
+        static let maxSearchRadius: Double = 100
+        static let minSearchRadius: Double = 5
+        
+        // Map zoom levels
+        static let defaultZoomLevel: Double = 0.1
+        static let cityZoomLevel: Double = 0.05
+        static let neighborhoodZoomLevel: Double = 0.01
+    }
+    
+    // MARK: - Social Features Configuration
+    
+    enum Social {
+        // Maximum friends per user
+        static let maxFriends = 5000
+        
+        // Post character limits
+        static let maxPostLength = 280
+        static let maxCommentLength = 140
+        
+        // Feed pagination
+        static let feedPageSize = 20
+        static let maxFeedItems = 1000
+    }
+    
+    // MARK: - Ralley Configuration
+    
+    enum Ralleys {
+        // Default limits
+        static let maxParticipants = 50
+        static let defaultDuration: TimeInterval = 2 * 60 * 60 // 2 hours
+        
+        // Time constraints
+        static let minAdvanceBooking: TimeInterval = 60 * 60 // 1 hour
+        static let maxAdvanceBooking: TimeInterval = 30 * 24 * 60 * 60 // 30 days
+        
+        // Categories (placeholder for now)
+        static let categories: [String] = [
+            "sports", "fitness", "social", "outdoor", "competitive", "casual", "training"
+        ]
     }
 
     // MARK: - Security Notes

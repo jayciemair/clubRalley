@@ -23,7 +23,7 @@ struct MainView: View {
     @State private var showCheckyChat = false
     @State private var showTextSimulator = false
     @State private var showRelapseEncouragement = false
-    @AppStorage("selectedTab") private var selectedTab: Tab = .v3test
+    @AppStorage("selectedTab") private var selectedTab: MainTab = .home
 
 
     // MARK: - Body

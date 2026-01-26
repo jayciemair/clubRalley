@@ -8,6 +8,8 @@
 import Foundation
 import Supabase
 
+public typealias SupabaseAuthUser = Auth.User
+
 // MARK: - Supabase Client Manager
 
 /// Manages the Supabase client instance
@@ -95,8 +97,16 @@ public class SupabaseClientManager: ObservableObject {
     // MARK: - Helper Methods
 
     /// Get the current session
-    public func getCurrentSession() async throws -> Session? {
+    internal func getCurrentSession() async throws -> Session? {
         return try await client.auth.session
+    }
+
+    /// Get the current user
+    internal func getCurrentUser() async throws -> Auth.User? {
+        guard let session = try await getCurrentSession() else {
+            return nil
+        }
+        return session.user
     }
 
     /// Check if user is authenticated
@@ -107,14 +117,6 @@ public class SupabaseClientManager: ObservableObject {
         } catch {
             return false
         }
-    }
-
-    /// Get the current user
-    public func getCurrentUser() async throws -> User? {
-        guard let session = try await getCurrentSession() else {
-            return nil
-        }
-        return session.user
     }
 
     // MARK: - Database Access

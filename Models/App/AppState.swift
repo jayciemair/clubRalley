@@ -1,9 +1,8 @@
 //
 //  AppState.swift
-//  Checkpoint
+//  Club Ralley
 //
-//  App state machine enums
-//  Extracted from ContentView during MVVM refactor
+//  App state machine enums for Club Ralley social platform
 //
 
 import Foundation
@@ -20,7 +19,7 @@ enum AppState: Equatable {
     case onboardingRequired(flowType: OnboardingFlowType)
 
     // Ready - main app loaded and functional
-    case ready(showSuccessHUD: Bool)
+    case ready(selectedTab: MainTab, showSuccessHUD: Bool)
 
     /// Helper to check if we should show loading screen
     var showsLoadingScreen: Bool {
@@ -48,17 +47,64 @@ enum AppState: Equatable {
 
     /// Helper to check if we should show success HUD
     var showsSuccessHUD: Bool {
-        if case .ready(let showSuccessHUD) = self {
+        if case .ready(_, let showSuccessHUD) = self {
             return showSuccessHUD
         }
         return false
     }
-
+    
+    /// Helper to get selected tab
+    var selectedTab: MainTab {
+        if case .ready(let selectedTab, _) = self {
+            return selectedTab
+        }
+        return .home
+    }
 }
 
-/// Types of onboarding flows
+/// Types of onboarding flows for Club Ralley
 enum OnboardingFlowType {
-    case software           // Normal first-time onboarding
-    case dataRecovery      // Recovering data for existing user
+    case firstTime          // First-time user onboarding
+    case profileSetup       // Profile and preferences setup
+    case athleteVerification // Athlete verification process
+}
+
+/// Main tab navigation for Club Ralley (based on Figma design)
+enum MainTab: String, CaseIterable {
+    case home = "home"
+    case leagueFinder = "league_finder"
+    case post = "post"
+    case teams = "teams"
+    case profile = "profile"
+    
+    var displayName: String {
+        switch self {
+        case .home: return "Home"
+        case .leagueFinder: return "League Finder"
+        case .post: return "Post"
+        case .teams: return "Teams"
+        case .profile: return "Profile"
+        }
+    }
+    
+    var iconName: String {
+        switch self {
+        case .home: return "house"
+        case .leagueFinder: return "magnifyingglass"
+        case .post: return "camera"
+        case .teams: return "person.2"
+        case .profile: return "person"
+        }
+    }
+    
+    var selectedIconName: String {
+        switch self {
+        case .home: return "house.fill"
+        case .leagueFinder: return "magnifyingglass"
+        case .post: return "camera.fill"
+        case .teams: return "person.2.fill"
+        case .profile: return "person.fill"
+        }
+    }
 }
 

@@ -60,13 +60,13 @@ class CommitmentSignatureCache {
 
         do {
             // Fetch signature URL and created_at date from database
-            struct UserProfile: Decodable {
+            struct CacheUserProfile: Decodable {
                 let commitment_signature_url: String?
                 let created_at: String
             }
 
             let supabase = SupabaseClientManager.shared
-            let profile: UserProfile = try await supabase.database
+            let profile: CacheUserProfile = try await supabase.database
                 .from("user_profiles")
                 .select("commitment_signature_url, created_at")
                 .eq("user_id", value: userId.uuidString)
