@@ -22,7 +22,7 @@ struct ClubRalleyMainView: View {
                     NavigationStack {
                         HomeView()
                     }
-                case .leagueFinder:
+                case .findRalleys:
                     NavigationStack {
                         LeagueFinderView()
                     }

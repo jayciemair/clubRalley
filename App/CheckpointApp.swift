@@ -91,8 +91,8 @@ struct ClubRalleyApp: App {
         switch url.host {
         case "home":
             selectedTab = .home
-        case "league-finder", "discover":
-            selectedTab = .leagueFinder
+        case "find-ralleys", "ralleys", "discover":
+            selectedTab = .findRalleys
         case "post", "create":
             selectedTab = .post
         case "teams", "ralleys":

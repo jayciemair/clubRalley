@@ -27,7 +27,7 @@ struct MainTabView: View {
                     Image(systemName: "magnifyingglass")
                     Text("League Finder")
                 }
-                .tag(MainTab.leagueFinder)
+                .tag(MainTab.findRalleys)
             
             Text("Post - Coming Soon!")
                 .tabItem {

@@ -23,13 +23,13 @@ struct CustomTabBar: View {
                 }
             )
 
-            // League Finder Tab
+            // Find Ralleys Tab
             TabBarButton(
-                icon: "magnifyingglass",
+                icon: "sportscourt",
                 isSystemIcon: true,
-                isSelected: selectedTab == .leagueFinder,
+                isSelected: selectedTab == .findRalleys,
                 action: {
-                    selectedTab = .leagueFinder
+                    selectedTab = .findRalleys
                 }
             )
 

@@ -26,14 +26,14 @@ struct ClubRalleyTabBar: View {
             
             Spacer()
             
-            // League Finder Tab
+            // Find Ralleys Tab
             TabBarButton(
-                tab: .leagueFinder,
-                icon: "magnifyingglass",
-                title: "League Finder",
-                isSelected: selectedTab == .leagueFinder,
+                tab: .findRalleys,
+                icon: "sportscourt",
+                title: "Find Ralleys",
+                isSelected: selectedTab == .findRalleys,
                 action: {
-                    selectedTab = .leagueFinder
+                    selectedTab = .findRalleys
                 }
             )
             
