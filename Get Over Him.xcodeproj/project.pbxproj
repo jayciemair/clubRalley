@@ -241,11 +241,16 @@
 		91E5C0352F1015E70032FC66 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91E5C0342F1015E70032FC66 /* SceneDelegate.swift */; };
 		91EC4B6A2EA4585F00EE99D3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91EC4B692EA4585F00EE99D3 /* AppDelegate.swift */; };
 		91F1B4882E88632200C5B1E2 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 91F1B4872E88632200C5B1E2 /* StoreKit.framework */; };
+		C93A2A762F27EED0004D160C /* PostService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93A2A752F27EECF004D160C /* PostService.swift */; };
+		C93A2A782F27EEDF004D160C /* RalleyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93A2A772F27EEDF004D160C /* RalleyService.swift */; };
+		C93A2A7E2F292D8C004D160C /* ProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93A2A7A2F292D8C004D160C /* ProfileService.swift */; };
+		C93A2A802F292D8C004D160C /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93A2A7C2F292D8C004D160C /* SupabaseManager.swift */; };
 		C9665BA42F26E3E60055C54F /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BA32F26E3E60055C54F /* SupabaseConfig.swift */; };
 		C9665BBA2F26E7C40055C54F /* Sport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BB82F26E7C40055C54F /* Sport.swift */; };
 		C9665BBE2F26E7DF0055C54F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BBB2F26E7DF0055C54F /* User.swift */; };
 		C9665BBF2F26E7DF0055C54F /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BBC2F26E7DF0055C54F /* UserProfile.swift */; };
 		C9665BC22F26E7F90055C54F /* Ralley.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC02F26E7F90055C54F /* Ralley.swift */; };
+		C9665BC32F26E8000055C54F /* ClubRalleyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC12F26E8000055C54F /* ClubRalleyModels.swift */; };
 		C9665BC52F26E80F0055C54F /* NavigationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC32F26E80F0055C54F /* NavigationModels.swift */; };
 		C9665BCB2F26E83C0055C54F /* Social.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC92F26E83C0055C54F /* Social.swift */; };
 /* End PBXBuildFile section */
@@ -497,11 +502,16 @@
 		91E5C0342F1015E70032FC66 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		91EC4B692EA4585F00EE99D3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		91F1B4872E88632200C5B1E2 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		C93A2A752F27EECF004D160C /* PostService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostService.swift; sourceTree = "<group>"; };
+		C93A2A772F27EEDF004D160C /* RalleyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyService.swift; sourceTree = "<group>"; };
+		C93A2A7A2F292D8C004D160C /* ProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileService.swift; sourceTree = "<group>"; };
+		C93A2A7C2F292D8C004D160C /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
 		C9665BA32F26E3E60055C54F /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
 		C9665BB82F26E7C40055C54F /* Sport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sport.swift; sourceTree = "<group>"; };
 		C9665BBB2F26E7DF0055C54F /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		C9665BBC2F26E7DF0055C54F /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		C9665BC02F26E7F90055C54F /* Ralley.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ralley.swift; sourceTree = "<group>"; };
+		C9665BC12F26E8000055C54F /* ClubRalleyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClubRalleyModels.swift; sourceTree = "<group>"; };
 		C9665BC32F26E80F0055C54F /* NavigationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationModels.swift; sourceTree = "<group>"; };
 		C9665BC92F26E83C0055C54F /* Social.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Social.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1392,6 +1402,8 @@
 				91B017DF2EA1BE960032AF9C /* Notifications */,
 				91B017E02EA1BE960032AF9C /* Onboarding */,
 				91B017E12EA1BE960032AF9C /* Persistence */,
+				C93A2A752F27EECF004D160C /* PostService.swift */,
+				C93A2A772F27EEDF004D160C /* RalleyService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -1408,6 +1420,7 @@
 		91B018012EA1C2670032AF9C /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				C93A2A7D2F292D8C004D160C /* Services */,
 				918D2D162ECBD5C2008ABBC0 /* Settings */,
 				918D2B622EC7A49E008ABBC0 /* Configuration */,
 				918D2A462EC6CA22008ABBC0 /* Utilities */,
@@ -1441,6 +1454,15 @@
 			path = Adjust;
 			sourceTree = "<group>";
 		};
+		C93A2A7D2F292D8C004D160C /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				C93A2A7A2F292D8C004D160C /* ProfileService.swift */,
+				C93A2A7C2F292D8C004D160C /* SupabaseManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 		C9665BB92F26E7C40055C54F /* Sport */ = {
 			isa = PBXGroup;
 			children = (
@@ -1462,6 +1484,7 @@
 			isa = PBXGroup;
 			children = (
 				C9665BC02F26E7F90055C54F /* Ralley.swift */,
+				C9665BC12F26E8000055C54F /* ClubRalleyModels.swift */,
 			);
 			path = Ralley;
 			sourceTree = "<group>";
@@ -1613,6 +1636,8 @@
 				C9665BCB2F26E83C0055C54F /* Social.swift in Sources */,
 				917267952EC2CC980037F74F /* BreathingIntroScreen.swift in Sources */,
 				918D2D762ED0BC13008ABBC0 /* RecoveryComponents.swift in Sources */,
+				C93A2A7E2F292D8C004D160C /* ProfileService.swift in Sources */,
+				C93A2A802F292D8C004D160C /* SupabaseManager.swift in Sources */,
 				91BBFB302ED65A070083AB35 /* DailyCheckInManager.swift in Sources */,
 				918D2A4D2EC75EF6008ABBC0 /* WebsiteBlockRequest.swift in Sources */,
 				918D2D252ECE99E4008ABBC0 /* ErrorLoggingService.swift in Sources */,
@@ -1637,6 +1662,7 @@
 				918D2A642EC760D8008ABBC0 /* FrozenAnalyticsBannerViewModel.swift in Sources */,
 				918D2B382EC7831A008ABBC0 /* OnboardingFlowController.swift in Sources */,
 				C9665BC22F26E7F90055C54F /* Ralley.swift in Sources */,
+				C9665BC32F26E8000055C54F /* ClubRalleyModels.swift in Sources */,
 				917267B32EC3A86D0037F74F /* CompactTierCard.swift in Sources */,
 				91967F312F0D78F5002BF7B5 /* EventLoggingService.swift in Sources */,
 				C9665BBA2F26E7C40055C54F /* Sport.swift in Sources */,
@@ -1664,6 +1690,7 @@
 				918D2B592EC79F57008ABBC0 /* UserGoalManager.swift in Sources */,
 				91E5C0352F1015E70032FC66 /* SceneDelegate.swift in Sources */,
 				918D2B442EC79CD7008ABBC0 /* ContentView.swift in Sources */,
+				C93A2A782F27EEDF004D160C /* RalleyService.swift in Sources */,
 				918D2B452EC79CD7008ABBC0 /* MainTabView.swift in Sources */,
 				918D2B462EC79CD7008ABBC0 /* AuthLoadingView.swift in Sources */,
 				918D2B472EC79CD7008ABBC0 /* CustomTabBar.swift in Sources */,
@@ -1714,6 +1741,7 @@
 				91987B452EB962D0000CF2AB /* CheckpointApp.swift in Sources */,
 				918D2B2A2EC782B2008ABBC0 /* OnboardingTypeManager.swift in Sources */,
 				918D2B672EC7A4AE008ABBC0 /* AppVersionService.swift in Sources */,
+				C93A2A762F27EED0004D160C /* PostService.swift in Sources */,
 				91BBFB652ED76A130083AB35 /* OnboardingCompletionViewModel.swift in Sources */,
 				918D2D282ECEA800008ABBC0 /* PaywallTestingView.swift in Sources */,
 				918D2D822ED10263008ABBC0 /* RecoveryProgressService.swift in Sources */,

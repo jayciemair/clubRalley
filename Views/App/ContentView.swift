@@ -1748,112 +1748,9 @@ struct CustomTextFieldStyle: TextFieldStyle {
     }
 }
 
-// MARK: - Ralley Models
-// Note: Uses RalleyLocation from Models/Ralley/Ralley.swift
-
-/**
- * ClubRalley: Simplified UI model for ralley display and creation
- *
- * Purpose: Provides a streamlined representation of ralleys for the UI layer
- * Relationship: Maps to/from the database Ralley model via RalleyService
- * Usage: Used by RalleyManager, FindRalleysView, and profile ralley lists
- */
-struct ClubRalley: Identifiable, Codable {
-    /// Unique identifier for the ralley
-    let id: UUID
-
-    /// Display title for the ralley
-    var title: String
-
-    /// Sport type (e.g., "Basketball", "Tennis", "Soccer")
-    var sport: String
-
-    /// Detailed description of the ralley
-    var description: String
-
-    /// Information about the person who created the ralley
-    var organizer: ClubRalleyOrganizer
-
-    /// When the ralley is scheduled to start
-    var dateTime: Date
-
-    /// Location details for the ralley
-    var location: ClubRalleyLocation
-
-    /// Maximum number of participants allowed
-    var maxPlayers: Int
-
-    /// Current number of participants
-    var currentPlayers: Int
-
-    /// Cost to join (0 for free)
-    var cost: Int
-
-    /// Any special requirements for participants
-    var requirements: String
-
-    /// Whether the ralley is visible to everyone
-    var isPublic: Bool
-
-    /// When the ralley was created (optional for new ralleys)
-    var createdAt: Date?
-
-    /// Whether the ralley is currently active
-    var isActive: Bool?
-
-    /// Formatted string showing time until the ralley starts
-    var timeUntilStart: String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: dateTime, relativeTo: Date())
-    }
-}
-
-/**
- * ClubRalleyOrganizer: Information about a ralley organizer
- *
- * Purpose: Stores display information for the person who created a ralley
- * Usage: Displayed on ralley cards and detail views
- */
-struct ClubRalleyOrganizer: Codable {
-    /// Unique user ID of the organizer
-    let id: UUID
-
-    /// Display name
-    let name: String
-
-    /// Username with @ prefix
-    let username: String
-
-    /// URL string for profile photo
-    let photoURL: String
-}
-
-/**
- * ClubRalleyLocation: Location information for a ralley
- *
- * Purpose: Stores venue details for UI display
- * Note: Separate from RalleyLocation to avoid conflicts with database model
- */
-struct ClubRalleyLocation: Codable {
-    /// Venue name (e.g., "Riverside Park Courts")
-    let name: String
-
-    /// Street address
-    let address: String
-
-    /// City name
-    let city: String
-
-    /// State abbreviation
-    let state: String
-
-    /// GPS latitude for map display
-    let latitude: Double
-
-    /// GPS longitude for map display
-    let longitude: Double
-}
+// MARK: - Models
+// Note: ClubRalley, ClubRalleyOrganizer, ClubRalleyLocation, ClubRalleyPost
+// are defined in Models/ClubRalley/ClubRalleyModels.swift
 
 // MARK: - Post Manager
 
@@ -2660,29 +2557,6 @@ struct UserPostPreview: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.gray.opacity(0.2), lineWidth: 1)
         )
-    }
-}
-
-// MARK: - Post Model
-
-struct ClubRalleyPost: Identifiable, Codable {
-    let id: UUID
-    let authorName: String
-    let authorUsername: String
-    let authorPhotoURL: String
-    let title: String?
-    let content: String
-    let images: [String]
-    let timestamp: Date
-    var likes: Int
-    var comments: Int
-    var shares: Int
-    var isLiked: Bool
-    
-    var timeAgo: String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: timestamp, relativeTo: Date())
     }
 }
 
