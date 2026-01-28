@@ -6,10 +6,12 @@ struct SupabaseConfig {
     // MARK: - Project Configuration
     
     /// Your Supabase project URL
-    static let projectURL = "https://yzjasxkathlqmysdtoji.supabase.co"
+    /// Note: This should match AppConfig.Supabase.projectURL
+    static let projectURL = AppConfig.Supabase.projectURL
     
     /// Your Supabase anon key (public key - safe to expose)
-    static let anonKey = "sb_publishable_MYUXDhdrYmfA1Ims7-xMcA_DtIY4l6U"
+    /// Note: This should match AppConfig.Supabase.anonKey
+    static let anonKey = AppConfig.Supabase.anonKey
     
     // MARK: - Setup Instructions
     

@@ -253,6 +253,9 @@
 		C9665BC32F26E8000055C54F /* ClubRalleyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC12F26E8000055C54F /* ClubRalleyModels.swift */; };
 		C9665BC52F26E80F0055C54F /* NavigationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC32F26E80F0055C54F /* NavigationModels.swift */; };
 		C9665BCB2F26E83C0055C54F /* Social.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC92F26E83C0055C54F /* Social.swift */; };
+		C9AABB012F2A0001004D160C /* RalleyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB002F2A0001004D160C /* RalleyManager.swift */; };
+		C9AABB032F2A0002004D160C /* PostManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB022F2A0002004D160C /* PostManager.swift */; };
+		C9AABB062F2B1000004D160C /* DatabaseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB072F2B1000004D160C /* DatabaseModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -514,6 +517,9 @@
 		C9665BC12F26E8000055C54F /* ClubRalleyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClubRalleyModels.swift; sourceTree = "<group>"; };
 		C9665BC32F26E80F0055C54F /* NavigationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationModels.swift; sourceTree = "<group>"; };
 		C9665BC92F26E83C0055C54F /* Social.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Social.swift; sourceTree = "<group>"; };
+		C9AABB002F2A0001004D160C /* RalleyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyManager.swift; sourceTree = "<group>"; };
+		C9AABB022F2A0002004D160C /* PostManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostManager.swift; sourceTree = "<group>"; };
+		C9AABB072F2B1000004D160C /* DatabaseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -622,6 +628,7 @@
 				917267A62EC371490037F74F /* Analytics */,
 				917267CD2EC41C040037F74F /* App */,
 				917267862EC2B3830037F74F /* Chat */,
+				C9AABB082F2B1000004D160C /* Database */,
 				C9665BC42F26E80F0055C54F /* Navigation */,
 				918D2B202EC77E37008ABBC0 /* Onboarding */,
 				C9665BC12F26E7F90055C54F /* Ralley */,
@@ -633,6 +640,14 @@
 				C9665BBD2F26E7DF0055C54F /* User */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		C9AABB082F2B1000004D160C /* Database */ = {
+			isa = PBXGroup;
+			children = (
+				C9AABB072F2B1000004D160C /* DatabaseModels.swift */,
+			);
+			path = Database;
 			sourceTree = "<group>";
 		};
 		915B1A672F22996600D125A7 /* Components */ = {
@@ -743,6 +758,8 @@
 		917267702EC2ACAB0037F74F /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				C9AABB042F2A0003004D160C /* Ralley */,
+				C9AABB052F2A0004004D160C /* Post */,
 				915B1A772F22999300D125A7 /* TextSimulator */,
 				918D2D6D2ED0AAFC008ABBC0 /* Recovery */,
 				918D2AA42EC77446008ABBC0 /* Onboarding */,
@@ -788,6 +805,22 @@
 				918D2D6F2ED0B2EB008ABBC0 /* MochiChatViewModel.swift */,
 			);
 			path = Chat;
+			sourceTree = "<group>";
+		};
+		C9AABB042F2A0003004D160C /* Ralley */ = {
+			isa = PBXGroup;
+			children = (
+				C9AABB002F2A0001004D160C /* RalleyManager.swift */,
+			);
+			path = Ralley;
+			sourceTree = "<group>";
+		};
+		C9AABB052F2A0004004D160C /* Post */ = {
+			isa = PBXGroup;
+			children = (
+				C9AABB022F2A0002004D160C /* PostManager.swift */,
+			);
+			path = Post;
 			sourceTree = "<group>";
 		};
 		917267862EC2B3830037F74F /* Chat */ = {
@@ -1824,6 +1857,9 @@
 				915B1A0B2F1EFCA000D125A7 /* MochiPromiseScreen.swift in Sources */,
 				915B1A0C2F1EFCA000D125A7 /* SocialProofScreen.swift in Sources */,
 				918D2D782ED0C0BD008ABBC0 /* BoxBreathingPracticeView.swift in Sources */,
+				C9AABB012F2A0001004D160C /* RalleyManager.swift in Sources */,
+				C9AABB032F2A0002004D160C /* PostManager.swift in Sources */,
+				C9AABB062F2B1000004D160C /* DatabaseModels.swift in Sources */,
 			);
 		};
 /* End PBXSourcesBuildPhase section */

@@ -305,43 +305,5 @@ class PostService: ObservableObject {
     }
 }
 
-// MARK: - Database Models
-
-/**
- * Database representation of post (matches Supabase posts table schema)
- * Used for API operations - separate from UI models for clean architecture
- */
-struct DatabasePost: Codable {
-    let user_id: UUID
-    let content: String
-    let post_type: String
-    let likes_count: Int
-    let comments_count: Int
-}
-
-/**
- * Database post with joined user information
- * Result of posts JOIN club_users query
- */
-struct DatabasePostWithUser: Codable {
-    let id: UUID
-    let user_id: UUID
-    let content: String
-    let post_type: String
-    let likes_count: Int
-    let comments_count: Int
-    let created_at: Date
-    let updated_at: Date
-    let user: DatabaseUser
-}
-
-/**
- * Database user representation (subset of club_users table)
- * Used in JOIN queries for post author information
- */
-struct DatabaseUser: Codable {
-    let first_name: String
-    let last_name: String
-    let username: String
-    let profile_photo_url: String?
-}
+// Note: Database models (DatabasePost, DatabasePostWithUser, DatabaseUser)
+// are defined in Models/Database/DatabaseModels.swift
