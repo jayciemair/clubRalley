@@ -122,41 +122,7 @@ struct ContentView: View {
                 Text("Teams")
             }
             .tag(MainTab.teams)
-            
-            // Figma Profile Design (embedded to avoid import issues)
-            NavigationStack {
-                ScrollView {
-            
-            // Post Creation Interface (matching Figma design)
-            PostCreationInterfaceView()
-                .environmentObject(postManager)
-            .tabItem {
-                Image(systemName: selectedTab == .post ? "plus.circle.fill" : "plus.circle")
-                Text("Post")
-            }
-            .tag(MainTab.post)
-            
-            VStack(spacing: 20) {
-                Image(systemName: "person.2.circle.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color(hex: "#2C4F40"))
-                
-                Text("Teams")
-                    .font(.title.bold())
-                    .foregroundColor(Color(hex: "#2C4F40"))
-                
-                Text("Connect with your teams")
-                    .font(.subheadline)
-                    .foregroundColor(Color(hex: "#666666"))
-                    .multilineTextAlignment(.center)
-            }
-            .padding()
-            .tabItem {
-                Image(systemName: selectedTab == .teams ? "person.2.fill" : "person.2")
-                Text("Teams")
-            }
-            .tag(MainTab.teams)
-            
+
             // Figma Profile Design (embedded to avoid import issues)
             NavigationStack {
                 ScrollView {
@@ -1029,14 +995,14 @@ class RalleyManager: ObservableObject {
                 title: "Basketball Pickup",
                 sport: "Basketball",
                 description: "Friendly pickup basketball game. All skill levels welcome!",
-                organizer: RalleyOrganizer(
+                organizer: ClubRalleyOrganizer(
                     id: UUID(),
                     name: "Alex Johnson",
                     username: "@alexj", 
                     photoURL: "https://picsum.photos/50/50?random=401"
                 ),
                 dateTime: Date().addingTimeInterval(3600 * 2), // 2 hours from now
-                location: RalleyLocation(
+                location: ClubRalleyLocation(
                     name: "Riverside Park Courts",
                     address: "123 Park Ave",
                     city: "Chicago",
@@ -1055,14 +1021,14 @@ class RalleyManager: ObservableObject {
                 title: "Tennis Doubles",
                 sport: "Tennis",
                 description: "Looking for tennis doubles partners. Intermediate level preferred.",
-                organizer: RalleyOrganizer(
+                organizer: ClubRalleyOrganizer(
                     id: UUID(),
                     name: "Sarah Wilson",
                     username: "@sarahw",
                     photoURL: "https://picsum.photos/50/50?random=402"
                 ),
                 dateTime: Date().addingTimeInterval(3600 * 18), // Tomorrow morning
-                location: RalleyLocation(
+                location: ClubRalleyLocation(
                     name: "University Tennis Center",
                     address: "456 College Blvd",
                     city: "Chicago",
@@ -1081,14 +1047,14 @@ class RalleyManager: ObservableObject {
                 title: "My Test Ralley", // User's own ralley for testing
                 sport: "Soccer",
                 description: "Just created my first ralley! Looking forward to a fun pickup game.",
-                organizer: RalleyOrganizer(
+                organizer: ClubRalleyOrganizer(
                     id: UUID(),
                     name: "Your Name",
                     username: "@you",
                     photoURL: "https://picsum.photos/50/50?random=50"
                 ),
                 dateTime: Date().addingTimeInterval(3600 * 6), // 6 hours from now
-                location: RalleyLocation(
+                location: ClubRalleyLocation(
                     name: "Local Soccer Field",
                     address: "789 Sports Ave",
                     city: "Chicago",
@@ -1151,14 +1117,14 @@ class RalleyManager: ObservableObject {
             title: title,
             sport: sport,
             description: description,
-            organizer: RalleyOrganizer(
+            organizer: ClubRalleyOrganizer(
                 id: supabase.currentUser?.id ?? UUID(),
                 name: supabase.currentUser?.displayName ?? "Your Name",
                 username: "@\(supabase.currentUser?.email.components(separatedBy: "@").first ?? "you")",
                 photoURL: "https://picsum.photos/50/50?random=50" // TODO: Get real profile photo
             ),
             dateTime: dateTime,
-            location: RalleyLocation(
+            location: ClubRalleyLocation(
                 name: locationName,
                 address: address,
                 city: city,
@@ -1168,7 +1134,7 @@ class RalleyManager: ObservableObject {
             ),
             maxPlayers: maxPlayers,
             currentPlayers: 1, // Organizer is first player
-            cost: cost,
+            cost: Int(cost),
             requirements: requirements,
             isPublic: true
         )
@@ -1481,7 +1447,9 @@ struct RalleyCardView: View {
             
             // Join Button
             Button(action: {
-                ralleyManager.joinRalley(ralley.id)
+                Task {
+                    await ralleyManager.joinRalley(ralley.id)
+                }
             }) {
                 Text(ralley.currentPlayers >= ralley.maxPlayers ? "Full" : "Join Ralley")
                     .font(.system(size: 16, weight: .semibold))
@@ -1721,7 +1689,7 @@ struct RalleyCreationView: View {
                     city: "San Francisco", // TODO: Get user's city or allow selection
                     state: "CA", // TODO: Get user's state or allow selection
                     maxPlayers: maxPlayers,
-                    cost: cost,
+                    cost: Double(cost),
                     description: description.isEmpty ? "Join us for a fun game of \(sport)!" : description,
                     requirements: requirements
                 )
@@ -1781,22 +1749,59 @@ struct CustomTextFieldStyle: TextFieldStyle {
 }
 
 // MARK: - Ralley Models
+// Note: Uses RalleyLocation from Models/Ralley/Ralley.swift
 
+/**
+ * ClubRalley: Simplified UI model for ralley display and creation
+ *
+ * Purpose: Provides a streamlined representation of ralleys for the UI layer
+ * Relationship: Maps to/from the database Ralley model via RalleyService
+ * Usage: Used by RalleyManager, FindRalleysView, and profile ralley lists
+ */
 struct ClubRalley: Identifiable, Codable {
+    /// Unique identifier for the ralley
     let id: UUID
-    let title: String
-    let sport: String
-    let organizer: RalleyOrganizer
-    let dateTime: Date
-    let location: RalleyLocation
-    let maxPlayers: Int
+
+    /// Display title for the ralley
+    var title: String
+
+    /// Sport type (e.g., "Basketball", "Tennis", "Soccer")
+    var sport: String
+
+    /// Detailed description of the ralley
+    var description: String
+
+    /// Information about the person who created the ralley
+    var organizer: ClubRalleyOrganizer
+
+    /// When the ralley is scheduled to start
+    var dateTime: Date
+
+    /// Location details for the ralley
+    var location: ClubRalleyLocation
+
+    /// Maximum number of participants allowed
+    var maxPlayers: Int
+
+    /// Current number of participants
     var currentPlayers: Int
-    let cost: Int
-    let description: String
-    let requirements: String
-    let createdAt: Date
-    let isActive: Bool
-    
+
+    /// Cost to join (0 for free)
+    var cost: Int
+
+    /// Any special requirements for participants
+    var requirements: String
+
+    /// Whether the ralley is visible to everyone
+    var isPublic: Bool
+
+    /// When the ralley was created (optional for new ralleys)
+    var createdAt: Date?
+
+    /// Whether the ralley is currently active
+    var isActive: Bool?
+
+    /// Formatted string showing time until the ralley starts
     var timeUntilStart: String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
@@ -1804,17 +1809,50 @@ struct ClubRalley: Identifiable, Codable {
     }
 }
 
-struct RalleyOrganizer: Codable {
+/**
+ * ClubRalleyOrganizer: Information about a ralley organizer
+ *
+ * Purpose: Stores display information for the person who created a ralley
+ * Usage: Displayed on ralley cards and detail views
+ */
+struct ClubRalleyOrganizer: Codable {
+    /// Unique user ID of the organizer
+    let id: UUID
+
+    /// Display name
     let name: String
+
+    /// Username with @ prefix
     let username: String
+
+    /// URL string for profile photo
     let photoURL: String
 }
 
-struct RalleyLocation: Codable {
+/**
+ * ClubRalleyLocation: Location information for a ralley
+ *
+ * Purpose: Stores venue details for UI display
+ * Note: Separate from RalleyLocation to avoid conflicts with database model
+ */
+struct ClubRalleyLocation: Codable {
+    /// Venue name (e.g., "Riverside Park Courts")
     let name: String
+
+    /// Street address
     let address: String
+
+    /// City name
     let city: String
+
+    /// State abbreviation
     let state: String
+
+    /// GPS latitude for map display
+    let latitude: Double
+
+    /// GPS longitude for map display
+    let longitude: Double
 }
 
 // MARK: - Post Manager
@@ -2258,7 +2296,9 @@ struct PostCardView: View {
             HStack(spacing: 24) {
                 // Like Button
                 Button(action: {
-                    postManager.toggleLike(for: post.id)
+                    Task {
+                        await postManager.toggleLike(for: post.id)
+                    }
                 }) {
                     HStack(spacing: 6) {
                         Image(systemName: post.isLiked ? "heart.fill" : "heart")
@@ -2359,7 +2399,9 @@ struct CompactRalleyCard: View {
                 Spacer()
                 
                 Button(action: {
-                    ralleyManager.joinRalley(ralley.id)
+                    Task {
+                        await ralleyManager.joinRalley(ralley.id)
+                    }
                 }) {
                     Text("Join")
                         .font(.system(size: 12, weight: .semibold))
@@ -2496,6 +2538,7 @@ struct UserPostsSection: View {
                         UserPostPreview(post: post)
                     }
                 }
+            }
             }
         }
     }
