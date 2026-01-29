@@ -256,6 +256,11 @@
 		C9AABB012F2A0001004D160C /* RalleyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB002F2A0001004D160C /* RalleyManager.swift */; };
 		C9AABB032F2A0002004D160C /* PostManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB022F2A0002004D160C /* PostManager.swift */; };
 		C9AABB062F2B1000004D160C /* DatabaseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB072F2B1000004D160C /* DatabaseModels.swift */; };
+		C9AABB112F2B1001004D160C /* HomeFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB102F2B1001004D160C /* HomeFeedView.swift */; };
+		C9AABB132F2B1002004D160C /* FindRalleysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB122F2B1002004D160C /* FindRalleysView.swift */; };
+		C9AABB152F2B1003004D160C /* RalleyCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB142F2B1003004D160C /* RalleyCreationView.swift */; };
+		C9AABB172F2B1004004D160C /* UserContentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB162F2B1004004D160C /* UserContentViews.swift */; };
+		C9AABB192F2B1005004D160C /* PostCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB182F2B1005004D160C /* PostCreationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -520,6 +525,11 @@
 		C9AABB002F2A0001004D160C /* RalleyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyManager.swift; sourceTree = "<group>"; };
 		C9AABB022F2A0002004D160C /* PostManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostManager.swift; sourceTree = "<group>"; };
 		C9AABB072F2B1000004D160C /* DatabaseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseModels.swift; sourceTree = "<group>"; };
+		C9AABB102F2B1001004D160C /* HomeFeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeFeedView.swift; sourceTree = "<group>"; };
+		C9AABB122F2B1002004D160C /* FindRalleysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindRalleysView.swift; sourceTree = "<group>"; };
+		C9AABB142F2B1003004D160C /* RalleyCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyCreationView.swift; sourceTree = "<group>"; };
+		C9AABB162F2B1004004D160C /* UserContentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserContentViews.swift; sourceTree = "<group>"; };
+		C9AABB182F2B1005004D160C /* PostCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCreationView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -775,6 +785,10 @@
 		917267772EC2ACAB0037F74F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C9AABB202F2B1006004D160C /* Home */,
+				C9AABB222F2B1008004D160C /* Post */,
+				C9AABB232F2B1009004D160C /* Profile */,
+				C9AABB212F2B1007004D160C /* Ralley */,
 				915B1A692F22996600D125A7 /* TextSimulator */,
 				91BBFB332ED65A120083AB35 /* CheckIn */,
 				918D2D612ED0AAF6008ABBC0 /* Recovery */,
@@ -821,6 +835,39 @@
 				C9AABB022F2A0002004D160C /* PostManager.swift */,
 			);
 			path = Post;
+			sourceTree = "<group>";
+		};
+		C9AABB202F2B1006004D160C /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				C9AABB102F2B1001004D160C /* HomeFeedView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		C9AABB212F2B1007004D160C /* Ralley */ = {
+			isa = PBXGroup;
+			children = (
+				C9AABB122F2B1002004D160C /* FindRalleysView.swift */,
+				C9AABB142F2B1003004D160C /* RalleyCreationView.swift */,
+			);
+			path = Ralley;
+			sourceTree = "<group>";
+		};
+		C9AABB222F2B1008004D160C /* Post */ = {
+			isa = PBXGroup;
+			children = (
+				C9AABB182F2B1005004D160C /* PostCreationView.swift */,
+			);
+			path = Post;
+			sourceTree = "<group>";
+		};
+		C9AABB232F2B1009004D160C /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				C9AABB162F2B1004004D160C /* UserContentViews.swift */,
+			);
+			path = Profile;
 			sourceTree = "<group>";
 		};
 		917267862EC2B3830037F74F /* Chat */ = {
@@ -1860,6 +1907,11 @@
 				C9AABB012F2A0001004D160C /* RalleyManager.swift in Sources */,
 				C9AABB032F2A0002004D160C /* PostManager.swift in Sources */,
 				C9AABB062F2B1000004D160C /* DatabaseModels.swift in Sources */,
+				C9AABB112F2B1001004D160C /* HomeFeedView.swift in Sources */,
+				C9AABB132F2B1002004D160C /* FindRalleysView.swift in Sources */,
+				C9AABB152F2B1003004D160C /* RalleyCreationView.swift in Sources */,
+				C9AABB172F2B1004004D160C /* UserContentViews.swift in Sources */,
+				C9AABB192F2B1005004D160C /* PostCreationView.swift in Sources */,
 			);
 		};
 /* End PBXSourcesBuildPhase section */
