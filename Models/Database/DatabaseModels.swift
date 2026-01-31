@@ -36,6 +36,18 @@ struct DatabasePostWithUser: Codable {
     let created_at: Date
     let updated_at: Date
     let user: DatabaseUser
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case user_id
+        case content
+        case post_type
+        case likes_count
+        case comments_count
+        case created_at
+        case updated_at
+        case user = "club_users"  // Supabase uses table name for joins
+    }
 }
 
 /**
@@ -70,6 +82,8 @@ struct DatabaseRalley: Codable {
     let max_participants: Int?
     let current_participants: Int
     let is_public: Bool
+    let visibility: String
+    let join_type: String
 }
 
 /**
@@ -93,9 +107,35 @@ struct DatabaseRalleyWithUser: Codable {
     let max_participants: Int?
     let current_participants: Int
     let is_public: Bool
+    let visibility: String?
+    let join_type: String?
     let created_at: Date
     let updated_at: Date
-    let user: DatabaseRalleyUser
+    let organizer: DatabaseRalleyUser
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case host_user_id
+        case title
+        case description
+        case location_name
+        case location_address
+        case location_city
+        case location_state
+        case latitude
+        case longitude
+        case date_time
+        case sport_id
+        case category
+        case max_participants
+        case current_participants
+        case is_public
+        case visibility
+        case join_type
+        case created_at
+        case updated_at
+        case organizer = "club_users"  // Supabase uses table name for joins
+    }
 }
 
 /**
@@ -116,6 +156,17 @@ struct DatabaseRalleyParticipant: Codable {
     let ralley_id: UUID
     let user_id: UUID
     let status: String // 'attending', 'maybe', 'not_attending', 'requested'
+}
+
+/**
+ * Database representation of ralley participant with ID (for queries)
+ */
+struct DatabaseRalleyParticipantWithId: Codable {
+    let id: UUID
+    let ralley_id: UUID
+    let user_id: UUID
+    let status: String
+    let created_at: Date
 }
 
 // MARK: - Profile Database Models
@@ -206,3 +257,106 @@ struct DatabaseFriendship: Codable {
     /// Relationship status (pending, accepted, blocked)
     let status: String
 }
+
+// MARK: - Comment Database Models
+
+/**
+ * Database representation of a comment (for INSERT operations)
+ */
+struct DatabaseComment: Codable {
+    let post_id: UUID
+    let user_id: UUID
+    let content: String
+}
+
+/**
+ * Database comment with joined user information
+ */
+struct DatabaseCommentWithUser: Codable {
+    let id: UUID
+    let post_id: UUID
+    let user_id: UUID
+    let content: String
+    let created_at: Date
+    let user: DatabaseUser
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case post_id
+        case user_id
+        case content
+        case created_at
+        case user = "club_users"
+    }
+}
+
+// MARK: - Report Database Models
+
+/**
+ * Database representation of a post report
+ */
+struct DatabasePostReport: Codable {
+    let post_id: UUID
+    let reporter_id: UUID
+    let reason: String
+}
+
+// MARK: - Notification Database Models
+
+/**
+ * Database representation of a notification
+ */
+struct DatabaseNotification: Codable {
+    let id: UUID
+    let user_id: UUID
+    let type: String
+    let actor_id: UUID?
+    let post_id: UUID?
+    let ralley_id: UUID?
+    let message: String
+    let is_read: Bool
+    let created_at: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case user_id
+        case type
+        case actor_id
+        case post_id
+        case ralley_id
+        case message
+        case is_read
+        case created_at
+    }
+}
+
+/**
+ * Database notification with actor user information
+ */
+struct DatabaseNotificationWithUser: Codable {
+    let id: UUID
+    let user_id: UUID
+    let type: String
+    let actor_id: UUID?
+    let post_id: UUID?
+    let ralley_id: UUID?
+    let message: String
+    let is_read: Bool
+    let created_at: Date
+    let actor: DatabaseUser?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case user_id
+        case type
+        case actor_id
+        case post_id
+        case ralley_id
+        case message
+        case is_read
+        case created_at
+        case actor = "club_users"
+    }
+}
+
+// Note: Chat-related database models are in DatabaseChatModels.swift

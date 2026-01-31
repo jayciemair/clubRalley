@@ -38,6 +38,9 @@ class RalleyManager: ObservableObject {
     /// Service layer for ralley database operations
     private let ralleyService = RalleyService()
 
+    /// Service layer for chat operations
+    private let chatService = ChatService()
+
     /// Supabase authentication state
     private let supabase = SupabaseManager.shared
 
@@ -178,8 +181,10 @@ class RalleyManager: ObservableObject {
      * @param cost: Cost per person (optional)
      * @param description: Ralley description
      * @param requirements: Special requirements
+     * @param visibility: Who can see the ralley
+     * @param joinType: How users can join
      *
-     * Flow: Create local ralley -> Save to database -> Update local cache
+     * Flow: Create local ralley -> Save to database -> Create group chat -> Update local cache
      */
     func createRalley(
         title: String,
@@ -192,27 +197,31 @@ class RalleyManager: ObservableObject {
         maxPlayers: Int,
         cost: Double = 0.0,
         description: String,
-        requirements: String = ""
+        requirements: String = "",
+        visibility: RalleyVisibility = .anyone,
+        joinType: RalleyJoinType = .open
     ) async {
         guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            print("❌ RalleyManager: Cannot create ralley with empty title")
+            print("RalleyManager: Cannot create ralley with empty title")
             return
         }
 
         isLoading = true
         error = nil
 
-        // Create local ralley model with current user as organizer
-        let newRalley = ClubRalley(
+        let currentUserId = supabase.currentUser?.id ?? UUID()
+
+        // Create local ralley model with current user as organizer (captain)
+        var newRalley = ClubRalley(
             id: UUID(),
             title: title,
             sport: sport,
             description: description,
             organizer: ClubRalleyOrganizer(
-                id: supabase.currentUser?.id ?? UUID(),
+                id: currentUserId,
                 name: supabase.currentUser?.displayName ?? "Your Name",
                 username: "@\(supabase.currentUser?.email.components(separatedBy: "@").first ?? "you")",
-                photoURL: "https://picsum.photos/50/50?random=50" // TODO: Get real profile photo
+                photoURL: "https://picsum.photos/50/50?random=50"
             ),
             dateTime: dateTime,
             location: ClubRalleyLocation(
@@ -220,32 +229,49 @@ class RalleyManager: ObservableObject {
                 address: address,
                 city: city,
                 state: state,
-                latitude: 37.7749, // TODO: Geocode address to get real coordinates
+                latitude: 37.7749,
                 longitude: -122.4194
             ),
             maxPlayers: maxPlayers,
-            currentPlayers: 1, // Organizer is first player
+            currentPlayers: 1,
             cost: Int(cost),
             requirements: requirements,
-            isPublic: true
+            isPublic: visibility == .anyone,
+            visibility: visibility,
+            joinType: joinType,
+            isCaptain: true,
+            chatId: nil,
+            pendingRequestsCount: 0
         )
 
         do {
             // Save to database via RalleyService
             let createdRalley = try await ralleyService.createRalley(newRalley)
+            newRalley = createdRalley
+
+            // Create group chat for the ralley
+            do {
+                let chatId = try await chatService.createRalleyChat(
+                    ralleyId: createdRalley.id,
+                    captainId: currentUserId
+                )
+                newRalley.chatId = chatId
+                print("RalleyManager: Group chat created for ralley")
+            } catch {
+                print("RalleyManager: Failed to create group chat: \(error)")
+            }
 
             // Add to local cache at the top of feed
-            ralleys.insert(createdRalley, at: 0)
-
-            print("✅ RalleyManager: Ralley created successfully")
+            ralleys.insert(newRalley, at: 0)
+            print("RalleyManager: Ralley created successfully")
 
         } catch {
-            print("❌ RalleyManager: Failed to create ralley: \(error)")
+            print("RalleyManager: Failed to create ralley: \(error)")
             self.error = error
 
             // Even if backend fails, add to local cache for immediate UI feedback
             ralleys.insert(newRalley, at: 0)
-            print("📱 RalleyManager: Ralley added locally (backend failed)")
+            print("RalleyManager: Ralley added locally (backend failed)")
         }
 
         isLoading = false
@@ -360,5 +386,107 @@ class RalleyManager: ObservableObject {
      */
     func dismissCreateRalley() {
         showingCreateRalley = false
+    }
+
+    // MARK: - Join Request Management (Captain)
+
+    /**
+     * Load pending requests for a ralley (captain only)
+     * @param ralleyId: Ralley ID
+     * @returns: Array of pending join requests
+     */
+    func loadPendingRequests(for ralleyId: UUID) async -> [PendingJoinRequest] {
+        do {
+            return try await ralleyService.loadPendingRequests(ralleyId: ralleyId)
+        } catch {
+            print("RalleyManager: Failed to load pending requests: \(error)")
+            return []
+        }
+    }
+
+    /**
+     * Approve a join request and add user to chat
+     * @param request: The pending request to approve
+     * @param chatId: ID of the ralley's group chat
+     */
+    func approveJoinRequest(_ request: PendingJoinRequest, chatId: UUID?) async {
+        do {
+            let success = try await ralleyService.approveJoinRequest(
+                ralleyId: request.ralleyId,
+                userId: request.userId
+            )
+
+            if success {
+                // Add user to group chat
+                if let chatId = chatId {
+                    try? await chatService.addMember(chatId: chatId, userId: request.userId)
+                }
+
+                // Update local ralley state
+                if let index = ralleys.firstIndex(where: { $0.id == request.ralleyId }) {
+                    ralleys[index].currentPlayers += 1
+                    ralleys[index].pendingRequestsCount = max(0, ralleys[index].pendingRequestsCount - 1)
+                }
+
+                print("RalleyManager: Approved join request for user \(request.userId)")
+            }
+        } catch {
+            print("RalleyManager: Failed to approve join request: \(error)")
+        }
+    }
+
+    /**
+     * Reject a join request
+     * @param request: The pending request to reject
+     */
+    func rejectJoinRequest(_ request: PendingJoinRequest) async {
+        do {
+            let success = try await ralleyService.rejectJoinRequest(
+                ralleyId: request.ralleyId,
+                userId: request.userId
+            )
+
+            if success {
+                // Update local ralley state
+                if let index = ralleys.firstIndex(where: { $0.id == request.ralleyId }) {
+                    ralleys[index].pendingRequestsCount = max(0, ralleys[index].pendingRequestsCount - 1)
+                }
+
+                print("RalleyManager: Rejected join request for user \(request.userId)")
+            }
+        } catch {
+            print("RalleyManager: Failed to reject join request: \(error)")
+        }
+    }
+
+    // MARK: - Join Request Submission (User)
+
+    /**
+     * Request to join a private ralley
+     * @param ralleyId: Ralley ID to request to join
+     */
+    func requestToJoin(_ ralleyId: UUID) async {
+        do {
+            let success = try await ralleyService.requestToJoin(ralleyId: ralleyId)
+            if success {
+                print("RalleyManager: Join request submitted")
+            }
+        } catch {
+            print("RalleyManager: Failed to submit join request: \(error)")
+            self.error = error
+        }
+    }
+
+    /**
+     * Check if user has a pending request for a ralley
+     * @param ralleyId: Ralley ID
+     * @returns: True if pending request exists
+     */
+    func hasPendingRequest(for ralleyId: UUID) async -> Bool {
+        do {
+            return try await ralleyService.hasPendingRequest(ralleyId: ralleyId)
+        } catch {
+            return false
+        }
     }
 }

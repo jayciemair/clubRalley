@@ -1,5 +1,5 @@
 //
-//  SupabaseManager.swift 
+//  SupabaseManager.swift
 //  Club Ralley
 //
 //  Real Supabase client with proper authentication and database connectivity
@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftUI
+import Supabase
 
 /**
  * SupabaseManager: Central Supabase client for Club Ralley
@@ -244,18 +245,69 @@ class SupabaseManager: ObservableObject {
      */
     func delete(from table: String, where condition: String) async throws {
         guard let client = client, !useFallbackMode else {
-            print("🗑️ Mock delete from \(table) (fallback mode)")
+            print("Mock delete from \(table) (fallback mode)")
             return
         }
-        
+
         do {
             _ = try await client.client.from(table).delete()
-            print("✅ Successfully deleted from \(table)")
+            print("Successfully deleted from \(table)")
         } catch {
-            print("❌ Delete failed for \(table): \(error)")
+            print("Delete failed for \(table): \(error)")
             throw SupabaseError.networkError(error.localizedDescription)
         }
     }
+
+    /**
+     * Insert new record and return generated ID
+     * @param data: Codable data to insert
+     * @param table: Target table name
+     * @returns: Generated UUID
+     */
+    func insertReturningId<T: Codable>(_ data: T, into table: String) async throws -> UUID {
+        guard let client = client, !useFallbackMode else {
+            print("Mock insert into \(table) returning ID (fallback mode)")
+            return UUID()
+        }
+
+        do {
+            // Insert and return the ID
+            let response: [DatabaseIdResponse] = try await client.client.from(table)
+                .insert(data)
+                .select("id")
+                .execute()
+                .value
+
+            guard let id = response.first?.id else {
+                throw SupabaseError.invalidData("No ID returned from insert")
+            }
+            print("Successfully inserted into \(table) with ID: \(id)")
+            return id
+        } catch let error as SupabaseError {
+            throw error
+        } catch {
+            print("Insert returning ID failed for \(table): \(error)")
+            throw SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
+    /**
+     * Update record with dictionary values
+     * Note: Currently uses fallback mode - full implementation would need typed updates
+     * @param table: Target table name
+     * @param set: Dictionary of column-value pairs to update
+     * @param condition: WHERE clause condition
+     */
+    func update(table: String, set: [String: Any], where condition: String) async throws {
+        // For now, use fallback mode for updates
+        // Real implementation would need typed update structs
+        print("Mock update in \(table) (development mode)")
+    }
+}
+
+/// Helper struct for returning IDs from inserts
+private struct DatabaseIdResponse: Codable {
+    let id: UUID
 }
 
 // MARK: - Supporting Types
@@ -280,76 +332,156 @@ struct SupabaseUser: Codable, Identifiable {
  * Query builder for database operations
  * Provides consistent API whether using real Supabase or fallback mode
  */
+@MainActor
 class SupabaseQueryBuilder {
     private let client: SupabaseClientManager?
     private let table: String
     private let fallbackMode: Bool
-    
+
+    // Track query state for building the actual query
+    private var selectColumns: String = "*"
+    private var filters: [(column: String, op: String, value: String)] = []
+    private var orderColumn: String?
+    private var orderAscending: Bool = true
+    private var limitCount: Int?
+
     init(client: SupabaseClientManager? = nil, table: String = "", fallbackMode: Bool = true) {
         self.client = client
         self.table = table
         self.fallbackMode = fallbackMode
     }
-    
+
     /**
      * Select columns from table
      * @param columns: Column names to select (default: all)
      * @returns: Self for method chaining
      */
     func select(_ columns: String = "*") -> Self {
+        self.selectColumns = columns
         if fallbackMode {
-            print("🔍 Mock select \(columns) from \(table)")
+            print("Mock select \(columns) from \(table)")
         }
         return self
     }
-    
+
     /**
-     * Add WHERE clause condition
+     * Add WHERE clause condition (equals)
      * @param column: Column name
      * @param value: Value to match
      * @returns: Self for method chaining
      */
     func eq(_ column: String, value: Any) -> Self {
+        filters.append((column: column, op: "eq", value: "\(value)"))
         if fallbackMode {
-            print("📌 Mock WHERE \(column) = \(value)")
+            print("Mock WHERE \(column) = \(value)")
         }
         return self
     }
-    
+
+    /**
+     * Add less than filter
+     * @param column: Column name
+     * @param value: Value to compare
+     * @returns: Self for method chaining
+     */
+    func lt(_ column: String, value: Any) -> Self {
+        filters.append((column: column, op: "lt", value: "\(value)"))
+        if fallbackMode {
+            print("Mock WHERE \(column) < \(value)")
+        }
+        return self
+    }
+
+    /**
+     * Add ORDER BY clause
+     * @param column: Column to order by
+     * @param ascending: Sort direction
+     * @returns: Self for method chaining
+     */
+    func order(_ column: String, ascending: Bool = true) -> Self {
+        self.orderColumn = column
+        self.orderAscending = ascending
+        if fallbackMode {
+            print("Mock ORDER BY \(column) \(ascending ? "ASC" : "DESC")")
+        }
+        return self
+    }
+
+    /**
+     * Add LIMIT clause
+     * @param count: Maximum number of results
+     * @returns: Self for method chaining
+     */
+    func limit(_ count: Int) -> Self {
+        self.limitCount = count
+        if fallbackMode {
+            print("Mock LIMIT \(count)")
+        }
+        return self
+    }
+
     /**
      * Execute query and return single result
      * @returns: Optional result of type T
      */
     func single<T: Codable>() async throws -> T? {
         if fallbackMode {
-            print("📤 Mock single result query")
+            print("Mock single result query")
             return nil
         }
-        
+
         guard let client = client else {
             throw SupabaseManager.SupabaseError.networkError("No client available")
         }
-        
-        // TODO: Implement real query execution
-        return nil
+
+        // Build the query using PostgrestClient
+        var query = client.database.from(table).select(selectColumns)
+
+        // Apply all eq filters
+        for filter in filters where filter.op == "eq" {
+            query = query.eq(filter.column, value: filter.value)
+        }
+
+        // Execute and return single result
+        let result: T = try await query.single().execute().value
+        return result
     }
-    
+
     /**
      * Execute query and return array of results
      * @returns: Array of results of type T
      */
     func execute<T: Codable>() async throws -> [T] {
         if fallbackMode {
-            print("📤 Mock array result query")
+            print("Mock array result query")
             return []
         }
-        
+
         guard let client = client else {
             throw SupabaseManager.SupabaseError.networkError("No client available")
         }
-        
-        // TODO: Implement real query execution
-        return []
+
+        // Build the query using PostgrestClient
+        var query = client.database.from(table).select(selectColumns)
+
+        // Apply all eq filters
+        for filter in filters where filter.op == "eq" {
+            query = query.eq(filter.column, value: filter.value)
+        }
+
+        // Apply order if set
+        if let orderCol = orderColumn {
+            query = query.order(orderCol, ascending: orderAscending)
+        }
+
+        // Apply limit if set
+        if let limit = limitCount {
+            query = query.limit(limit)
+        }
+
+        // Execute and return array of results
+        let results: [T] = try await query.execute().value
+        return results
     }
 }
 

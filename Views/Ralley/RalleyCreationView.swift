@@ -24,6 +24,10 @@ struct RalleyCreationView: View {
     @State private var isCreating = false
     @State private var showingSuccessMessage = false
 
+    // Privacy settings
+    @State private var visibility: RalleyVisibility = .anyone
+    @State private var joinType: RalleyJoinType = .open
+
     var canCreate: Bool {
         !title.isEmpty && !sport.isEmpty && !locationName.isEmpty && maxPlayers > 0
     }
@@ -111,6 +115,95 @@ struct RalleyCreationView: View {
                             }
                         }
 
+                        // Privacy Settings
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Privacy Settings")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.black)
+
+                            VStack(spacing: 12) {
+                                // Visibility Picker
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Who can see this ralley?")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.gray)
+
+                                    ForEach(RalleyVisibility.allCases, id: \.self) { option in
+                                        Button(action: { visibility = option }) {
+                                            HStack(spacing: 12) {
+                                                Image(systemName: option.iconName)
+                                                    .font(.system(size: 16))
+                                                    .foregroundColor(visibility == option ? .white : Color(hex: "#2C4F40"))
+                                                    .frame(width: 32, height: 32)
+                                                    .background(visibility == option ? Color(hex: "#2C4F40") : Color.gray.opacity(0.1))
+                                                    .cornerRadius(8)
+
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(option.displayName)
+                                                        .font(.system(size: 15, weight: .medium))
+                                                        .foregroundColor(.black)
+                                                    Text(option.description)
+                                                        .font(.system(size: 12))
+                                                        .foregroundColor(.gray)
+                                                }
+
+                                                Spacer()
+
+                                                if visibility == option {
+                                                    Image(systemName: "checkmark.circle.fill")
+                                                        .foregroundColor(Color(hex: "#2C4F40"))
+                                                }
+                                            }
+                                            .padding(12)
+                                            .background(visibility == option ? Color(hex: "#2C4F40").opacity(0.1) : Color.gray.opacity(0.05))
+                                            .cornerRadius(12)
+                                        }
+                                    }
+                                }
+
+                                Divider().padding(.vertical, 4)
+
+                                // Join Type Picker
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("How can people join?")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.gray)
+
+                                    ForEach(RalleyJoinType.allCases, id: \.self) { option in
+                                        Button(action: { joinType = option }) {
+                                            HStack(spacing: 12) {
+                                                Image(systemName: option.iconName)
+                                                    .font(.system(size: 16))
+                                                    .foregroundColor(joinType == option ? .white : Color(hex: "#2C4F40"))
+                                                    .frame(width: 32, height: 32)
+                                                    .background(joinType == option ? Color(hex: "#2C4F40") : Color.gray.opacity(0.1))
+                                                    .cornerRadius(8)
+
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(option.displayName)
+                                                        .font(.system(size: 15, weight: .medium))
+                                                        .foregroundColor(.black)
+                                                    Text(option.description)
+                                                        .font(.system(size: 12))
+                                                        .foregroundColor(.gray)
+                                                }
+
+                                                Spacer()
+
+                                                if joinType == option {
+                                                    Image(systemName: "checkmark.circle.fill")
+                                                        .foregroundColor(Color(hex: "#2C4F40"))
+                                                }
+                                            }
+                                            .padding(12)
+                                            .background(joinType == option ? Color(hex: "#2C4F40").opacity(0.1) : Color.gray.opacity(0.05))
+                                            .cornerRadius(12)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         // Create Button
                         Button(action: {
                             createRalley()
@@ -195,7 +288,9 @@ struct RalleyCreationView: View {
                 maxPlayers: maxPlayers,
                 cost: Double(cost),
                 description: description.isEmpty ? "Join us for a fun game of \(sport)!" : description,
-                requirements: requirements
+                requirements: requirements,
+                visibility: visibility,
+                joinType: joinType
             )
 
             let impactFeedback = UIImpactFeedbackGenerator(style: .medium)

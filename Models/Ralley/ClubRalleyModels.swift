@@ -101,6 +101,23 @@ struct ClubRalley: Identifiable, Codable {
     /// Inactive ralleys don't appear in search results
     var isActive: Bool?
 
+    // MARK: - Captain & Chat Properties
+
+    /// Visibility setting - who can see/find this ralley
+    var visibility: RalleyVisibility
+
+    /// Join type setting - how users can join
+    var joinType: RalleyJoinType
+
+    /// Whether current user is the captain (organizer)
+    var isCaptain: Bool
+
+    /// ID of the associated group chat (if created)
+    var chatId: UUID?
+
+    /// Number of pending join requests (for captain)
+    var pendingRequestsCount: Int
+
     // MARK: - Computed Properties
 
     /// Formatted string showing time until the ralley starts
@@ -130,6 +147,61 @@ struct ClubRalley: Identifiable, Codable {
     var isHappeningSoon: Bool {
         let twoHoursFromNow = Date().addingTimeInterval(2 * 60 * 60)
         return dateTime > Date() && dateTime < twoHoursFromNow
+    }
+
+    /// Whether this ralley requires approval to join
+    var requiresApproval: Bool {
+        joinType == .approvalRequired
+    }
+
+    /// Whether current user can directly join (open join type)
+    var canJoinDirectly: Bool {
+        joinType == .open && !isFull
+    }
+
+    // MARK: - Initialization with Defaults
+
+    /// Initialize with all properties including new captain/chat fields
+    init(
+        id: UUID,
+        title: String,
+        sport: String,
+        description: String,
+        organizer: ClubRalleyOrganizer,
+        dateTime: Date,
+        location: ClubRalleyLocation,
+        maxPlayers: Int,
+        currentPlayers: Int,
+        cost: Int,
+        requirements: String,
+        isPublic: Bool,
+        createdAt: Date? = nil,
+        isActive: Bool? = nil,
+        visibility: RalleyVisibility = .anyone,
+        joinType: RalleyJoinType = .open,
+        isCaptain: Bool = false,
+        chatId: UUID? = nil,
+        pendingRequestsCount: Int = 0
+    ) {
+        self.id = id
+        self.title = title
+        self.sport = sport
+        self.description = description
+        self.organizer = organizer
+        self.dateTime = dateTime
+        self.location = location
+        self.maxPlayers = maxPlayers
+        self.currentPlayers = currentPlayers
+        self.cost = cost
+        self.requirements = requirements
+        self.isPublic = isPublic
+        self.createdAt = createdAt
+        self.isActive = isActive
+        self.visibility = visibility
+        self.joinType = joinType
+        self.isCaptain = isCaptain
+        self.chatId = chatId
+        self.pendingRequestsCount = pendingRequestsCount
     }
 }
 
@@ -247,6 +319,15 @@ struct ClubRalleyPost: Identifiable, Codable {
 
     /// URL string for author's profile photo
     let authorPhotoURL: String
+
+    /// Author's school/university (e.g., "Texas A&M", "Bucknell University")
+    var authorSchool: String?
+
+    /// Author's location (e.g., "Chicago, IL")
+    var authorLocation: String?
+
+    /// Author's sport (e.g., "soccer", "tennis")
+    var authorSport: String?
 
     /// Optional title for the post
     let title: String?

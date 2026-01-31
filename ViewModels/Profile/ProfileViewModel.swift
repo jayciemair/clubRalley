@@ -10,12 +10,15 @@ import SwiftUI
 
 @MainActor
 class ProfileViewModel: ObservableObject {
-    
+
     // MARK: - Published Properties
     @Published var currentUserProfile: UserProfile?
     @Published var viewedProfiles: [UUID: UserProfile] = [:]
     @Published var isLoading = false
     @Published var error: ProfileError?
+
+    // MARK: - Dependencies
+    private let friendshipService = FriendshipService()
     
     // MARK: - Current User Methods
     
@@ -59,13 +62,16 @@ class ProfileViewModel: ObservableObject {
     
     func toggleFollow(_ userId: UUID) async {
         guard let profile = viewedProfiles[userId] else { return }
-        
+
         let isCurrentlyFollowing = profile.isFollowedByCurrentUser ?? false
         let newFollowState = !isCurrentlyFollowing
-        
+
         print("Toggling follow for user \(userId): \(isCurrentlyFollowing) -> \(newFollowState)")
-        
-        // Optimistic local update - works perfectly for UI testing!
+
+        // Store original state for rollback
+        let originalProfile = profile
+
+        // Optimistic local update
         let updatedProfile = UserProfile(
             id: profile.id,
             user: profile.user,
@@ -85,11 +91,23 @@ class ProfileViewModel: ObservableObject {
             isFollowedByCurrentUser: newFollowState,
             relationshipStatus: newFollowState ? .following : .none
         )
-        
+
         viewedProfiles[userId] = updatedProfile
-        
-        // Simulate API call time for realistic UX
-        try? await Task.sleep(nanoseconds: 200_000_000)
+
+        // Sync with backend
+        do {
+            if newFollowState {
+                try await friendshipService.followUser(userId)
+            } else {
+                try await friendshipService.unfollowUser(userId)
+            }
+            print("Follow state synced with backend")
+        } catch {
+            // Revert optimistic update on failure
+            viewedProfiles[userId] = originalProfile
+            self.error = .actionFailed("Failed to update follow status")
+            print("Failed to sync follow state: \(error)")
+        }
     }
     
     func blockUser(_ userId: UUID) async {

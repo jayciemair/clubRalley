@@ -261,6 +261,16 @@
 		C9AABB152F2B1003004D160C /* RalleyCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB142F2B1003004D160C /* RalleyCreationView.swift */; };
 		C9AABB172F2B1004004D160C /* UserContentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB162F2B1004004D160C /* UserContentViews.swift */; };
 		C9AABB192F2B1005004D160C /* PostCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB182F2B1005004D160C /* PostCreationView.swift */; };
+		7DFB6935608F4D5BA0235F9C /* ChatModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAB5E7F14E7485FB417CDEC /* ChatModels.swift */; };
+		F814EFEBCD394BA1A28247F1 /* DatabaseChatModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40169BDB40040F98EFA7034 /* DatabaseChatModels.swift */; };
+		464F122180BE4A3AB4D83054 /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB19CB9A7EB41F9BFD78F50 /* ChatService.swift */; };
+		7F7914E4B5F346D8A9796844 /* GroupChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5BB9DCF55748C5A0F16C21 /* GroupChatViewModel.swift */; };
+		82974B8248684139B69BBB79 /* ChatsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201374D271BE458488665421 /* ChatsListViewModel.swift */; };
+		3214675F9C574AD1983D7058 /* GroupChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5174E8FF82A1453E91D79B69 /* GroupChatView.swift */; };
+		BA84DF69D76244F9AE44875F /* GroupChatMessageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE3B097D4C547C8B5340689 /* GroupChatMessageRow.swift */; };
+		DDC20D6997824C2DA1CCF641 /* ChatsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944F9A9BB36C45AEBEF9FEF9 /* ChatsListView.swift */; };
+		6D012D857F4742168B0B01FF /* RalleyDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06206BA527D8432986062EF6 /* RalleyDetailView.swift */; };
+		050D1BCF4E5841318649A490 /* PendingRequestsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34E2C7D678C49EBAB310CFC /* PendingRequestsSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -530,6 +540,16 @@
 		C9AABB142F2B1003004D160C /* RalleyCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyCreationView.swift; sourceTree = "<group>"; };
 		C9AABB162F2B1004004D160C /* UserContentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserContentViews.swift; sourceTree = "<group>"; };
 		C9AABB182F2B1005004D160C /* PostCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCreationView.swift; sourceTree = "<group>"; };
+		5BAB5E7F14E7485FB417CDEC /* ChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Chat/ChatModels.swift"; sourceTree = "<group>"; };
+		E40169BDB40040F98EFA7034 /* DatabaseChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Database/DatabaseChatModels.swift"; sourceTree = "<group>"; };
+		7EB19CB9A7EB41F9BFD78F50 /* ChatService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/ChatService.swift"; sourceTree = "<group>"; };
+		EA5BB9DCF55748C5A0F16C21 /* GroupChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewModels/Chat/GroupChatViewModel.swift"; sourceTree = "<group>"; };
+		201374D271BE458488665421 /* ChatsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewModels/Chat/ChatsListViewModel.swift"; sourceTree = "<group>"; };
+		5174E8FF82A1453E91D79B69 /* GroupChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Chat/GroupChatView.swift"; sourceTree = "<group>"; };
+		3AE3B097D4C547C8B5340689 /* GroupChatMessageRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Chat/GroupChatMessageRow.swift"; sourceTree = "<group>"; };
+		944F9A9BB36C45AEBEF9FEF9 /* ChatsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Chat/ChatsListView.swift"; sourceTree = "<group>"; };
+		06206BA527D8432986062EF6 /* RalleyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Ralley/RalleyDetailView.swift"; sourceTree = "<group>"; };
+		C34E2C7D678C49EBAB310CFC /* PendingRequestsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/Ralley/PendingRequestsSheet.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1912,6 +1932,17 @@
 				C9AABB152F2B1003004D160C /* RalleyCreationView.swift in Sources */,
 				C9AABB172F2B1004004D160C /* UserContentViews.swift in Sources */,
 				C9AABB192F2B1005004D160C /* PostCreationView.swift in Sources */,
+			
+				7DFB6935608F4D5BA0235F9C /* ChatModels.swift in Sources */,
+				F814EFEBCD394BA1A28247F1 /* DatabaseChatModels.swift in Sources */,
+				464F122180BE4A3AB4D83054 /* ChatService.swift in Sources */,
+				7F7914E4B5F346D8A9796844 /* GroupChatViewModel.swift in Sources */,
+				82974B8248684139B69BBB79 /* ChatsListViewModel.swift in Sources */,
+				3214675F9C574AD1983D7058 /* GroupChatView.swift in Sources */,
+				BA84DF69D76244F9AE44875F /* GroupChatMessageRow.swift in Sources */,
+				DDC20D6997824C2DA1CCF641 /* ChatsListView.swift in Sources */,
+				6D012D857F4742168B0B01FF /* RalleyDetailView.swift in Sources */,
+				050D1BCF4E5841318649A490 /* PendingRequestsSheet.swift in Sources */,
 			);
 		};
 /* End PBXSourcesBuildPhase section */

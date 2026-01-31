@@ -75,7 +75,9 @@ class RalleyService: ObservableObject {
                 category: mapSportToCategory(ralley.sport),
                 max_participants: ralley.maxPlayers,
                 current_participants: 1, // Host counts as first participant
-                is_public: true
+                is_public: ralley.visibility == .anyone,
+                visibility: ralley.visibility.rawValue,
+                join_type: ralley.joinType.rawValue
             )
             
             // Insert into Supabase ralleys table
@@ -263,24 +265,194 @@ class RalleyService: ObservableObject {
         guard supabase.isAuthenticated else {
             throw SupabaseManager.SupabaseError.notAuthenticated
         }
-        
+
         guard let currentUser = supabase.currentUser else {
             throw SupabaseManager.SupabaseError.userNotFound
         }
-        
+
         do {
             // Delete from ralley_participants and decrement counter
             try await supabase.delete(
-                from: "ralley_participants", 
+                from: "ralley_participants",
                 where: "ralley_id = '\(ralleyId)' AND user_id = '\(currentUser.id)'"
             )
-            
+
             print("✅ RalleyService: User left ralley successfully")
             return true
-            
+
         } catch {
             print("❌ RalleyService: Leave ralley failed: \(error)")
             throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
+    // MARK: - Join Request Methods (Private Ralleys)
+
+    /**
+     * Request to join a private ralley (requires captain approval)
+     * @param ralleyId: Ralley ID to request to join
+     * @returns: Success status
+     */
+    func requestToJoin(ralleyId: UUID) async throws -> Bool {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        guard let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.userNotFound
+        }
+
+        do {
+            // Insert participant with 'requested' status
+            let participant = DatabaseRalleyParticipant(
+                ralley_id: ralleyId,
+                user_id: currentUser.id,
+                status: "requested"
+            )
+
+            try await supabase.insert(participant, into: "ralley_participants")
+
+            print("✅ RalleyService: Join request submitted for ralley \(ralleyId)")
+            return true
+
+        } catch {
+            print("❌ RalleyService: Request to join failed: \(error)")
+            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
+    /**
+     * Approve a join request (captain only)
+     * @param ralleyId: Ralley ID
+     * @param userId: User ID to approve
+     * @returns: Success status
+     */
+    func approveJoinRequest(ralleyId: UUID, userId: UUID) async throws -> Bool {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        do {
+            // Update participant status to 'attending'
+            try await supabase.update(
+                table: "ralley_participants",
+                set: ["status": "attending"],
+                where: "ralley_id = '\(ralleyId)' AND user_id = '\(userId)'"
+            )
+
+            // Increment current_participants count
+            // Note: In production, this should be done via a database trigger or RPC
+
+            print("✅ RalleyService: Approved join request for user \(userId)")
+            return true
+
+        } catch {
+            print("❌ RalleyService: Approve join request failed: \(error)")
+            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
+    /**
+     * Reject a join request (captain only)
+     * @param ralleyId: Ralley ID
+     * @param userId: User ID to reject
+     * @returns: Success status
+     */
+    func rejectJoinRequest(ralleyId: UUID, userId: UUID) async throws -> Bool {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        do {
+            // Delete the participant record
+            try await supabase.delete(
+                from: "ralley_participants",
+                where: "ralley_id = '\(ralleyId)' AND user_id = '\(userId)' AND status = 'requested'"
+            )
+
+            print("✅ RalleyService: Rejected join request for user \(userId)")
+            return true
+
+        } catch {
+            print("❌ RalleyService: Reject join request failed: \(error)")
+            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
+    /**
+     * Load pending join requests for a ralley (captain only)
+     * @param ralleyId: Ralley ID
+     * @returns: Array of pending requests with user info
+     */
+    func loadPendingRequests(ralleyId: UUID) async throws -> [PendingJoinRequest] {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        do {
+            let requests: [DatabasePendingRequestWithUser] = try await supabase.query("ralley_participants")
+                .select("*, club_users(first_name, last_name, username, profile_photo_url)")
+                .eq("ralley_id", value: ralleyId)
+                .eq("status", value: "requested")
+                .execute()
+
+            return requests.map { req in
+                PendingJoinRequest(
+                    id: req.id,
+                    ralleyId: req.ralley_id,
+                    userId: req.user_id,
+                    userName: "\(req.user.first_name) \(req.user.last_name)",
+                    userUsername: req.user.username,
+                    userPhotoURL: req.user.profile_photo_url,
+                    mutualCount: 0, // TODO: Calculate mutual friends
+                    requestedAt: req.created_at
+                )
+            }
+
+        } catch {
+            print("❌ RalleyService: Load pending requests failed: \(error)")
+            return []
+        }
+    }
+
+    /**
+     * Get count of pending requests for a ralley
+     * @param ralleyId: Ralley ID
+     * @returns: Number of pending requests
+     */
+    func getPendingRequestsCount(ralleyId: UUID) async throws -> Int {
+        do {
+            let requests: [DatabaseRalleyParticipant] = try await supabase.query("ralley_participants")
+                .select("*")
+                .eq("ralley_id", value: ralleyId)
+                .eq("status", value: "requested")
+                .execute()
+
+            return requests.count
+        } catch {
+            return 0
+        }
+    }
+
+    /**
+     * Check if current user has a pending request for a ralley
+     * @param ralleyId: Ralley ID
+     * @returns: True if user has pending request
+     */
+    func hasPendingRequest(ralleyId: UUID) async throws -> Bool {
+        guard let currentUser = supabase.currentUser else { return false }
+
+        do {
+            let requests: [DatabaseRalleyParticipant] = try await supabase.query("ralley_participants")
+                .select("*")
+                .eq("ralley_id", value: ralleyId)
+                .eq("user_id", value: currentUser.id)
+                .eq("status", value: "requested")
+                .execute()
+
+            return !requests.isEmpty
+        } catch {
+            return false
         }
     }
     
@@ -307,13 +479,13 @@ class RalleyService: ObservableObject {
      * Handles complex mapping between database schema and UI models
      */
     private func mapDatabaseRalleyToApp(_ dbRalley: DatabaseRalleyWithUser) -> ClubRalley {
-        let organizer = ClubRalleyOrganizer(
-            id: dbRalley.user.id ?? UUID(),
-            name: "\(dbRalley.user.first_name) \(dbRalley.user.last_name)",
-            username: dbRalley.user.username,
-            photoURL: dbRalley.user.profile_photo_url ?? ""
+        let organizerData = ClubRalleyOrganizer(
+            id: dbRalley.organizer.id ?? UUID(),
+            name: "\(dbRalley.organizer.first_name) \(dbRalley.organizer.last_name)",
+            username: dbRalley.organizer.username,
+            photoURL: dbRalley.organizer.profile_photo_url ?? ""
         )
-        
+
         let location = ClubRalleyLocation(
             name: dbRalley.location_name,
             address: dbRalley.location_address ?? "",
@@ -322,20 +494,32 @@ class RalleyService: ObservableObject {
             latitude: dbRalley.latitude,
             longitude: dbRalley.longitude
         )
-        
+
+        // Determine if current user is captain
+        let isCaptain = supabase.currentUser?.id == dbRalley.host_user_id
+
+        // Parse visibility and join type from database
+        let visibility = RalleyVisibility(rawValue: dbRalley.visibility ?? "anyone") ?? .anyone
+        let joinType = RalleyJoinType(rawValue: dbRalley.join_type ?? "open") ?? .open
+
         return ClubRalley(
             id: dbRalley.id,
             title: dbRalley.title,
             sport: mapCategoryToSport(dbRalley.category),
             description: dbRalley.description ?? "",
-            organizer: organizer,
+            organizer: organizerData,
             dateTime: dbRalley.date_time,
             location: location,
             maxPlayers: dbRalley.max_participants ?? 0,
             currentPlayers: dbRalley.current_participants,
             cost: 0, // TODO: Add cost field to database
             requirements: "", // TODO: Add requirements field to database
-            isPublic: dbRalley.is_public
+            isPublic: dbRalley.is_public,
+            visibility: visibility,
+            joinType: joinType,
+            isCaptain: isCaptain,
+            chatId: nil, // TODO: Load from ralley_chats table
+            pendingRequestsCount: 0 // Loaded separately for captain
         )
     }
     

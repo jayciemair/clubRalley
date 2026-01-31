@@ -30,6 +30,12 @@ class PostManager: ObservableObject {
     /// Error state for user notifications
     @Published var error: Error?
 
+    /// Comments for the selected post
+    @Published var selectedPostComments: [PostComment] = []
+
+    /// Loading state for comments
+    @Published var isLoadingComments = false
+
     // MARK: - Dependencies
 
     /// Service layer for post database operations
@@ -80,13 +86,16 @@ class PostManager: ObservableObject {
         let samplePosts = [
             ClubRalleyPost(
                 id: UUID(),
-                authorName: "Sarah Wilson",
-                authorUsername: "@sarahw",
-                authorPhotoURL: "https://picsum.photos/44/44?random=10",
-                title: "Amazing Tennis Practice",
-                content: "Just had an incredible practice session! Working on my backhand and it's finally clicking. Can't wait for the tournament next week!",
-                images: ["https://picsum.photos/300/300?random=510"],
-                timestamp: Date().addingTimeInterval(-3600), // 1 hour ago
+                authorName: "Ryan Smith",
+                authorUsername: "@rsmith",
+                authorPhotoURL: "https://picsum.photos/50/50?random=10",
+                authorSchool: "Texas A&M",
+                authorLocation: "Chicago, IL",
+                authorSport: "soccer",
+                title: "Tennis Match",
+                content: "I need a hitting partner for tomorrow afternoon. Send help!",
+                images: [],
+                timestamp: Date().addingTimeInterval(-86400), // Today/1 day ago
                 likes: 24,
                 comments: 8,
                 shares: 3,
@@ -94,30 +103,36 @@ class PostManager: ObservableObject {
             ),
             ClubRalleyPost(
                 id: UUID(),
-                authorName: "Mike Johnson",
-                authorUsername: "@mikej",
-                authorPhotoURL: "https://picsum.photos/44/44?random=11",
+                authorName: "Gracie King",
+                authorUsername: "@gking",
+                authorPhotoURL: "https://picsum.photos/50/50?random=11",
+                authorSchool: "Bucknell University",
+                authorLocation: "Chicago, IL",
+                authorSport: "tennis",
                 title: nil,
-                content: "Basketball pickup game at the park was intense! Made some new friends and got a great workout in. Who's up for tomorrow?",
-                images: [],
-                timestamp: Date().addingTimeInterval(-7200), // 2 hours ago
-                likes: 15,
+                content: "Had an amazing session on the courts today! The weather was perfect and my serve is finally coming together.",
+                images: ["https://picsum.photos/600/400?random=tennis1"],
+                timestamp: Date().addingTimeInterval(-172800), // 2 days ago
+                likes: 45,
                 comments: 12,
-                shares: 1,
+                shares: 5,
                 isLiked: true
             ),
             ClubRalleyPost(
                 id: UUID(),
-                authorName: "Your Name", // For user posts testing
-                authorUsername: "@you",
-                authorPhotoURL: "https://picsum.photos/44/44?random=50",
-                title: "My First Rally Post!",
-                content: "Just created my first post on Club Ralley! Looking forward to connecting with fellow athletes and organizing some pickup games. Who's ready to play?",
+                authorName: "Mike Johnson",
+                authorUsername: "@mikej",
+                authorPhotoURL: "https://picsum.photos/50/50?random=12",
+                authorSchool: "Duke University",
+                authorLocation: "Chicago, IL",
+                authorSport: "basketball",
+                title: "Pickup Game Tonight",
+                content: "Looking for 2 more players for basketball at 6pm. Riverside Park courts. All skill levels welcome!",
                 images: [],
-                timestamp: Date().addingTimeInterval(-1800), // 30 minutes ago
-                likes: 5,
-                comments: 2,
-                shares: 0,
+                timestamp: Date().addingTimeInterval(-7200), // 2 hours ago
+                likes: 15,
+                comments: 8,
+                shares: 1,
                 isLiked: false
             )
         ]
@@ -150,7 +165,10 @@ class PostManager: ObservableObject {
             id: UUID(),
             authorName: supabase.currentUser?.displayName ?? "Your Name",
             authorUsername: "@\(supabase.currentUser?.email.components(separatedBy: "@").first ?? "you")",
-            authorPhotoURL: "https://picsum.photos/44/44?random=50", // TODO: Get real profile photo
+            authorPhotoURL: "https://picsum.photos/50/50?random=50",
+            authorSchool: "University", // TODO: Get from user profile
+            authorLocation: "Chicago, IL", // TODO: Get from user profile
+            authorSport: "athlete", // TODO: Get from user profile
             title: title?.isEmpty == false ? title : nil,
             content: content,
             images: images,
@@ -267,5 +285,120 @@ class PostManager: ObservableObject {
      */
     func clearError() {
         error = nil
+    }
+
+    // MARK: - Comment Operations
+
+    /**
+     * Load comments for a specific post
+     * @param postId: ID of post to load comments for
+     */
+    func loadComments(for postId: UUID) async {
+        isLoadingComments = true
+
+        do {
+            let comments = try await postService.loadComments(postId: postId)
+            selectedPostComments = comments
+            print("✅ PostManager: Loaded \(comments.count) comments")
+        } catch {
+            print("❌ PostManager: Failed to load comments: \(error)")
+            self.error = error
+        }
+
+        isLoadingComments = false
+    }
+
+    /**
+     * Add a comment to a post
+     * @param postId: ID of post to comment on
+     * @param content: Comment text
+     */
+    func addComment(to postId: UUID, content: String) async {
+        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return
+        }
+
+        do {
+            let newComment = try await postService.addComment(postId: postId, content: content)
+
+            // Add to local cache
+            selectedPostComments.insert(newComment, at: 0)
+
+            // Update post comment count
+            if let index = posts.firstIndex(where: { $0.id == postId }) {
+                posts[index].comments += 1
+            }
+
+            print("✅ PostManager: Comment added")
+        } catch {
+            print("❌ PostManager: Failed to add comment: \(error)")
+            self.error = error
+        }
+    }
+
+    /**
+     * Delete a comment from a post
+     * @param commentId: ID of comment to delete
+     * @param postId: ID of post the comment belongs to
+     */
+    func deleteComment(_ commentId: UUID, from postId: UUID) async {
+        // Optimistic update
+        let originalComments = selectedPostComments
+        selectedPostComments.removeAll { $0.id == commentId }
+
+        // Update post comment count
+        if let index = posts.firstIndex(where: { $0.id == postId }) {
+            posts[index].comments -= 1
+        }
+
+        do {
+            try await postService.deleteComment(commentId: commentId)
+            print("✅ PostManager: Comment deleted")
+        } catch {
+            // Revert on failure
+            selectedPostComments = originalComments
+            if let index = posts.firstIndex(where: { $0.id == postId }) {
+                posts[index].comments += 1
+            }
+            print("❌ PostManager: Failed to delete comment: \(error)")
+            self.error = error
+        }
+    }
+
+    // MARK: - Post Management
+
+    /**
+     * Delete a post
+     * @param postId: ID of post to delete
+     */
+    func deletePost(_ postId: UUID) async {
+        // Optimistic update
+        let originalPosts = posts
+        posts.removeAll { $0.id == postId }
+
+        do {
+            try await postService.deletePost(postId)
+            print("✅ PostManager: Post deleted")
+        } catch {
+            // Revert on failure
+            posts = originalPosts
+            print("❌ PostManager: Failed to delete post: \(error)")
+            self.error = error
+        }
+    }
+
+    /**
+     * Report a post for inappropriate content
+     * @param postId: ID of post to report
+     * @param reason: Reason for reporting
+     */
+    func reportPost(_ postId: UUID, reason: String) async {
+        do {
+            try await postService.reportPost(postId, reason: reason)
+            print("✅ PostManager: Post reported")
+        } catch {
+            print("❌ PostManager: Failed to report post: \(error)")
+            self.error = error
+        }
     }
 }

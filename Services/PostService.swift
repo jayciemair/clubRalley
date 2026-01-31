@@ -216,8 +216,291 @@ class PostService: ObservableObject {
         }
     }
     
+    // MARK: - Comment Operations
+
+    /**
+     * Load comments for a specific post
+     * @param postId: Post ID to load comments for
+     * @returns: Array of comments with user information
+     */
+    func loadComments(postId: UUID) async throws -> [PostComment] {
+        isLoading = true
+        lastError = nil
+
+        do {
+            let comments = try await supabase.query("post_comments")
+                .select("*, club_users(first_name, last_name, username, profile_photo_url)")
+                .eq("post_id", value: postId)
+                .execute() as [DatabaseCommentWithUser]
+
+            let mappedComments = comments.map { dbComment in
+                mapDatabaseCommentToApp(dbComment)
+            }
+
+            isLoading = false
+            print("✅ PostService: Loaded \(mappedComments.count) comments for post \(postId)")
+            return mappedComments
+
+        } catch {
+            isLoading = false
+            print("❌ PostService: Load comments failed: \(error)")
+
+            // Return mock comments for development
+            return generateMockComments(for: postId)
+        }
+    }
+
+    /**
+     * Add a new comment to a post
+     * @param postId: Post ID to comment on
+     * @param content: Comment text content
+     * @returns: Created comment with user information
+     */
+    func addComment(postId: UUID, content: String) async throws -> PostComment {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        guard let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.userNotFound
+        }
+
+        isLoading = true
+        lastError = nil
+
+        do {
+            let dbComment = DatabaseComment(
+                post_id: postId,
+                user_id: currentUser.id,
+                content: content
+            )
+
+            try await supabase.insert(dbComment, into: "post_comments")
+
+            print("✅ PostService: Comment added to post \(postId)")
+
+            isLoading = false
+
+            // Return the created comment
+            return PostComment(
+                id: UUID(),
+                postId: postId,
+                userId: currentUser.id,
+                content: content,
+                createdAt: Date(),
+                user: User(
+                    id: currentUser.id,
+                    email: currentUser.email,
+                    firstName: currentUser.firstName,
+                    lastName: currentUser.lastName,
+                    username: currentUser.email.components(separatedBy: "@").first ?? "user",
+                    dateOfBirth: DateOfBirth(month: 1, year: 2000),
+                    gender: .preferNotToSay,
+                    locationCity: "",
+                    locationState: "",
+                    bio: nil,
+                    instagramHandle: nil,
+                    profilePhotoURL: nil,
+                    isVerifiedAthlete: false,
+                    athleteInfo: nil,
+                    friendsCount: 0,
+                    ralleysCount: 0,
+                    createdAt: Date(),
+                    updatedAt: Date()
+                )
+            )
+
+        } catch let error as SupabaseManager.SupabaseError {
+            isLoading = false
+            lastError = error
+            throw error
+        } catch {
+            isLoading = false
+            let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+            lastError = supabaseError
+            throw supabaseError
+        }
+    }
+
+    /**
+     * Delete a comment
+     * @param commentId: Comment ID to delete
+     */
+    func deleteComment(commentId: UUID) async throws {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        isLoading = true
+        lastError = nil
+
+        do {
+            try await supabase.delete(from: "post_comments", where: "id = '\(commentId)'")
+            print("✅ PostService: Comment \(commentId) deleted")
+            isLoading = false
+        } catch {
+            isLoading = false
+            print("❌ PostService: Delete comment failed: \(error)")
+            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
+    // MARK: - Post Management
+
+    /**
+     * Delete a post
+     * @param postId: Post ID to delete
+     */
+    func deletePost(_ postId: UUID) async throws {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        isLoading = true
+        lastError = nil
+
+        do {
+            try await supabase.delete(from: "posts", where: "id = '\(postId)'")
+            print("✅ PostService: Post \(postId) deleted")
+            isLoading = false
+        } catch {
+            isLoading = false
+            print("❌ PostService: Delete post failed: \(error)")
+            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
+    /**
+     * Report a post for review
+     * @param postId: Post ID to report
+     * @param reason: Reason for reporting
+     */
+    func reportPost(_ postId: UUID, reason: String) async throws {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        guard let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.userNotFound
+        }
+
+        isLoading = true
+        lastError = nil
+
+        do {
+            let report = DatabasePostReport(
+                post_id: postId,
+                reporter_id: currentUser.id,
+                reason: reason
+            )
+
+            try await supabase.insert(report, into: "post_reports")
+            print("✅ PostService: Post \(postId) reported for: \(reason)")
+            isLoading = false
+        } catch {
+            isLoading = false
+            print("❌ PostService: Report post failed: \(error)")
+            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
     // MARK: - Helper Methods
-    
+
+    /**
+     * Map database comment to app model
+     */
+    private func mapDatabaseCommentToApp(_ dbComment: DatabaseCommentWithUser) -> PostComment {
+        return PostComment(
+            id: dbComment.id,
+            postId: dbComment.post_id,
+            userId: dbComment.user_id,
+            content: dbComment.content,
+            createdAt: dbComment.created_at,
+            user: User(
+                id: dbComment.user_id,
+                email: "",
+                firstName: dbComment.user.first_name,
+                lastName: dbComment.user.last_name,
+                username: dbComment.user.username,
+                dateOfBirth: DateOfBirth(month: 1, year: 2000),
+                gender: .preferNotToSay,
+                locationCity: "",
+                locationState: "",
+                bio: nil,
+                instagramHandle: nil,
+                profilePhotoURL: dbComment.user.profile_photo_url,
+                isVerifiedAthlete: false,
+                athleteInfo: nil,
+                friendsCount: 0,
+                ralleysCount: 0,
+                createdAt: Date(),
+                updatedAt: Date()
+            )
+        )
+    }
+
+    /**
+     * Generate mock comments for development
+     */
+    private func generateMockComments(for postId: UUID) -> [PostComment] {
+        return [
+            PostComment(
+                id: UUID(),
+                postId: postId,
+                userId: UUID(),
+                content: "Great post! Keep it up!",
+                createdAt: Date().addingTimeInterval(-1800),
+                user: User(
+                    id: UUID(),
+                    email: "sarah@example.com",
+                    firstName: "Sarah",
+                    lastName: "Wilson",
+                    username: "sarahw",
+                    dateOfBirth: DateOfBirth(month: 5, year: 1998),
+                    gender: .female,
+                    locationCity: "Chicago",
+                    locationState: "IL",
+                    bio: nil,
+                    instagramHandle: nil,
+                    profilePhotoURL: "https://picsum.photos/44/44?random=20",
+                    isVerifiedAthlete: false,
+                    athleteInfo: nil,
+                    friendsCount: 50,
+                    ralleysCount: 5,
+                    createdAt: Date(),
+                    updatedAt: Date()
+                )
+            ),
+            PostComment(
+                id: UUID(),
+                postId: postId,
+                userId: UUID(),
+                content: "Love this! Count me in for the next game.",
+                createdAt: Date().addingTimeInterval(-3600),
+                user: User(
+                    id: UUID(),
+                    email: "mike@example.com",
+                    firstName: "Mike",
+                    lastName: "Johnson",
+                    username: "mikej",
+                    dateOfBirth: DateOfBirth(month: 8, year: 1995),
+                    gender: .male,
+                    locationCity: "Chicago",
+                    locationState: "IL",
+                    bio: nil,
+                    instagramHandle: nil,
+                    profilePhotoURL: "https://picsum.photos/44/44?random=21",
+                    isVerifiedAthlete: false,
+                    athleteInfo: nil,
+                    friendsCount: 80,
+                    ralleysCount: 12,
+                    createdAt: Date(),
+                    updatedAt: Date()
+                )
+            )
+        ]
+    }
+
     /**
      * Format post content for database storage
      * Combines title and content, handles special formatting
