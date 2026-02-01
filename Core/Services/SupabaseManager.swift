@@ -132,32 +132,22 @@ class SupabaseManager: ObservableObject {
     }
     
     /**
-     * Sign in as Gracie King for development testing
-     * In production, this would be replaced with real OAuth flows
+     * Set authenticated user (called by AuthenticationService)
+     * @param user: SupabaseUser to set as current user
      */
-    func signInAsGracie() {
-        if useFallbackMode {
-            // Mock authentication for development
-            isAuthenticated = true
-            currentUser = SupabaseUser(
-                id: UUID(),
-                email: "gracie@example.com",
-                firstName: "Gracie",
-                lastName: "King"
-            )
-            print("🎭 Mock sign in as Gracie (fallback mode)")
-        } else {
-            // TODO: Implement real authentication when needed
-            // For now, use development mock even with real client
-            isAuthenticated = true
-            currentUser = SupabaseUser(
-                id: UUID(),
-                email: "gracie@example.com",
-                firstName: "Gracie", 
-                lastName: "King"
-            )
-            print("🔑 Development sign in as Gracie (with real client)")
-        }
+    func setAuthenticatedUser(_ user: SupabaseUser) {
+        isAuthenticated = true
+        currentUser = user
+        print("SupabaseManager: User authenticated: \(user.email)")
+    }
+
+    /**
+     * Clear authenticated user (called by AuthenticationService on sign out)
+     */
+    func clearAuthenticatedUser() {
+        isAuthenticated = false
+        currentUser = nil
+        print("SupabaseManager: User cleared")
     }
     
     /**
@@ -303,6 +293,57 @@ class SupabaseManager: ObservableObject {
         // Real implementation would need typed update structs
         print("Mock update in \(table) (development mode)")
     }
+
+    // MARK: - User Profile Creation
+
+    /**
+     * Create a new Club Ralley user profile in the database
+     * Called during onboarding completion
+     */
+    func createClubUser(
+        id: UUID,
+        email: String,
+        firstName: String,
+        lastName: String,
+        username: String,
+        phoneNumber: String,
+        locationCity: String,
+        locationState: String,
+        profilePhotoURL: String?
+    ) async throws {
+        let userData = ClubUserInsert(
+            id: id,
+            email: email,
+            first_name: firstName,
+            last_name: lastName,
+            username: username,
+            phone_number: phoneNumber,
+            location_city: locationCity,
+            location_state: locationState,
+            profile_photo_url: profilePhotoURL,
+            is_verified_athlete: false,
+            friends_count: 0,
+            ralleys_count: 0
+        )
+
+        try await insert(userData, into: "club_users")
+    }
+}
+
+/// Database model for inserting club users
+private struct ClubUserInsert: Codable {
+    let id: UUID
+    let email: String
+    let first_name: String
+    let last_name: String
+    let username: String
+    let phone_number: String
+    let location_city: String
+    let location_state: String
+    let profile_photo_url: String?
+    let is_verified_athlete: Bool
+    let friends_count: Int
+    let ralleys_count: Int
 }
 
 /// Helper struct for returning IDs from inserts
@@ -462,25 +503,21 @@ class SupabaseQueryBuilder {
         }
 
         // Build the query using PostgrestClient
-        var query = client.database.from(table).select(selectColumns)
+        var filterQuery = client.database.from(table).select(selectColumns)
 
         // Apply all eq filters
         for filter in filters where filter.op == "eq" {
-            query = query.eq(filter.column, value: filter.value)
+            filterQuery = filterQuery.eq(filter.column, value: filter.value)
         }
 
-        // Apply order if set
-        if let orderCol = orderColumn {
-            query = query.order(orderCol, ascending: orderAscending)
-        }
-
-        // Apply limit if set
+        // Apply transforms (order and limit)
+        var transformQuery = filterQuery.order(orderColumn ?? "created_at", ascending: orderAscending)
         if let limit = limitCount {
-            query = query.limit(limit)
+            transformQuery = transformQuery.limit(limit)
         }
 
         // Execute and return array of results
-        let results: [T] = try await query.execute().value
+        let results: [T] = try await transformQuery.execute().value
         return results
     }
 }

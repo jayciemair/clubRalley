@@ -16,23 +16,38 @@ struct ClubRalleyApp: App {
     @StateObject var appearanceManager = AppearanceManager.shared  // Appearance mode manager
     @State var selectedTab: MainTab = .home  // Default to home tab
 
+    // Track if Club Ralley onboarding has been completed
+    @AppStorage("hasCompletedClubRalleyOnboarding") private var hasCompletedOnboarding = false
 
+    // SupabaseManager for session management (Club Ralley uses email/password via onboarding)
+    @ObservedObject private var supabaseManager = SupabaseManager.shared
 
     var body: some Scene {
         WindowGroup {
             ZStack {
-                ContentView(selectedTab: $selectedTab)
-                    .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                    .environmentObject(onboardingFlowController)
-                    .environmentObject(storeManager)
-                    .preferredColorScheme(appearanceManager.colorScheme)  // Apply user's appearance preference
-                    .onAppear {
-                        // Fix alert button colors for system alerts
-                        UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor.systemBlue
+                // Show onboarding if not completed, otherwise show main content
+                if hasCompletedOnboarding {
+                    ContentView(selectedTab: $selectedTab)
+                        .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                        .environmentObject(onboardingFlowController)
+                        .environmentObject(storeManager)
+                        .preferredColorScheme(appearanceManager.colorScheme)
+                        .onAppear {
+                            UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor.systemBlue
+                        }
+                        .onOpenURL { url in
+                            handleDeepLink(from: url)
+                        }
+                } else {
+                    // Show Club Ralley onboarding for new users
+                    ClubRalleyOnboardingCoordinator {
+                        // Called when onboarding completes
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                            hasCompletedOnboarding = true
+                        }
                     }
-                    .onOpenURL { url in
-                        handleDeepLink(from: url)
-                    }
+                    .transition(.opacity)
+                }
 
                 // Force update overlay
                 if versionService.shouldShowForceUpdate {
@@ -49,6 +64,9 @@ struct ClubRalleyApp: App {
                 // PHASED INITIALIZATION: Fire and forget - don't block UI
                 // SDKs initialize in background after first frame renders
                 AppInitializer.shared.initialize()
+
+                // Check for existing auth session via SupabaseManager
+                await supabaseManager.checkAuthStatus()
 
                 // Check for force updates (also non-blocking)
                 Task.detached(priority: .utility) {

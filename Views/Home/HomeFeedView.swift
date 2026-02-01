@@ -2,7 +2,7 @@
 //  HomeFeedView.swift
 //  Club Ralley
 //
-//  Home feed view with Figma-styled posts and search header.
+//  Home feed view with Figma-styled posts, search header, and repost functionality.
 //
 
 import SwiftUI
@@ -22,16 +22,146 @@ struct HomeFeedView: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     FeedSearchHeader(searchText: $searchText, showingNotifications: $showingNotifications, showingMessages: $showingMessages)
-                    ForEach(postManager.posts) { post in
-                        FigmaPostCard(post: post).environmentObject(postManager)
+
+                    // Loading state
+                    if postManager.isLoading && postManager.posts.isEmpty {
+                        FeedLoadingView()
+                    } else if let error = postManager.error, postManager.posts.isEmpty {
+                        FeedErrorView(error: error) {
+                            Task {
+                                await postManager.refreshPosts()
+                            }
+                        }
+                    } else {
+                        ForEach(postManager.posts) { post in
+                            FigmaPostCard(post: post).environmentObject(postManager)
+                        }
+                        if postManager.posts.isEmpty { EmptyFeedView() }
                     }
-                    if postManager.posts.isEmpty { EmptyFeedView() }
+
                     Spacer(minLength: 100)
                 }
+            }
+            .refreshable {
+                await postManager.refreshPosts()
             }
             .background(Color.white).navigationBarHidden(true)
             .sheet(isPresented: $showingNotifications) { SimpleNotificationsView() }
         }
+    }
+}
+
+// MARK: - Feed Loading View
+
+struct FeedLoadingView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            ForEach(0..<3, id: \.self) { _ in
+                PostSkeletonView()
+            }
+        }
+        .padding(.top, 16)
+    }
+}
+
+// MARK: - Post Skeleton View
+
+struct PostSkeletonView: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header skeleton
+            HStack(spacing: 12) {
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 50, height: 50)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 120, height: 16)
+
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 180, height: 12)
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+
+            // Content skeleton
+            VStack(alignment: .leading, spacing: 8) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 14)
+
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 200, height: 14)
+            }
+            .padding(.horizontal, 16)
+
+            // Actions skeleton
+            HStack {
+                ForEach(0..<4, id: \.self) { _ in
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 30, height: 20)
+                    Spacer()
+                }
+            }
+            .padding(.horizontal, 16)
+
+            Divider()
+        }
+        .padding(.vertical, 16)
+        .opacity(isAnimating ? 0.6 : 1.0)
+        .onAppear {
+            withAnimation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                isAnimating = true
+            }
+        }
+    }
+}
+
+// MARK: - Feed Error View
+
+struct FeedErrorView: View {
+    let error: Error
+    let onRetry: () -> Void
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 50))
+                .foregroundColor(Color(hex: "#2C4F40").opacity(0.6))
+
+            Text("Unable to load feed")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(.black)
+
+            Text("Check your internet connection and try again")
+                .font(.system(size: 15))
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+
+            Button(action: onRetry) {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.clockwise")
+                    Text("Try Again")
+                }
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(Color(hex: "#2C4F40"))
+                .cornerRadius(12)
+            }
+        }
+        .padding(.top, 60)
     }
 }
 
@@ -61,22 +191,100 @@ struct FigmaPostCard: View {
     @EnvironmentObject var postManager: PostManager
     @State private var showingComments = false
     @State private var showingReport = false
+    @State private var showingRepost = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             FigmaPostHeader(post: post)
+
+            // Visibility badge for non-everyone posts
+            if post.visibility != .everyone {
+                VisibilityBadge(visibility: post.visibility)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+            }
+
+            // Repost indicator
+            if post.isRepost, let originalAuthor = post.originalAuthorName {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.2.squarepath")
+                        .font(.system(size: 12))
+                    Text("Reposted from \(originalAuthor)")
+                        .font(.system(size: 12))
+                }
+                .foregroundColor(.gray)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+            }
+
+            // Ralley completion badge
+            if post.postType == .ralleyCompletion {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 14))
+                    Text("Ralley Completed")
+                        .font(.system(size: 13, weight: .medium))
+                }
+                .foregroundColor(Color(hex: "#2C4F40"))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color(hex: "#2C4F40").opacity(0.1))
+                .cornerRadius(12)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+            }
+
             if let title = post.title, !title.isEmpty {
                 Text(title).font(.system(size: 20, weight: .bold)).foregroundColor(Color(hex: "#2C4F40")).padding(.horizontal, 16).padding(.top, 12)
             }
-            Text(post.content).font(.system(size: 16)).foregroundColor(.black).padding(.horizontal, 16).padding(.top, 8)
+
+            // Quote comment (for reposts)
+            if let quoteComment = post.repostComment, !quoteComment.isEmpty {
+                Text(quoteComment)
+                    .font(.system(size: 16))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+
+                // Original post preview
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(post.content)
+                        .font(.system(size: 14))
+                        .foregroundColor(.black.opacity(0.7))
+                        .lineLimit(3)
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.gray.opacity(0.05))
+                .cornerRadius(10)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+            } else {
+                Text(post.content).font(.system(size: 16)).foregroundColor(.black).padding(.horizontal, 16).padding(.top, 8)
+            }
+
+            // Tagged users
+            if !post.taggedUserIds.isEmpty {
+                HStack(spacing: 4) {
+                    Image(systemName: "person.2.fill")
+                        .font(.system(size: 12))
+                    Text("\(post.taggedUserIds.count) people tagged")
+                        .font(.system(size: 13))
+                }
+                .foregroundColor(Color(hex: "#2C4F40"))
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+            }
+
             FigmaSocialProof().padding(.horizontal, 16).padding(.top, 16)
-            FigmaActionButtons(post: post, showingComments: $showingComments, postManager: postManager).padding(.horizontal, 16).padding(.top, 12)
+            FigmaActionButtons(post: post, showingComments: $showingComments, showingRepost: $showingRepost, postManager: postManager).padding(.horizontal, 16).padding(.top, 12)
             if !post.images.isEmpty { FigmaPostImage(images: post.images).padding(.top, 16) }
             Divider().padding(.top, 16)
         }
         .background(Color.white)
         .sheet(isPresented: $showingComments) { SimpleCommentsSheet(post: post).environmentObject(postManager) }
         .sheet(isPresented: $showingReport) { SimpleReportSheet(postId: post.id).environmentObject(postManager) }
+        .sheet(isPresented: $showingRepost) { RepostSheet(post: post).environmentObject(postManager) }
     }
 }
 
@@ -90,10 +298,14 @@ struct FigmaPostHeader: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
+            // Profile avatar
             AsyncImage(url: URL(string: post.authorPhotoURL)) { image in image.resizable().aspectRatio(contentMode: .fill) } placeholder: { Circle().fill(Color(hex: "#2C4F40")) }
-            .frame(width: 50, height: 50).clipShape(Circle())
+                .frame(width: 50, height: 50).clipShape(Circle())
+
             VStack(alignment: .leading, spacing: 2) {
+                // Author name
                 Text(post.authorName).font(.system(size: 16, weight: .bold)).foregroundColor(.black)
+
                 Text(subtitleText).font(.system(size: 14)).foregroundColor(.gray)
                 HStack(spacing: 4) {
                     Text(post.timeAgo).font(.system(size: 14)).foregroundColor(.gray)
@@ -129,16 +341,59 @@ struct FigmaSocialProof: View {
 struct FigmaActionButtons: View {
     let post: ClubRalleyPost
     @Binding var showingComments: Bool
+    @Binding var showingRepost: Bool
     var postManager: PostManager
 
     var body: some View {
         HStack(spacing: 0) {
+            // Like Button
             Button(action: { Task { await postManager.toggleLike(for: post.id) } }) {
-                Image(systemName: post.isLiked ? "heart.fill" : "heart").font(.system(size: 22, weight: .medium)).foregroundColor(post.isLiked ? .red : Color(hex: "#2C4F40"))
+                HStack(spacing: 4) {
+                    Image(systemName: post.isLiked ? "heart.fill" : "heart")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(post.isLiked ? .red : Color(hex: "#2C4F40"))
+                    if post.likes > 0 {
+                        Text("\(post.likes)")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                    }
+                }
             }.frame(maxWidth: .infinity)
-            Button(action: {}) { Image(systemName: "arrow.2.squarepath").font(.system(size: 22, weight: .medium)).foregroundColor(Color(hex: "#2C4F40")) }.frame(maxWidth: .infinity)
-            Button(action: { showingComments = true }) { Image(systemName: "bubble.left").font(.system(size: 22, weight: .medium)).foregroundColor(Color(hex: "#2C4F40")) }.frame(maxWidth: .infinity)
-            Button(action: { ShareHelper.sharePost(post) }) { Image(systemName: "arrowshape.turn.up.right").font(.system(size: 22, weight: .medium)).foregroundColor(Color(hex: "#2C4F40")) }.frame(maxWidth: .infinity)
+
+            // Repost Button
+            Button(action: { showingRepost = true }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.2.squarepath")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(post.isReposted ? Color(hex: "#2C4F40") : Color(hex: "#2C4F40"))
+                    if post.shares > 0 {
+                        Text("\(post.shares)")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                    }
+                }
+            }.frame(maxWidth: .infinity)
+
+            // Comment Button
+            Button(action: { showingComments = true }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "bubble.left")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                    if post.comments > 0 {
+                        Text("\(post.comments)")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                    }
+                }
+            }.frame(maxWidth: .infinity)
+
+            // Share Button
+            Button(action: { ShareHelper.sharePost(post) }) {
+                Image(systemName: "arrowshape.turn.up.right")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundColor(Color(hex: "#2C4F40"))
+            }.frame(maxWidth: .infinity)
         }.padding(.vertical, 8)
     }
 }

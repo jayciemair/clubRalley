@@ -21,19 +21,83 @@ class ProfileViewModel: ObservableObject {
     private let friendshipService = FriendshipService()
     
     // MARK: - Current User Methods
-    
+
     func loadCurrentUserProfile() async {
         isLoading = true
         error = nil
-        
-        // Use mock data directly for now - clean and simple!
+
+        // First check if we have a saved profile from onboarding
+        if let savedProfile = SavedUserProfile.loadFromStorage() {
+            print("Loading current user profile from onboarding data")
+            currentUserProfile = createProfileFromSavedData(savedProfile)
+            isLoading = false
+            return
+        }
+
+        // Fall back to mock data if no saved profile
         print("Loading current user profile with mock data")
         currentUserProfile = await generateMockCurrentUserProfile()
-        
+
         // Simulate loading time for realistic UX
         try? await Task.sleep(nanoseconds: 500_000_000)
-        
+
         isLoading = false
+    }
+
+    /// Create UserProfile from saved onboarding data
+    private func createProfileFromSavedData(_ saved: SavedUserProfile) -> UserProfile {
+        // Create User from saved data
+        let user = User(
+            id: saved.id,
+            email: saved.email,
+            firstName: saved.firstName,
+            lastName: saved.lastName,
+            username: saved.username,
+            dateOfBirth: DateOfBirth(month: 1, year: 2000), // Default
+            gender: .preferNotToSay,
+            locationCity: saved.locationCity,
+            locationState: saved.locationState,
+            bio: nil,
+            instagramHandle: nil,
+            profilePhotoURL: saved.profilePhotoURL,
+            isVerifiedAthlete: false,
+            athleteInfo: nil,
+            friendsCount: 0,
+            ralleysCount: 0,
+            createdAt: saved.createdAt,
+            updatedAt: Date()
+        )
+
+        let stats = UserStats(
+            followersCount: 0,
+            followingCount: 0,
+            gamesPlayed: 0,
+            wins: 0,
+            postsCount: 0,
+            ralleysAttended: 0,
+            ralleysHosted: 0
+        )
+
+        let socialInfo = SocialInfo(
+            instagramHandle: nil,
+            linkedinHandle: nil,
+            twitterHandle: nil,
+            isVerifiedAthlete: false,
+            verificationBadge: nil,
+            joinedAt: saved.createdAt
+        )
+
+        return UserProfile(
+            id: saved.id,
+            user: user,
+            stats: stats,
+            socialInfo: socialInfo,
+            teams: [],
+            photos: [],
+            mutualFriends: [],
+            isFollowedByCurrentUser: nil,
+            relationshipStatus: .none
+        )
     }
     
     func isCurrentUser(_ userId: UUID) -> Bool {
@@ -142,15 +206,6 @@ class ProfileViewModel: ObservableObject {
         print("Reported user \(userId) for: \(reason)")
     }
     
-    // MARK: - Development Helpers
-    
-    /// Load Gracie King profile for testing
-    func loadGracieProfile() async {
-        print("Loading Gracie King profile for testing")
-        let gracieId = UUID() 
-        let gracieProfile = await generateMockUserProfile(userId: gracieId)
-        viewedProfiles[gracieId] = gracieProfile
-    }
     
     // MARK: - Mock Data Generation
     

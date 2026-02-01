@@ -142,10 +142,12 @@ class ChatService: ObservableObject {
      */
     private func loadChatDetails(chatId: UUID, userRole: String) async throws -> GroupChat {
         // Load chat with ralley info
-        let chatData: DatabaseRalleyChatWithRalley = try await supabase.query("ralley_chats")
+        guard let chatData: DatabaseRalleyChatWithRalley = try await supabase.query("ralley_chats")
             .select("*, ralleys(title, category, date_time)")
             .eq("id", value: chatId)
-            .single()
+            .single() else {
+            throw SupabaseManager.SupabaseError.networkError("Chat not found")
+        }
 
         // Get member count
         let members: [DatabaseChatMember] = try await supabase.query("chat_members")

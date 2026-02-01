@@ -20,6 +20,35 @@ struct DatabasePost: Codable {
     let post_type: String
     let likes_count: Int
     let comments_count: Int
+    let visibility: String
+    let ralley_id: UUID?
+    let tagged_user_ids: [UUID]?
+    let link_url: String?
+    let shares_count: Int
+
+    init(
+        user_id: UUID,
+        content: String,
+        post_type: String,
+        likes_count: Int = 0,
+        comments_count: Int = 0,
+        visibility: String = "everyone",
+        ralley_id: UUID? = nil,
+        tagged_user_ids: [UUID]? = nil,
+        link_url: String? = nil,
+        shares_count: Int = 0
+    ) {
+        self.user_id = user_id
+        self.content = content
+        self.post_type = post_type
+        self.likes_count = likes_count
+        self.comments_count = comments_count
+        self.visibility = visibility
+        self.ralley_id = ralley_id
+        self.tagged_user_ids = tagged_user_ids
+        self.link_url = link_url
+        self.shares_count = shares_count
+    }
 }
 
 /**
@@ -33,6 +62,13 @@ struct DatabasePostWithUser: Codable {
     let post_type: String
     let likes_count: Int
     let comments_count: Int
+    let shares_count: Int?
+    let visibility: String?
+    let ralley_id: UUID?
+    let tagged_user_ids: [UUID]?
+    let link_url: String?
+    let original_post_id: UUID?
+    let repost_comment: String?
     let created_at: Date
     let updated_at: Date
     let user: DatabaseUser
@@ -44,10 +80,61 @@ struct DatabasePostWithUser: Codable {
         case post_type
         case likes_count
         case comments_count
+        case shares_count
+        case visibility
+        case ralley_id
+        case tagged_user_ids
+        case link_url
+        case original_post_id
+        case repost_comment
         case created_at
         case updated_at
         case user = "club_users"  // Supabase uses table name for joins
     }
+}
+
+/**
+ * Database representation of a repost
+ */
+struct DatabaseRepost: Codable {
+    let original_post_id: UUID
+    let user_id: UUID
+    let comment: String?
+
+    init(original_post_id: UUID, user_id: UUID, comment: String? = nil) {
+        self.original_post_id = original_post_id
+        self.user_id = user_id
+        self.comment = comment
+    }
+}
+
+/**
+ * Database repost with joined information
+ */
+struct DatabaseRepostWithUser: Codable {
+    let id: UUID
+    let original_post_id: UUID
+    let user_id: UUID
+    let comment: String?
+    let created_at: Date
+    let user: DatabaseUser
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case original_post_id
+        case user_id
+        case comment
+        case created_at
+        case user = "club_users"
+    }
+}
+
+/**
+ * Database representation of ralley post opt-out
+ */
+struct DatabaseRalleyPostOptOut: Codable {
+    let ralley_id: UUID
+    let user_id: UUID
 }
 
 /**

@@ -304,6 +304,7 @@ struct RosterUserCardView: View {
 
     var body: some View {
         VStack(spacing: 8) {
+            // Profile photo
             ZStack(alignment: .bottomTrailing) {
                 AsyncImage(url: URL(string: user.photoURL)) { image in
                     image.resizable().aspectRatio(contentMode: .fill)
@@ -318,7 +319,9 @@ struct RosterUserCardView: View {
                 }
             }
 
+            // Name
             Text(user.name).font(.system(size: 13, weight: .bold)).foregroundColor(.black).lineLimit(1)
+
             Text(user.location).font(.system(size: 11, weight: .medium)).foregroundColor(.gray).lineLimit(1)
             Text("\(user.mutuals) mutuals").font(.system(size: 11)).foregroundColor(.gray)
             Spacer(minLength: 4)

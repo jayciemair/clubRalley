@@ -101,6 +101,129 @@ struct ProfileErrorView: View {
     }
 }
 
+// MARK: - Tappable Profile Avatar
+
+struct TappableProfileAvatar: View {
+    let userId: UUID
+    let imageURL: String?
+    let size: CGFloat
+    let showNavigationLink: Bool
+
+    init(userId: UUID, imageURL: String?, size: CGFloat = 50, showNavigationLink: Bool = true) {
+        self.userId = userId
+        self.imageURL = imageURL
+        self.size = size
+        self.showNavigationLink = showNavigationLink
+    }
+
+    var body: some View {
+        if showNavigationLink {
+            NavigationLink(destination: UserProfileView(userId: userId)) {
+                avatarContent
+            }
+            .buttonStyle(PlainButtonStyle())
+        } else {
+            avatarContent
+        }
+    }
+
+    private var avatarContent: some View {
+        AsyncImage(url: URL(string: imageURL ?? "")) { image in
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+        } placeholder: {
+            Circle()
+                .fill(ClubRalleyTheme.Colors.sageGreen)
+                .overlay(
+                    Image(systemName: "person.fill")
+                        .font(.system(size: size * 0.4))
+                        .foregroundColor(ClubRalleyTheme.Colors.accent)
+                )
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+    }
+}
+
+// MARK: - Tappable Profile Name
+
+struct TappableProfileName: View {
+    let userId: UUID
+    let name: String
+    let font: Font
+    let color: Color
+
+    init(userId: UUID, name: String, font: Font = .headline, color: Color = .black) {
+        self.userId = userId
+        self.name = name
+        self.font = font
+        self.color = color
+    }
+
+    var body: some View {
+        NavigationLink(destination: UserProfileView(userId: userId)) {
+            Text(name)
+                .font(font)
+                .foregroundColor(color)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+// MARK: - Tappable Profile Header (combines avatar and name)
+
+struct TappableProfileHeader: View {
+    let userId: UUID
+    let name: String
+    let subtitle: String?
+    let imageURL: String?
+    let avatarSize: CGFloat
+
+    init(userId: UUID, name: String, subtitle: String? = nil, imageURL: String?, avatarSize: CGFloat = 50) {
+        self.userId = userId
+        self.name = name
+        self.subtitle = subtitle
+        self.imageURL = imageURL
+        self.avatarSize = avatarSize
+    }
+
+    var body: some View {
+        NavigationLink(destination: UserProfileView(userId: userId)) {
+            HStack(spacing: 12) {
+                AsyncImage(url: URL(string: imageURL ?? "")) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Circle()
+                        .fill(ClubRalleyTheme.Colors.sageGreen)
+                        .overlay(
+                            Image(systemName: "person.fill")
+                                .font(.system(size: avatarSize * 0.4))
+                                .foregroundColor(ClubRalleyTheme.Colors.accent)
+                        )
+                }
+                .frame(width: avatarSize, height: avatarSize)
+                .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(name)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.black)
+
+                    if let subtitle = subtitle {
+                        Text(subtitle)
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
 // MARK: - Preview
 
 struct UserProfileView_Previews: PreviewProvider {

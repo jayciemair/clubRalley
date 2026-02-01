@@ -97,12 +97,29 @@ enum PostType: String, Codable, CaseIterable {
     case text = "text"
     case ralleyUpdate = "ralley_update"
     case achievement = "achievement"
-    
+    case image = "image"
+    case link = "link"
+    case ralleyCompletion = "ralley_completion"
+
     var displayName: String {
         switch self {
         case .text: return "Text Post"
         case .ralleyUpdate: return "Ralley Update"
         case .achievement: return "Achievement"
+        case .image: return "Photo"
+        case .link: return "Link"
+        case .ralleyCompletion: return "Ralley Completed"
+        }
+    }
+
+    var iconName: String {
+        switch self {
+        case .text: return "text.alignleft"
+        case .ralleyUpdate: return "sportscourt"
+        case .achievement: return "trophy.fill"
+        case .image: return "photo.fill"
+        case .link: return "link"
+        case .ralleyCompletion: return "checkmark.circle.fill"
         }
     }
 }

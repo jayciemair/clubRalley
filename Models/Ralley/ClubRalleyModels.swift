@@ -118,7 +118,15 @@ struct ClubRalley: Identifiable, Codable {
     /// Number of pending join requests (for captain)
     var pendingRequestsCount: Int
 
+    /// Duration of the ralley in minutes (default: 60)
+    var durationMinutes: Int
+
     // MARK: - Computed Properties
+
+    /// Calculated end time based on start time and duration
+    var endTime: Date {
+        dateTime.addingTimeInterval(Double(durationMinutes) * 60)
+    }
 
     /// Formatted string showing time until the ralley starts
     /// Returns values like "in 2h", "in 3d", "yesterday"
@@ -181,7 +189,8 @@ struct ClubRalley: Identifiable, Codable {
         joinType: RalleyJoinType = .open,
         isCaptain: Bool = false,
         chatId: UUID? = nil,
-        pendingRequestsCount: Int = 0
+        pendingRequestsCount: Int = 0,
+        durationMinutes: Int = 60
     ) {
         self.id = id
         self.title = title
@@ -202,6 +211,7 @@ struct ClubRalley: Identifiable, Codable {
         self.isCaptain = isCaptain
         self.chatId = chatId
         self.pendingRequestsCount = pendingRequestsCount
+        self.durationMinutes = durationMinutes
     }
 }
 
@@ -320,6 +330,9 @@ struct ClubRalleyPost: Identifiable, Codable {
     /// URL string for author's profile photo
     let authorPhotoURL: String
 
+    /// Author's user ID
+    var authorId: UUID?
+
     /// Author's school/university (e.g., "Texas A&M", "Bucknell University")
     var authorSchool: String?
 
@@ -341,6 +354,23 @@ struct ClubRalleyPost: Identifiable, Codable {
     /// When the post was created
     let timestamp: Date
 
+    // MARK: - Post Type & Visibility
+
+    /// Type of post (text, image, link, ralley completion, etc.)
+    var postType: PostType
+
+    /// Visibility setting - who can see this post
+    var visibility: PostVisibility
+
+    /// Related ralley ID (for ralley completion posts)
+    var relatedRalleyId: UUID?
+
+    /// Tagged user IDs (for ralley completion posts with attendees)
+    var taggedUserIds: [UUID]
+
+    /// Link URL (for link posts)
+    var linkUrl: String?
+
     // MARK: - Engagement Properties
 
     /// Number of likes on the post
@@ -349,11 +379,25 @@ struct ClubRalleyPost: Identifiable, Codable {
     /// Number of comments on the post
     var comments: Int
 
-    /// Number of shares of the post
+    /// Number of shares/reposts of the post
     var shares: Int
 
     /// Whether the current user has liked this post
     var isLiked: Bool
+
+    /// Whether the current user has reposted this post
+    var isReposted: Bool
+
+    // MARK: - Repost Properties
+
+    /// Original post ID if this is a repost
+    var originalPostId: UUID?
+
+    /// Original post author name (for repost display)
+    var originalAuthorName: String?
+
+    /// Quote comment added when reposting
+    var repostComment: String?
 
     // MARK: - Computed Properties
 
@@ -372,5 +416,71 @@ struct ClubRalleyPost: Identifiable, Codable {
     /// Total engagement count for sorting
     var engagementCount: Int {
         likes + comments + shares
+    }
+
+    /// Whether this is a repost
+    var isRepost: Bool {
+        originalPostId != nil
+    }
+
+    /// Whether this is a ralley completion post
+    var isRalleyCompletion: Bool {
+        postType == .ralleyCompletion
+    }
+
+    // MARK: - Initialization
+
+    init(
+        id: UUID,
+        authorName: String,
+        authorUsername: String,
+        authorPhotoURL: String,
+        authorId: UUID? = nil,
+        authorSchool: String? = nil,
+        authorLocation: String? = nil,
+        authorSport: String? = nil,
+        title: String? = nil,
+        content: String,
+        images: [String] = [],
+        timestamp: Date,
+        postType: PostType = .text,
+        visibility: PostVisibility = .everyone,
+        relatedRalleyId: UUID? = nil,
+        taggedUserIds: [UUID] = [],
+        linkUrl: String? = nil,
+        likes: Int = 0,
+        comments: Int = 0,
+        shares: Int = 0,
+        isLiked: Bool = false,
+        isReposted: Bool = false,
+        originalPostId: UUID? = nil,
+        originalAuthorName: String? = nil,
+        repostComment: String? = nil
+    ) {
+        self.id = id
+        self.authorName = authorName
+        self.authorUsername = authorUsername
+        self.authorPhotoURL = authorPhotoURL
+        self.authorId = authorId
+        self.authorSchool = authorSchool
+        self.authorLocation = authorLocation
+        self.authorSport = authorSport
+        self.title = title
+        self.content = content
+        self.images = images
+        self.timestamp = timestamp
+        self.postType = postType
+        self.visibility = visibility
+        self.relatedRalleyId = relatedRalleyId
+        self.taggedUserIds = taggedUserIds
+        self.linkUrl = linkUrl
+        self.likes = likes
+        self.comments = comments
+        self.shares = shares
+        self.isLiked = isLiked
+        self.isReposted = isReposted
+        self.originalPostId = originalPostId
+        self.originalAuthorName = originalAuthorName
+        self.repostComment = repostComment
     }
 }

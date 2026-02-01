@@ -389,15 +389,6 @@ struct ProfileErrorView: View {
                     }
                 }
                 .clubRalleyButtonStyle()
-                
-                // Development helper button
-                Button("Load Sample Profile (Gracie)") {
-                    viewModel.signInAsGracie()
-                    Task {
-                        await viewModel.loadCurrentUserProfile()
-                    }
-                }
-                .clubRalleyButtonStyle(.outline)
             }
         }
         .padding(ClubRalleyTheme.Spacing.xl)

@@ -12,71 +12,76 @@ import SwiftUI
 
 enum ClubRalleyOnboardingStep: String, CaseIterable {
     case welcome = "welcome"
-    case signUp = "sign_up"
-    case profileBasics = "profile_basics"
-    case profileDetails = "profile_details"
-    case athleteQuestion = "athlete_question"
-    case athleteVerification = "athlete_verification"
-    case sportsSelection = "sports_selection"
-    case interests = "interests"
-    case availability = "availability"
+    case phoneNumber = "phone_number"
+    case email = "email"
+    case password = "password"
+    case name = "name"
+    case username = "username"
+    case profilePhoto = "profile_photo"
+    case location = "location"
+    case sports = "sports"
+    case contactsAccess = "contacts_access"
     case completion = "completion"
-    
+
     var title: String {
         switch self {
         case .welcome:
-            return "Welcome to Club Ralley"
-        case .signUp:
-            return "Create Your Account"
-        case .profileBasics:
-            return "Tell Us About You"
-        case .profileDetails:
-            return "Complete Your Profile"
-        case .athleteQuestion:
-            return "Are You an Athlete?"
-        case .athleteVerification:
-            return "Verify Your Athlete Status"
-        case .sportsSelection:
-            return "Select Your Sports"
-        case .interests:
-            return "What Are You Into?"
-        case .availability:
-            return "When Are You Free?"
+            return "Ralley Connect"
+        case .phoneNumber:
+            return "What's your phone number?"
+        case .email:
+            return "What's your email?"
+        case .password:
+            return "Create password"
+        case .name:
+            return "What's your name?"
+        case .username:
+            return "Your username"
+        case .profilePhoto:
+            return "Add your profile photo"
+        case .location:
+            return "Where do you compete the most?"
+        case .sports:
+            return "What sports do you play?"
+        case .contactsAccess:
+            return "Discover teammates already on the app"
         case .completion:
-            return "You're All Set!"
+            return "Congrats! You made the team!"
         }
     }
-    
+
     var subtitle: String? {
         switch self {
         case .welcome:
-            return "GFTO - Get the F*** Outside"
-        case .signUp:
-            return "Join the community of athletes and active people"
-        case .profileBasics:
-            return "Help others find and connect with you"
-        case .profileDetails:
-            return "Add a few more details to your profile"
-        case .athleteQuestion:
-            return "Get verified for exclusive features"
-        case .athleteVerification:
-            return "Upload proof of your athletic involvement"
-        case .sportsSelection:
-            return "What sports do you play or want to try?"
-        case .interests:
-            return "Beyond sports, what do you enjoy?"
-        case .availability:
-            return "When are you usually free to rally?"
+            return "Meet and reconnect with athletes in our digital locker room."
+        case .phoneNumber:
+            return nil
+        case .email:
+            return nil
+        case .password:
+            return nil
+        case .name:
+            return "This is how your teammates will see you!"
+        case .username:
+            return "How do you want to be known on Ralley?"
+        case .profilePhoto:
+            return "Show off your college headshots or your sports pics"
+        case .location:
+            return nil
+        case .sports:
+            return nil
+        case .contactsAccess:
+            return nil
         case .completion:
-            return "Welcome to the Club Ralley community!"
+            return nil
         }
     }
-    
+
     var progressValue: Double {
         let index = Double(ClubRalleyOnboardingStep.allCases.firstIndex(of: self) ?? 0)
         return index / Double(ClubRalleyOnboardingStep.allCases.count - 1)
     }
-    
+
     var canGoBack: Bool {
         switch self {
         case .welcome, .completion:
@@ -90,21 +95,59 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
 // MARK: - Onboarding Data Models
 
 struct OnboardingProfileData {
-    var firstName: String = ""
-    var lastName: String = ""
-    var username: String = ""
+    var phoneNumber: String = ""
+    var phoneCountryCode: String = "+1"
     var email: String = ""
-    var dateOfBirth: DateOfBirth?
-    var gender: Gender?
+    var username: String = ""
+    var password: String = ""
+    var confirmPassword: String = ""
+    var profilePhotoData: Data?
+    var profilePhotoURL: String?
     var city: String = ""
     var state: String = ""
+    var gender: Gender?
+    var birthday: Date?
+    var contactsAccessGranted: Bool = false
+
+    // Legacy fields for compatibility
+    var firstName: String = ""
+    var lastName: String = ""
+    var dateOfBirth: DateOfBirth?
     var bio: String = ""
     var instagramHandle: String = ""
-    
+
+    var isPhoneComplete: Bool {
+        phoneNumber.count >= 10
+    }
+
+    var isEmailComplete: Bool {
+        !email.isEmpty && email.contains("@") && email.contains(".")
+    }
+
+    var isUsernameComplete: Bool {
+        username.count >= 3 && username.count <= 20
+    }
+
+    var isPasswordComplete: Bool {
+        password.count >= 8 && password == confirmPassword
+    }
+
+    var isLocationComplete: Bool {
+        !city.isEmpty
+    }
+
+    var isGenderComplete: Bool {
+        gender != nil
+    }
+
+    var isBirthdayComplete: Bool {
+        birthday != nil
+    }
+
     var isBasicsComplete: Bool {
         !firstName.isEmpty && !lastName.isEmpty && !username.isEmpty && !email.isEmpty
     }
-    
+
     var isDetailsComplete: Bool {
         dateOfBirth != nil && gender != nil && !city.isEmpty && !state.isEmpty
     }
@@ -116,7 +159,7 @@ struct OnboardingAthleteData {
     var school: School?
     var verificationImageURL: String?
     var verificationNotes: String = ""
-    
+
     var isComplete: Bool {
         if !isAthlete { return true }
         return sport != nil && school != nil
@@ -130,7 +173,7 @@ struct OnboardingInterestsData {
     var classTypes: [String] = []
     var hometown: String = ""
     var favoriteTeams: [String] = []
-    
+
     var isComplete: Bool {
         !selectedSports.isEmpty || !hobbies.isEmpty
     }
@@ -140,7 +183,7 @@ struct OnboardingAvailabilityData {
     var availabilitySlots: [AvailabilitySlot] = []
     var maxDistance: Int = 25  // miles
     var socialPreferences: [SocialPreference] = []
-    
+
     var isComplete: Bool {
         !availabilitySlots.isEmpty
     }
@@ -154,7 +197,7 @@ enum SocialPreference: String, CaseIterable {
     case casual = "casual"
     case beginner = "beginner_friendly"
     case advanced = "advanced_level"
-    
+
     var displayName: String {
         switch self {
         case .smallGroups: return "Small Groups (2-5 people)"
@@ -166,7 +209,7 @@ enum SocialPreference: String, CaseIterable {
         case .advanced: return "Advanced Level"
         }
     }
-    
+
     var icon: String {
         switch self {
         case .smallGroups: return "person.2"
@@ -180,6 +223,42 @@ enum SocialPreference: String, CaseIterable {
     }
 }
 
+// MARK: - Available Cities
+
+struct OnboardingCity: Identifiable, Hashable {
+    let id = UUID()
+    let name: String
+    let state: String
+    let stateAbbreviation: String
+
+    var displayName: String {
+        "\(name), \(stateAbbreviation)"
+    }
+
+    static let availableCities: [OnboardingCity] = [
+        OnboardingCity(name: "New York", state: "New York", stateAbbreviation: "NY"),
+        OnboardingCity(name: "Los Angeles", state: "California", stateAbbreviation: "CA"),
+        OnboardingCity(name: "Chicago", state: "Illinois", stateAbbreviation: "IL"),
+        OnboardingCity(name: "Houston", state: "Texas", stateAbbreviation: "TX"),
+        OnboardingCity(name: "Phoenix", state: "Arizona", stateAbbreviation: "AZ"),
+        OnboardingCity(name: "Philadelphia", state: "Pennsylvania", stateAbbreviation: "PA"),
+        OnboardingCity(name: "San Antonio", state: "Texas", stateAbbreviation: "TX"),
+        OnboardingCity(name: "San Diego", state: "California", stateAbbreviation: "CA"),
+        OnboardingCity(name: "Dallas", state: "Texas", stateAbbreviation: "TX"),
+        OnboardingCity(name: "Austin", state: "Texas", stateAbbreviation: "TX"),
+        OnboardingCity(name: "San Francisco", state: "California", stateAbbreviation: "CA"),
+        OnboardingCity(name: "Seattle", state: "Washington", stateAbbreviation: "WA"),
+        OnboardingCity(name: "Denver", state: "Colorado", stateAbbreviation: "CO"),
+        OnboardingCity(name: "Boston", state: "Massachusetts", stateAbbreviation: "MA"),
+        OnboardingCity(name: "Nashville", state: "Tennessee", stateAbbreviation: "TN"),
+        OnboardingCity(name: "Atlanta", state: "Georgia", stateAbbreviation: "GA"),
+        OnboardingCity(name: "Miami", state: "Florida", stateAbbreviation: "FL"),
+        OnboardingCity(name: "Portland", state: "Oregon", stateAbbreviation: "OR"),
+        OnboardingCity(name: "Minneapolis", state: "Minnesota", stateAbbreviation: "MN"),
+        OnboardingCity(name: "Charlotte", state: "North Carolina", stateAbbreviation: "NC")
+    ]
+}
+
 // MARK: - Complete Onboarding Data
 
 struct CompleteOnboardingData {
@@ -187,23 +266,35 @@ struct CompleteOnboardingData {
     var athlete: OnboardingAthleteData = OnboardingAthleteData()
     var interests: OnboardingInterestsData = OnboardingInterestsData()
     var availability: OnboardingAvailabilityData = OnboardingAvailabilityData()
-    
+
     var isComplete: Bool {
-        profile.isBasicsComplete && 
-        profile.isDetailsComplete && 
-        athlete.isComplete && 
-        interests.isComplete && 
-        availability.isComplete
+        profile.isPhoneComplete &&
+        profile.isEmailComplete &&
+        profile.isUsernameComplete &&
+        profile.isPasswordComplete &&
+        profile.isLocationComplete &&
+        profile.isGenderComplete &&
+        profile.isBirthdayComplete
     }
-    
+
     /// Convert to User model for API submission
     func toUserCreationRequest() -> UserCreationRequest {
+        // Convert birthday to DateOfBirth
+        var dob = DateOfBirth(month: 1, year: 2000)
+        if let birthday = profile.birthday {
+            let calendar = Calendar.current
+            dob = DateOfBirth(
+                month: calendar.component(.month, from: birthday),
+                year: calendar.component(.year, from: birthday)
+            )
+        }
+
         return UserCreationRequest(
             email: profile.email,
             firstName: profile.firstName,
             lastName: profile.lastName,
             username: profile.username,
-            dateOfBirth: profile.dateOfBirth ?? DateOfBirth(month: 1, year: 2000),
+            dateOfBirth: dob,
             gender: profile.gender ?? .preferNotToSay,
             locationCity: profile.city,
             locationState: profile.state,
@@ -222,7 +313,10 @@ struct CompleteOnboardingData {
             hobbies: interests.hobbies,
             availabilitySlots: availability.availabilitySlots,
             maxDistance: availability.maxDistance,
-            socialPreferences: availability.socialPreferences.map { $0.rawValue }
+            socialPreferences: availability.socialPreferences.map { $0.rawValue },
+            phoneNumber: profile.phoneCountryCode + profile.phoneNumber,
+            profilePhotoURL: profile.profilePhotoURL,
+            contactsAccessGranted: profile.contactsAccessGranted
         )
     }
 }
@@ -245,7 +339,10 @@ struct UserCreationRequest: Codable {
     let availabilitySlots: [AvailabilitySlot]
     let maxDistance: Int
     let socialPreferences: [String]
-    
+    let phoneNumber: String?
+    let profilePhotoURL: String?
+    let contactsAccessGranted: Bool?
+
     enum CodingKeys: String, CodingKey {
         case email
         case firstName = "first_name"
@@ -264,39 +361,145 @@ struct UserCreationRequest: Codable {
         case availabilitySlots = "availability_slots"
         case maxDistance = "max_distance"
         case socialPreferences = "social_preferences"
+        case phoneNumber = "phone_number"
+        case profilePhotoURL = "profile_photo_url"
+        case contactsAccessGranted = "contacts_access_granted"
+    }
+
+    init(
+        email: String,
+        firstName: String,
+        lastName: String,
+        username: String,
+        dateOfBirth: DateOfBirth,
+        gender: Gender,
+        locationCity: String,
+        locationState: String,
+        bio: String?,
+        instagramHandle: String?,
+        isVerifiedAthlete: Bool,
+        athleteInfo: AthleteInfo?,
+        selectedSports: [UserSport],
+        hobbies: [String],
+        availabilitySlots: [AvailabilitySlot],
+        maxDistance: Int,
+        socialPreferences: [String],
+        phoneNumber: String? = nil,
+        profilePhotoURL: String? = nil,
+        contactsAccessGranted: Bool? = nil
+    ) {
+        self.email = email
+        self.firstName = firstName
+        self.lastName = lastName
+        self.username = username
+        self.dateOfBirth = dateOfBirth
+        self.gender = gender
+        self.locationCity = locationCity
+        self.locationState = locationState
+        self.bio = bio
+        self.instagramHandle = instagramHandle
+        self.isVerifiedAthlete = isVerifiedAthlete
+        self.athleteInfo = athleteInfo
+        self.selectedSports = selectedSports
+        self.hobbies = hobbies
+        self.availabilitySlots = availabilitySlots
+        self.maxDistance = maxDistance
+        self.socialPreferences = socialPreferences
+        self.phoneNumber = phoneNumber
+        self.profilePhotoURL = profilePhotoURL
+        self.contactsAccessGranted = contactsAccessGranted
     }
 }
 
 // MARK: - Onboarding Error Types
 
-enum OnboardingError: LocalizedError {
+enum ClubRalleyOnboardingError: LocalizedError {
     case usernameAlreadyTaken
     case emailAlreadyExists
+    case phoneAlreadyExists
     case invalidEmail
+    case invalidPhone
     case weakPassword
+    case passwordMismatch
     case verificationImageTooLarge
     case verificationImageInvalid
+    case contactsAccessDenied
     case networkError(String)
     case unknownError
-    
+
     var errorDescription: String? {
         switch self {
         case .usernameAlreadyTaken:
             return "This username is already taken. Please choose another."
         case .emailAlreadyExists:
             return "An account with this email already exists."
+        case .phoneAlreadyExists:
+            return "An account with this phone number already exists."
         case .invalidEmail:
             return "Please enter a valid email address."
+        case .invalidPhone:
+            return "Please enter a valid phone number."
         case .weakPassword:
             return "Password must be at least 8 characters with uppercase, lowercase, and numbers."
+        case .passwordMismatch:
+            return "Passwords do not match."
         case .verificationImageTooLarge:
             return "Image is too large. Please choose a smaller file."
         case .verificationImageInvalid:
             return "Please select a valid image file."
+        case .contactsAccessDenied:
+            return "Contacts access was denied. You can enable it later in Settings."
         case .networkError(let message):
             return "Network error: \(message)"
         case .unknownError:
             return "An unexpected error occurred. Please try again."
         }
+    }
+}
+
+// MARK: - Saved User Profile (for persistence)
+
+struct SavedUserProfile: Codable {
+    let id: UUID
+    let email: String
+    let firstName: String
+    let lastName: String
+    let username: String
+    let phoneNumber: String
+    let locationCity: String
+    let locationState: String
+    let profilePhotoURL: String?
+    let selectedSports: [String]
+    let createdAt: Date
+
+    var fullName: String {
+        "\(firstName) \(lastName)"
+    }
+
+    var displayLocation: String {
+        if locationCity.isEmpty { return "" }
+        return "\(locationCity), \(locationState)"
+    }
+
+    /// Load saved profile from UserDefaults
+    static func loadFromStorage() -> SavedUserProfile? {
+        guard let data = UserDefaults.standard.data(forKey: "currentUserProfile") else {
+            return nil
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try? decoder.decode(SavedUserProfile.self, from: data)
+    }
+
+    /// Load profile photo data from UserDefaults
+    static func loadProfilePhotoData() -> Data? {
+        return UserDefaults.standard.data(forKey: "currentUserProfilePhoto")
+    }
+
+    /// Clear saved profile (for logout/reset)
+    static func clearStorage() {
+        UserDefaults.standard.removeObject(forKey: "currentUserProfile")
+        UserDefaults.standard.removeObject(forKey: "currentUserProfilePhoto")
     }
 }
