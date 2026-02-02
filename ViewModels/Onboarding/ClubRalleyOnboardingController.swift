@@ -39,8 +39,6 @@ class ClubRalleyOnboardingController: ObservableObject {
         switch currentStep {
         case .welcome, .completion:
             return true
-        case .phoneNumber:
-            return onboardingData.profile.isPhoneComplete
         case .email:
             return onboardingData.profile.isEmailComplete
         case .password:
@@ -55,8 +53,6 @@ class ClubRalleyOnboardingController: ObservableObject {
             return onboardingData.profile.isLocationComplete
         case .sports:
             return !onboardingData.interests.selectedSports.isEmpty
-        case .contactsAccess:
-            return true // Contacts access is optional
         }
     }
 
@@ -354,26 +350,64 @@ class ClubRalleyOnboardingController: ObservableObject {
         isLoading = true
         error = nil
 
-        do {
-            // Create the user profile from onboarding data
-            let userId = UUID()
-            let now = Date()
+        // Generate a local user ID (will be replaced by Supabase ID if signup succeeds)
+        var userId = UUID()
 
+        // STEP 1: Try to create Supabase Auth account
+        do {
+            userId = try await supabaseManager.signUp(
+                email: onboardingData.profile.email,
+                password: onboardingData.profile.password
+            )
+            print("ClubRalleyOnboardingController: Supabase signup successful")
+
+            // STEP 2: Create profile in club_users table
+            try await supabaseManager.createClubUser(
+                id: userId,
+                email: onboardingData.profile.email,
+                firstName: onboardingData.profile.firstName,
+                lastName: onboardingData.profile.lastName,
+                username: onboardingData.profile.username,
+                phoneNumber: "",
+                locationCity: onboardingData.profile.city,
+                locationState: onboardingData.profile.state,
+                profilePhotoURL: onboardingData.profile.profilePhotoURL
+            )
+            print("ClubRalleyOnboardingController: Profile created in database")
+
+        } catch {
+            // Check if this is a critical auth error that should stop onboarding
+            let errorMessage = error.localizedDescription.lowercased()
+            if errorMessage.contains("already registered") || errorMessage.contains("already exists") {
+                self.error = .emailAlreadyExists
+                isLoading = false
+                return
+            } else if errorMessage.contains("weak password") || errorMessage.contains("invalid password") {
+                self.error = .weakPassword
+                isLoading = false
+                return
+            }
+
+            // For other errors (network, not configured), continue with local-only mode
+            print("ClubRalleyOnboardingController: Supabase error, using local mode: \(error.localizedDescription)")
+        }
+
+        // STEP 3: Save local profile backup (always do this)
+        do {
             let userProfile = SavedUserProfile(
                 id: userId,
                 email: onboardingData.profile.email,
                 firstName: onboardingData.profile.firstName,
                 lastName: onboardingData.profile.lastName,
                 username: onboardingData.profile.username,
-                phoneNumber: onboardingData.profile.phoneCountryCode + onboardingData.profile.phoneNumber,
+                phoneNumber: "",
                 locationCity: onboardingData.profile.city,
                 locationState: onboardingData.profile.state,
                 profilePhotoURL: onboardingData.profile.profilePhotoURL,
                 selectedSports: onboardingData.interests.selectedSports.map { $0.sport.name },
-                createdAt: now
+                createdAt: Date()
             )
 
-            // Save profile to UserDefaults (local backup)
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             let profileData = try encoder.encode(userProfile)
@@ -384,26 +418,7 @@ class ClubRalleyOnboardingController: ObservableObject {
                 UserDefaults.standard.set(photoData, forKey: "currentUserProfilePhoto")
             }
 
-            // Try to create user profile in Supabase database
-            do {
-                try await supabaseManager.createClubUser(
-                    id: userId,
-                    email: onboardingData.profile.email,
-                    firstName: onboardingData.profile.firstName,
-                    lastName: onboardingData.profile.lastName,
-                    username: onboardingData.profile.username,
-                    phoneNumber: onboardingData.profile.phoneCountryCode + onboardingData.profile.phoneNumber,
-                    locationCity: onboardingData.profile.city,
-                    locationState: onboardingData.profile.state,
-                    profilePhotoURL: onboardingData.profile.profilePhotoURL
-                )
-                print("ClubRalleyOnboardingController: User profile created in Supabase")
-            } catch {
-                // If Supabase fails, continue with local-only mode
-                print("ClubRalleyOnboardingController: Supabase insert failed, using local mode: \(error)")
-            }
-
-            // Set up SupabaseManager with user data for session
+            // Update SupabaseManager with user info
             supabaseManager.isAuthenticated = true
             supabaseManager.currentUser = SupabaseUser(
                 id: userId,
@@ -412,19 +427,18 @@ class ClubRalleyOnboardingController: ObservableObject {
                 lastName: onboardingData.profile.lastName
             )
 
-            // Mark onboarding as complete
-            UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
-
-            // Small delay for UX
-            try await Task.sleep(nanoseconds: 1_000_000_000)
-
-            isComplete = true
-            isLoading = false
-
         } catch {
-            self.error = .networkError(error.localizedDescription)
-            isLoading = false
+            print("ClubRalleyOnboardingController: Failed to save local profile: \(error)")
         }
+
+        // STEP 4: Mark onboarding as complete
+        UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
+
+        // Brief delay for UX
+        try? await Task.sleep(nanoseconds: 500_000_000)
+
+        isComplete = true
+        isLoading = false
     }
 
     // MARK: - Reset

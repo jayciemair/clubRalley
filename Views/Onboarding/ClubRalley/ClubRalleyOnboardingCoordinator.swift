@@ -64,10 +64,6 @@ struct ClubRalleyOnboardingCoordinator: View {
             RalleyWelcomeScreen()
                 .environmentObject(controller)
 
-        case .phoneNumber:
-            PhoneNumberScreen()
-                .environmentObject(controller)
-
         case .email:
             EmailScreen()
                 .environmentObject(controller)
@@ -94,10 +90,6 @@ struct ClubRalleyOnboardingCoordinator: View {
 
         case .sports:
             SportsOnboardingScreen()
-                .environmentObject(controller)
-
-        case .contactsAccess:
-            ContactsAccessScreen()
                 .environmentObject(controller)
 
         case .completion:

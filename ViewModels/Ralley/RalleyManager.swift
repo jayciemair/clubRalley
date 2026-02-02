@@ -58,6 +58,9 @@ class RalleyManager: ObservableObject {
         self.participationManager = RalleyParticipationManager(ralleyManager: self)
         self.completionManager = RalleyCompletionManager(ralleyManager: self)
 
+        // Load joined ralleys from local storage
+        loadJoinedRalleys()
+
         // Load ralleys from backend on startup
         Task {
             await loadRalleys()
@@ -80,104 +83,14 @@ class RalleyManager: ObservableObject {
         } catch {
             print("RalleyManager: Failed to load ralleys: \(error)")
             self.error = error
-
-            // Fallback to sample ralleys for development
-            await loadSampleRalleys()
+            // Let UI show empty state - no mock data fallback
+            ralleys = []
         }
 
         isLoading = false
 
         // Start monitoring for ended ralleys (for captain completion flow)
         completionManager?.startMonitoring()
-    }
-
-    /**
-     * Load sample ralleys for development and offline scenarios
-     */
-    private func loadSampleRalleys() async {
-        let sampleRalleys = [
-            ClubRalley(
-                id: UUID(),
-                title: "Basketball Pickup",
-                sport: "Basketball",
-                description: "Friendly pickup basketball game. All skill levels welcome!",
-                organizer: ClubRalleyOrganizer(
-                    id: UUID(),
-                    name: "Alex Johnson",
-                    username: "@alexj",
-                    photoURL: "https://picsum.photos/50/50?random=401"
-                ),
-                dateTime: Date().addingTimeInterval(3600 * 2),
-                location: ClubRalleyLocation(
-                    name: "Riverside Park Courts",
-                    address: "123 Park Ave",
-                    city: "Chicago",
-                    state: "IL",
-                    latitude: 41.8781,
-                    longitude: -87.6298
-                ),
-                maxPlayers: 8,
-                currentPlayers: 5,
-                cost: 0,
-                requirements: "Bring your own water and sneakers",
-                isPublic: true
-            ),
-            ClubRalley(
-                id: UUID(),
-                title: "Tennis Doubles",
-                sport: "Tennis",
-                description: "Looking for tennis doubles partners. Intermediate level preferred.",
-                organizer: ClubRalleyOrganizer(
-                    id: UUID(),
-                    name: "Sarah Wilson",
-                    username: "@sarahw",
-                    photoURL: "https://picsum.photos/50/50?random=402"
-                ),
-                dateTime: Date().addingTimeInterval(3600 * 18),
-                location: ClubRalleyLocation(
-                    name: "University Tennis Center",
-                    address: "456 College Blvd",
-                    city: "Chicago",
-                    state: "IL",
-                    latitude: 41.8958,
-                    longitude: -87.6388
-                ),
-                maxPlayers: 4,
-                currentPlayers: 2,
-                cost: 15,
-                requirements: "Bring racket and tennis balls",
-                isPublic: true
-            ),
-            ClubRalley(
-                id: UUID(),
-                title: "My Test Ralley",
-                sport: "Soccer",
-                description: "Just created my first ralley! Looking forward to a fun pickup game.",
-                organizer: ClubRalleyOrganizer(
-                    id: UUID(),
-                    name: "Your Name",
-                    username: "@you",
-                    photoURL: "https://picsum.photos/50/50?random=50"
-                ),
-                dateTime: Date().addingTimeInterval(3600 * 6),
-                location: ClubRalleyLocation(
-                    name: "Local Soccer Field",
-                    address: "789 Sports Ave",
-                    city: "Chicago",
-                    state: "IL",
-                    latitude: 41.8500,
-                    longitude: -87.6500
-                ),
-                maxPlayers: 12,
-                currentPlayers: 1,
-                cost: 5,
-                requirements: "Bring cleats",
-                isPublic: true
-            )
-        ]
-
-        ralleys = sampleRalleys
-        print("RalleyManager: Using sample ralleys (fallback mode)")
     }
 
     // MARK: - Ralley Creation
@@ -329,12 +242,49 @@ class RalleyManager: ObservableObject {
 
     // MARK: - User Content Filtering
 
+    /// Ralleys the current user has joined (tracked locally)
+    @Published var joinedRalleyIds: Set<UUID> = []
+
     func getUserRalleys() -> [ClubRalley] {
         let currentUserName = supabase.currentUser?.displayName ?? "Your Name"
         let userRalleys = ralleys.filter { $0.organizer.name == currentUserName }
 
         print("RalleyManager: Found \(userRalleys.count) ralleys for current user")
         return userRalleys.sorted { $0.dateTime < $1.dateTime }
+    }
+
+    /// Get upcoming ralleys the user has joined
+    func getJoinedUpcomingRalleys() -> [ClubRalley] {
+        let now = Date()
+        return ralleys
+            .filter { joinedRalleyIds.contains($0.id) && $0.dateTime > now }
+            .sorted { $0.dateTime < $1.dateTime }
+    }
+
+    /// Mark a ralley as joined (called when user joins)
+    func markRalleyAsJoined(_ ralleyId: UUID) {
+        joinedRalleyIds.insert(ralleyId)
+        saveJoinedRalleys()
+    }
+
+    /// Mark a ralley as left (called when user leaves)
+    func markRalleyAsLeft(_ ralleyId: UUID) {
+        joinedRalleyIds.remove(ralleyId)
+        saveJoinedRalleys()
+    }
+
+    /// Save joined ralleys to UserDefaults
+    private func saveJoinedRalleys() {
+        let ids = joinedRalleyIds.map { $0.uuidString }
+        UserDefaults.standard.set(ids, forKey: "joinedRalleyIds")
+    }
+
+    /// Load joined ralleys from UserDefaults
+    func loadJoinedRalleys() {
+        if let ids = UserDefaults.standard.stringArray(forKey: "joinedRalleyIds") {
+            joinedRalleyIds = Set(ids.compactMap { UUID(uuidString: $0) })
+            print("RalleyManager: Loaded \(joinedRalleyIds.count) joined ralleys")
+        }
     }
 
     func getRalleysForUser(username: String) -> [ClubRalley] {

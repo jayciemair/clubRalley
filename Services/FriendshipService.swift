@@ -220,4 +220,77 @@ class FriendshipService: ObservableObject {
         let followers = try await getFollowerIds()
         return following.intersection(followers)
     }
+
+    // MARK: - User List Methods
+
+    /// Load followers for a specific user
+    /// - Parameter userId: The user ID to get followers for
+    /// - Returns: Array of DatabaseUserProfile representing followers
+    func loadFollowers(userId: UUID) async throws -> [DatabaseUserProfile] {
+        do {
+            // Get all friendships where friend_id = userId (people following this user)
+            let friendships: [DatabaseFriendship] = try await supabase.query("friendships")
+                .select("*")
+                .eq("friend_id", value: userId)
+                .execute()
+
+            // Get user profiles for each follower
+            var followers: [DatabaseUserProfile] = []
+            for friendship in friendships {
+                let users: [DatabaseUserProfile] = try await supabase.query("club_users")
+                    .select("*")
+                    .eq("id", value: friendship.user_id)
+                    .execute()
+                if let user = users.first {
+                    followers.append(user)
+                }
+            }
+
+            print("✅ FriendshipService: Loaded \(followers.count) followers")
+            return followers
+        } catch {
+            print("❌ FriendshipService: Failed to load followers: \(error)")
+            throw error
+        }
+    }
+
+    /// Load users that a specific user is following
+    /// - Parameter userId: The user ID to get following for
+    /// - Returns: Array of DatabaseUserProfile representing followed users
+    func loadFollowing(userId: UUID) async throws -> [DatabaseUserProfile] {
+        do {
+            // Get all friendships where user_id = userId (people this user follows)
+            let friendships: [DatabaseFriendship] = try await supabase.query("friendships")
+                .select("*")
+                .eq("user_id", value: userId)
+                .execute()
+
+            // Get user profiles for each followed user
+            var following: [DatabaseUserProfile] = []
+            for friendship in friendships {
+                let users: [DatabaseUserProfile] = try await supabase.query("club_users")
+                    .select("*")
+                    .eq("id", value: friendship.friend_id)
+                    .execute()
+                if let user = users.first {
+                    following.append(user)
+                }
+            }
+
+            print("✅ FriendshipService: Loaded \(following.count) following")
+            return following
+        } catch {
+            print("❌ FriendshipService: Failed to load following: \(error)")
+            throw error
+        }
+    }
+
+    /// Get follow counts for a specific user
+    /// - Parameter userId: The user ID to get counts for
+    /// - Returns: Tuple with followers and following counts
+    func getFollowCounts(userId: UUID) async throws -> (followers: Int, following: Int) {
+        let followersCount = try await getFollowersCount(userId)
+        let followingCount = try await getFollowingCount(userId)
+        return (followers: followersCount, following: followingCount)
+    }
 }

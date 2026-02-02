@@ -9,72 +9,7 @@
 import SwiftUI
 import CoreData
 
-// MARK: - Roster User Data Model
-
-struct RosterUserData: Identifiable {
-    let id: UUID
-    let name: String
-    let username: String
-    let location: String
-    let photoURL: String
-    let mutuals: Int
-    var isFollowing: Bool
-    let isVerified: Bool
-
-    static let mockUsers: [RosterUserData] = [
-        RosterUserData(id: UUID(), name: "Sam Marcus", username: "sammarcus", location: "Chicago, IL", photoURL: "https://picsum.photos/100/100?random=201", mutuals: 21, isFollowing: false, isVerified: false),
-        RosterUserData(id: UUID(), name: "Gracie King", username: "gking", location: "Chicago, IL", photoURL: "https://picsum.photos/100/100?random=202", mutuals: 9, isFollowing: false, isVerified: true),
-        RosterUserData(id: UUID(), name: "Abby Smith", username: "abbysmith", location: "Chicago, IL", photoURL: "https://picsum.photos/100/100?random=203", mutuals: 44, isFollowing: false, isVerified: false),
-        RosterUserData(id: UUID(), name: "Sarah Jay", username: "sarahjay", location: "Chicago, IL", photoURL: "https://picsum.photos/100/100?random=204", mutuals: 9, isFollowing: false, isVerified: false),
-        RosterUserData(id: UUID(), name: "Maddie Moss", username: "maddiemoss", location: "Chicago, IL", photoURL: "https://picsum.photos/100/100?random=205", mutuals: 21, isFollowing: false, isVerified: true),
-        RosterUserData(id: UUID(), name: "Brandon Moss", username: "brandonm", location: "Chicago, IL", photoURL: "https://picsum.photos/100/100?random=206", mutuals: 44, isFollowing: false, isVerified: false),
-        RosterUserData(id: UUID(), name: "Jaycie Stone", username: "jayciestone", location: "Chicago, IL", photoURL: "https://picsum.photos/100/100?random=207", mutuals: 9, isFollowing: false, isVerified: false),
-        RosterUserData(id: UUID(), name: "Whitney K", username: "whitneyk", location: "Chicago, IL", photoURL: "https://picsum.photos/100/100?random=208", mutuals: 9, isFollowing: false, isVerified: false),
-        RosterUserData(id: UUID(), name: "Abby P", username: "abbyp", location: "Chicago, IL", photoURL: "https://picsum.photos/100/100?random=209", mutuals: 9, isFollowing: false, isVerified: true)
-    ]
-}
-
-// MARK: - User Service
-
-@MainActor
-class UserService: ObservableObject {
-    private let supabase = SupabaseManager.shared
-    @Published var users: [RosterUserData] = []
-    @Published var isLoading = false
-
-    func loadUsers() async {
-        isLoading = true
-        do {
-            let dbUsers: [DatabaseUserProfile] = try await supabase.query("club_users").select("*").execute()
-            let currentUserId = supabase.currentUser?.id
-            users = Array(dbUsers.filter { $0.id != currentUserId }.prefix(50)).map { RosterUserData(id: $0.id, name: "\($0.first_name) \($0.last_name)", username: $0.username, location: "\($0.location_city), \($0.location_state)", photoURL: $0.profile_photo_url ?? "https://picsum.photos/100/100?random=\($0.id.hashValue % 1000)", mutuals: $0.friends_count, isFollowing: false, isVerified: $0.is_verified_athlete) }
-            isLoading = false
-        } catch {
-            isLoading = false; users = RosterUserData.mockUsers
-        }
-    }
-
-    func searchUsers(query: String) async {
-        guard !query.isEmpty else { await loadUsers(); return }
-        isLoading = true
-        users = RosterUserData.mockUsers.filter { $0.name.localizedCaseInsensitiveContains(query) }
-        isLoading = false
-    }
-
-    func toggleFollow(userId: UUID) async {
-        guard let idx = users.firstIndex(where: { $0.id == userId }) else { return }
-        users[idx].isFollowing.toggle()
-    }
-
-    func loadFollowingStatus() async {
-        guard supabase.isAuthenticated, let currentUser = supabase.currentUser else { return }
-        do {
-            let friendships: [DatabaseFriendship] = try await supabase.query("friendships").select("*").eq("user_id", value: currentUser.id).execute()
-            let ids = Set(friendships.map { $0.friend_id })
-            for i in users.indices { users[i].isFollowing = ids.contains(users[i].id) }
-        } catch { }
-    }
-}
+// Note: RosterUserData and UserService are defined in Services/UserService.swift
 
 // MARK: - Content View
 

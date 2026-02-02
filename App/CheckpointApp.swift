@@ -17,16 +17,30 @@ struct ClubRalleyApp: App {
     @State var selectedTab: MainTab = .home  // Default to home tab
 
     // Track if Club Ralley onboarding has been completed
-    @AppStorage("hasCompletedClubRalleyOnboarding") private var hasCompletedOnboarding = false
+    // Using @State instead of @AppStorage so we can control when it's read
+    @State private var hasCompletedOnboarding = false
 
-    // SupabaseManager for session management (Club Ralley uses email/password via onboarding)
+    init() {
+        // Read onboarding state from UserDefaults
+        let completed = UserDefaults.standard.bool(forKey: "hasCompletedClubRalleyOnboarding")
+        _hasCompletedOnboarding = State(initialValue: completed)
+        print("🚀 App init - hasCompletedOnboarding: \(completed)")
+    }
+
+    // SupabaseManager for session management
     @ObservedObject private var supabaseManager = SupabaseManager.shared
+
+    // State for checking session on launch
+    @State private var isCheckingSession = true
 
     var body: some Scene {
         WindowGroup {
             ZStack {
-                // Show onboarding if not completed, otherwise show main content
-                if hasCompletedOnboarding {
+                if isCheckingSession {
+                    // Show splash while checking auth session
+                    splashView
+                } else if hasCompletedOnboarding {
+                    // User completed onboarding - show main app
                     ContentView(selectedTab: $selectedTab)
                         .environment(\.managedObjectContext, persistenceController.container.viewContext)
                         .environmentObject(onboardingFlowController)
@@ -39,10 +53,11 @@ struct ClubRalleyApp: App {
                             handleDeepLink(from: url)
                         }
                 } else {
-                    // Show Club Ralley onboarding for new users
+                    // Not logged in - show onboarding
                     ClubRalleyOnboardingCoordinator {
                         // Called when onboarding completes
                         withAnimation(.easeInOut(duration: 0.5)) {
+                            UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
                             hasCompletedOnboarding = true
                         }
                     }
@@ -61,14 +76,40 @@ struct ClubRalleyApp: App {
                 }
             }
             .task {
+                // DEBUG: Log onboarding state
+                print("🚀 App Launch - hasCompletedOnboarding: \(hasCompletedOnboarding)")
+                print("🚀 App Launch - UserDefaults value: \(UserDefaults.standard.bool(forKey: "hasCompletedClubRalleyOnboarding"))")
+
+                // Try to restore existing session
+                let hasSession = await supabaseManager.restoreSession()
+                print("🚀 App Launch - hasSession: \(hasSession)")
+
+                // If session restored and onboarding was completed, user is ready
+                if hasSession && hasCompletedOnboarding {
+                    // Load user profile if available
+                    if let userId = supabaseManager.currentUser?.id {
+                        if let profile = try? await supabaseManager.fetchUserProfile(userId: userId) {
+                            await MainActor.run {
+                                supabaseManager.currentUser = SupabaseUser(
+                                    id: profile.id,
+                                    email: profile.email,
+                                    firstName: profile.firstName,
+                                    lastName: profile.lastName
+                                )
+                            }
+                        }
+                    }
+                }
+
+                await MainActor.run {
+                    isCheckingSession = false
+                    print("🚀 App Launch - isCheckingSession set to false, will show: \(hasCompletedOnboarding ? "ContentView" : "Onboarding")")
+                }
+
                 // PHASED INITIALIZATION: Fire and forget - don't block UI
-                // SDKs initialize in background after first frame renders
                 AppInitializer.shared.initialize()
 
-                // Check for existing auth session via SupabaseManager
-                await supabaseManager.checkAuthStatus()
-
-                // Check for force updates (also non-blocking)
+                // Check for force updates (non-blocking)
                 Task.detached(priority: .utility) {
                     await self.checkForUpdates()
                 }
@@ -78,6 +119,33 @@ struct ClubRalleyApp: App {
                 Task {
                     await checkForUpdates()
                 }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("UserDidLogout"))) { _ in
+                // User logged out - show onboarding
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    hasCompletedOnboarding = false
+                }
+            }
+        }
+    }
+
+    private var splashView: some View {
+        ZStack {
+            Color.white.ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "#2C4F40"))
+                        .frame(width: 100, height: 100)
+
+                    Image(systemName: "figure.run")
+                        .font(.system(size: 44, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "#2C4F40")))
             }
         }
     }
@@ -89,12 +157,12 @@ struct ClubRalleyApp: App {
             // Silently fail - don't block app if version check fails
         }
     }
-    
+
     func handleDeepLink(from url: URL) {
         // Handle Club Ralley deep links
         if let deepLink = DeepLink(url: url) {
             selectedTab = deepLink.type.targetTab
-            
+
             // Post notification for navigation handling
             NotificationCenter.default.post(
                 name: NSNotification.Name("ClubRalleyDeepLink"),
@@ -102,7 +170,7 @@ struct ClubRalleyApp: App {
             )
             return
         }
-        
+
         // Handle custom URL schemes for Club Ralley
         guard url.scheme == "clubralley" else { return }
 

@@ -10,6 +10,7 @@ import SwiftUI
 struct RalleyWelcomeScreen: View {
     @EnvironmentObject var controller: ClubRalleyOnboardingController
     @State private var animateLogo = false
+    @State private var showingSignIn = false
 
     var body: some View {
         ZStack {
@@ -58,11 +59,11 @@ struct RalleyWelcomeScreen: View {
 
                 Spacer()
 
-                // Join button
+                // Main CTA - Create Account
                 Button(action: {
                     controller.goToNextStep()
                 }) {
-                    Text("Join the roster")
+                    Text("Create Account")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -73,6 +74,44 @@ struct RalleyWelcomeScreen: View {
                 .padding(.horizontal, 24)
                 .opacity(animateLogo ? 1 : 0)
                 .animation(.easeOut(duration: 0.5).delay(0.6), value: animateLogo)
+
+                // Google Sign In
+                Button(action: {
+                    signInWithGoogle()
+                }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "g.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.red)
+                        Text("Continue with Google")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.black)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 30)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                    .cornerRadius(30)
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 12)
+                .opacity(animateLogo ? 1 : 0)
+                .animation(.easeOut(duration: 0.5).delay(0.7), value: animateLogo)
+
+                // Sign In link for returning users
+                Button(action: {
+                    showingSignIn = true
+                }) {
+                    Text("Already have an account? Sign In")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                }
+                .padding(.top, 16)
+                .opacity(animateLogo ? 1 : 0)
+                .animation(.easeOut(duration: 0.5).delay(0.8), value: animateLogo)
 
                 // Terms text
                 VStack(spacing: 4) {
@@ -101,12 +140,24 @@ struct RalleyWelcomeScreen: View {
                 .padding(.top, 16)
                 .padding(.bottom, 40)
                 .opacity(animateLogo ? 1 : 0)
-                .animation(.easeOut(duration: 0.5).delay(0.8), value: animateLogo)
+                .animation(.easeOut(duration: 0.5).delay(0.9), value: animateLogo)
             }
         }
         .onAppear {
             animateLogo = true
         }
+        .sheet(isPresented: $showingSignIn) {
+            SignInSheet()
+                .environmentObject(controller)
+        }
+    }
+
+    private func signInWithGoogle() {
+        // Google Sign-In integration would go here
+        // For now, this is a placeholder that would use GoogleSignIn SDK
+        // to get the idToken and then call:
+        // await supabaseManager.signInWithGoogle(idToken: token)
+        print("Google Sign-In tapped - integration pending")
     }
 }
 

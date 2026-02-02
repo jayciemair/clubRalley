@@ -124,8 +124,8 @@ class PostService: ObservableObject {
             lastError = error
             print("PostService: Load feed failed: \(error)")
 
-            // Fallback to mock data for development
-            return generateMockPosts()
+            // Return empty array - let UI show empty state
+            return []
 
         } catch {
             isLoading = false
@@ -133,8 +133,8 @@ class PostService: ObservableObject {
             lastError = supabaseError
             print("PostService: Load feed failed with network error: \(error)")
 
-            // Fallback to mock data
-            return generateMockPosts()
+            // Return empty array - let UI show empty state
+            return []
         }
     }
 
@@ -165,8 +165,8 @@ class PostService: ObservableObject {
             isLoading = false
             print("PostService: Load user posts failed: \(error)")
 
-            // Fallback: Filter mock posts by user
-            return generateMockPosts().filter { $0.authorName == "Your Name" }
+            // Return empty array - let UI show empty state
+            return []
         }
     }
 
@@ -286,41 +286,5 @@ class PostService: ObservableObject {
     private func extractContentFromContent(_ content: String) -> String {
         let parts = content.components(separatedBy: "\n\n")
         return parts.count > 1 ? parts[1] : content
-    }
-
-    /**
-     * Generate mock posts for development and fallback scenarios
-     */
-    private func generateMockPosts() -> [ClubRalleyPost] {
-        return [
-            ClubRalleyPost(
-                id: UUID(),
-                authorName: "Sarah Wilson",
-                authorUsername: "@sarahw",
-                authorPhotoURL: "https://picsum.photos/44/44?random=10",
-                title: "Amazing Tennis Practice",
-                content: "Just had an incredible practice session! Working on my backhand and it's finally clicking. Can't wait for the tournament next week!",
-                images: ["https://picsum.photos/300/300?random=510"],
-                timestamp: Date().addingTimeInterval(-3600),
-                likes: 24,
-                comments: 8,
-                shares: 3,
-                isLiked: false
-            ),
-            ClubRalleyPost(
-                id: UUID(),
-                authorName: "Mike Johnson",
-                authorUsername: "@mikej",
-                authorPhotoURL: "https://picsum.photos/44/44?random=11",
-                title: nil,
-                content: "Basketball pickup game at the park was intense! Made some new friends and got a great workout in. Who's up for tomorrow?",
-                images: [],
-                timestamp: Date().addingTimeInterval(-7200),
-                likes: 15,
-                comments: 12,
-                shares: 1,
-                isLiked: true
-            )
-        ]
     }
 }

@@ -95,6 +95,9 @@ class RalleyParticipationManager: ObservableObject {
             if success {
                 print("RalleyParticipationManager: Join synced with database")
 
+                // Track joined ralley locally
+                ralleyManager.markRalleyAsJoined(ralleyId)
+
                 // Check if ralley is now full - auto-create group chat
                 let updatedRalley = ralleyManager.ralleys[index]
                 if updatedRalley.currentPlayers >= updatedRalley.maxPlayers {
@@ -140,6 +143,9 @@ class RalleyParticipationManager: ObservableObject {
             let success = try await participationService.leaveRalley(ralleyId: ralleyId)
 
             if success {
+                // Track left ralley locally
+                ralleyManager.markRalleyAsLeft(ralleyId)
+
                 // Remove from chat if exists
                 if let chatId = ralleyManager.ralleys[index].chatId,
                    let currentUser = supabase.currentUser {

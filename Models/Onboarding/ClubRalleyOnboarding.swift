@@ -12,7 +12,6 @@ import SwiftUI
 
 enum ClubRalleyOnboardingStep: String, CaseIterable {
     case welcome = "welcome"
-    case phoneNumber = "phone_number"
     case email = "email"
     case password = "password"
     case name = "name"
@@ -20,15 +19,12 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
     case profilePhoto = "profile_photo"
     case location = "location"
     case sports = "sports"
-    case contactsAccess = "contacts_access"
     case completion = "completion"
 
     var title: String {
         switch self {
         case .welcome:
             return "Ralley Connect"
-        case .phoneNumber:
-            return "What's your phone number?"
         case .email:
             return "What's your email?"
         case .password:
@@ -43,8 +39,6 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
             return "Where do you compete the most?"
         case .sports:
             return "What sports do you play?"
-        case .contactsAccess:
-            return "Discover teammates already on the app"
         case .completion:
             return "Congrats! You made the team!"
         }
@@ -54,8 +48,6 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
         switch self {
         case .welcome:
             return "Meet and reconnect with athletes in our digital locker room."
-        case .phoneNumber:
-            return nil
         case .email:
             return nil
         case .password:
@@ -69,8 +61,6 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
         case .location:
             return nil
         case .sports:
-            return nil
-        case .contactsAccess:
             return nil
         case .completion:
             return nil
@@ -268,13 +258,10 @@ struct CompleteOnboardingData {
     var availability: OnboardingAvailabilityData = OnboardingAvailabilityData()
 
     var isComplete: Bool {
-        profile.isPhoneComplete &&
         profile.isEmailComplete &&
         profile.isUsernameComplete &&
         profile.isPasswordComplete &&
-        profile.isLocationComplete &&
-        profile.isGenderComplete &&
-        profile.isBirthdayComplete
+        profile.isLocationComplete
     }
 
     /// Convert to User model for API submission

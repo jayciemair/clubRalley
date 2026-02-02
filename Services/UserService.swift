@@ -166,6 +166,38 @@ class UserService: ObservableObject {
         }
     }
 
+    // MARK: - Load Single User
+
+    /// Load a single user by their UUID
+    /// - Parameter userId: The user's UUID
+    /// - Returns: The user profile if found
+    func loadUser(_ userId: UUID) async throws -> DatabaseUserProfile {
+        isLoading = true
+        error = nil
+
+        do {
+            let users: [DatabaseUserProfile] = try await supabase.query("club_users")
+                .select("*")
+                .eq("id", value: userId)
+                .execute()
+
+            isLoading = false
+
+            guard let user = users.first else {
+                throw SupabaseManager.SupabaseError.userNotFound
+            }
+
+            print("✅ UserService: Loaded user \(user.first_name) \(user.last_name)")
+            return user
+
+        } catch {
+            print("❌ UserService: Failed to load user \(userId): \(error)")
+            self.error = error
+            isLoading = false
+            throw error
+        }
+    }
+
     // MARK: - Helper Methods
 
     private func mapToRosterUser(_ dbUser: DatabaseUserProfile) -> RosterUserData {

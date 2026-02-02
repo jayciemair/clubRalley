@@ -137,8 +137,8 @@ class RalleyService: ObservableObject {
             lastError = error
             print("RalleyService: Load ralleys failed: \(error)")
 
-            // Fallback to mock data for development
-            return generateMockRalleys()
+            // Return empty array - let UI show empty state
+            return []
 
         } catch {
             isLoading = false
@@ -146,8 +146,8 @@ class RalleyService: ObservableObject {
             lastError = supabaseError
             print("RalleyService: Load ralleys failed with network error: \(error)")
 
-            // Fallback to mock data
-            return generateMockRalleys()
+            // Return empty array - let UI show empty state
+            return []
         }
     }
 
@@ -178,7 +178,47 @@ class RalleyService: ObservableObject {
             isLoading = false
             print("RalleyService: Load user ralleys failed: \(error)")
 
-            return generateMockRalleys().filter { $0.organizer.name == "Your Name" }
+            // Return empty array - let UI show empty state
+            return []
+        }
+    }
+
+    /**
+     * Load ralleys that a user has attended/participated in (not hosted)
+     * @param userId: User ID to load attended ralleys for
+     * @returns: Array of attended ralleys
+     */
+    func loadAttendedRalleys(userId: UUID) async throws -> [ClubRalley] {
+        isLoading = true
+        lastError = nil
+
+        do {
+            // First get all ralley participations for this user
+            let participations: [DatabaseRalleyParticipantWithId] = try await supabase.query("ralley_participants")
+                .select("*")
+                .eq("user_id", value: userId)
+                .eq("status", value: "attending")
+                .execute()
+
+            // Then load the actual ralleys
+            var attendedRalleys: [ClubRalley] = []
+            for participation in participations {
+                if let ralley = try await loadRalley(id: participation.ralley_id) {
+                    // Only include if user is not the host
+                    if ralley.organizer.id != userId {
+                        attendedRalleys.append(ralley)
+                    }
+                }
+            }
+
+            isLoading = false
+            print("RalleyService: Loaded \(attendedRalleys.count) attended ralleys from database")
+            return attendedRalleys
+
+        } catch {
+            isLoading = false
+            print("RalleyService: Load attended ralleys failed: \(error)")
+            return []
         }
     }
 
@@ -287,67 +327,5 @@ class RalleyService: ObservableObject {
         case "outdoor": return "Hiking"
         default: return "Sports"
         }
-    }
-
-    /**
-     * Generate mock ralleys for development and fallback scenarios
-     */
-    private func generateMockRalleys() -> [ClubRalley] {
-        let now = Date()
-
-        return [
-            ClubRalley(
-                id: UUID(),
-                title: "Downtown Basketball Pickup",
-                sport: "Basketball",
-                description: "Casual pickup game at the community center. All skill levels welcome!",
-                organizer: ClubRalleyOrganizer(
-                    id: UUID(),
-                    name: "Marcus Johnson",
-                    username: "marcusj",
-                    photoURL: "https://picsum.photos/44/44?random=20"
-                ),
-                dateTime: now.addingTimeInterval(3600),
-                location: ClubRalleyLocation(
-                    name: "Downtown Community Center",
-                    address: "123 Main St",
-                    city: "San Francisco",
-                    state: "CA",
-                    latitude: 37.7849,
-                    longitude: -122.4094
-                ),
-                maxPlayers: 10,
-                currentPlayers: 6,
-                cost: 0,
-                requirements: "Bring water bottle",
-                isPublic: true
-            ),
-            ClubRalley(
-                id: UUID(),
-                title: "Morning Tennis Session",
-                sport: "Tennis",
-                description: "Quick doubles matches before work. Intermediate level preferred.",
-                organizer: ClubRalleyOrganizer(
-                    id: UUID(),
-                    name: "Sarah Chen",
-                    username: "sarahc",
-                    photoURL: "https://picsum.photos/44/44?random=21"
-                ),
-                dateTime: now.addingTimeInterval(18000),
-                location: ClubRalleyLocation(
-                    name: "Golden Gate Park Tennis Courts",
-                    address: "Golden Gate Park",
-                    city: "San Francisco",
-                    state: "CA",
-                    latitude: 37.7694,
-                    longitude: -122.4862
-                ),
-                maxPlayers: 4,
-                currentPlayers: 2,
-                cost: 15,
-                requirements: "Bring your own racquet",
-                isPublic: true
-            )
-        ]
     }
 }
