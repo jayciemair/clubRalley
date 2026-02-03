@@ -293,4 +293,140 @@ class FriendshipService: ObservableObject {
         let followingCount = try await getFollowingCount(userId)
         return (followers: followersCount, following: followingCount)
     }
+
+    // MARK: - Block Operations
+
+    /// Block a user
+    /// - Parameter userId: The ID of the user to block
+    func blockUser(_ userId: UUID) async throws {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        guard let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.userNotFound
+        }
+
+        isLoading = true
+        error = nil
+
+        do {
+            // First, remove any existing friendship
+            try? await supabase.delete(
+                from: "friendships",
+                where: "user_id = '\(currentUser.id)' AND friend_id = '\(userId)'"
+            )
+
+            // Insert blocked relationship
+            let blockedRelationship = DatabaseFriendship(
+                user_id: currentUser.id,
+                friend_id: userId,
+                status: "blocked"
+            )
+
+            try await supabase.insert(blockedRelationship, into: "friendships")
+            print("✅ FriendshipService: Blocked user: \(userId)")
+            isLoading = false
+        } catch {
+            isLoading = false
+            self.error = error
+            print("❌ FriendshipService: Failed to block user: \(error)")
+            throw error
+        }
+    }
+
+    /// Unblock a user
+    /// - Parameter userId: The ID of the user to unblock
+    func unblockUser(_ userId: UUID) async throws {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        guard let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.userNotFound
+        }
+
+        isLoading = true
+        error = nil
+
+        do {
+            try await supabase.delete(
+                from: "friendships",
+                where: "user_id = '\(currentUser.id)' AND friend_id = '\(userId)' AND status = 'blocked'"
+            )
+            print("✅ FriendshipService: Unblocked user: \(userId)")
+            isLoading = false
+        } catch {
+            isLoading = false
+            self.error = error
+            print("❌ FriendshipService: Failed to unblock user: \(error)")
+            throw error
+        }
+    }
+
+    /// Check if the current user has blocked a specific user
+    /// - Parameter userId: The ID of the user to check
+    /// - Returns: True if blocked, false otherwise
+    func hasBlocked(_ userId: UUID) async -> Bool {
+        guard let currentUser = supabase.currentUser else { return false }
+
+        do {
+            let result: [DatabaseFriendship] = try await supabase.query("friendships")
+                .select("*")
+                .eq("user_id", value: currentUser.id)
+                .eq("friend_id", value: userId)
+                .eq("status", value: "blocked")
+                .execute()
+
+            return !result.isEmpty
+        } catch {
+            print("FriendshipService: Check blocked status failed: \(error)")
+            return false
+        }
+    }
+
+    // MARK: - Report Operations
+
+    /// Report a user for inappropriate behavior
+    /// - Parameters:
+    ///   - userId: The ID of the user to report
+    ///   - reason: The reason for reporting
+    func reportUser(_ userId: UUID, reason: String) async throws {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        guard let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.userNotFound
+        }
+
+        isLoading = true
+        error = nil
+
+        do {
+            let report = DatabaseUserReport(
+                reporter_id: currentUser.id,
+                reported_user_id: userId,
+                reason: reason
+            )
+
+            try await supabase.insert(report, into: "user_reports")
+            print("✅ FriendshipService: Reported user \(userId) for: \(reason)")
+            isLoading = false
+        } catch {
+            isLoading = false
+            // Log the report even if database insert fails
+            print("⚠️ FriendshipService: Report logged (DB insert failed): User \(userId), Reason: \(reason)")
+            // Don't throw - we don't want to fail the user experience if reporting table doesn't exist yet
+        }
+    }
+}
+
+// MARK: - Database Models for Blocking/Reporting
+
+/// Database model for user reports
+struct DatabaseUserReport: Codable {
+    let reporter_id: UUID
+    let reported_user_id: UUID
+    let reason: String
 }

@@ -167,3 +167,95 @@ struct DatabasePendingRequestWithUser: Codable {
         case user = "club_users"
     }
 }
+
+// MARK: - Direct Message Database Models
+
+/**
+ * Database representation of a direct message conversation
+ */
+struct DatabaseDirectConversation: Codable {
+    let id: UUID
+    let user1_id: UUID
+    let user2_id: UUID
+    let created_at: Date
+    let updated_at: Date
+}
+
+/**
+ * Database representation for creating a new conversation
+ */
+struct DatabaseDirectConversationInsert: Codable {
+    let user1_id: UUID
+    let user2_id: UUID
+}
+
+/**
+ * Database direct conversation with user information
+ */
+struct DatabaseDirectConversationWithUsers: Codable {
+    let id: UUID
+    let user1_id: UUID
+    let user2_id: UUID
+    let created_at: Date
+    let updated_at: Date
+    let user1: DatabaseUser?
+    let user2: DatabaseUser?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case user1_id
+        case user2_id
+        case created_at
+        case updated_at
+        case user1 = "user1:club_users!user1_id"
+        case user2 = "user2:club_users!user2_id"
+    }
+}
+
+/**
+ * Database representation of a direct message
+ */
+struct DatabaseDirectMessage: Codable {
+    let id: UUID
+    let conversation_id: UUID
+    let sender_id: UUID
+    let recipient_id: UUID
+    let content: String
+    let is_read: Bool
+    let created_at: Date
+}
+
+/**
+ * Database representation for inserting a direct message
+ */
+struct DatabaseDirectMessageInsert: Codable {
+    let conversation_id: UUID
+    let sender_id: UUID
+    let recipient_id: UUID
+    let content: String
+}
+
+/**
+ * Database direct message with sender information
+ */
+struct DatabaseDirectMessageWithUser: Codable {
+    let id: UUID
+    let conversation_id: UUID
+    let sender_id: UUID
+    let recipient_id: UUID
+    let content: String
+    let is_read: Bool
+    let created_at: Date
+    let sender: DatabaseUser
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case conversation_id
+        case sender_id
+        case recipient_id
+        case content
+        case is_read
+        case created_at
+        case sender = "club_users"
+    }
+}

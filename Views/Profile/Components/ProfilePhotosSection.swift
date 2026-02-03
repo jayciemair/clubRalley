@@ -238,19 +238,24 @@ struct PhotoDetailView: View {
 // MARK: - Preview
 
 struct ProfilePhotosSection_Previews: PreviewProvider {
-    static var previews: some View {
-        let mockPhotos = Array(1...12).map { index in
-            UserPhoto(
+    static var mockPhotos: [UserPhoto] {
+        (1...12).map { index -> UserPhoto in
+            let caption: String? = index % 3 == 0 ? "Great game today! #tennis #bucknell" : nil
+            let date = Date().addingTimeInterval(-Double(index) * 86400)
+            let tags: [String] = index % 2 == 0 ? ["tennis", "bucknell", "game"] : []
+            return UserPhoto(
                 id: UUID(),
                 imageURL: "https://picsum.photos/200/200?random=\(index)",
-                caption: index % 3 == 0 ? "Great game today! #tennis #bucknell" : nil,
-                createdAt: Date().addingTimeInterval(-Double(index) * 86400),
+                caption: caption,
+                createdAt: date,
                 likesCount: Int.random(in: 5...50),
                 commentsCount: Int.random(in: 0...15),
-                tags: index % 2 == 0 ? ["tennis", "bucknell", "game"] : []
+                tags: tags
             )
         }
-        
+    }
+
+    static var previews: some View {
         ProfilePhotosSection(photos: mockPhotos)
             .padding()
     }

@@ -1,6 +1,6 @@
 //
 //  MainTabView.swift
-//  Checkpoint
+//  Club Ralley
 //
 //  Main tab bar component for the authenticated app experience
 //
@@ -11,49 +11,63 @@ struct MainTabView: View {
     // MARK: - Properties
     @AppStorage("selectedTab") var selectedTab: MainTab = .home
     @StateObject private var appLifecycleManager = AppLifecycleManager.shared
+    @StateObject private var postManager = PostManager()
+    @StateObject private var ralleyManager = RalleyManager()
+    @StateObject private var messagingService = MessagingService()
 
     // MARK: - Body
     var body: some View {
         TabView(selection: $selectedTab) {
-            Text("Home - Welcome to Club Ralley!")
+            // Home Tab - Social Feed
+            HomeFeedView()
+                .environmentObject(postManager)
+                .environmentObject(ralleyManager)
                 .tabItem {
                     Image(systemName: selectedTab == .home ? "house.fill" : "house")
                     Text("Home")
                 }
                 .tag(MainTab.home)
-            
-            Text("League Finder - Coming Soon!")
+
+            // Find Ralleys Tab - Discover pickup games
+            FindRalleysView()
+                .environmentObject(ralleyManager)
                 .tabItem {
-                    Image(systemName: "magnifyingglass")
-                    Text("League Finder")
+                    Image(systemName: selectedTab == .findRalleys ? "sportscourt.fill" : "sportscourt")
+                    Text("Find Ralleys")
                 }
                 .tag(MainTab.findRalleys)
-            
-            Text("Post - Coming Soon!")
+
+            // Post Tab - Create new content
+            PostCreationInterfaceView()
+                .environmentObject(postManager)
                 .tabItem {
-                    Image(systemName: selectedTab == .post ? "camera.fill" : "camera")
+                    Image(systemName: selectedTab == .post ? "plus.circle.fill" : "plus.circle")
                     Text("Post")
                 }
                 .tag(MainTab.post)
-            
-            Text("Teams - Coming Soon!")
+
+            // Messages Tab - Direct messaging
+            MessagesView()
                 .tabItem {
-                    Image(systemName: selectedTab == .teams ? "person.2.fill" : "person.2")
-                    Text("Teams")
+                    Image(systemName: selectedTab == .teams ? "message.fill" : "message")
+                    Text("Messages")
                 }
                 .tag(MainTab.teams)
-            
-            Text("Profile - Coming Soon!")
+
+            // Profile Tab - User profile
+            ProfileTabView()
                 .tabItem {
                     Image(systemName: selectedTab == .profile ? "person.fill" : "person")
                     Text("Profile")
                 }
                 .tag(MainTab.profile)
         }
+        .accentColor(Color(hex: "#2C4F40"))
         .onAppear {
             // Initialize app data on first launch
             Task {
                 await appLifecycleManager.initializeOnLaunch()
+                await messagingService.loadConversations()
             }
         }
     }

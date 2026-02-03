@@ -14,6 +14,7 @@ struct RalleyCardView: View {
     @EnvironmentObject var ralleyManager: RalleyManager
     @State private var participationStatus: UserParticipationStatus = .notJoined
     @State private var isLoading = false
+    @State private var showingManagement = false
 
     var sportIcon: String {
         switch ralley.sport.lowercased() {
@@ -146,7 +147,7 @@ struct RalleyCardView: View {
     @ViewBuilder
     private var actionButton: some View {
         if ralley.isCaptain {
-            Button(action: {}) {
+            Button(action: { showingManagement = true }) {
                 HStack(spacing: 8) {
                     Image(systemName: "gearshape.fill")
                     Text("Manage Ralley")
@@ -157,6 +158,10 @@ struct RalleyCardView: View {
                 .padding(.vertical, 12)
                 .background(Color(hex: "#2C4F40").opacity(0.1))
                 .cornerRadius(10)
+            }
+            .sheet(isPresented: $showingManagement) {
+                RalleyManagementView(ralley: ralley)
+                    .environmentObject(ralleyManager)
             }
         } else if ralley.isFull && participationStatus != .joined {
             Button(action: {}) {
@@ -274,6 +279,7 @@ struct EmptyRalleysView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
     }
 }

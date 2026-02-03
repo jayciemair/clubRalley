@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "481388EC29ABE0F2001B8A55"
-               BuildableName = "Get Over Him.app"
-               BlueprintName = "Get Over Him"
-               ReferencedContainer = "container:Get Over Him.xcodeproj">
+               BuildableName = "Club Ralley.app"
+               BlueprintName = "Club Ralley"
+               ReferencedContainer = "container:Club Ralley.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "481388EC29ABE0F2001B8A55"
-            BuildableName = "Get Over Him.app"
-            BlueprintName = "Get Over Him"
-            ReferencedContainer = "container:Get Over Him.xcodeproj">
+            BuildableName = "Club Ralley.app"
+            BlueprintName = "Club Ralley"
+            ReferencedContainer = "container:Club Ralley.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
@@ -65,9 +65,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "481388EC29ABE0F2001B8A55"
-            BuildableName = "Get Over Him.app"
-            BlueprintName = "Get Over Him"
-            ReferencedContainer = "container:Get Over Him.xcodeproj">
+            BuildableName = "Club Ralley.app"
+            BlueprintName = "Club Ralley"
+            ReferencedContainer = "container:Club Ralley.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

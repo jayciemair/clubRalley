@@ -88,3 +88,26 @@ struct DatabaseRalleyParticipantWithId: Codable {
     let status: String
     let created_at: Date
 }
+
+/// Database model for updating ralley fields
+struct DatabaseRalleyUpdate: Codable {
+    let title: String
+    let description: String
+    let location_name: String
+    let location_address: String
+    let location_city: String
+    let location_state: String
+    let latitude: Double
+    let longitude: Double
+    let date_time: Date
+    let category: String
+    let max_participants: Int
+    let is_public: Bool
+    let visibility: String
+    let join_type: String
+}
+
+/// Database model for checking ralley host ownership
+struct DatabaseRalleyHostCheck: Codable {
+    let host_user_id: UUID
+}

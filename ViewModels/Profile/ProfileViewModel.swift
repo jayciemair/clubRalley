@@ -341,8 +341,8 @@ class ProfileViewModel: ObservableObject {
     func blockUser(_ userId: UUID) async {
         guard let profile = viewedProfiles[userId] else { return }
 
-        var updatedProfile = profile
-        updatedProfile = UserProfile(
+        // Optimistic UI update
+        let updatedProfile = UserProfile(
             id: profile.id,
             user: profile.user,
             stats: profile.stats,
@@ -355,14 +355,56 @@ class ProfileViewModel: ObservableObject {
         )
         viewedProfiles[userId] = updatedProfile
 
-        // Simulate API call - TODO: Implement actual blocking in backend
-        try? await Task.sleep(nanoseconds: 300_000_000)
+        // Persist to database
+        do {
+            try await friendshipService.blockUser(userId)
+            print("ProfileViewModel: Successfully blocked user \(userId)")
+        } catch {
+            // Revert optimistic update on failure
+            viewedProfiles[userId] = profile
+            self.error = .actionFailed("Failed to block user")
+            print("ProfileViewModel: Failed to block user: \(error)")
+        }
+    }
+
+    func unblockUser(_ userId: UUID) async {
+        guard let profile = viewedProfiles[userId] else { return }
+
+        // Optimistic UI update
+        let updatedProfile = UserProfile(
+            id: profile.id,
+            user: profile.user,
+            stats: profile.stats,
+            socialInfo: profile.socialInfo,
+            teams: profile.teams,
+            photos: profile.photos,
+            mutualFriends: profile.mutualFriends,
+            isFollowedByCurrentUser: false,
+            relationshipStatus: .none
+        )
+        viewedProfiles[userId] = updatedProfile
+
+        // Persist to database
+        do {
+            try await friendshipService.unblockUser(userId)
+            print("ProfileViewModel: Successfully unblocked user \(userId)")
+        } catch {
+            // Revert optimistic update on failure
+            viewedProfiles[userId] = profile
+            self.error = .actionFailed("Failed to unblock user")
+            print("ProfileViewModel: Failed to unblock user: \(error)")
+        }
     }
 
     func reportUser(_ userId: UUID, reason: String) async {
-        // TODO: Implement actual reporting in backend
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        print("ProfileViewModel: Reported user \(userId) for: \(reason)")
+        // Persist report to database
+        do {
+            try await friendshipService.reportUser(userId, reason: reason)
+            print("ProfileViewModel: Successfully reported user \(userId) for: \(reason)")
+        } catch {
+            print("ProfileViewModel: Report logged locally (DB may not be configured): \(error)")
+            // Don't show error to user - report is logged even if DB fails
+        }
     }
 }
 

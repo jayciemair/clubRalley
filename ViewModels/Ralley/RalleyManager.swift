@@ -311,6 +311,87 @@ class RalleyManager: ObservableObject {
         showingCreateRalley = false
     }
 
+    // MARK: - Ralley Update
+
+    /**
+     * Update an existing ralley
+     */
+    func updateRalley(_ ralley: ClubRalley) async throws {
+        isLoading = true
+        error = nil
+
+        do {
+            let updatedRalley = try await ralleyService.updateRalley(ralley)
+
+            // Update local cache
+            if let index = ralleys.firstIndex(where: { $0.id == ralley.id }) {
+                ralleys[index] = updatedRalley
+            }
+
+            print("RalleyManager: Ralley updated successfully")
+            isLoading = false
+        } catch {
+            self.error = error
+            isLoading = false
+            print("RalleyManager: Failed to update ralley: \(error)")
+            throw error
+        }
+    }
+
+    // MARK: - Ralley Delete
+
+    /**
+     * Delete a ralley
+     */
+    func deleteRalley(_ ralleyId: UUID) async throws {
+        isLoading = true
+        error = nil
+
+        do {
+            try await ralleyService.deleteRalley(ralleyId)
+
+            // Remove from local cache
+            ralleys.removeAll { $0.id == ralleyId }
+            joinedRalleyIds.remove(ralleyId)
+            saveJoinedRalleys()
+
+            print("RalleyManager: Ralley deleted successfully")
+            isLoading = false
+        } catch {
+            self.error = error
+            isLoading = false
+            print("RalleyManager: Failed to delete ralley: \(error)")
+            throw error
+        }
+    }
+
+    // MARK: - Participant Management
+
+    /**
+     * Remove a participant from a ralley (captain only)
+     */
+    func removeParticipant(userId: UUID, from ralleyId: UUID) async throws {
+        isLoading = true
+        error = nil
+
+        do {
+            try await ralleyService.removeParticipant(userId: userId, from: ralleyId)
+
+            // Update local cache
+            if let index = ralleys.firstIndex(where: { $0.id == ralleyId }) {
+                ralleys[index].currentPlayers = max(0, ralleys[index].currentPlayers - 1)
+            }
+
+            print("RalleyManager: Participant removed successfully")
+            isLoading = false
+        } catch {
+            self.error = error
+            isLoading = false
+            print("RalleyManager: Failed to remove participant: \(error)")
+            throw error
+        }
+    }
+
     // MARK: - Internal Methods
 
     func updateRalley(at index: Int, with updatedRalley: ClubRalley) {

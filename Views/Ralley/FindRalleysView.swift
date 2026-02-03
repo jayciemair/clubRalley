@@ -63,7 +63,6 @@ struct FindRalleysView: View {
                     headerSection
                     searchBar
                     quickActionsSection
-                    sportFilterSection
                     if hasActiveFilters { activeFiltersSection }
                     ralleysSection
                 }
@@ -245,13 +244,19 @@ struct FindRalleysView: View {
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.black)
                 Spacer()
-                Text("\(filteredRalleys.count) found")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.gray)
+                if !ralleyManager.isLoading {
+                    Text("\(filteredRalleys.count) found")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.gray)
+                }
             }
             .padding(.horizontal, 24)
 
-            if filteredRalleys.isEmpty {
+            if ralleyManager.isLoading && ralleyManager.ralleys.isEmpty {
+                ralleysLoadingView
+            } else if let error = ralleyManager.error, ralleyManager.ralleys.isEmpty {
+                ralleysErrorView(error: error)
+            } else if filteredRalleys.isEmpty {
                 EmptyRalleysView(hasFilters: hasActiveFilters, onCreateRalley: {
                     ralleyManager.showingCreateRalley = true
                 })
@@ -268,6 +273,107 @@ struct FindRalleysView: View {
             }
 
             Spacer(minLength: 100)
+        }
+    }
+
+    // MARK: - Loading View
+
+    private var ralleysLoadingView: some View {
+        VStack(spacing: 16) {
+            ForEach(0..<3, id: \.self) { _ in
+                RalleySkeletonView()
+            }
+        }
+        .padding(.horizontal, 24)
+    }
+
+    // MARK: - Error View
+
+    private func ralleysErrorView(error: Error) -> some View {
+        VStack(spacing: 20) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 50))
+                .foregroundColor(Color(hex: "#2C4F40").opacity(0.6))
+
+            Text("Unable to load ralleys")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(.black)
+
+            Text("Check your internet connection and try again")
+                .font(.system(size: 15))
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+
+            Button(action: {
+                Task {
+                    await ralleyManager.refreshRalleys()
+                }
+            }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.clockwise")
+                    Text("Try Again")
+                }
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(Color(hex: "#2C4F40"))
+                .cornerRadius(12)
+            }
+        }
+        .padding(.top, 40)
+    }
+}
+
+// MARK: - Ralley Skeleton View
+
+struct RalleySkeletonView: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 60, height: 24)
+
+                Spacer()
+
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 80, height: 24)
+            }
+
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 20)
+
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.gray.opacity(0.2))
+                .frame(width: 200, height: 16)
+
+            HStack {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 150, height: 14)
+
+                Spacer()
+
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 80, height: 14)
+            }
+        }
+        .padding(16)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+        .opacity(isAnimating ? 0.6 : 1.0)
+        .onAppear {
+            withAnimation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                isAnimating = true
+            }
         }
     }
 }

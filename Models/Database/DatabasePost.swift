@@ -114,3 +114,22 @@ struct DatabasePostReport: Codable {
     let reporter_id: UUID
     let reason: String
 }
+
+/// Database representation of a post like
+struct DatabasePostLike: Codable {
+    var id: UUID?
+    let post_id: UUID
+    let user_id: UUID
+    var created_at: Date?
+
+    init(post_id: UUID, user_id: UUID) {
+        self.id = nil
+        self.post_id = post_id
+        self.user_id = user_id
+        self.created_at = nil
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, post_id, user_id, created_at
+    }
+}

@@ -71,11 +71,14 @@ class ProfileService: ObservableObject {
                 throw SupabaseManager.SupabaseError.userNotFound
             }
 
-            // Build UserProfile from database data
-            let profile = mapDatabaseUserToProfile(dbUser, isCurrentUser: true)
+            // Load real stats from database
+            let stats = await loadUserStats(userId: currentUser.id)
+
+            // Build UserProfile from database data with real stats
+            let profile = mapDatabaseUserToProfile(dbUser, isCurrentUser: true, stats: stats)
 
             isLoading = false
-            print("✅ ProfileService: Loaded current user profile from database")
+            print("✅ ProfileService: Loaded current user profile from database with real stats")
             return profile
 
         } catch let error as SupabaseManager.SupabaseError {
@@ -119,18 +122,20 @@ class ProfileService: ObservableObject {
                 throw SupabaseManager.SupabaseError.userNotFound
             }
 
-            // Check if current user follows this user
-            let isFollowing = try await checkFollowingStatus(userID: userID)
+            // Check if current user follows this user and load stats in parallel
+            async let isFollowing = checkFollowingStatus(userID: userID)
+            async let stats = loadUserStats(userId: userID)
 
-            // Build profile with following status
+            // Build profile with following status and real stats
             let profile = mapDatabaseUserToProfile(
                 dbUser,
                 isCurrentUser: false,
-                isFollowedByCurrentUser: isFollowing
+                isFollowedByCurrentUser: try await isFollowing,
+                stats: await stats
             )
 
             isLoading = false
-            print("✅ ProfileService: Loaded user profile for \(userID)")
+            print("✅ ProfileService: Loaded user profile for \(userID) with real stats")
             return profile
 
         } catch {
@@ -263,12 +268,14 @@ class ProfileService: ObservableObject {
      * @param dbUser: Database user profile record
      * @param isCurrentUser: Whether this is the logged-in user
      * @param isFollowedByCurrentUser: Following status (for other users)
+     * @param stats: Optional pre-loaded stats (if nil, uses defaults from dbUser)
      * @returns: Fully constructed UserProfile
      */
     private func mapDatabaseUserToProfile(
         _ dbUser: DatabaseUserProfile,
         isCurrentUser: Bool,
-        isFollowedByCurrentUser: Bool? = nil
+        isFollowedByCurrentUser: Bool? = nil,
+        stats loadedStats: UserStats? = nil
     ) -> UserProfile {
 
         // Create DateOfBirth struct from separate fields
@@ -295,21 +302,21 @@ class ProfileService: ObservableObject {
             instagramHandle: dbUser.instagram_handle,
             profilePhotoURL: dbUser.profile_photo_url,
             isVerifiedAthlete: dbUser.is_verified_athlete,
-            athleteInfo: nil, // TODO: Load from athlete_info table
+            athleteInfo: nil,
             friendsCount: dbUser.friends_count,
             ralleysCount: dbUser.ralleys_count,
             createdAt: dbUser.created_at,
             updatedAt: dbUser.updated_at
         )
 
-        // Create UserStats matching UserProfile.swift model
-        let stats = UserStats(
+        // Use pre-loaded stats or create from database user
+        let stats = loadedStats ?? UserStats(
             followersCount: dbUser.friends_count,
-            followingCount: 0, // TODO: Query from friendships table
-            gamesPlayed: 0, // TODO: Calculate from ralley participation
+            followingCount: 0,
+            gamesPlayed: 0,
             wins: 0,
-            postsCount: 0, // TODO: Query from posts table
-            ralleysAttended: 0, // TODO: Query from ralley_participants
+            postsCount: 0,
+            ralleysAttended: 0,
             ralleysHosted: dbUser.ralleys_count
         )
 
@@ -331,12 +338,119 @@ class ProfileService: ObservableObject {
             user: user,
             stats: stats,
             socialInfo: socialInfo,
-            teams: [], // TODO: Load from user_teams table
-            photos: [], // TODO: Load from user_photos table
+            teams: [],
+            photos: [],
             mutualFriends: [],
             isFollowedByCurrentUser: isFollowedByCurrentUser,
             relationshipStatus: relationshipStatus
         )
+    }
+
+    // MARK: - Stats Loading Methods
+
+    /**
+     * Load user stats from database (followers, following, posts, ralleys)
+     * @param userId: User ID to load stats for
+     * @returns: UserStats with real counts from database
+     */
+    func loadUserStats(userId: UUID) async -> UserStats {
+        async let followersCount = getFollowersCount(userId: userId)
+        async let followingCount = getFollowingCount(userId: userId)
+        async let postsCount = getPostsCount(userId: userId)
+        async let ralleysAttended = getRalleysAttendedCount(userId: userId)
+        async let ralleysHosted = getRalleysHostedCount(userId: userId)
+
+        return await UserStats(
+            followersCount: followersCount,
+            followingCount: followingCount,
+            gamesPlayed: ralleysAttended,
+            wins: 0,
+            postsCount: postsCount,
+            ralleysAttended: ralleysAttended,
+            ralleysHosted: ralleysHosted
+        )
+    }
+
+    /**
+     * Get count of users following this user
+     */
+    private func getFollowersCount(userId: UUID) async -> Int {
+        do {
+            let result: [DatabaseFriendship] = try await supabase.query("friendships")
+                .select("*")
+                .eq("friend_id", value: userId)
+                .eq("status", value: "accepted")
+                .execute()
+            return result.count
+        } catch {
+            print("ProfileService: Failed to get followers count: \(error)")
+            return 0
+        }
+    }
+
+    /**
+     * Get count of users this user is following
+     */
+    private func getFollowingCount(userId: UUID) async -> Int {
+        do {
+            let result: [DatabaseFriendship] = try await supabase.query("friendships")
+                .select("*")
+                .eq("user_id", value: userId)
+                .eq("status", value: "accepted")
+                .execute()
+            return result.count
+        } catch {
+            print("ProfileService: Failed to get following count: \(error)")
+            return 0
+        }
+    }
+
+    /**
+     * Get count of posts by this user
+     */
+    private func getPostsCount(userId: UUID) async -> Int {
+        do {
+            let result: [DatabasePostWithUser] = try await supabase.query("posts")
+                .select("*, club_users(*)")
+                .eq("user_id", value: userId)
+                .execute()
+            return result.count
+        } catch {
+            print("ProfileService: Failed to get posts count: \(error)")
+            return 0
+        }
+    }
+
+    /**
+     * Get count of ralleys this user has attended
+     */
+    private func getRalleysAttendedCount(userId: UUID) async -> Int {
+        do {
+            let result: [DatabaseRalleyParticipant] = try await supabase.query("ralley_participants")
+                .select("*")
+                .eq("user_id", value: userId)
+                .execute()
+            return result.count
+        } catch {
+            print("ProfileService: Failed to get ralleys attended count: \(error)")
+            return 0
+        }
+    }
+
+    /**
+     * Get count of ralleys this user has hosted
+     */
+    private func getRalleysHostedCount(userId: UUID) async -> Int {
+        do {
+            let result: [DatabaseRalleyWithUser] = try await supabase.query("ralleys")
+                .select("*, club_users(*)")
+                .eq("host_user_id", value: userId)
+                .execute()
+            return result.count
+        } catch {
+            print("ProfileService: Failed to get ralleys hosted count: \(error)")
+            return 0
+        }
     }
 
     /**

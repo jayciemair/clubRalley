@@ -15,6 +15,7 @@ struct SignInSheet: View {
     @State private var password = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var showingForgotPassword = false
 
     private let supabaseManager = SupabaseManager.shared
 
@@ -104,7 +105,7 @@ struct SignInSheet: View {
 
                 // Forgot password link
                 Button(action: {
-                    // TODO: Implement forgot password flow
+                    showingForgotPassword = true
                 }) {
                     Text("Forgot password?")
                         .font(.system(size: 14))
@@ -114,6 +115,9 @@ struct SignInSheet: View {
                 Spacer()
             }
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showingForgotPassword) {
+                ForgotPasswordView()
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {

@@ -41,6 +41,8 @@ struct RalleyCreationView: View {
     // UI State
     @State private var isCreating = false
     @State private var showingSuccessMessage = false
+    @State private var showingError = false
+    @State private var errorMessage = ""
 
     var canCreate: Bool {
         !title.isEmpty && selectedSport != nil && !locationName.isEmpty && maxPlayers >= 2
@@ -82,6 +84,11 @@ struct RalleyCreationView: View {
                 locationCity: $locationCity,
                 locationState: $locationState
             )
+        }
+        .alert("Error", isPresented: $showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
         }
     }
 
@@ -422,6 +429,8 @@ struct RalleyCreationView: View {
         isCreating = true
 
         Task { @MainActor in
+            let previousError = ralleyManager.error
+
             await ralleyManager.createRalley(
                 title: title,
                 sport: selectedSport?.name ?? "",
@@ -437,6 +446,14 @@ struct RalleyCreationView: View {
                 visibility: visibility,
                 joinType: joinType
             )
+
+            // Check if error was set during operation
+            if ralleyManager.error != nil && ralleyManager.error?.localizedDescription != previousError?.localizedDescription {
+                errorMessage = "Failed to create ralley. Please check your connection and try again."
+                showingError = true
+                isCreating = false
+                return
+            }
 
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             showingSuccessMessage = true

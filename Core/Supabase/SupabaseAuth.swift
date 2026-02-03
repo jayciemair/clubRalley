@@ -206,6 +206,38 @@ extension SupabaseManager {
             currentUser = nil
         }
     }
+
+    /// Send password reset email
+    /// - Parameter email: The email address to send the reset link to
+    func resetPassword(email: String) async throws {
+        guard let client = client, !useFallbackMode else {
+            throw SupabaseError.networkError("Supabase not configured")
+        }
+
+        do {
+            try await client.auth.resetPasswordForEmail(email)
+            print("✅ SupabaseManager: Password reset email sent to: \(email)")
+        } catch {
+            print("❌ SupabaseManager: Password reset failed: \(error)")
+            throw SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
+    /// Update user password (after reset)
+    /// - Parameter newPassword: The new password to set
+    func updatePassword(newPassword: String) async throws {
+        guard let client = client, !useFallbackMode else {
+            throw SupabaseError.networkError("Supabase not configured")
+        }
+
+        do {
+            try await client.auth.update(user: .init(password: newPassword))
+            print("✅ SupabaseManager: Password updated successfully")
+        } catch {
+            print("❌ SupabaseManager: Password update failed: \(error)")
+            throw SupabaseError.networkError(error.localizedDescription)
+        }
+    }
 }
 
 // MARK: - Internal Types

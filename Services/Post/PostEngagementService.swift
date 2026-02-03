@@ -47,17 +47,76 @@ class PostEngagementService: ObservableObject {
         }
 
         do {
-            // In real implementation:
-            // 1. Check if user already liked: SELECT * FROM post_likes WHERE post_id = ? AND user_id = ?
-            // 2. If exists: DELETE and decrement counter
-            // 3. If not exists: INSERT and increment counter
+            // Check if user already liked this post
+            let existingLikes: [DatabasePostLike] = try await supabase.query("post_likes")
+                .select("*")
+                .eq("post_id", value: postId)
+                .eq("user_id", value: currentUser.id)
+                .execute()
 
-            print("PostEngagementService: Toggled like for post \(postId)")
-            return true
+            if !existingLikes.isEmpty {
+                // User already liked - remove the like
+                try await supabase.delete(
+                    from: "post_likes",
+                    where: "post_id = '\(postId)' AND user_id = '\(currentUser.id)'"
+                )
+                print("PostEngagementService: Removed like for post \(postId)")
+                return false
+            } else {
+                // User hasn't liked - add the like
+                let newLike = DatabasePostLike(
+                    post_id: postId,
+                    user_id: currentUser.id
+                )
+                try await supabase.insert(newLike, into: "post_likes")
+                print("PostEngagementService: Added like for post \(postId)")
+                return true
+            }
 
         } catch {
             print("PostEngagementService: Like toggle failed: \(error)")
             throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
+    /**
+     * Check if current user has liked a post
+     * @param postId: Post ID to check
+     * @returns: True if user has liked the post
+     */
+    func hasLiked(postId: UUID) async -> Bool {
+        guard let currentUser = supabase.currentUser else { return false }
+
+        do {
+            let likes: [DatabasePostLike] = try await supabase.query("post_likes")
+                .select("*")
+                .eq("post_id", value: postId)
+                .eq("user_id", value: currentUser.id)
+                .execute()
+
+            return !likes.isEmpty
+        } catch {
+            print("PostEngagementService: Check like status failed: \(error)")
+            return false
+        }
+    }
+
+    /**
+     * Get like count for a post
+     * @param postId: Post ID to get count for
+     * @returns: Number of likes
+     */
+    func getLikeCount(postId: UUID) async -> Int {
+        do {
+            let likes: [DatabasePostLike] = try await supabase.query("post_likes")
+                .select("*")
+                .eq("post_id", value: postId)
+                .execute()
+
+            return likes.count
+        } catch {
+            print("PostEngagementService: Get like count failed: \(error)")
+            return 0
         }
     }
 

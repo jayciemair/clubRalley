@@ -20,8 +20,9 @@ struct ProfileView: View {
                 } else if viewModel.isLoading {
                     ProfileLoadingView()
                 } else {
-                    ProfileErrorView()
-                        .environmentObject(viewModel)
+                    ProfileErrorView {
+                        Task { await viewModel.loadCurrentUserProfile() }
+                    }
                 }
             }
             .refreshable {
@@ -279,7 +280,11 @@ struct MutualFriendsView: View {
 struct ProfileActionButtonsView: View {
     let userProfile: UserProfile
     @EnvironmentObject var viewModel: ProfileViewModel
-    
+    @StateObject private var messagingService = MessagingService()
+    @State private var showingDirectMessage = false
+    @State private var conversation: DirectConversation?
+    @State private var isLoadingMessage = false
+
     var body: some View {
         HStack(spacing: ClubRalleyTheme.Spacing.md) {
             // Follow/Following Button
@@ -292,24 +297,49 @@ struct ProfileActionButtonsView: View {
                     .frame(maxWidth: .infinity)
             }
             .clubRalleyButtonStyle(followButtonStyle)
-            
+
             // Message Button
             Button(action: {
-                // Handle message action
+                Task { await openDirectMessage() }
             }) {
-                Text("Message")
-                    .frame(maxWidth: .infinity)
+                HStack {
+                    if isLoadingMessage {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    }
+                    Text("Message")
+                }
+                .frame(maxWidth: .infinity)
             }
             .clubRalleyButtonStyle(.outline)
+            .disabled(isLoadingMessage)
+        }
+        .sheet(isPresented: $showingDirectMessage) {
+            if let conversation = conversation {
+                NavigationStack {
+                    DirectMessageView(conversation: conversation, messagingService: messagingService)
+                }
+            }
         }
     }
-    
+
     private var followButtonText: String {
         userProfile.isFollowedByCurrentUser == true ? "Following" : "Follow"
     }
-    
+
     private var followButtonStyle: ClubRalleyButtonStyle {
         userProfile.isFollowedByCurrentUser == true ? .secondary : .primary
+    }
+
+    private func openDirectMessage() async {
+        isLoadingMessage = true
+        do {
+            conversation = try await messagingService.getOrCreateConversation(with: userProfile.user.id)
+            showingDirectMessage = true
+        } catch {
+            print("Failed to open conversation: \(error)")
+        }
+        isLoadingMessage = false
     }
 }
 
@@ -352,46 +382,9 @@ struct ProfileLoadingView: View {
             
             Text("Loading profile...")
                 .font(ClubRalleyTheme.Typography.body)
-                .foregroundColor(ClubRalleyTheme.Colors.textSecondary)
+                .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
         }
         .padding(ClubRalleyTheme.Spacing.lg)
-    }
-}
-
-// MARK: - Error View
-
-struct ProfileErrorView: View {
-    @EnvironmentObject var viewModel: ProfileViewModel
-    
-    var body: some View {
-        VStack(spacing: ClubRalleyTheme.Spacing.lg) {
-            Image(systemName: "person.circle.fill")
-                .font(.system(size: 80))
-                .foregroundColor(ClubRalleyTheme.Colors.sageGreen)
-            
-            VStack(spacing: ClubRalleyTheme.Spacing.sm) {
-                Text("Unable to load profile")
-                    .font(ClubRalleyTheme.Typography.title2)
-                    .foregroundColor(ClubRalleyTheme.Colors.text)
-                
-                if let error = viewModel.error {
-                    Text(error.localizedDescription)
-                        .font(ClubRalleyTheme.Typography.body)
-                        .foregroundColor(ClubRalleyTheme.Colors.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-            }
-            
-            VStack(spacing: ClubRalleyTheme.Spacing.md) {
-                Button("Try Again") {
-                    Task {
-                        await viewModel.loadCurrentUserProfile()
-                    }
-                }
-                .clubRalleyButtonStyle()
-            }
-        }
-        .padding(ClubRalleyTheme.Spacing.xl)
     }
 }
 

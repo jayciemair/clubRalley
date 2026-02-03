@@ -235,7 +235,10 @@ struct RosterView: View {
 struct RosterUserCardView: View {
     let user: RosterUserData
     @ObservedObject var userService: UserService
-    @State private var showingMessageAlert = false
+    @StateObject private var messagingService = MessagingService()
+    @State private var showingDirectMessage = false
+    @State private var conversation: DirectConversation?
+    @State private var isLoadingMessage = false
 
     var body: some View {
         VStack(spacing: 8) {
@@ -271,17 +274,42 @@ struct RosterUserCardView: View {
                         .cornerRadius(6).overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "#2C4F40"), lineWidth: 1))
                 }
 
-                Button(action: { showingMessageAlert = true }) {
-                    Image(systemName: "message").font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color(hex: "#2C4F40")).frame(width: 32, height: 32)
-                        .background(Color.white).cornerRadius(6)
-                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "#2C4F40"), lineWidth: 1))
+                Button(action: { Task { await openDirectMessage() } }) {
+                    ZStack {
+                        if isLoadingMessage {
+                            ProgressView()
+                                .scaleEffect(0.6)
+                        } else {
+                            Image(systemName: "message").font(.system(size: 12, weight: .medium))
+                        }
+                    }
+                    .foregroundColor(Color(hex: "#2C4F40")).frame(width: 32, height: 32)
+                    .background(Color.white).cornerRadius(6)
+                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "#2C4F40"), lineWidth: 1))
                 }
+                .disabled(isLoadingMessage)
             }
         }
         .padding(12).background(Color.white).cornerRadius(12)
         .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
-        .alert("Coming Soon", isPresented: $showingMessageAlert) { Button("OK", role: .cancel) { } } message: { Text("Direct messaging will be available soon.") }
+        .sheet(isPresented: $showingDirectMessage) {
+            if let conversation = conversation {
+                NavigationStack {
+                    DirectMessageView(conversation: conversation, messagingService: messagingService)
+                }
+            }
+        }
+    }
+
+    private func openDirectMessage() async {
+        isLoadingMessage = true
+        do {
+            conversation = try await messagingService.getOrCreateConversation(with: user.id)
+            showingDirectMessage = true
+        } catch {
+            print("Failed to open conversation: \(error)")
+        }
+        isLoadingMessage = false
     }
 }
 
@@ -315,6 +343,12 @@ struct ProfileTabView: View {
                 }
             }
             .background(Color(hex: "#F5F5F5")).navigationBarHidden(true)
+            .sheet(isPresented: $showingSettings) {
+                ProfileSettingsView()
+            }
+            .sheet(isPresented: $showingEditProfile) {
+                EditProfileView()
+            }
         }
     }
 

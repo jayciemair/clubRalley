@@ -18,6 +18,8 @@ struct RalleyDetailView: View {
     @State private var pendingRequests: [PendingJoinRequest] = []
     @State private var hasPendingRequest = false
     @State private var isJoining = false
+    @State private var showingError = false
+    @State private var errorMessage = ""
 
     var body: some View {
         ScrollView {
@@ -65,6 +67,11 @@ struct RalleyDetailView: View {
         }
         .task {
             await loadData()
+        }
+        .alert("Error", isPresented: $showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
         }
     }
 
@@ -149,14 +156,27 @@ struct RalleyDetailView: View {
 
     private func joinRalley() async {
         isJoining = true
+        let previousError = ralleyManager.error
         await ralleyManager.joinRalley(ralley.id)
+        // Check if error was set during operation
+        if ralleyManager.error != nil && ralleyManager.error?.localizedDescription != previousError?.localizedDescription {
+            errorMessage = "Failed to join ralley. Please check your connection and try again."
+            showingError = true
+        }
         isJoining = false
     }
 
     private func requestToJoin() async {
         isJoining = true
+        let previousError = ralleyManager.error
         await ralleyManager.requestToJoin(ralley.id)
-        hasPendingRequest = true
+        // Check if error was set during operation
+        if ralleyManager.error != nil && ralleyManager.error?.localizedDescription != previousError?.localizedDescription {
+            errorMessage = "Failed to send join request. Please check your connection and try again."
+            showingError = true
+        } else {
+            hasPendingRequest = true
+        }
         isJoining = false
     }
 }

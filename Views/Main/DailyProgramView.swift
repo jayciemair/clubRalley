@@ -232,18 +232,36 @@ struct MeditationPlayerView: View {
     let title: String
     let onComplete: () -> Void
 
-    @State private var isPlaying = false
-    @State private var progress: Double = 0.0
+    @StateObject private var audioService = AudioService.shared
+    @State private var hasStarted = false
 
-    // TODO: Replace with actual audio player
-    private let duration = 300.0 // 5 minutes in seconds
+    // Audio file configuration (would be fetched from backend in production)
+    private var audioFileName: String {
+        "meditation_day_\(dayNumber)"
+    }
+
+    // Fallback duration if no audio loaded
+    private let fallbackDuration = 300.0 // 5 minutes
+
+    private var displayDuration: TimeInterval {
+        audioService.duration > 0 ? audioService.duration : fallbackDuration
+    }
 
     var body: some View {
         VStack(spacing: 32) {
             Spacer()
 
-            // Meditation icon
+            // Meditation icon with animation
             ZStack {
+                // Pulsing background when playing
+                if audioService.isPlaying {
+                    Circle()
+                        .fill(Color.purple.opacity(0.15))
+                        .frame(width: 140, height: 140)
+                        .scaleEffect(audioService.isPlaying ? 1.1 : 1.0)
+                        .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: audioService.isPlaying)
+                }
+
                 Circle()
                     .fill(
                         LinearGradient(
@@ -271,7 +289,7 @@ struct MeditationPlayerView: View {
             }
             .padding(.horizontal)
 
-            // Progress bar
+            // Progress bar with scrubbing
             VStack(spacing: 8) {
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
@@ -282,83 +300,128 @@ struct MeditationPlayerView: View {
 
                         Rectangle()
                             .fill(Color.purple)
-                            .frame(width: geometry.size.width * progress, height: 4)
+                            .frame(width: geometry.size.width * audioService.progress, height: 4)
                             .cornerRadius(2)
+
+                        // Scrubber handle
+                        Circle()
+                            .fill(Color.purple)
+                            .frame(width: 12, height: 12)
+                            .offset(x: geometry.size.width * audioService.progress - 6)
                     }
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { value in
+                                let progress = value.location.x / geometry.size.width
+                                audioService.seek(toProgress: progress)
+                            }
+                    )
                 }
-                .frame(height: 4)
+                .frame(height: 12)
 
                 HStack {
-                    Text(formatTime(progress * duration))
+                    Text(audioService.formattedCurrentTime)
                         .font(.custom("Satoshi-Regular", size: 12))
                         .foregroundColor(AppTheme.Colors.textSecondary)
 
                     Spacer()
 
-                    Text(formatTime(duration))
+                    Text(audioService.formattedDuration)
                         .font(.custom("Satoshi-Regular", size: 12))
                         .foregroundColor(AppTheme.Colors.textSecondary)
                 }
             }
             .padding(.horizontal, 40)
 
-            // Play/Pause button
-            Button(action: {
-                isPlaying.toggle()
-                if isPlaying {
-                    startMeditation()
+            // Playback controls
+            HStack(spacing: 40) {
+                // Skip backward
+                Button(action: { audioService.skipBackward(seconds: 15) }) {
+                    Image(systemName: "gobackward.15")
+                        .font(.system(size: 24))
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                 }
-            }) {
-                ZStack {
-                    Circle()
-                        .fill(Color.purple)
-                        .frame(width: 80, height: 80)
 
-                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(.white)
+                // Play/Pause button
+                Button(action: {
+                    if !hasStarted {
+                        hasStarted = true
+                        // Try to load audio file (will use simulation if not found)
+                        audioService.loadFromFile(named: audioFileName)
+                    }
+                    audioService.togglePlayPause()
+                }) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.purple)
+                            .frame(width: 80, height: 80)
+                            .shadow(color: Color.purple.opacity(0.4), radius: 10, x: 0, y: 4)
+
+                        if audioService.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Image(systemName: audioService.isPlaying ? "pause.fill" : "play.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(.white)
+                        }
+                    }
+                }
+                .disabled(audioService.isLoading)
+
+                // Skip forward
+                Button(action: { audioService.skipForward(seconds: 15) }) {
+                    Image(systemName: "goforward.15")
+                        .font(.system(size: 24))
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                 }
             }
 
             Spacer()
 
-            // Skip button (for demo purposes)
-            Button(action: {
-                onComplete()
-            }) {
-                HStack(spacing: 6) {
-                    Text("Skip for now")
-                        .font(.custom("Satoshi-Medium", size: 14))
-                        .foregroundColor(AppTheme.Colors.textSecondary)
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(AppTheme.Colors.textSecondary)
+            // Complete/Skip buttons
+            VStack(spacing: 12) {
+                // Show complete button when finished
+                if audioService.progress >= 0.95 {
+                    Button(action: {
+                        audioService.stop()
+                        onComplete()
+                    }) {
+                        HStack(spacing: 8) {
+                            Text("Continue")
+                                .font(.custom("Satoshi-Bold", size: 16))
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 14, weight: .bold))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.purple)
+                        .cornerRadius(14)
+                    }
+                    .padding(.horizontal)
+                }
+
+                // Skip button
+                Button(action: {
+                    audioService.stop()
+                    onComplete()
+                }) {
+                    HStack(spacing: 6) {
+                        Text("Skip for now")
+                            .font(.custom("Satoshi-Medium", size: 14))
+                            .foregroundColor(AppTheme.Colors.textSecondary)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(AppTheme.Colors.textSecondary)
+                    }
                 }
             }
             .padding(.bottom, 40)
         }
-    }
-
-    private func startMeditation() {
-        // TODO: Implement actual audio playback
-        // For now, just simulate progress
-        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            if progress >= 1.0 {
-                timer.invalidate()
-                isPlaying = false
-                onComplete()
-            } else if isPlaying {
-                progress += 0.1 / duration
-            } else {
-                timer.invalidate()
-            }
+        .onDisappear {
+            audioService.pause()
         }
-    }
-
-    private func formatTime(_ seconds: Double) -> String {
-        let minutes = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        return String(format: "%d:%02d", minutes, secs)
     }
 }
 

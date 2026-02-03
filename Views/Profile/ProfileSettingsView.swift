@@ -13,6 +13,7 @@ struct ProfileSettingsView: View {
     @State private var showingDeleteAccountAlert = false
     @State private var isSigningOut = false
     @State private var isDeletingAccount = false
+    @State private var showingPowerUpProfile = false
 
     private let authService = AuthenticationService.shared
     private let supabaseManager = SupabaseManager.shared
@@ -22,6 +23,36 @@ struct ProfileSettingsView: View {
             List {
                 // Profile Section
                 Section {
+                    // Power Up Profile - Featured entry point
+                    Button(action: { showingPowerUpProfile = true }) {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(ClubRalleyTheme.Colors.darkGreen.opacity(0.1))
+                                    .frame(width: 40, height: 40)
+                                Image(systemName: "bolt.fill")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                            }
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Power Up Profile")
+                                    .font(.system(size: 17, weight: .medium))
+                                    .foregroundColor(.primary)
+                                Text("Add sports, availability & more")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Spacer()
+
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(Color(.systemGray3))
+                        }
+                        .padding(.vertical, 4)
+                    }
+
                     NavigationLink(destination: EditProfileView()) {
                         SettingsRow(
                             icon: "person.circle",
@@ -179,6 +210,9 @@ struct ProfileSettingsView: View {
                                 .cornerRadius(12)
                         }
                 }
+            }
+            .fullScreenCover(isPresented: $showingPowerUpProfile) {
+                PowerUpProfileCoordinator()
             }
         }
     }

@@ -291,3 +291,112 @@ struct PendingJoinRequest: Identifiable, Codable {
         return formatter.localizedString(for: requestedAt, relativeTo: Date())
     }
 }
+
+// MARK: - Direct Message Conversation
+
+/**
+ * UI model for a direct message conversation
+ */
+struct DirectConversation: Identifiable, Codable {
+    /// Unique identifier for the conversation
+    let id: UUID
+
+    /// The other participant's user ID
+    let otherUserId: UUID
+
+    /// The other participant's display name
+    let otherUserName: String
+
+    /// The other participant's username
+    let otherUserUsername: String
+
+    /// The other participant's profile photo URL
+    let otherUserPhotoURL: String?
+
+    /// Whether the other user is verified
+    var isVerified: Bool
+
+    /// Most recent message preview
+    var lastMessage: String?
+
+    /// When the last message was sent
+    var lastMessageAt: Date?
+
+    /// Whether there are unread messages
+    var unreadCount: Int
+
+    /// When the conversation was created
+    let createdAt: Date
+
+    // MARK: - Computed Properties
+
+    /// Formatted time for last message
+    var lastMessageTimeAgo: String? {
+        guard let lastMessageAt = lastMessageAt else { return nil }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: lastMessageAt, relativeTo: Date())
+    }
+
+    /// Whether there are unread messages
+    var hasUnread: Bool {
+        unreadCount > 0
+    }
+}
+
+// MARK: - Direct Message
+
+/**
+ * UI model for a direct message
+ */
+struct DirectMessage: Identifiable, Codable, Equatable {
+    /// Unique identifier for the message
+    let id: UUID
+
+    /// ID of the conversation this message belongs to
+    let conversationId: UUID
+
+    /// ID of the sender
+    let senderId: UUID
+
+    /// ID of the recipient
+    let recipientId: UUID
+
+    /// Message content
+    let content: String
+
+    /// When the message was sent
+    let createdAt: Date
+
+    /// Whether the message has been read
+    var isRead: Bool
+
+    /// Whether this message is from the current user
+    var isFromCurrentUser: Bool
+
+    // MARK: - Computed Properties
+
+    /// Formatted timestamp for display
+    var formattedTime: String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: createdAt)
+    }
+
+    /// Formatted date for message grouping
+    var formattedDate: String {
+        let formatter = DateFormatter()
+        if Calendar.current.isDateInToday(createdAt) {
+            return "Today"
+        } else if Calendar.current.isDateInYesterday(createdAt) {
+            return "Yesterday"
+        } else {
+            formatter.dateStyle = .medium
+            return formatter.string(from: createdAt)
+        }
+    }
+
+    static func == (lhs: DirectMessage, rhs: DirectMessage) -> Bool {
+        lhs.id == rhs.id
+    }
+}

@@ -251,6 +251,178 @@ class RalleyService: ObservableObject {
         }
     }
 
+    // MARK: - Ralley Update
+
+    /**
+     * Update an existing ralley in Supabase database
+     * @param ralley: Updated ClubRalley data
+     * @returns: Updated ralley
+     */
+    func updateRalley(_ ralley: ClubRalley) async throws -> ClubRalley {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        guard let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.userNotFound
+        }
+
+        // Verify user is the captain/host
+        guard ralley.organizer.id == currentUser.id else {
+            throw SupabaseManager.SupabaseError.invalidData("Only the captain can edit this ralley")
+        }
+
+        isLoading = true
+        lastError = nil
+
+        do {
+            let updateData = DatabaseRalleyUpdate(
+                title: ralley.title,
+                description: ralley.description,
+                location_name: ralley.location.name,
+                location_address: ralley.location.address,
+                location_city: ralley.location.city,
+                location_state: ralley.location.state,
+                latitude: ralley.location.latitude,
+                longitude: ralley.location.longitude,
+                date_time: ralley.dateTime,
+                category: mapSportToCategory(ralley.sport),
+                max_participants: ralley.maxPlayers,
+                is_public: ralley.visibility == .anyone,
+                visibility: ralley.visibility.rawValue,
+                join_type: ralley.joinType.rawValue
+            )
+
+            try await supabase.update(updateData, in: "ralleys", where: "id = '\(ralley.id)'")
+
+            print("RalleyService: Ralley updated successfully")
+            isLoading = false
+            return ralley
+
+        } catch let error as SupabaseManager.SupabaseError {
+            isLoading = false
+            lastError = error
+            print("RalleyService: Update failed with Supabase error: \(error)")
+            throw error
+        } catch {
+            isLoading = false
+            let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+            lastError = supabaseError
+            print("RalleyService: Update failed with network error: \(error)")
+            throw supabaseError
+        }
+    }
+
+    // MARK: - Ralley Delete
+
+    /**
+     * Delete a ralley from Supabase database
+     * @param ralleyId: ID of the ralley to delete
+     */
+    func deleteRalley(_ ralleyId: UUID) async throws {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        guard let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.userNotFound
+        }
+
+        isLoading = true
+        lastError = nil
+
+        do {
+            // Verify ownership before deleting
+            let ralleys = try await supabase.query("ralleys")
+                .select("host_user_id")
+                .eq("id", value: ralleyId)
+                .execute() as [DatabaseRalleyHostCheck]
+
+            guard let ralley = ralleys.first else {
+                throw SupabaseManager.SupabaseError.invalidData("Ralley not found")
+            }
+
+            guard ralley.host_user_id == currentUser.id else {
+                throw SupabaseManager.SupabaseError.invalidData("Only the captain can delete this ralley")
+            }
+
+            // Delete associated participants first
+            try? await supabase.delete(from: "ralley_participants", where: "ralley_id = '\(ralleyId)'")
+
+            // Delete the ralley
+            try await supabase.delete(from: "ralleys", where: "id = '\(ralleyId)'")
+
+            print("RalleyService: Ralley deleted successfully")
+            isLoading = false
+
+        } catch let error as SupabaseManager.SupabaseError {
+            isLoading = false
+            lastError = error
+            print("RalleyService: Delete failed with Supabase error: \(error)")
+            throw error
+        } catch {
+            isLoading = false
+            let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+            lastError = supabaseError
+            print("RalleyService: Delete failed with network error: \(error)")
+            throw supabaseError
+        }
+    }
+
+    // MARK: - Participant Management
+
+    /**
+     * Remove a participant from a ralley
+     * @param userId: ID of the user to remove
+     * @param ralleyId: ID of the ralley
+     */
+    func removeParticipant(userId: UUID, from ralleyId: UUID) async throws {
+        guard supabase.isAuthenticated else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        guard let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.userNotFound
+        }
+
+        isLoading = true
+        lastError = nil
+
+        do {
+            // Verify current user is captain
+            let ralleys = try await supabase.query("ralleys")
+                .select("host_user_id")
+                .eq("id", value: ralleyId)
+                .execute() as [DatabaseRalleyHostCheck]
+
+            guard let ralley = ralleys.first, ralley.host_user_id == currentUser.id else {
+                throw SupabaseManager.SupabaseError.invalidData("Only the captain can remove participants")
+            }
+
+            // Remove the participant
+            try await supabase.delete(
+                from: "ralley_participants",
+                where: "ralley_id = '\(ralleyId)' AND user_id = '\(userId)'"
+            )
+
+            // Note: Participant count is derived from the ralley_participants table
+            // No need to maintain a separate counter
+
+            print("RalleyService: Participant removed successfully")
+            isLoading = false
+
+        } catch let error as SupabaseManager.SupabaseError {
+            isLoading = false
+            lastError = error
+            throw error
+        } catch {
+            isLoading = false
+            let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+            lastError = supabaseError
+            throw supabaseError
+        }
+    }
+
     // MARK: - Helper Methods
 
     /**
