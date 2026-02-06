@@ -296,6 +296,9 @@
 		A499C2FC6928A02B7F89152C /* PowerUpProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E97CAB22F6080B96030D8EA /* PowerUpProfileService.swift */; };
 		A50B7C9A0D06C2047DFCCB99 /* ImageUploadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C9515B9732C638D37AE2B8D /* ImageUploadService.swift */; };
 		AA7030338EEFB419010D9596 /* AvailabilityStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6C83C1322B99023985EC53 /* AvailabilityStep.swift */; };
+		AABB001122334455CCDD6678 /* ProfileSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB001122334455CCDD6677 /* ProfileSwitcherView.swift */; };
+		AABB001122334455DDEEFFDD /* SupabaseRealtime.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB001122334455DDEEFFCC /* SupabaseRealtime.swift */; };
+		AABB001122334455EEFFAABB /* MultiProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB001122334455EEFF8899 /* MultiProfileManager.swift */; };
 		ADDA4853A0440E057BB2FCDB /* ProfileSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 926D1BE5CBCBFB6FD195BF86 /* ProfileSettingsView.swift */; };
 		AF96F51DA23848D9B7347C09 /* Services/Ralley/RalleyParticipationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72461DC1DF9F42ED8A4BDE78 /* Services/Ralley/RalleyParticipationService.swift */; };
 		B0F41A6EABC2E59AA44D819E /* RalleyCreationComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33EE6B94E8D2CF48658E540E /* RalleyCreationComponents.swift */; };
@@ -332,6 +335,7 @@
 		C99FFB7E2F32688800EC948E /* UserProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB7D2F32688800EC948E /* UserProfileView.swift */; };
 		C99FFB822F3268AD00EC948E /* ProfileTeamsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB802F3268AD00EC948E /* ProfileTeamsSection.swift */; };
 		C99FFB832F3268AD00EC948E /* ProfilePhotosSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB7F2F3268AD00EC948E /* ProfilePhotosSection.swift */; };
+		C99FFB862F3628D900EC948E /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB842F3628D900EC948E /* NotificationsView.swift */; };
 		C9AABB012F2A0001004D160C /* RalleyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB002F2A0001004D160C /* RalleyManager.swift */; };
 		C9AABB032F2A0002004D160C /* PostManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB022F2A0002004D160C /* PostManager.swift */; };
 		C9AABB062F2B1000004D160C /* DatabaseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB072F2B1000004D160C /* DatabaseModels.swift */; };
@@ -353,9 +357,6 @@
 		E94319448B75E8741C7FD9BC /* ProfilePhotoScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46497B54ABFD7A60EABE689C /* ProfilePhotoScreen.swift */; };
 		F43F2CCFE6CE7C2A15CB4917 /* SupabaseAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF2BC5EF801B7B2233DA8B /* SupabaseAuth.swift */; };
 		F814EFEBCD394BA1A28247F1 /* Models/Database/DatabaseChatModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40169BDB40040F98EFA7034 /* Models/Database/DatabaseChatModels.swift */; };
-		AABB001122334455CCDD6678 /* ProfileSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB001122334455CCDD6677 /* ProfileSwitcherView.swift */; };
-		AABB001122334455EEFFAABB /* MultiProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB001122334455EEFF8899 /* MultiProfileManager.swift */; };
-		AABB001122334455DDEEFFDD /* SupabaseRealtime.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB001122334455DDEEFFCC /* SupabaseRealtime.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -379,8 +380,8 @@
 
 /* Begin PBXFileReference section */
 		01645528C6FC68853B05483D /* PrivacySettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
-		043A60112F19E642C986D424 /* DatabaseComment.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DatabaseComment.swift; path = Database/DatabaseComment.swift; sourceTree = "<group>"; };
 		0327C66CB2664841A0DD418B /* Services/Post/PostEngagementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/Post/PostEngagementService.swift; sourceTree = "<group>"; };
+		043A60112F19E642C986D424 /* DatabaseComment.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DatabaseComment.swift; path = Database/DatabaseComment.swift; sourceTree = "<group>"; };
 		06206BA527D8432986062EF6 /* Views/Ralley/RalleyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Ralley/RalleyDetailView.swift; sourceTree = "<group>"; };
 		067DFCD533F44CDBA51077F9 /* Models/Social/PostVisibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/Social/PostVisibility.swift; sourceTree = "<group>"; };
 		081A91ABACA6603ECA209FD7 /* WelcomeScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WelcomeScreen.swift; path = ClubRalley/Screens/WelcomeScreen.swift; sourceTree = "<group>"; };
@@ -424,8 +425,8 @@
 		5F8424D921A859CF88F64054 /* FriendshipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FriendshipService.swift; sourceTree = "<group>"; };
 		63E5DA92175B078CC6A38C08 /* RosterPhotoStep.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RosterPhotoStep.swift; path = PowerUpProfile/Screens/RosterPhotoStep.swift; sourceTree = "<group>"; };
 		6451C6E8AE3349AB98BD814D /* ViewModels/Post/PostEngagementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels/Post/PostEngagementManager.swift; sourceTree = "<group>"; };
-		65D137DA361EDEB0C986B6A9 /* DatabaseFriendship.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DatabaseFriendship.swift; path = Database/DatabaseFriendship.swift; sourceTree = "<group>"; };
 		650A0B14EAF2E8BD4EB6152F /* PowerUpProfileCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PowerUpProfileCoordinator.swift; path = PowerUpProfile/PowerUpProfileCoordinator.swift; sourceTree = "<group>"; };
+		65D137DA361EDEB0C986B6A9 /* DatabaseFriendship.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DatabaseFriendship.swift; path = Database/DatabaseFriendship.swift; sourceTree = "<group>"; };
 		6A10072451F7417FA9875AAB /* ViewModels/Ralley/RalleyParticipationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels/Ralley/RalleyParticipationManager.swift; sourceTree = "<group>"; };
 		72461DC1DF9F42ED8A4BDE78 /* Services/Ralley/RalleyParticipationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/Ralley/RalleyParticipationService.swift; sourceTree = "<group>"; };
 		7BAC578F0DF7E7B918EE9537 /* RalleyFilterSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RalleyFilterSheet.swift; sourceTree = "<group>"; };
@@ -659,6 +660,9 @@
 		9B13BA0E926274A1BE967B43 /* ProfileViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ProfileViewModel.swift; path = Profile/ProfileViewModel.swift; sourceTree = "<group>"; };
 		9C23C9E59F19959B38EFF942 /* UsernameScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UsernameScreen.swift; path = ClubRalley/UsernameScreen.swift; sourceTree = "<group>"; };
 		A6B9A9694BB04D6787837034 /* Views/Ralley/RalleyCompletionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Ralley/RalleyCompletionSheet.swift; sourceTree = "<group>"; };
+		AABB001122334455CCDD6677 /* ProfileSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSwitcherView.swift; sourceTree = "<group>"; };
+		AABB001122334455DDEEFFCC /* SupabaseRealtime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseRealtime.swift; path = Supabase/SupabaseRealtime.swift; sourceTree = "<group>"; };
+		AABB001122334455EEFF8899 /* MultiProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiProfileManager.swift; sourceTree = "<group>"; };
 		B0164A95C3AB4E6998432567 /* SportsOnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SportsOnboardingScreen.swift; path = ClubRalley/SportsOnboardingScreen.swift; sourceTree = "<group>"; };
 		B3C7CFC3F1CBD6F8DE156BF8 /* DatabaseUser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DatabaseUser.swift; path = Database/DatabaseUser.swift; sourceTree = "<group>"; };
 		B3FF2A4A8E5642A1975DCD1C /* Views/Post/RepostSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Post/RepostSheet.swift; sourceTree = "<group>"; };
@@ -694,6 +698,7 @@
 		C99FFB7D2F32688800EC948E /* UserProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileView.swift; sourceTree = "<group>"; };
 		C99FFB7F2F3268AD00EC948E /* ProfilePhotosSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePhotosSection.swift; sourceTree = "<group>"; };
 		C99FFB802F3268AD00EC948E /* ProfileTeamsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTeamsSection.swift; sourceTree = "<group>"; };
+		C99FFB842F3628D900EC948E /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
 		C9AABB002F2A0001004D160C /* RalleyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyManager.swift; sourceTree = "<group>"; };
 		C9AABB022F2A0002004D160C /* PostManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostManager.swift; sourceTree = "<group>"; };
 		C9AABB072F2B1000004D160C /* DatabaseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseModels.swift; sourceTree = "<group>"; };
@@ -717,9 +722,6 @@
 		FC2DA1556A724B4FB9F7B2E5 /* Views/Ralley/RalleyDetailComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Ralley/RalleyDetailComponents.swift; sourceTree = "<group>"; };
 		FD7533E1FA1945D7A653D351 /* NameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NameScreen.swift; path = ClubRalley/NameScreen.swift; sourceTree = "<group>"; };
 		FD97E9A82651DF1940E181A9 /* SettingsComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsComponents.swift; sourceTree = "<group>"; };
-		AABB001122334455CCDD6677 /* ProfileSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSwitcherView.swift; sourceTree = "<group>"; };
-		AABB001122334455EEFF8899 /* MultiProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiProfileManager.swift; sourceTree = "<group>"; };
-		AABB001122334455DDEEFFCC /* SupabaseRealtime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseRealtime.swift; path = Supabase/SupabaseRealtime.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1112,6 +1114,7 @@
 				917267A32EC36D0E0037F74F /* Analytics */,
 				917267932EC2CC980037F74F /* Shared */,
 				917267802EC2B35E0037F74F /* Chat */,
+				C99FFB852F3628D900EC948E /* Notifications  */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1941,6 +1944,14 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		C99FFB852F3628D900EC948E /* Notifications  */ = {
+			isa = PBXGroup;
+			children = (
+				C99FFB842F3628D900EC948E /* NotificationsView.swift */,
+			);
+			path = "Notifications ";
+			sourceTree = "<group>";
+		};
 		C9AABB042F2A0003004D160C /* Ralley */ = {
 			isa = PBXGroup;
 			children = (
@@ -2319,6 +2330,7 @@
 				918D2A212EC6C364008ABBC0 /* FeatureRequestView.swift in Sources */,
 				918D2A232EC6C364008ABBC0 /* AccountSupportSection.swift in Sources */,
 				918D2A242EC6C364008ABBC0 /* UserRequestsSection.swift in Sources */,
+				C99FFB862F3628D900EC948E /* NotificationsView.swift in Sources */,
 				915B1A042F1EFB7700D125A7 /* GrieveAsDeepScreen.swift in Sources */,
 				915B1A052F1EFB7700D125A7 /* MochiRealTalkScreen.swift in Sources */,
 				915B1A062F1EFB7700D125A7 /* TheCostsScreen.swift in Sources */,

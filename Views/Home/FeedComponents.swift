@@ -13,7 +13,7 @@ struct FeedHeader: View {
     @Binding var showingNotifications: Bool
     @Binding var showingMessages: Bool
     var unreadMessageCount: Int = 0
-    @StateObject private var notificationsService = NotificationsService()
+    var unreadNotificationCount: Int = 0
 
     var body: some View {
         HStack {
@@ -30,8 +30,8 @@ struct FeedHeader: View {
                         .foregroundColor(.black)
 
                     // Notification badge
-                    if notificationsService.unreadCount > 0 {
-                        NotificationBadge(count: notificationsService.unreadCount)
+                    if unreadNotificationCount > 0 {
+                        NotificationBadge(count: unreadNotificationCount)
                             .offset(x: 8, y: -6)
                     }
                 }
