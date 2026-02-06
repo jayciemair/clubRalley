@@ -40,13 +40,20 @@ class RalleyService: ObservableObject {
      * @returns: Created ralley with database ID and timestamps
      */
     func createRalley(_ ralley: ClubRalley) async throws -> ClubRalley {
+        print("🔵 helloWORLD RALLEY_CREATE START - title: \(ralley.title)")
+        print("🔵 helloWORLD RALLEY_CREATE - isAuthenticated: \(supabase.isAuthenticated)")
+
         guard supabase.isAuthenticated else {
+            print("🔴 helloWORLD RALLEY_CREATE FAILED - not authenticated")
             throw SupabaseManager.SupabaseError.notAuthenticated
         }
 
         guard let currentUser = supabase.currentUser else {
+            print("🔴 helloWORLD RALLEY_CREATE FAILED - no current user")
             throw SupabaseManager.SupabaseError.userNotFound
         }
+
+        print("🔵 helloWORLD RALLEY_CREATE - hostUserId: \(currentUser.id)")
 
         isLoading = true
         lastError = nil
@@ -73,10 +80,11 @@ class RalleyService: ObservableObject {
                 join_type: ralley.joinType.rawValue
             )
 
+            print("🔵 helloWORLD RALLEY_CREATE - dbRalley created, calling insert...")
             // Insert into Supabase ralleys table
             try await supabase.insert(dbRalley, into: "ralleys")
 
-            print("RalleyService: Ralley created successfully in database")
+            print("🟢 helloWORLD RALLEY_CREATE SUCCESS")
 
             // Return the ralley with updated database info
             var updatedRalley = ralley
@@ -115,10 +123,12 @@ class RalleyService: ObservableObject {
         radius: Double = 50.0,
         limit: Int = 20
     ) async throws -> [ClubRalley] {
+        print("🔵 helloWORLD RALLEY_LOAD_NEARBY START")
         isLoading = true
         lastError = nil
 
         do {
+            print("🔵 helloWORLD RALLEY_LOAD_NEARBY - querying ralleys table...")
             let ralleys = try await supabase.query("ralleys")
                 .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
                 .execute() as [DatabaseRalleyWithUser]
@@ -129,13 +139,13 @@ class RalleyService: ObservableObject {
             }
 
             isLoading = false
-            print("RalleyService: Loaded \(mappedRalleys.count) ralleys from database")
+            print("🟢 helloWORLD RALLEY_LOAD_NEARBY SUCCESS - loaded \(mappedRalleys.count) ralleys")
             return mappedRalleys
 
         } catch let error as SupabaseManager.SupabaseError {
             isLoading = false
             lastError = error
-            print("RalleyService: Load ralleys failed: \(error)")
+            print("🔴 helloWORLD RALLEY_LOAD_NEARBY FAILED: \(error)")
 
             // Return empty array - let UI show empty state
             return []
@@ -144,7 +154,7 @@ class RalleyService: ObservableObject {
             isLoading = false
             let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
             lastError = supabaseError
-            print("RalleyService: Load ralleys failed with network error: \(error)")
+            print("🔴 helloWORLD RALLEY_LOAD_NEARBY FAILED with network error: \(error)")
 
             // Return empty array - let UI show empty state
             return []
@@ -197,7 +207,7 @@ class RalleyService: ObservableObject {
             let participations: [DatabaseRalleyParticipantWithId] = try await supabase.query("ralley_participants")
                 .select("*")
                 .eq("user_id", value: userId)
-                .eq("status", value: "attending")
+                .eq("status", value: "joined")
                 .execute()
 
             // Then load the actual ralleys
@@ -452,13 +462,17 @@ class RalleyService: ObservableObject {
             photoURL: dbRalley.organizer.profile_photo_url ?? ""
         )
 
+        // Convert optional Decimal to Double
+        let lat = dbRalley.latitude.map { NSDecimalNumber(decimal: $0).doubleValue } ?? 0.0
+        let lon = dbRalley.longitude.map { NSDecimalNumber(decimal: $0).doubleValue } ?? 0.0
+
         let location = ClubRalleyLocation(
-            name: dbRalley.location_name,
+            name: dbRalley.location_name ?? "Location",
             address: dbRalley.location_address ?? "",
             city: dbRalley.location_city,
             state: dbRalley.location_state,
-            latitude: dbRalley.latitude,
-            longitude: dbRalley.longitude
+            latitude: lat,
+            longitude: lon
         )
 
         // Determine if current user is captain

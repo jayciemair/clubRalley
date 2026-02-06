@@ -12,6 +12,7 @@ import SwiftUI
 struct HomeFeedView: View {
     @EnvironmentObject var postManager: PostManager
     @EnvironmentObject var ralleyManager: RalleyManager
+    @StateObject private var messagingService = MessagingService()
     @State private var showingNotifications = false
     @State private var showingMessages = false
 
@@ -22,13 +23,15 @@ struct HomeFeedView: View {
                     // Header with notifications and messages
                     FeedHeader(
                         showingNotifications: $showingNotifications,
-                        showingMessages: $showingMessages
+                        showingMessages: $showingMessages,
+                        unreadMessageCount: messagingService.totalUnreadCount
                     )
 
                     // Upcoming joined ralleys section
                     let joinedRalleys = ralleyManager.getJoinedUpcomingRalleys()
                     if !joinedRalleys.isEmpty {
                         UpcomingRalleysSection(ralleys: joinedRalleys)
+                            .environmentObject(ralleyManager)
                     }
 
                     // Feed content
@@ -57,11 +60,18 @@ struct HomeFeedView: View {
             .refreshable {
                 await postManager.refreshPosts()
                 await ralleyManager.refreshRalleys()
+                await messagingService.loadConversations()
             }
             .background(Color.white)
             .navigationBarHidden(true)
             .sheet(isPresented: $showingNotifications) {
-                SimpleNotificationsView()
+                NotificationsView()
+            }
+            .sheet(isPresented: $showingMessages) {
+                MessagesView()
+            }
+            .task {
+                await messagingService.loadConversations()
             }
         }
     }

@@ -25,6 +25,36 @@ struct ShareUtility {
         presentShareSheet(items: [shareContent])
     }
 
+    /// Share a ralley via iOS share sheet
+    /// - Parameter ralley: The ralley to share
+    static func shareRalley(_ ralley: ClubRalley) {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .short
+
+        var shareContent = "\(ralley.title)\n"
+        shareContent += "\(ralley.sport) | \(dateFormatter.string(from: ralley.dateTime))\n"
+        shareContent += "\(ralley.location.name)\n"
+
+        if ralley.currentPlayers < ralley.maxPlayers {
+            let spots = ralley.maxPlayers - ralley.currentPlayers
+            shareContent += "\(spots) spot\(spots == 1 ? "" : "s") available\n"
+        }
+
+        shareContent += "\nJoin me on Club Ralley!"
+
+        presentShareSheet(items: [shareContent])
+    }
+
+    /// Share a user profile via iOS share sheet
+    /// - Parameters:
+    ///   - name: The user's display name
+    ///   - username: The user's username
+    static func shareProfile(name: String, username: String) {
+        let shareContent = "Check out \(name) (@\(username)) on Club Ralley!"
+        presentShareSheet(items: [shareContent])
+    }
+
     /// Share text content via iOS share sheet
     /// - Parameter text: The text to share
     static func shareText(_ text: String) {

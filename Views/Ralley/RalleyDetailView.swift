@@ -46,10 +46,17 @@ struct RalleyDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if ralley.chatId != nil {
-                    Button(action: { showingChat = true }) {
-                        Image(systemName: "message.fill")
+                HStack(spacing: 16) {
+                    Button(action: { ShareUtility.shareRalley(ralley) }) {
+                        Image(systemName: "square.and.arrow.up")
                             .foregroundColor(Color(hex: "#2C4F40"))
+                    }
+
+                    if ralley.chatId != nil {
+                        Button(action: { showingChat = true }) {
+                            Image(systemName: "message.fill")
+                                .foregroundColor(Color(hex: "#2C4F40"))
+                        }
                     }
                 }
             }
@@ -73,6 +80,38 @@ struct RalleyDetailView: View {
         } message: {
             Text(errorMessage)
         }
+        .sheet(isPresented: $showingChat) {
+            NavigationStack {
+                GroupChatView(chat: createGroupChat())
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Close") {
+                                showingChat = false
+                            }
+                            .foregroundColor(Color(hex: "#2C4F40"))
+                        }
+                    }
+            }
+        }
+    }
+
+    // MARK: - Helper Methods
+
+    /// Creates a GroupChat object from the current ralley data
+    private func createGroupChat() -> GroupChat {
+        GroupChat(
+            id: ralley.chatId ?? UUID(),
+            ralleyId: ralley.id,
+            ralleyTitle: ralley.title,
+            ralleySport: ralley.sport,
+            ralleyDateTime: ralley.dateTime,
+            createdAt: ralley.createdAt ?? Date(),
+            memberCount: ralley.currentPlayers,
+            lastMessage: nil,
+            lastMessageAt: nil,
+            hasUnread: false,
+            currentUserRole: ralley.isCaptain ? .admin : .member
+        )
     }
 
     // MARK: - Action Button Section

@@ -11,6 +11,9 @@ struct MessagesView: View {
     @StateObject private var messagingService = MessagingService()
     @State private var searchText = ""
 
+    private let realtimeManager = RealtimeManager.shared
+    private let supabaseManager = SupabaseManager.shared
+
     var filteredConversations: [DirectConversation] {
         if searchText.isEmpty {
             return messagingService.conversations
@@ -43,6 +46,25 @@ struct MessagesView: View {
         }
         .task {
             await messagingService.loadConversations()
+            subscribeToRealtime()
+        }
+        .onDisappear {
+            Task {
+                await realtimeManager.unsubscribeFromDirectMessages()
+            }
+        }
+    }
+
+    // MARK: - Realtime Subscription
+
+    private func subscribeToRealtime() {
+        guard let currentUserId = supabaseManager.currentUser?.id else { return }
+
+        realtimeManager.subscribeToDirectMessages(userId: currentUserId) { _ in
+            // Reload conversations when new message arrives
+            Task {
+                await messagingService.loadConversations()
+            }
         }
     }
 

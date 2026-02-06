@@ -42,15 +42,25 @@ class NotificationsService: ObservableObject {
         isLoading = true
         error = nil
 
+        guard let userId = supabase.currentUser?.id else {
+            notifications = generateMockNotifications()
+            unreadCount = notifications.filter { !$0.isRead }.count
+            isLoading = false
+            return
+        }
+
         do {
-            let dbNotifications = try await supabase.query("notifications")
+            let dbNotifications: [DatabaseNotificationWithUser] = try await supabase.query("notifications")
                 .select("*, club_users(first_name, last_name, username, profile_photo_url)")
-                .execute() as [DatabaseNotificationWithUser]
+                .eq("user_id", value: userId)
+                .order("created_at", ascending: false)
+                .limit(50)
+                .execute()
 
             notifications = dbNotifications.map { mapDatabaseNotificationToApp($0) }
             unreadCount = notifications.filter { !$0.isRead }.count
 
-            print("Loaded \(notifications.count) notifications")
+            print("NotificationsService: Loaded \(notifications.count) notifications")
         } catch {
             print("Failed to load notifications: \(error)")
             self.error = error
@@ -221,6 +231,7 @@ enum NotificationType: String {
     case ralleyJoin = "ralley_join"
     case ralleyReminder = "ralley_reminder"
     case mention = "mention"
+    case message = "message"
     case general = "general"
 
     var icon: String {
@@ -231,6 +242,7 @@ enum NotificationType: String {
         case .ralleyJoin: return "sportscourt.fill"
         case .ralleyReminder: return "clock.fill"
         case .mention: return "at"
+        case .message: return "envelope.fill"
         case .general: return "bell.fill"
         }
     }
@@ -243,7 +255,35 @@ enum NotificationType: String {
         case .ralleyJoin: return .orange
         case .ralleyReminder: return .blue
         case .mention: return .purple
+        case .message: return Color(hex: "#2C4F40")
         case .general: return .gray
         }
     }
+}
+
+// MARK: - Database Models
+
+struct DatabaseNotificationWithUser: Codable {
+    let id: UUID
+    let user_id: UUID
+    let type: String
+    let message: String
+    let actor_id: UUID?
+    let post_id: UUID?
+    let ralley_id: UUID?
+    let is_read: Bool
+    let created_at: Date
+    let actor: DatabaseNotificationActor?
+
+    enum CodingKeys: String, CodingKey {
+        case id, user_id, type, message, actor_id, post_id, ralley_id, is_read, created_at
+        case actor = "club_users"
+    }
+}
+
+struct DatabaseNotificationActor: Codable {
+    let first_name: String
+    let last_name: String
+    let username: String
+    let profile_photo_url: String?
 }

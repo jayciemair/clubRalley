@@ -205,7 +205,7 @@ class UserService: ObservableObject {
             id: dbUser.id,
             name: "\(dbUser.first_name) \(dbUser.last_name)",
             username: dbUser.username,
-            location: "\(dbUser.location_city), \(dbUser.location_state)",
+            location: "\(dbUser.city ?? ""), \(dbUser.state ?? "")",
             photoURL: dbUser.profile_photo_url ?? "https://picsum.photos/100/100?random=\(dbUser.id.hashValue % 1000)",
             mutuals: dbUser.friends_count,
             isFollowing: false,

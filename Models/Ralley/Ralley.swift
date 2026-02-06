@@ -145,35 +145,35 @@ struct RalleyParticipant: Codable, Identifiable {
 }
 
 enum ParticipationStatus: String, Codable, CaseIterable {
-    case attending = "attending"
+    case joined = "joined"
     case maybe = "maybe"
     case notAttending = "not_attending"
-    case requested = "requested"  // For private ralleys
-    
+    case pending = "pending"  // For private ralleys awaiting approval
+
     var displayName: String {
         switch self {
-        case .attending: return "Attending"
+        case .joined: return "Joined"
         case .maybe: return "Maybe"
         case .notAttending: return "Not Attending"
-        case .requested: return "Requested"
+        case .pending: return "Pending"
         }
     }
     
     var icon: String {
         switch self {
-        case .attending: return "checkmark.circle.fill"
+        case .joined: return "checkmark.circle.fill"
         case .maybe: return "questionmark.circle.fill"
         case .notAttending: return "xmark.circle.fill"
-        case .requested: return "clock.circle.fill"
+        case .pending: return "clock.circle.fill"
         }
     }
-    
+
     var color: String {
         switch self {
-        case .attending: return "green"
+        case .joined: return "green"
         case .maybe: return "orange"
         case .notAttending: return "red"
-        case .requested: return "blue"
+        case .pending: return "blue"
         }
     }
 }

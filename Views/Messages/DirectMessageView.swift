@@ -20,6 +20,10 @@ struct DirectMessageView: View {
     @State private var showingSendError = false
     @State private var sendErrorMessage = ""
 
+    // Realtime updates
+    private let realtimeManager = RealtimeManager.shared
+    private let supabaseManager = SupabaseManager.shared
+
     var body: some View {
         VStack(spacing: 0) {
             // Messages List
@@ -75,6 +79,12 @@ struct DirectMessageView: View {
         .task {
             await loadMessages()
             await messagingService.markAsRead(conversationId: conversation.id)
+            subscribeToRealtime()
+        }
+        .onDisappear {
+            Task {
+                await realtimeManager.unsubscribeFromDirectMessages()
+            }
         }
         .alert("Message Failed", isPresented: $showingSendError) {
             Button("OK", role: .cancel) {}
@@ -215,6 +225,35 @@ struct DirectMessageView: View {
         }
 
         isSending = false
+    }
+
+    private func subscribeToRealtime() {
+        guard let currentUserId = supabaseManager.currentUser?.id else { return }
+
+        realtimeManager.subscribeToDirectMessages(userId: currentUserId) { payload in
+            // Only add messages from the other user in this conversation
+            if payload.senderId == conversation.otherUserId {
+                let newMessage = DirectMessage(
+                    id: payload.id,
+                    conversationId: conversation.id,
+                    senderId: payload.senderId,
+                    recipientId: payload.recipientId,
+                    content: payload.content,
+                    createdAt: payload.createdAt,
+                    isRead: payload.isRead,
+                    isFromCurrentUser: false
+                )
+
+                // Only add if not already present
+                if !messages.contains(where: { $0.id == newMessage.id }) {
+                    messages.append(newMessage)
+                    // Mark as read since we're viewing the conversation
+                    Task {
+                        await messagingService.markMessageAsRead(messageId: newMessage.id)
+                    }
+                }
+            }
+        }
     }
 }
 

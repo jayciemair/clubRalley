@@ -41,13 +41,20 @@ class PostService: ObservableObject {
      * @returns: Created post with database ID and timestamps
      */
     func createPost(_ post: ClubRalleyPost, visibility: PostVisibility = .everyone) async throws -> ClubRalleyPost {
+        print("🔵 helloWORLD POST_CREATE START")
+        print("🔵 helloWORLD POST_CREATE - isAuthenticated: \(supabase.isAuthenticated)")
+
         guard supabase.isAuthenticated else {
+            print("🔴 helloWORLD POST_CREATE FAILED - not authenticated")
             throw SupabaseManager.SupabaseError.notAuthenticated
         }
 
         guard let currentUser = supabase.currentUser else {
+            print("🔴 helloWORLD POST_CREATE FAILED - no current user")
             throw SupabaseManager.SupabaseError.userNotFound
         }
+
+        print("🔵 helloWORLD POST_CREATE - userId: \(currentUser.id)")
 
         isLoading = true
         lastError = nil
@@ -67,10 +74,11 @@ class PostService: ObservableObject {
                 shares_count: 0
             )
 
+            print("🔵 helloWORLD POST_CREATE - dbPost created, calling insert...")
             // Insert into Supabase posts table
             try await supabase.insert(dbPost, into: "posts")
 
-            print("PostService: Post created successfully in database")
+            print("🟢 helloWORLD POST_CREATE SUCCESS")
 
             // Return the post with updated database info
             var updatedPost = post
@@ -102,10 +110,12 @@ class PostService: ObservableObject {
      * @returns: Array of posts with user information populated
      */
     func loadHomeFeedPosts(limit: Int = 20, offset: Int = 0) async throws -> [ClubRalleyPost] {
+        print("🔵 helloWORLD POST_LOAD_FEED START")
         isLoading = true
         lastError = nil
 
         do {
+            print("🔵 helloWORLD POST_LOAD_FEED - querying posts table...")
             let posts = try await supabase.query("posts")
                 .select("*, club_users(first_name, last_name, username, profile_photo_url)")
                 .execute() as [DatabasePostWithUser]
@@ -116,13 +126,13 @@ class PostService: ObservableObject {
             }
 
             isLoading = false
-            print("PostService: Loaded \(mappedPosts.count) posts from database")
+            print("🟢 helloWORLD POST_LOAD_FEED SUCCESS - loaded \(mappedPosts.count) posts")
             return mappedPosts
 
         } catch let error as SupabaseManager.SupabaseError {
             isLoading = false
             lastError = error
-            print("PostService: Load feed failed: \(error)")
+            print("🔴 helloWORLD POST_LOAD_FEED FAILED: \(error)")
 
             // Return empty array - let UI show empty state
             return []
@@ -131,7 +141,7 @@ class PostService: ObservableObject {
             isLoading = false
             let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
             lastError = supabaseError
-            print("PostService: Load feed failed with network error: \(error)")
+            print("🔴 helloWORLD POST_LOAD_FEED FAILED with network error: \(error)")
 
             // Return empty array - let UI show empty state
             return []
@@ -197,6 +207,7 @@ class PostService: ObservableObject {
 
     /**
      * Report a post for review
+     * Note: post_reports table not in lean schema - logs locally only
      * @param postId: Post ID to report
      * @param reason: Reason for reporting
      */
@@ -209,24 +220,9 @@ class PostService: ObservableObject {
             throw SupabaseManager.SupabaseError.userNotFound
         }
 
-        isLoading = true
-        lastError = nil
-
-        do {
-            let report = DatabasePostReport(
-                post_id: postId,
-                reporter_id: currentUser.id,
-                reason: reason
-            )
-
-            try await supabase.insert(report, into: "post_reports")
-            print("PostService: Post \(postId) reported for: \(reason)")
-            isLoading = false
-        } catch {
-            isLoading = false
-            print("PostService: Report post failed: \(error)")
-            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
-        }
+        // Log the report (no post_reports table in lean schema)
+        print("📋 PostService: Post report logged - Reporter: \(currentUser.id), Post: \(postId), Reason: \(reason)")
+        // In production, this would be sent to a moderation queue or external service
     }
 
     // MARK: - Helper Methods

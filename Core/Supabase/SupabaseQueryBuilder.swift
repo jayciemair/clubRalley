@@ -31,8 +31,9 @@ class SupabaseQueryBuilder {
     /// Select columns from table
     func select(_ columns: String = "*") -> Self {
         self.selectColumns = columns
+        print("🔵 helloWORLD QUERY select(\(columns)) from \(table) - fallbackMode: \(fallbackMode)")
         if fallbackMode {
-            print("Mock select \(columns) from \(table)")
+            print("🔴 helloWORLD QUERY SKIPPED - fallback mode")
         }
         return self
     }
@@ -85,12 +86,15 @@ class SupabaseQueryBuilder {
 
     /// Execute query and return single result
     func single<T: Codable>() async throws -> T? {
+        print("🔵 helloWORLD QUERY_SINGLE START - table: \(table), columns: \(selectColumns)")
+
         if fallbackMode {
-            print("Mock single result query")
+            print("🔴 helloWORLD QUERY_SINGLE SKIPPED - fallback mode")
             return nil
         }
 
         guard let client = client else {
+            print("🔴 helloWORLD QUERY_SINGLE FAILED - no client")
             throw SupabaseManager.SupabaseError.networkError("No client available")
         }
 
@@ -100,26 +104,33 @@ class SupabaseQueryBuilder {
             query = query.eq(filter.column, value: filter.value)
         }
 
+        print("🔵 helloWORLD QUERY_SINGLE - executing...")
         let result: T = try await query.single().execute().value
+        print("🟢 helloWORLD QUERY_SINGLE SUCCESS - table: \(table)")
         return result
     }
 
     /// Execute query and return array of results
     func execute<T: Codable>() async throws -> [T] {
+        print("🔵 helloWORLD QUERY_EXECUTE START - table: \(table), columns: \(selectColumns)")
+
         if fallbackMode {
-            print("Mock array result query")
+            print("🔴 helloWORLD QUERY_EXECUTE SKIPPED - fallback mode")
             return []
         }
 
         guard let client = client else {
+            print("🔴 helloWORLD QUERY_EXECUTE FAILED - no client")
             throw SupabaseManager.SupabaseError.networkError("No client available")
         }
 
+        print("🔵 helloWORLD QUERY_EXECUTE - building query...")
         var filterQuery = client.database.from(table).select(selectColumns)
 
         for filter in filters {
             if filter.op == "eq" {
                 filterQuery = filterQuery.eq(filter.column, value: filter.value)
+                print("🔵 helloWORLD QUERY_EXECUTE - added filter: \(filter.column) = \(filter.value)")
             } else if filter.op == "or" {
                 filterQuery = filterQuery.or(filter.value)
             }
@@ -130,7 +141,14 @@ class SupabaseQueryBuilder {
             transformQuery = transformQuery.limit(limit)
         }
 
-        let results: [T] = try await transformQuery.execute().value
-        return results
+        print("🔵 helloWORLD QUERY_EXECUTE - executing query on \(table)...")
+        do {
+            let results: [T] = try await transformQuery.execute().value
+            print("🟢 helloWORLD QUERY_EXECUTE SUCCESS - table: \(table), count: \(results.count)")
+            return results
+        } catch {
+            print("🔴 helloWORLD QUERY_EXECUTE FAILED - table: \(table), error: \(error)")
+            throw error
+        }
     }
 }

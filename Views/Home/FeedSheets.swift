@@ -92,22 +92,7 @@ struct SimpleCommentsSheet: View {
                             .padding(.top, 60)
                         } else {
                             ForEach(postManager.selectedPostComments) { comment in
-                                HStack(alignment: .top, spacing: 12) {
-                                    Circle()
-                                        .fill(Color(hex: "#2C4F40"))
-                                        .frame(width: 36, height: 36)
-
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(comment.user?.firstName ?? "User")
-                                            .font(.system(size: 14, weight: .semibold))
-                                        Text(comment.content)
-                                            .font(.system(size: 15))
-                                    }
-                                    Spacer()
-                                }
-                                .padding(12)
-                                .background(Color.gray.opacity(0.05))
-                                .cornerRadius(12)
+                                CommentRow(comment: comment)
                             }
                         }
                     }
@@ -243,5 +228,115 @@ struct SimpleReportSheet: View {
                 Text("Thank you for your report.")
             }
         }
+    }
+}
+
+// MARK: - Comment Row
+
+struct CommentRow: View {
+    let comment: PostComment
+
+    private var userName: String {
+        if let user = comment.user {
+            return "\(user.firstName) \(user.lastName)"
+        }
+        return "User"
+    }
+
+    private var userPhotoURL: String? {
+        comment.user?.profilePhotoURL
+    }
+
+    private var timeAgo: String {
+        let interval = Date().timeIntervalSince(comment.createdAt)
+
+        if interval < 60 {
+            return "just now"
+        } else if interval < 3600 {
+            let minutes = Int(interval / 60)
+            return "\(minutes)m"
+        } else if interval < 86400 {
+            let hours = Int(interval / 3600)
+            return "\(hours)h"
+        } else if interval < 604800 {
+            let days = Int(interval / 86400)
+            return "\(days)d"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d"
+            return formatter.string(from: comment.createdAt)
+        }
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            // User avatar with navigation
+            if let userId = comment.user?.id {
+                NavigationLink(destination: UserProfileView(userId: userId)) {
+                    userAvatar
+                }
+                .buttonStyle(PlainButtonStyle())
+            } else {
+                userAvatar
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    // Tappable username
+                    if let userId = comment.user?.id {
+                        NavigationLink(destination: UserProfileView(userId: userId)) {
+                            Text(userName)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.black)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    } else {
+                        Text(userName)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.black)
+                    }
+
+                    Text(timeAgo)
+                        .font(.system(size: 13))
+                        .foregroundColor(.gray)
+                }
+
+                Text(comment.content)
+                    .font(.system(size: 15))
+                    .foregroundColor(.black)
+            }
+            Spacer()
+        }
+        .padding(12)
+        .background(Color.gray.opacity(0.05))
+        .cornerRadius(12)
+    }
+
+    private var userAvatar: some View {
+        Group {
+            if let photoURL = userPhotoURL {
+                AsyncImage(url: URL(string: photoURL)) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Circle()
+                        .fill(Color(hex: "#2C4F40"))
+                        .overlay(
+                            Text(String(userName.prefix(1)).uppercased())
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                        )
+                }
+            } else {
+                Circle()
+                    .fill(Color(hex: "#2C4F40"))
+                    .overlay(
+                        Text(String(userName.prefix(1)).uppercased())
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                    )
+            }
+        }
+        .frame(width: 36, height: 36)
+        .clipShape(Circle())
     }
 }

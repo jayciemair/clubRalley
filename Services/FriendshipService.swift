@@ -388,6 +388,7 @@ class FriendshipService: ObservableObject {
     // MARK: - Report Operations
 
     /// Report a user for inappropriate behavior
+    /// Note: user_reports table not in lean schema - logs locally only
     /// - Parameters:
     ///   - userId: The ID of the user to report
     ///   - reason: The reason for reporting
@@ -400,31 +401,17 @@ class FriendshipService: ObservableObject {
             throw SupabaseManager.SupabaseError.userNotFound
         }
 
-        isLoading = true
-        error = nil
-
-        do {
-            let report = DatabaseUserReport(
-                reporter_id: currentUser.id,
-                reported_user_id: userId,
-                reason: reason
-            )
-
-            try await supabase.insert(report, into: "user_reports")
-            print("✅ FriendshipService: Reported user \(userId) for: \(reason)")
-            isLoading = false
-        } catch {
-            isLoading = false
-            // Log the report even if database insert fails
-            print("⚠️ FriendshipService: Report logged (DB insert failed): User \(userId), Reason: \(reason)")
-            // Don't throw - we don't want to fail the user experience if reporting table doesn't exist yet
-        }
+        // Log the report (no user_reports table in lean schema)
+        print("📋 FriendshipService: User report logged - Reporter: \(currentUser.id), Reported: \(userId), Reason: \(reason)")
+        // In production, this would be sent to a moderation queue or external service
     }
 }
 
-// MARK: - Database Models for Blocking/Reporting
+// MARK: - Database Models
 
-/// Database model for user reports
+// Note: DatabaseFriendship is defined in Models/Database/DatabaseFriendship.swift
+
+/// Database model for user reports (stubbed - no reports table in lean schema)
 struct DatabaseUserReport: Codable {
     let reporter_id: UUID
     let reported_user_id: UUID

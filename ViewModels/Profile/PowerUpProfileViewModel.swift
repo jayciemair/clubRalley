@@ -115,14 +115,9 @@ class PowerUpProfileViewModel: ObservableObject {
     }
 
     func loadSports() async {
-        do {
-            availableSports = try await powerUpService.loadSports()
-            print("PowerUpProfileViewModel: Loaded \(availableSports.count) sports")
-        } catch {
-            print("PowerUpProfileViewModel: Failed to load sports: \(error)")
-            // Provide fallback sports
-            availableSports = defaultSports
-        }
+        // Lean schema doesn't have a sports table - use default sports list
+        availableSports = defaultSports
+        print("PowerUpProfileViewModel: Loaded \(availableSports.count) default sports")
     }
 
     // MARK: - Photo Management

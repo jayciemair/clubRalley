@@ -3,6 +3,7 @@
 //  Club Ralley
 //
 //  Service for direct messaging operations
+//  Uses direct_messages table for 1-on-1 DMs
 //
 
 import Foundation
@@ -32,63 +33,72 @@ class MessagingService: ObservableObject {
         error = nil
 
         do {
-            // Load conversations where user is participant
-            let convos: [DatabaseDirectConversation] = try await supabase.query("direct_conversations")
+            // Get all unique users we've messaged with
+            // Query messages where we're sender or recipient
+            let sentMessages: [DatabaseDirectMessageRecord] = try await supabase.query("direct_messages")
                 .select("*")
-                .or("user1_id.eq.\(currentUser.id),user2_id.eq.\(currentUser.id)")
-                .order("updated_at", ascending: false)
+                .eq("sender_id", value: currentUser.id)
+                .order("created_at", ascending: false)
                 .execute()
 
-            // Map to UI model with other user info
-            var loadedConversations: [DirectConversation] = []
+            let receivedMessages: [DatabaseDirectMessageRecord] = try await supabase.query("direct_messages")
+                .select("*")
+                .eq("recipient_id", value: currentUser.id)
+                .order("created_at", ascending: false)
+                .execute()
 
-            for convo in convos {
-                let otherUserId = convo.user1_id == currentUser.id ? convo.user2_id : convo.user1_id
+            // Combine and find unique conversation partners
+            var conversationPartners: [UUID: (lastMessage: DatabaseDirectMessageRecord, unreadCount: Int)] = [:]
 
-                // Load other user's info
-                let users: [DatabaseUserProfile] = try await supabase.query("club_users")
-                    .select("*")
-                    .eq("id", value: otherUserId)
-                    .execute()
-
-                guard let otherUser = users.first else { continue }
-
-                // Load last message
-                let messages: [DatabaseDirectMessage] = try await supabase.query("direct_messages")
-                    .select("*")
-                    .eq("conversation_id", value: convo.id)
-                    .order("created_at", ascending: false)
-                    .limit(1)
-                    .execute()
-
-                let lastMessage = messages.first
-
-                // Count unread messages
-                let unreadMessages: [DatabaseDirectMessage] = try await supabase.query("direct_messages")
-                    .select("*")
-                    .eq("conversation_id", value: convo.id)
-                    .eq("recipient_id", value: currentUser.id)
-                    .eq("is_read", value: false)
-                    .execute()
-
-                let conversation = DirectConversation(
-                    id: convo.id,
-                    otherUserId: otherUserId,
-                    otherUserName: "\(otherUser.first_name) \(otherUser.last_name)",
-                    otherUserUsername: otherUser.username,
-                    otherUserPhotoURL: otherUser.profile_photo_url,
-                    isVerified: otherUser.is_verified_athlete,
-                    lastMessage: lastMessage?.content,
-                    lastMessageAt: lastMessage?.created_at,
-                    unreadCount: unreadMessages.count,
-                    createdAt: convo.created_at
-                )
-
-                loadedConversations.append(conversation)
+            for msg in sentMessages {
+                let partnerId = msg.recipient_id
+                if conversationPartners[partnerId] == nil ||
+                   msg.created_at > conversationPartners[partnerId]!.lastMessage.created_at {
+                    conversationPartners[partnerId] = (lastMessage: msg, unreadCount: 0)
+                }
             }
 
+            for msg in receivedMessages {
+                let partnerId = msg.sender_id
+                let isUnread = !msg.is_read
+                if let existing = conversationPartners[partnerId] {
+                    let newUnread = existing.unreadCount + (isUnread ? 1 : 0)
+                    if msg.created_at > existing.lastMessage.created_at {
+                        conversationPartners[partnerId] = (lastMessage: msg, unreadCount: newUnread)
+                    } else {
+                        conversationPartners[partnerId] = (lastMessage: existing.lastMessage, unreadCount: newUnread)
+                    }
+                } else {
+                    conversationPartners[partnerId] = (lastMessage: msg, unreadCount: isUnread ? 1 : 0)
+                }
+            }
+
+            // Load user info for each partner and build conversations
+            var loadedConversations: [DirectConversation] = []
+
+            for (partnerId, data) in conversationPartners {
+                if let userInfo = try? await loadUserInfo(userId: partnerId) {
+                    let conversation = DirectConversation(
+                        id: partnerId, // Use partner ID as conversation ID
+                        otherUserId: partnerId,
+                        otherUserName: "\(userInfo.first_name) \(userInfo.last_name)",
+                        otherUserUsername: userInfo.username,
+                        otherUserPhotoURL: userInfo.profile_photo_url,
+                        isVerified: false,
+                        lastMessage: data.lastMessage.content,
+                        lastMessageAt: data.lastMessage.created_at,
+                        unreadCount: data.unreadCount,
+                        createdAt: data.lastMessage.created_at
+                    )
+                    loadedConversations.append(conversation)
+                }
+            }
+
+            // Sort by most recent message
+            loadedConversations.sort { ($0.lastMessageAt ?? Date.distantPast) > ($1.lastMessageAt ?? Date.distantPast) }
+
             conversations = loadedConversations
-            print("MessagingService: Loaded \(conversations.count) conversations")
+            print("MessagingService: Loaded \(conversations.count) conversations from database")
             isLoading = false
 
         } catch {
@@ -108,82 +118,24 @@ class MessagingService: ObservableObject {
             throw SupabaseManager.SupabaseError.notAuthenticated
         }
 
-        guard let currentUser = supabase.currentUser else {
-            throw SupabaseManager.SupabaseError.userNotFound
-        }
-
-        // Check if conversation already exists
+        // Check if conversation already exists in local cache
         if let existing = conversations.first(where: { $0.otherUserId == userId }) {
             return existing
         }
 
-        // Try to find in database
-        do {
-            let existingConvos: [DatabaseDirectConversation] = try await supabase.query("direct_conversations")
-                .select("*")
-                .or("user1_id.eq.\(currentUser.id).and(user2_id.eq.\(userId)),user1_id.eq.\(userId).and(user2_id.eq.\(currentUser.id))")
-                .execute()
-
-            if let existing = existingConvos.first {
-                // Load other user info
-                let users: [DatabaseUserProfile] = try await supabase.query("club_users")
-                    .select("*")
-                    .eq("id", value: userId)
-                    .execute()
-
-                guard let otherUser = users.first else {
-                    throw SupabaseManager.SupabaseError.userNotFound
-                }
-
-                let conversation = DirectConversation(
-                    id: existing.id,
-                    otherUserId: userId,
-                    otherUserName: "\(otherUser.first_name) \(otherUser.last_name)",
-                    otherUserUsername: otherUser.username,
-                    otherUserPhotoURL: otherUser.profile_photo_url,
-                    isVerified: otherUser.is_verified_athlete,
-                    lastMessage: nil,
-                    lastMessageAt: nil,
-                    unreadCount: 0,
-                    createdAt: existing.created_at
-                )
-
-                // Add to local cache
-                if !conversations.contains(where: { $0.id == conversation.id }) {
-                    conversations.insert(conversation, at: 0)
-                }
-
-                return conversation
-            }
-        } catch {
-            print("MessagingService: Error checking existing conversation: \(error)")
-        }
-
-        // Create new conversation
-        let insert = DatabaseDirectConversationInsert(
-            user1_id: currentUser.id,
-            user2_id: userId
-        )
-
-        let conversationId = try await supabase.insertReturningId(insert, into: "direct_conversations")
-
-        // Load other user info
-        let users: [DatabaseUserProfile] = try await supabase.query("club_users")
-            .select("*")
-            .eq("id", value: userId)
-            .execute()
-
-        guard let otherUser = users.first else {
+        // Load user info for the new conversation partner
+        guard let userInfo = try? await loadUserInfo(userId: userId) else {
             throw SupabaseManager.SupabaseError.userNotFound
         }
 
+        // Create a new conversation (no actual DB record needed - conversation is implicit)
         let conversation = DirectConversation(
-            id: conversationId,
+            id: userId,
             otherUserId: userId,
-            otherUserName: "\(otherUser.first_name) \(otherUser.last_name)",
-            otherUserUsername: otherUser.username,
-            otherUserPhotoURL: otherUser.profile_photo_url,
-            isVerified: otherUser.is_verified_athlete,
+            otherUserName: "\(userInfo.first_name) \(userInfo.last_name)",
+            otherUserUsername: userInfo.username,
+            otherUserPhotoURL: userInfo.profile_photo_url,
+            isVerified: false,
             lastMessage: nil,
             lastMessageAt: nil,
             unreadCount: 0,
@@ -193,13 +145,13 @@ class MessagingService: ObservableObject {
         // Add to local cache
         conversations.insert(conversation, at: 0)
 
-        print("MessagingService: Created new conversation with \(otherUser.first_name)")
+        print("MessagingService: Created new conversation with \(userInfo.first_name)")
         return conversation
     }
 
     // MARK: - Load Messages
 
-    /// Load messages for a conversation
+    /// Load messages for a conversation (between current user and other user)
     func loadMessages(conversationId: UUID, limit: Int = 50, before: Date? = nil) async throws -> [DirectMessage] {
         guard supabase.isAuthenticated else {
             throw SupabaseManager.SupabaseError.notAuthenticated
@@ -209,23 +161,36 @@ class MessagingService: ObservableObject {
             throw SupabaseManager.SupabaseError.userNotFound
         }
 
+        let otherUserId = conversationId // conversationId is the other user's ID
+
         do {
-            var query = supabase.query("direct_messages")
+            // Get messages sent by current user to other user
+            let sentMessages: [DatabaseDirectMessageRecord] = try await supabase.query("direct_messages")
                 .select("*")
-                .eq("conversation_id", value: conversationId)
+                .eq("sender_id", value: currentUser.id)
+                .eq("recipient_id", value: otherUserId)
                 .order("created_at", ascending: false)
                 .limit(limit)
+                .execute()
 
-            if let before = before {
-                query = query.lt("created_at", value: before)
-            }
+            // Get messages received from other user
+            let receivedMessages: [DatabaseDirectMessageRecord] = try await supabase.query("direct_messages")
+                .select("*")
+                .eq("sender_id", value: otherUserId)
+                .eq("recipient_id", value: currentUser.id)
+                .order("created_at", ascending: false)
+                .limit(limit)
+                .execute()
 
-            let dbMessages: [DatabaseDirectMessage] = try await query.execute()
+            // Combine and sort
+            var allMessages = sentMessages + receivedMessages
+            allMessages.sort { $0.created_at < $1.created_at }
 
-            let messages = dbMessages.map { msg in
+            // Map to UI model
+            let messages = allMessages.map { msg in
                 DirectMessage(
                     id: msg.id,
-                    conversationId: msg.conversation_id,
+                    conversationId: otherUserId,
                     senderId: msg.sender_id,
                     recipientId: msg.recipient_id,
                     content: msg.content,
@@ -235,8 +200,8 @@ class MessagingService: ObservableObject {
                 )
             }
 
-            // Return in chronological order
-            return messages.reversed()
+            print("MessagingService: Loaded \(messages.count) messages from database")
+            return messages
 
         } catch {
             print("MessagingService: Failed to load messages: \(error)")
@@ -261,66 +226,85 @@ class MessagingService: ObservableObject {
             throw SupabaseManager.SupabaseError.invalidData("Message cannot be empty")
         }
 
-        let insert = DatabaseDirectMessageInsert(
-            conversation_id: conversationId,
-            sender_id: currentUser.id,
-            recipient_id: recipientId,
-            content: trimmedContent
-        )
+        do {
+            let insert = DatabaseDirectMessageInsert(
+                sender_id: currentUser.id,
+                recipient_id: recipientId,
+                content: trimmedContent
+            )
 
-        try await supabase.insert(insert, into: "direct_messages")
+            try await supabase.insert(insert, into: "direct_messages")
 
-        // Update conversation's updated_at
-        try? await supabase.update(
-            table: "direct_conversations",
-            set: ["updated_at": Date()],
-            where: "id = '\(conversationId)'"
-        )
+            print("MessagingService: Message sent to \(recipientId)")
 
-        // Update local conversation cache
-        if let index = conversations.firstIndex(where: { $0.id == conversationId }) {
-            conversations[index].lastMessage = trimmedContent
-            conversations[index].lastMessageAt = Date()
-            // Move to top
-            let conversation = conversations.remove(at: index)
-            conversations.insert(conversation, at: 0)
+            // Update local conversation cache
+            if let index = conversations.firstIndex(where: { $0.otherUserId == recipientId }) {
+                conversations[index].lastMessage = trimmedContent
+                conversations[index].lastMessageAt = Date()
+                // Move to top
+                let conversation = conversations.remove(at: index)
+                conversations.insert(conversation, at: 0)
+            }
+
+            // Return the sent message
+            return DirectMessage(
+                id: UUID(),
+                conversationId: conversationId,
+                senderId: currentUser.id,
+                recipientId: recipientId,
+                content: trimmedContent,
+                createdAt: Date(),
+                isRead: false,
+                isFromCurrentUser: true
+            )
+
+        } catch {
+            print("MessagingService: Failed to send message: \(error)")
+            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
         }
-
-        // Return the sent message
-        return DirectMessage(
-            id: UUID(),
-            conversationId: conversationId,
-            senderId: currentUser.id,
-            recipientId: recipientId,
-            content: trimmedContent,
-            createdAt: Date(),
-            isRead: false,
-            isFromCurrentUser: true
-        )
     }
 
     // MARK: - Mark as Read
 
-    /// Mark messages in a conversation as read
+    /// Mark messages in a conversation as read (updates database)
     func markAsRead(conversationId: UUID) async {
         guard supabase.isAuthenticated else { return }
         guard let currentUser = supabase.currentUser else { return }
 
+        let otherUserId = conversationId
+
+        // Update local cache immediately (optimistic update)
+        if let index = conversations.firstIndex(where: { $0.otherUserId == otherUserId }) {
+            conversations[index].unreadCount = 0
+        }
+
+        // Update database - mark all unread messages from this sender as read
         do {
             try await supabase.update(
-                table: "direct_messages",
-                set: ["is_read": true],
-                where: "conversation_id = '\(conversationId)' AND recipient_id = '\(currentUser.id)' AND is_read = false"
+                ["is_read": true],
+                in: "direct_messages",
+                where: "recipient_id = '\(currentUser.id)' AND sender_id = '\(otherUserId)' AND is_read = false"
             )
-
-            // Update local cache
-            if let index = conversations.firstIndex(where: { $0.id == conversationId }) {
-                conversations[index].unreadCount = 0
-            }
-
-            print("MessagingService: Marked messages as read")
+            print("MessagingService: Marked messages as read in database")
         } catch {
-            print("MessagingService: Failed to mark as read: \(error)")
+            print("MessagingService: Failed to mark messages as read in database: \(error)")
+            // Local cache already updated, so UI will still show as read
+        }
+    }
+
+    /// Mark a specific message as read
+    func markMessageAsRead(messageId: UUID) async {
+        guard supabase.isAuthenticated else { return }
+
+        do {
+            try await supabase.update(
+                ["is_read": true],
+                in: "direct_messages",
+                where: "id = '\(messageId)'"
+            )
+            print("MessagingService: Marked message \(messageId) as read")
+        } catch {
+            print("MessagingService: Failed to mark message as read: \(error)")
         }
     }
 
@@ -331,7 +315,21 @@ class MessagingService: ObservableObject {
         conversations.reduce(0) { $0 + $1.unreadCount }
     }
 
-    // MARK: - Mock Data
+    // MARK: - Helper Methods
+
+    private func loadUserInfo(userId: UUID) async throws -> DatabaseUserBasic {
+        let users: [DatabaseUserBasic] = try await supabase.query("club_users")
+            .select("id, first_name, last_name, username, profile_photo_url")
+            .eq("id", value: userId)
+            .execute()
+
+        guard let user = users.first else {
+            throw SupabaseManager.SupabaseError.userNotFound
+        }
+        return user
+    }
+
+    // MARK: - Mock Data (Fallback)
 
     private func generateMockConversations() -> [DirectConversation] {
         return [
@@ -358,18 +356,6 @@ class MessagingService: ObservableObject {
                 lastMessageAt: Date().addingTimeInterval(-7200),
                 unreadCount: 0,
                 createdAt: Date().addingTimeInterval(-172800)
-            ),
-            DirectConversation(
-                id: UUID(),
-                otherUserId: UUID(),
-                otherUserName: "Marcus Williams",
-                otherUserUsername: "marcusw",
-                otherUserPhotoURL: "https://picsum.photos/100/100?random=303",
-                isVerified: false,
-                lastMessage: "Great playing with you",
-                lastMessageAt: Date().addingTimeInterval(-86400),
-                unreadCount: 0,
-                createdAt: Date().addingTimeInterval(-259200)
             )
         ]
     }
@@ -377,7 +363,7 @@ class MessagingService: ObservableObject {
     private func generateMockMessages(conversationId: UUID) -> [DirectMessage] {
         let now = Date()
         let currentUserId = supabase.currentUser?.id ?? UUID()
-        let otherUserId = UUID()
+        let otherUserId = conversationId
 
         return [
             DirectMessage(
@@ -413,3 +399,33 @@ class MessagingService: ObservableObject {
         ]
     }
 }
+
+// MARK: - Database Models for Direct Messages
+
+/// Database record for direct messages
+struct DatabaseDirectMessageRecord: Codable {
+    let id: UUID
+    let sender_id: UUID
+    let recipient_id: UUID
+    let content: String
+    let is_read: Bool
+    let created_at: Date
+}
+
+/// Database insert for direct messages
+struct DatabaseDirectMessageInsert: Codable {
+    let sender_id: UUID
+    let recipient_id: UUID
+    let content: String
+}
+
+/// Basic user info for conversation display
+struct DatabaseUserBasic: Codable {
+    let id: UUID
+    let first_name: String
+    let last_name: String
+    let username: String
+    let profile_photo_url: String?
+}
+
+// NOTE: DirectConversation and DirectMessage UI structs are defined in Models/Chat/ChatModels.swift

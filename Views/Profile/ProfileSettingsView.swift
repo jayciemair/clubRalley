@@ -142,6 +142,14 @@ struct ProfileSettingsView: View {
 
                 // Account Section
                 Section {
+                    NavigationLink(destination: ProfileSwitcherView()) {
+                        SettingsRow(
+                            icon: "person.2.circle",
+                            title: "Switch Account",
+                            iconColor: ClubRalleyTheme.Colors.accent
+                        )
+                    }
+
                     Button(action: {
                         showingSignOutAlert = true
                     }) {
@@ -225,6 +233,8 @@ struct ProfileSettingsView: View {
         try? await authService.signOut()
         // Clear local Club Ralley session
         await supabaseManager.signOut()
+        // Update multi-profile state
+        MultiProfileManager.shared.signOutCurrentProfile()
         // Clear onboarding flag to show onboarding on next launch
         clearUserData()
         isSigningOut = false

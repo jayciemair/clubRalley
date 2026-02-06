@@ -35,7 +35,11 @@ struct SupabaseConfig {
     
     /// Check if Supabase is properly configured
     static var isConfigured: Bool {
-        return !anonKey.contains("YOUR_SUPABASE_ANON_KEY")
+        let configured = !anonKey.contains("YOUR_SUPABASE_ANON_KEY")
+        print("🔵 helloWORLD SUPABASE_CONFIG CHECK - projectURL: \(projectURL)")
+        print("🔵 helloWORLD SUPABASE_CONFIG CHECK - anonKey: \(anonKey.prefix(20))...")
+        print("🔵 helloWORLD SUPABASE_CONFIG CHECK - isConfigured: \(configured)")
+        return configured
     }
     
     /// Configuration status for debugging

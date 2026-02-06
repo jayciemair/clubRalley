@@ -10,15 +10,33 @@ import SwiftUI
 struct UserProfileView: View {
     let userId: UUID
     @StateObject private var viewModel = ProfileViewModel()
+    @StateObject private var friendshipService = FriendshipService()
+    @StateObject private var messagingService = MessagingService()
+
     @State private var userProfile: UserProfile?
     @State private var isLoading = true
-    
+    @State private var isFollowing = false
+    @State private var isLoadingFollow = false
+    @State private var showingMessages = false
+
+    // Check if this is the current user's profile
+    private var isOwnProfile: Bool {
+        SupabaseManager.shared.currentUser?.id == userId
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 if let profile = userProfile {
-                    ProfileContentView(userProfile: profile)
-                        .environmentObject(viewModel)
+                    VStack(spacing: 0) {
+                        ProfileContentView(userProfile: profile)
+                            .environmentObject(viewModel)
+
+                        // Action buttons (only for other users' profiles)
+                        if !isOwnProfile {
+                            profileActionButtons
+                        }
+                    }
                 } else if isLoading {
                     ProfileLoadingView()
                 } else {
@@ -37,23 +55,30 @@ struct UserProfileView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button(action: {
-                            // Share profile
+                            if let profile = userProfile {
+                                ShareUtility.shareProfile(
+                                    name: "\(profile.user.firstName) \(profile.user.lastName)",
+                                    username: profile.user.username
+                                )
+                            }
                         }) {
                             Label("Share Profile", systemImage: "square.and.arrow.up")
                         }
-                        
-                        Button(role: .destructive, action: {
-                            Task {
-                                await viewModel.blockUser(userId)
+
+                        if !isOwnProfile {
+                            Button(role: .destructive, action: {
+                                Task {
+                                    await viewModel.blockUser(userId)
+                                }
+                            }) {
+                                Label("Block User", systemImage: "hand.raised")
                             }
-                        }) {
-                            Label("Block User", systemImage: "hand.raised")
-                        }
-                        
-                        Button(role: .destructive, action: {
-                            // Report user
-                        }) {
-                            Label("Report", systemImage: "exclamationmark.triangle")
+
+                            Button(role: .destructive, action: {
+                                // Report user
+                            }) {
+                                Label("Report", systemImage: "exclamationmark.triangle")
+                            }
                         }
                     } label: {
                         Image(systemName: "ellipsis")
@@ -61,16 +86,133 @@ struct UserProfileView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showingMessages) {
+                if let profile = userProfile {
+                    NavigationStack {
+                        DirectMessageView(
+                            conversation: createConversation(from: profile),
+                            messagingService: messagingService
+                        )
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                Button("Close") {
+                                    showingMessages = false
+                                }
+                                .foregroundColor(ClubRalleyTheme.Colors.accent)
+                            }
+                        }
+                    }
+                }
+            }
         }
         .task {
             await loadProfile()
+            await checkFollowStatus()
         }
     }
-    
+
+    // MARK: - Profile Action Buttons
+
+    private var profileActionButtons: some View {
+        HStack(spacing: 12) {
+            // Follow/Unfollow button
+            Button(action: { Task { await toggleFollow() } }) {
+                HStack(spacing: 8) {
+                    if isLoadingFollow {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: isFollowing ? Color(hex: "#2C4F40") : .white))
+                            .scaleEffect(0.8)
+                    } else {
+                        Image(systemName: isFollowing ? "checkmark" : "plus")
+                            .font(.system(size: 16, weight: .semibold))
+                    }
+                    Text(isFollowing ? "Following" : "Follow")
+                        .font(.system(size: 16, weight: .semibold))
+                }
+                .foregroundColor(isFollowing ? Color(hex: "#2C4F40") : .white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(
+                    isFollowing
+                        ? Color.clear
+                        : Color(hex: "#2C4F40")
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(hex: "#2C4F40"), lineWidth: 2)
+                )
+                .cornerRadius(12)
+            }
+            .disabled(isLoadingFollow)
+
+            // Message button
+            Button(action: { showingMessages = true }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "message.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text("Message")
+                        .font(.system(size: 16, weight: .semibold))
+                }
+                .foregroundColor(Color(hex: "#2C4F40"))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(hex: "#2C4F40"), lineWidth: 2)
+                )
+                .cornerRadius(12)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 16)
+        .padding(.bottom, 32)
+    }
+
+    // MARK: - Helper Methods
+
     private func loadProfile() async {
         isLoading = true
         userProfile = await viewModel.loadUserProfile(userId)
         isLoading = false
+    }
+
+    private func checkFollowStatus() async {
+        guard !isOwnProfile else { return }
+        isFollowing = (try? await friendshipService.isFollowing(userId)) ?? false
+    }
+
+    private func toggleFollow() async {
+        isLoadingFollow = true
+
+        do {
+            if isFollowing {
+                try await friendshipService.unfollowUser(userId)
+                isFollowing = false
+            } else {
+                try await friendshipService.followUser(userId)
+                isFollowing = true
+            }
+        } catch {
+            print("Failed to toggle follow: \(error)")
+        }
+
+        isLoadingFollow = false
+    }
+
+    private func createConversation(from profile: UserProfile) -> DirectConversation {
+        DirectConversation(
+            id: userId,
+            otherUserId: userId,
+            otherUserName: "\(profile.user.firstName) \(profile.user.lastName)",
+            otherUserUsername: profile.user.username,
+            otherUserPhotoURL: profile.user.profilePhotoURL,
+            isVerified: profile.socialInfo.isVerifiedAthlete,
+            lastMessage: nil,
+            lastMessageAt: nil,
+            unreadCount: 0,
+            createdAt: Date()
+        )
     }
 }
 

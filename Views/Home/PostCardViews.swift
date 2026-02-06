@@ -124,18 +124,30 @@ struct FigmaPostHeader: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            AsyncImage(url: URL(string: post.authorPhotoURL)) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Circle().fill(Color(hex: "#2C4F40"))
+            // Tappable profile photo
+            if let authorId = post.authorId {
+                NavigationLink(destination: UserProfileView(userId: authorId)) {
+                    profileImage
+                }
+                .buttonStyle(PlainButtonStyle())
+            } else {
+                profileImage
             }
-            .frame(width: 50, height: 50)
-            .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(post.authorName)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.black)
+                // Tappable author name
+                if let authorId = post.authorId {
+                    NavigationLink(destination: UserProfileView(userId: authorId)) {
+                        Text(post.authorName)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.black)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                } else {
+                    Text(post.authorName)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.black)
+                }
 
                 Text(subtitleText)
                     .font(.system(size: 14))
@@ -154,6 +166,16 @@ struct FigmaPostHeader: View {
         }
         .padding(.horizontal, 16)
         .padding(.top, 16)
+    }
+
+    private var profileImage: some View {
+        AsyncImage(url: URL(string: post.authorPhotoURL)) { image in
+            image.resizable().aspectRatio(contentMode: .fill)
+        } placeholder: {
+            Circle().fill(Color(hex: "#2C4F40"))
+        }
+        .frame(width: 50, height: 50)
+        .clipShape(Circle())
     }
 }
 
@@ -235,7 +257,7 @@ struct FigmaActionButtons: View {
             }
             .frame(maxWidth: .infinity)
 
-            Button(action: { ShareHelper.sharePost(post) }) {
+            Button(action: { ShareUtility.sharePost(post) }) {
                 Image(systemName: "arrowshape.turn.up.right")
                     .font(.system(size: 22, weight: .medium))
                     .foregroundColor(Color(hex: "#2C4F40"))

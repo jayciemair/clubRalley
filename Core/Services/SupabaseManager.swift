@@ -48,8 +48,11 @@ class SupabaseManager: ObservableObject {
     // MARK: - Setup Methods
 
     private func setupSupabaseClient() {
+        print("🔵 helloWORLD SUPABASE_INIT START")
+        print("🔵 helloWORLD SUPABASE_INIT - SupabaseConfig.isConfigured: \(SupabaseConfig.isConfigured)")
+
         guard SupabaseConfig.isConfigured else {
-            print("⚠️ SupabaseManager: Configuration invalid, using fallback mode")
+            print("🔴 helloWORLD SUPABASE_INIT - Configuration invalid, using FALLBACK MODE")
             useFallbackMode = true
             connectionStatus = .fallback
             return
@@ -58,9 +61,10 @@ class SupabaseManager: ObservableObject {
         do {
             client = SupabaseClientManager.shared
             connectionStatus = .connected
-            print("✅ SupabaseManager: Real client initialized successfully")
+            print("🟢 helloWORLD SUPABASE_INIT SUCCESS - Real client initialized")
+            print("🟢 helloWORLD SUPABASE_INIT - useFallbackMode: \(useFallbackMode)")
         } catch {
-            print("❌ SupabaseManager: Client initialization failed: \(error)")
+            print("🔴 helloWORLD SUPABASE_INIT FAILED: \(error)")
             useFallbackMode = true
             connectionStatus = .fallback
         }
@@ -72,9 +76,9 @@ class SupabaseManager: ObservableObject {
             return
         }
 
-        Task {
-            await checkAuthStatus()
-        }
+        // Auth state is restored explicitly via restoreSession() called from app launch
+        // Don't call checkAuthStatus() here to avoid racing with the saved-profile fallback
+        print("📡 SupabaseManager: Auth listener ready (session restored on launch)")
     }
 }
 

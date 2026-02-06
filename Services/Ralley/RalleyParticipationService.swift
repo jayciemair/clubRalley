@@ -50,7 +50,7 @@ class RalleyParticipationService: ObservableObject {
             let participant = DatabaseRalleyParticipant(
                 ralley_id: ralleyId,
                 user_id: currentUser.id,
-                status: "attending"
+                status: "joined"
             )
 
             try await supabase.insert(participant, into: "ralley_participants")
@@ -113,7 +113,7 @@ class RalleyParticipationService: ObservableObject {
             let participant = DatabaseRalleyParticipant(
                 ralley_id: ralleyId,
                 user_id: currentUser.id,
-                status: "requested"
+                status: "pending"
             )
 
             try await supabase.insert(participant, into: "ralley_participants")
@@ -141,7 +141,7 @@ class RalleyParticipationService: ObservableObject {
         do {
             try await supabase.update(
                 table: "ralley_participants",
-                set: ["status": "attending"],
+                set: ["status": "joined"],
                 where: "ralley_id = '\(ralleyId)' AND user_id = '\(userId)'"
             )
 
@@ -168,7 +168,7 @@ class RalleyParticipationService: ObservableObject {
         do {
             try await supabase.delete(
                 from: "ralley_participants",
-                where: "ralley_id = '\(ralleyId)' AND user_id = '\(userId)' AND status = 'requested'"
+                where: "ralley_id = '\(ralleyId)' AND user_id = '\(userId)' AND status = 'pending'"
             )
 
             print("RalleyParticipationService: Rejected join request for user \(userId)")
@@ -194,7 +194,7 @@ class RalleyParticipationService: ObservableObject {
             let requests: [DatabaseRalleyPendingRequest] = try await supabase.query("ralley_participants")
                 .select("*, club_users(first_name, last_name, username, profile_photo_url)")
                 .eq("ralley_id", value: ralleyId)
-                .eq("status", value: "requested")
+                .eq("status", value: "pending")
                 .execute()
 
             return requests.map { req in
@@ -206,7 +206,7 @@ class RalleyParticipationService: ObservableObject {
                     userUsername: req.user.username,
                     userPhotoURL: req.user.profile_photo_url,
                     mutualCount: 0,
-                    requestedAt: req.created_at
+                    pendingAt: req.created_at
                 )
             }
 
@@ -226,7 +226,7 @@ class RalleyParticipationService: ObservableObject {
             let requests: [DatabaseRalleyParticipant] = try await supabase.query("ralley_participants")
                 .select("*")
                 .eq("ralley_id", value: ralleyId)
-                .eq("status", value: "requested")
+                .eq("status", value: "pending")
                 .execute()
 
             return requests.count
@@ -248,7 +248,7 @@ class RalleyParticipationService: ObservableObject {
                 .select("*")
                 .eq("ralley_id", value: ralleyId)
                 .eq("user_id", value: currentUser.id)
-                .eq("status", value: "requested")
+                .eq("status", value: "pending")
                 .execute()
 
             return !requests.isEmpty
@@ -267,7 +267,7 @@ class RalleyParticipationService: ObservableObject {
             let participants: [DatabaseParticipantWithUser] = try await supabase.query("ralley_participants")
                 .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
                 .eq("ralley_id", value: ralleyId)
-                .eq("status", value: "attending")
+                .eq("status", value: "joined")
                 .execute()
 
             return participants.map { p in

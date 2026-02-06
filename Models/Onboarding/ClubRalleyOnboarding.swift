@@ -458,6 +458,8 @@ struct SavedUserProfile: Codable {
     let profilePhotoURL: String?
     let selectedSports: [String]
     let createdAt: Date
+    var bio: String?
+    var instagramHandle: String?
 
     var fullName: String {
         "\(firstName) \(lastName)"
@@ -466,6 +468,45 @@ struct SavedUserProfile: Codable {
     var displayLocation: String {
         if locationCity.isEmpty { return "" }
         return "\(locationCity), \(locationState)"
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, email, firstName, lastName, username, phoneNumber
+        case locationCity, locationState, profilePhotoURL, selectedSports, createdAt
+        case bio, instagramHandle
+    }
+
+    init(id: UUID, email: String, firstName: String, lastName: String, username: String, phoneNumber: String, locationCity: String, locationState: String, profilePhotoURL: String?, selectedSports: [String], createdAt: Date, bio: String? = nil, instagramHandle: String? = nil) {
+        self.id = id
+        self.email = email
+        self.firstName = firstName
+        self.lastName = lastName
+        self.username = username
+        self.phoneNumber = phoneNumber
+        self.locationCity = locationCity
+        self.locationState = locationState
+        self.profilePhotoURL = profilePhotoURL
+        self.selectedSports = selectedSports
+        self.createdAt = createdAt
+        self.bio = bio
+        self.instagramHandle = instagramHandle
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        email = try container.decode(String.self, forKey: .email)
+        firstName = try container.decode(String.self, forKey: .firstName)
+        lastName = try container.decode(String.self, forKey: .lastName)
+        username = try container.decode(String.self, forKey: .username)
+        phoneNumber = try container.decodeIfPresent(String.self, forKey: .phoneNumber) ?? ""
+        locationCity = try container.decode(String.self, forKey: .locationCity)
+        locationState = try container.decode(String.self, forKey: .locationState)
+        profilePhotoURL = try container.decodeIfPresent(String.self, forKey: .profilePhotoURL)
+        selectedSports = try container.decodeIfPresent([String].self, forKey: .selectedSports) ?? []
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        bio = try container.decodeIfPresent(String.self, forKey: .bio)
+        instagramHandle = try container.decodeIfPresent(String.self, forKey: .instagramHandle)
     }
 
     /// Load saved profile from UserDefaults

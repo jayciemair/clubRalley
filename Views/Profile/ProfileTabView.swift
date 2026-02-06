@@ -3,78 +3,163 @@
 //  Club Ralley
 //
 //  Profile tab view displaying user profile information
+//  Now connected to real user data from ProfileViewModel
 //
 
 import SwiftUI
 
 struct ProfileTabView: View {
-    @State private var isFollowing = false
-    @State private var showingMessageComingSoon = false
+    @StateObject private var profileViewModel = ProfileViewModel()
+    @State private var showingSettings = false
+    @State private var showingEditProfile = false
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    ProfileHeaderSection()
-                    ProfileInfoSection()
-                    ProfileActionButtons(
-                        isFollowing: $isFollowing,
-                        showingMessageComingSoon: $showingMessageComingSoon
+            Group {
+                if profileViewModel.isLoading {
+                    ProfileLoadingView()
+                } else if let profile = profileViewModel.currentUserProfile {
+                    ProfileContentView(
+                        profile: profile,
+                        showingSettings: $showingSettings,
+                        showingEditProfile: $showingEditProfile
                     )
-                    ProfileTeamsSection()
-                    ProfilePhotosSection()
-                    Spacer(minLength: 100)
+                } else {
+                    ProfileEmptyView()
                 }
             }
             .background(Color(hex: "#F5F5F5"))
             .navigationBarHidden(true)
+            .sheet(isPresented: $showingSettings) {
+                ProfileSettingsView()
+            }
+            .sheet(isPresented: $showingEditProfile) {
+                EditProfileView()
+            }
+        }
+        .task {
+            await profileViewModel.loadCurrentUserProfile()
         }
     }
 }
 
-// MARK: - Profile Header Section
+// MARK: - Profile Loading View
 
-struct ProfileHeaderSection: View {
+struct ProfileLoadingView: View {
+    var body: some View {
+        VStack {
+            Spacer()
+            ProgressView()
+                .scaleEffect(1.2)
+            Text("Loading profile...")
+                .font(.system(size: 16))
+                .foregroundColor(.gray)
+                .padding(.top, 16)
+            Spacer()
+        }
+    }
+}
+
+// MARK: - Profile Empty View
+
+struct ProfileEmptyView: View {
     var body: some View {
         VStack(spacing: 20) {
+            Spacer()
+            Image(systemName: "person.crop.circle.badge.questionmark")
+                .font(.system(size: 60))
+                .foregroundColor(Color(hex: "#2C4F40"))
+            Text("No Profile Found")
+                .font(.system(size: 22, weight: .bold))
+            Text("Complete onboarding to set up your profile")
+                .font(.system(size: 16))
+                .foregroundColor(.gray)
+            Spacer()
+        }
+    }
+}
+
+// MARK: - Profile Content View
+
+struct ProfileContentView: View {
+    let profile: UserProfile
+    @Binding var showingSettings: Bool
+    @Binding var showingEditProfile: Bool
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ProfileHeaderSectionReal(
+                    profile: profile,
+                    showingSettings: $showingSettings
+                )
+                ProfileInfoSectionReal(profile: profile)
+                ProfileEditButton(showingEditProfile: $showingEditProfile)
+                ProfileTeamsSectionReal(profile: profile)
+                ProfilePhotosSectionReal(photos: profile.photos)
+                Spacer(minLength: 100)
+            }
+        }
+    }
+}
+
+// MARK: - Profile Header Section (Real Data)
+
+struct ProfileHeaderSectionReal: View {
+    let profile: UserProfile
+    @Binding var showingSettings: Bool
+
+    var body: some View {
+        VStack(spacing: 20) {
+            // Top bar with location and settings
             HStack {
-                Button(action: {}) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(.black)
-                }
-                Spacer()
                 HStack(spacing: 6) {
                     Image(systemName: "location.fill")
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
-                    Text("Chicago, IL")
+                    Text(profile.user.locationDisplay)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.gray)
+                }
+                Spacer()
+                Button(action: { showingSettings = true }) {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(Color(hex: "#2C4F40"))
                 }
             }
             .padding(.horizontal, 24)
 
-            AsyncImage(url: URL(string: "https://picsum.photos/100/100?random=50")) { image in
+            // Profile photo
+            AsyncImage(url: URL(string: profile.user.profilePhotoURL ?? "")) { image in
                 image.resizable().aspectRatio(contentMode: .fill)
             } placeholder: {
-                Circle().fill(Color(hex: "#2C4F40"))
+                Circle()
+                    .fill(Color(hex: "#2C4F40"))
+                    .overlay(
+                        Text(profile.user.initials)
+                            .font(.system(size: 40, weight: .bold))
+                            .foregroundColor(.white)
+                    )
             }
             .frame(width: 110, height: 110)
             .clipShape(Circle())
             .overlay(Circle().stroke(Color.white, lineWidth: 4))
             .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
 
+            // Name and username
             VStack(spacing: 8) {
                 HStack(spacing: 8) {
-                    Text("Gracie King")
+                    Text(profile.user.displayName)
                         .font(.system(size: 26, weight: .bold))
                         .foregroundColor(.black)
-                    Image(systemName: "checkmark.seal.fill")
-                        .foregroundColor(Color(hex: "#2C4F40"))
-                        .font(.system(size: 18))
+                    if profile.socialInfo.isVerifiedAthlete {
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundColor(Color(hex: "#2C4F40"))
+                            .font(.system(size: 18))
+                    }
                 }
-                Text("@gking")
+                Text("@\(profile.user.username)")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.gray)
             }
@@ -84,38 +169,244 @@ struct ProfileHeaderSection: View {
     }
 }
 
-// MARK: - Profile Info Section
+// MARK: - Profile Info Section (Real Data)
 
-struct ProfileInfoSection: View {
+struct ProfileInfoSectionReal: View {
+    let profile: UserProfile
+
     var body: some View {
         VStack(spacing: 24) {
+            // Stats row
             HStack(spacing: 32) {
-                ProfileStatItem(value: "130", label: "Followers")
-                ProfileStatItem(value: "95", label: "Following")
-                ProfileStatItem(value: "15", label: "Ralleys")
+                ProfileStatItem(value: "\(profile.stats.followersCount)", label: "Followers")
+                ProfileStatItem(value: "\(profile.stats.followingCount)", label: "Following")
+                ProfileStatItem(value: "\(profile.stats.ralleysHosted + profile.stats.ralleysAttended)", label: "Ralleys")
             }
 
-            Text("Former D1 tennis player passionate about fitness and meeting new people!")
-                .font(.system(size: 15, weight: .regular))
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-
-            HStack(spacing: 12) {
-                ProfileBadge(icon: "tennisball.fill", text: "Tennis")
-                ProfileBadge(icon: "building.columns.fill", text: "Bucknell")
-            }
-
-            HStack(spacing: 16) {
-                MutualFriendBubble(imageUrl: "https://picsum.photos/30/30?random=301")
-                MutualFriendBubble(imageUrl: "https://picsum.photos/30/30?random=302")
-                Text("Sarah + 4 mutual friends")
-                    .font(.system(size: 14, weight: .medium))
+            // Bio
+            if let bio = profile.user.bio, !bio.isEmpty {
+                Text(bio)
+                    .font(.system(size: 15, weight: .regular))
                     .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
+
+            // Sports badges (if available from athlete info or sports)
+            ProfileSportBadges(profile: profile)
+
+            // Instagram link
+            if let instagram = profile.socialInfo.instagramHandle, !instagram.isEmpty {
+                HStack(spacing: 8) {
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 14))
+                    Text("@\(instagram)")
+                        .font(.system(size: 14, weight: .medium))
+                }
+                .foregroundColor(Color(hex: "#2C4F40"))
             }
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 32)
+    }
+}
+
+// MARK: - Profile Sport Badges
+
+struct ProfileSportBadges: View {
+    let profile: UserProfile
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // Show primary sport if available
+            if let athleteInfo = profile.user.athleteInfo {
+                ProfileBadge(icon: sportIcon(for: athleteInfo.sport), text: athleteInfo.sport.capitalized)
+                if let school = athleteInfo.college {
+                    ProfileBadge(icon: "building.columns.fill", text: school)
+                }
+            }
+        }
+    }
+
+    private func sportIcon(for sport: String) -> String {
+        switch sport.lowercased() {
+        case "tennis": return "tennisball.fill"
+        case "basketball": return "basketball.fill"
+        case "soccer", "football": return "soccerball"
+        case "volleyball": return "volleyball.fill"
+        case "baseball": return "baseball.fill"
+        case "golf": return "figure.golf"
+        case "swimming": return "figure.pool.swim"
+        default: return "sportscourt.fill"
+        }
+    }
+}
+
+// MARK: - Profile Edit Button
+
+struct ProfileEditButton: View {
+    @Binding var showingEditProfile: Bool
+
+    var body: some View {
+        Button(action: { showingEditProfile = true }) {
+            HStack(spacing: 8) {
+                Image(systemName: "pencil")
+                    .font(.system(size: 16, weight: .medium))
+                Text("Edit Profile")
+                    .font(.system(size: 17, weight: .semibold))
+            }
+            .foregroundColor(Color(hex: "#2C4F40"))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Color.white)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color(hex: "#2C4F40"), lineWidth: 2)
+            )
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 32)
+    }
+}
+
+// MARK: - Profile Teams Section (Real Data)
+
+struct ProfileTeamsSectionReal: View {
+    let profile: UserProfile
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Text("My Teams")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.black)
+                Spacer()
+                if !profile.teams.isEmpty {
+                    Button(action: {}) {
+                        Text("View All")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(Color(hex: "#2C4F40"))
+                    }
+                }
+            }
+
+            if profile.teams.isEmpty {
+                HStack {
+                    Spacer()
+                    VStack(spacing: 8) {
+                        Image(systemName: "person.3")
+                            .font(.system(size: 30))
+                            .foregroundColor(.gray.opacity(0.5))
+                        Text("No teams yet")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.vertical, 20)
+                    Spacer()
+                }
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        ForEach(profile.teams) { team in
+                            ProfileTeamCard(
+                                imageUrl: team.imageUrl ?? "https://picsum.photos/180/140",
+                                name: team.name,
+                                sport: team.sport
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 32)
+    }
+}
+
+// MARK: - Profile Photos Section (Real Data)
+
+struct ProfilePhotosSectionReal: View {
+    let photos: [UserPhoto]
+
+    private let columns = [
+        GridItem(.flexible(), spacing: 4),
+        GridItem(.flexible(), spacing: 4),
+        GridItem(.flexible(), spacing: 4)
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Text("Posts")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.black)
+                Spacer()
+                if !photos.isEmpty {
+                    Button(action: {}) {
+                        Text("View All")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(Color(hex: "#2C4F40"))
+                    }
+                }
+            }
+
+            if photos.isEmpty {
+                HStack {
+                    Spacer()
+                    VStack(spacing: 8) {
+                        Image(systemName: "photo.on.rectangle.angled")
+                            .font(.system(size: 30))
+                            .foregroundColor(.gray.opacity(0.5))
+                        Text("No posts yet")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.vertical, 20)
+                    Spacer()
+                }
+            } else {
+                LazyVGrid(columns: columns, spacing: 4) {
+                    ForEach(photos) { photo in
+                        AsyncImage(url: URL(string: photo.imageURL)) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Rectangle().fill(Color.gray.opacity(0.2))
+                        }
+                        .frame(height: 110)
+                        .clipped()
+                        .cornerRadius(8)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 24)
+    }
+}
+
+// MARK: - User Extensions for Display
+
+extension User {
+    var displayName: String {
+        "\(firstName) \(lastName)"
+    }
+
+    var locationDisplay: String {
+        if !locationCity.isEmpty && !locationState.isEmpty {
+            return "\(locationCity), \(locationState)"
+        } else if !locationCity.isEmpty {
+            return locationCity
+        } else if !locationState.isEmpty {
+            return locationState
+        }
+        return "Location not set"
+    }
+
+    var initials: String {
+        let first = firstName.first.map(String.init) ?? ""
+        let last = lastName.first.map(String.init) ?? ""
+        return (first + last).uppercased()
     }
 }
 
@@ -158,147 +449,6 @@ struct ProfileBadge: View {
     }
 }
 
-// MARK: - Mutual Friend Bubble
-
-struct MutualFriendBubble: View {
-    let imageUrl: String
-
-    var body: some View {
-        AsyncImage(url: URL(string: imageUrl)) { image in
-            image.resizable().aspectRatio(contentMode: .fill)
-        } placeholder: {
-            Circle().fill(Color.gray.opacity(0.3))
-        }
-        .frame(width: 30, height: 30)
-        .clipShape(Circle())
-        .overlay(Circle().stroke(Color.white, lineWidth: 2))
-        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-    }
-}
-
-// MARK: - Profile Action Buttons
-
-struct ProfileActionButtons: View {
-    @Binding var isFollowing: Bool
-    @Binding var showingMessageComingSoon: Bool
-
-    var body: some View {
-        HStack(spacing: 20) {
-            ProfileFollowButton(isFollowing: $isFollowing)
-            ProfileMessageButton(showingAlert: $showingMessageComingSoon)
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 40)
-        .alert("Coming Soon", isPresented: $showingMessageComingSoon) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("Direct messaging will be available in a future update.")
-        }
-    }
-}
-
-// MARK: - Profile Follow Button
-
-struct ProfileFollowButton: View {
-    @Binding var isFollowing: Bool
-
-    var body: some View {
-        Button(action: { isFollowing.toggle() }) {
-            HStack(spacing: 8) {
-                Image(systemName: isFollowing ? "checkmark" : "person.badge.plus")
-                    .font(.system(size: 16, weight: .medium))
-                Text(isFollowing ? "Following" : "Follow")
-                    .font(.system(size: 17, weight: .semibold))
-            }
-            .foregroundColor(isFollowing ? Color(hex: "#2C4F40") : .white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(followButtonBackground)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(hex: "#2C4F40"), lineWidth: isFollowing ? 2 : 0)
-            )
-            .shadow(color: Color(hex: "#2C4F40").opacity(0.3), radius: 8, x: 0, y: 4)
-        }
-    }
-
-    @ViewBuilder
-    private var followButtonBackground: some View {
-        if isFollowing {
-            Color.white
-        } else {
-            LinearGradient(
-                colors: [Color(hex: "#2C4F40"), Color(hex: "#3A6B4F")],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-    }
-}
-
-// MARK: - Profile Message Button
-
-struct ProfileMessageButton: View {
-    @Binding var showingAlert: Bool
-
-    var body: some View {
-        Button(action: { showingAlert = true }) {
-            HStack(spacing: 8) {
-                Image(systemName: "message")
-                    .font(.system(size: 16, weight: .medium))
-                Text("Message")
-                    .font(.system(size: 17, weight: .semibold))
-            }
-            .foregroundColor(Color(hex: "#2C4F40"))
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(Color.white)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(hex: "#2C4F40"), lineWidth: 2)
-            )
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-        }
-    }
-}
-
-// MARK: - Profile Teams Section
-
-struct ProfileTeamsSection: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack {
-                Text("My Teams")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.black)
-                Spacer()
-                Button(action: {}) {
-                    Text("View All")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(hex: "#2C4F40"))
-                }
-            }
-
-            HStack(spacing: 16) {
-                ProfileTeamCard(
-                    imageUrl: "https://picsum.photos/180/140?random=201",
-                    name: "AVS Club",
-                    sport: "Volleyball"
-                )
-                ProfileTeamCard(
-                    imageUrl: "https://picsum.photos/180/140?random=202",
-                    name: "Basketball Club",
-                    sport: "Basketball"
-                )
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 32)
-    }
-}
-
 // MARK: - Profile Team Card
 
 struct ProfileTeamCard: View {
@@ -314,7 +464,7 @@ struct ProfileTeamCard: View {
                 } placeholder: {
                     Rectangle().fill(Color.gray.opacity(0.2))
                 }
-                .frame(height: 100)
+                .frame(width: 160, height: 100)
                 .clipped()
             }
             .cornerRadius(12, corners: [.topLeft, .topRight])
@@ -327,7 +477,7 @@ struct ProfileTeamCard: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.gray)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(width: 160, alignment: .leading)
             .padding(12)
             .background(Color.white)
             .cornerRadius(12, corners: [.bottomLeft, .bottomRight])
@@ -335,46 +485,6 @@ struct ProfileTeamCard: View {
         .background(Color.white)
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-    }
-}
-
-// MARK: - Profile Photos Section
-
-struct ProfilePhotosSection: View {
-    private let columns = [
-        GridItem(.flexible(), spacing: 4),
-        GridItem(.flexible(), spacing: 4),
-        GridItem(.flexible(), spacing: 4)
-    ]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack {
-                Text("Photos")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.black)
-                Spacer()
-                Button(action: {}) {
-                    Text("View All")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(hex: "#2C4F40"))
-                }
-            }
-
-            LazyVGrid(columns: columns, spacing: 4) {
-                ForEach(1...9, id: \.self) { index in
-                    AsyncImage(url: URL(string: "https://picsum.photos/150/150?random=\(index + 400)")) { image in
-                        image.resizable().aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Rectangle().fill(Color.gray.opacity(0.2))
-                    }
-                    .frame(height: 110)
-                    .clipped()
-                    .cornerRadius(8)
-                }
-            }
-        }
-        .padding(.horizontal, 24)
     }
 }
 
@@ -397,5 +507,13 @@ struct RoundedCorner: Shape {
             cornerRadii: CGSize(width: radius, height: radius)
         )
         return Path(path.cgPath)
+    }
+}
+
+// MARK: - Preview
+
+struct ProfileTabView_Previews: PreviewProvider {
+    static var previews: some View {
+        ProfileTabView()
     }
 }

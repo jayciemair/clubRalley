@@ -12,11 +12,11 @@ import SwiftUI
 // MARK: - ProfileService
 
 /**
- * ProfileService: Bridge between ProfileViewModel and Supabase club_users table
+ * ProfileService: Bridge between ProfileViewModel and Supabase users table
  *
  * Purpose: Handles all profile-related database operations
  * Strategy: Real Supabase calls with mock fallbacks for reliability
- * Database: Maps UserProfile model to 'club_users', 'friendships', 'user_photos' tables
+ * Database: Maps UserProfile model to 'users', 'friendships', 'user_photos' tables
  */
 @MainActor
 class ProfileService: ObservableObject {
@@ -42,49 +42,64 @@ class ProfileService: ObservableObject {
      * @returns: Complete UserProfile with stats, photos, teams, etc.
      *
      * Database Query Strategy:
-     * - Main profile: SELECT from club_users WHERE id = current_user_id
+     * - Main profile: SELECT from users WHERE id = current_user_id
      * - Stats: COUNT posts, ralleys, friends from respective tables
      * - Photos: SELECT from user_photos WHERE user_id = current_user_id
      * - Teams: SELECT from user_teams JOIN teams WHERE user_id = current_user_id
      * - Social info: Calculate from friendships, posts engagement
      */
     func loadCurrentUserProfile() async throws -> UserProfile? {
+        print("🔵 helloWORLD PROFILE_SVC loadCurrentUserProfile START")
+        print("🔵 helloWORLD PROFILE_SVC - isAuthenticated: \(supabase.isAuthenticated)")
+
         guard supabase.isAuthenticated else {
+            print("🔴 helloWORLD PROFILE_SVC - NOT AUTHENTICATED")
             throw SupabaseManager.SupabaseError.notAuthenticated
         }
 
         guard let currentUser = supabase.currentUser else {
+            print("🔴 helloWORLD PROFILE_SVC - NO CURRENT USER")
             throw SupabaseManager.SupabaseError.userNotFound
         }
+
+        print("🔵 helloWORLD PROFILE_SVC - currentUser.id: \(currentUser.id)")
 
         isLoading = true
         lastError = nil
 
         do {
             // Query user profile from database
+            print("🔵 helloWORLD PROFILE_SVC - Querying users table...")
             let dbUser = try await supabase.query("club_users")
                 .select("*")
                 .eq("id", value: currentUser.id)
                 .single() as DatabaseUserProfile?
 
             guard let dbUser = dbUser else {
+                print("🔴 helloWORLD PROFILE_SVC - No user found in database")
                 throw SupabaseManager.SupabaseError.userNotFound
             }
 
+            print("🟢 helloWORLD PROFILE_SVC - Found user: \(dbUser.first_name) \(dbUser.last_name)")
+            print("🔵 helloWORLD PROFILE_SVC - username: \(dbUser.username)")
+            print("🔵 helloWORLD PROFILE_SVC - bio: \(dbUser.bio ?? "nil")")
+
             // Load real stats from database
+            print("🔵 helloWORLD PROFILE_SVC - Loading stats...")
             let stats = await loadUserStats(userId: currentUser.id)
+            print("🔵 helloWORLD PROFILE_SVC - Stats: followers=\(stats.followersCount), following=\(stats.followingCount)")
 
             // Build UserProfile from database data with real stats
             let profile = mapDatabaseUserToProfile(dbUser, isCurrentUser: true, stats: stats)
 
             isLoading = false
-            print("✅ ProfileService: Loaded current user profile from database with real stats")
+            print("🟢 helloWORLD PROFILE_SVC loadCurrentUserProfile SUCCESS")
             return profile
 
         } catch let error as SupabaseManager.SupabaseError {
             isLoading = false
             lastError = error
-            print("❌ ProfileService: Load current user failed: \(error)")
+            print("🔴 helloWORLD PROFILE_SVC - Supabase error: \(error)")
 
             // Fallback to mock data for development
             return generateMockCurrentUserProfile()
@@ -93,7 +108,7 @@ class ProfileService: ObservableObject {
             isLoading = false
             let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
             lastError = supabaseError
-            print("❌ ProfileService: Load current user failed with network error: \(error)")
+            print("🔴 helloWORLD PROFILE_SVC - Network error: \(error)")
 
             // Fallback to mock data
             return generateMockCurrentUserProfile()
@@ -156,29 +171,45 @@ class ProfileService: ObservableObject {
      * @returns: Success status
      */
     func updateProfile(_ profile: UserProfile) async throws -> Bool {
+        print("🔵 helloWORLD PROFILE_SVC updateProfile START")
+        print("🔵 helloWORLD PROFILE_SVC - firstName: \(profile.user.firstName)")
+        print("🔵 helloWORLD PROFILE_SVC - lastName: \(profile.user.lastName)")
+        print("🔵 helloWORLD PROFILE_SVC - username: \(profile.user.username)")
+        print("🔵 helloWORLD PROFILE_SVC - bio: \(profile.user.bio ?? "nil")")
+
         guard supabase.isAuthenticated else {
+            print("🔴 helloWORLD PROFILE_SVC updateProfile - NOT AUTHENTICATED")
             throw SupabaseManager.SupabaseError.notAuthenticated
         }
 
         guard let currentUser = supabase.currentUser else {
+            print("🔴 helloWORLD PROFILE_SVC updateProfile - NO CURRENT USER")
             throw SupabaseManager.SupabaseError.userNotFound
         }
 
+        print("🔵 helloWORLD PROFILE_SVC - Updating for userId: \(currentUser.id)")
+
         do {
-            // Map UserProfile to database format
+            // Map UserProfile to database format - include all editable fields
             let dbUpdate = DatabaseUserProfileUpdate(
+                first_name: profile.user.firstName,
+                last_name: profile.user.lastName,
+                username: profile.user.username,
                 bio: profile.user.bio,
+                city: profile.user.locationCity.isEmpty ? nil : profile.user.locationCity,
+                state: profile.user.locationState.isEmpty ? nil : profile.user.locationState,
                 instagram_handle: profile.user.instagramHandle,
                 profile_photo_url: profile.user.profilePhotoURL
             )
 
+            print("🔵 helloWORLD PROFILE_SVC - Calling supabase.update...")
             try await supabase.update(dbUpdate, in: "club_users", where: "id = '\(currentUser.id)'")
 
-            print("✅ ProfileService: Profile updated successfully")
+            print("🟢 helloWORLD PROFILE_SVC updateProfile SUCCESS")
             return true
 
         } catch {
-            print("❌ ProfileService: Profile update failed: \(error)")
+            print("🔴 helloWORLD PROFILE_SVC updateProfile FAILED: \(error)")
             throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
         }
     }
@@ -265,7 +296,7 @@ class ProfileService: ObservableObject {
     /**
      * Map database user profile to app UserProfile model
      *
-     * @param dbUser: Database user profile record
+     * @param dbUser: Database user profile record (lean 6-table schema)
      * @param isCurrentUser: Whether this is the logged-in user
      * @param isFollowedByCurrentUser: Following status (for other users)
      * @param stats: Optional pre-loaded stats (if nil, uses defaults from dbUser)
@@ -278,14 +309,9 @@ class ProfileService: ObservableObject {
         stats loadedStats: UserStats? = nil
     ) -> UserProfile {
 
-        // Create DateOfBirth struct from separate fields
-        let dateOfBirth = DateOfBirth(
-            month: dbUser.date_of_birth_month,
-            year: dbUser.date_of_birth_year
-        )
-
-        // Parse gender enum from string
-        let gender = Gender(rawValue: dbUser.gender) ?? .preferNotToSay
+        // Lean schema doesn't store DOB or gender - use defaults
+        let dateOfBirth = DateOfBirth(month: 1, year: 2000)
+        let gender: Gender = .preferNotToSay
 
         // Create User object matching User.swift model
         let user = User(
@@ -296,8 +322,8 @@ class ProfileService: ObservableObject {
             username: dbUser.username,
             dateOfBirth: dateOfBirth,
             gender: gender,
-            locationCity: dbUser.location_city,
-            locationState: dbUser.location_state,
+            locationCity: dbUser.city ?? "",
+            locationState: dbUser.state ?? "",
             bio: dbUser.bio,
             instagramHandle: dbUser.instagram_handle,
             profilePhotoURL: dbUser.profile_photo_url,
@@ -306,7 +332,7 @@ class ProfileService: ObservableObject {
             friendsCount: dbUser.friends_count,
             ralleysCount: dbUser.ralleys_count,
             createdAt: dbUser.created_at,
-            updatedAt: dbUser.updated_at
+            updatedAt: dbUser.created_at  // Lean schema doesn't have updated_at
         )
 
         // Use pre-loaded stats or create from database user

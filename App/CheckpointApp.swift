@@ -21,10 +21,16 @@ struct ClubRalleyApp: App {
     @State private var hasCompletedOnboarding = false
 
     init() {
+        print("🔵🔵🔵 helloWORLD APP_INIT - THIS SHOULD APPEAR IN CONSOLE 🔵🔵🔵")
         // Read onboarding state from UserDefaults
         let completed = UserDefaults.standard.bool(forKey: "hasCompletedClubRalleyOnboarding")
         _hasCompletedOnboarding = State(initialValue: completed)
         print("🚀 App init - hasCompletedOnboarding: \(completed)")
+
+        // Force initialize SupabaseManager to see debug prints
+        print("🔵🔵🔵 helloWORLD - About to access SupabaseManager.shared 🔵🔵🔵")
+        let _ = SupabaseManager.shared
+        print("🔵🔵🔵 helloWORLD - SupabaseManager.shared accessed 🔵🔵🔵")
     }
 
     // SupabaseManager for session management
@@ -84,9 +90,8 @@ struct ClubRalleyApp: App {
                 let hasSession = await supabaseManager.restoreSession()
                 print("🚀 App Launch - hasSession: \(hasSession)")
 
-                // If session restored and onboarding was completed, user is ready
                 if hasSession && hasCompletedOnboarding {
-                    // Load user profile if available
+                    // Session restored - enrich with profile data if available
                     if let userId = supabaseManager.currentUser?.id {
                         if let profile = try? await supabaseManager.fetchUserProfile(userId: userId) {
                             await MainActor.run {
@@ -98,6 +103,22 @@ struct ClubRalleyApp: App {
                                 )
                             }
                         }
+                    }
+                } else if !hasSession && hasCompletedOnboarding {
+                    // No Supabase session but user completed onboarding
+                    // Restore auth state from saved profile so the app works
+                    if let savedProfile = SavedUserProfile.loadFromStorage() {
+                        print("🟡 App Launch - Restoring auth from saved profile: \(savedProfile.firstName) \(savedProfile.lastName)")
+                        await MainActor.run {
+                            supabaseManager.isAuthenticated = true
+                            supabaseManager.currentUser = SupabaseUser(
+                                id: savedProfile.id,
+                                email: savedProfile.email,
+                                firstName: savedProfile.firstName,
+                                lastName: savedProfile.lastName
+                            )
+                        }
+                        print("🟢 App Launch - Auth restored from saved profile, userId: \(savedProfile.id)")
                     }
                 }
 

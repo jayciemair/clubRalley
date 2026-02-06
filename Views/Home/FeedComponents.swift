@@ -12,6 +12,8 @@ import SwiftUI
 struct FeedHeader: View {
     @Binding var showingNotifications: Bool
     @Binding var showingMessages: Bool
+    var unreadMessageCount: Int = 0
+    @StateObject private var notificationsService = NotificationsService()
 
     var body: some View {
         HStack {
@@ -22,16 +24,32 @@ struct FeedHeader: View {
             Spacer()
 
             Button(action: { showingNotifications = true }) {
-                Image(systemName: "bell")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(.black)
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: "bell")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(.black)
+
+                    // Notification badge
+                    if notificationsService.unreadCount > 0 {
+                        NotificationBadge(count: notificationsService.unreadCount)
+                            .offset(x: 8, y: -6)
+                    }
+                }
             }
             .padding(.trailing, 8)
 
             Button(action: { showingMessages = true }) {
-                Image(systemName: "bubble.left.and.bubble.right")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(.black)
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: "bubble.left.and.bubble.right")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(.black)
+
+                    // Unread messages badge
+                    if unreadMessageCount > 0 {
+                        NotificationBadge(count: unreadMessageCount)
+                            .offset(x: 10, y: -6)
+                    }
+                }
             }
         }
         .padding(.horizontal, 16)
@@ -39,10 +57,28 @@ struct FeedHeader: View {
     }
 }
 
+// MARK: - Notification Badge
+
+struct NotificationBadge: View {
+    let count: Int
+
+    var body: some View {
+        Text(count > 99 ? "99+" : "\(count)")
+            .font(.system(size: 11, weight: .bold))
+            .foregroundColor(.white)
+            .padding(.horizontal, count > 9 ? 5 : 6)
+            .padding(.vertical, 2)
+            .background(Color.red)
+            .clipShape(Capsule())
+            .minimumScaleFactor(0.8)
+    }
+}
+
 // MARK: - Upcoming Ralleys Section
 
 struct UpcomingRalleysSection: View {
     let ralleys: [ClubRalley]
+    @EnvironmentObject var ralleyManager: RalleyManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -60,7 +96,10 @@ struct UpcomingRalleysSection: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(ralleys) { ralley in
-                        UpcomingRalleyCard(ralley: ralley)
+                        NavigationLink(destination: RalleyDetailView(ralley: ralley).environmentObject(ralleyManager)) {
+                            UpcomingRalleyCard(ralley: ralley)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
                 .padding(.horizontal, 16)
