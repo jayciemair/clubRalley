@@ -65,7 +65,7 @@ struct HomeFeedView: View {
             .background(Color.white)
             .navigationBarHidden(true)
             .sheet(isPresented: $showingNotifications) {
-                NotificationsView()
+                SimpleNotificationsView()
             }
             .sheet(isPresented: $showingMessages) {
                 MessagesView()
