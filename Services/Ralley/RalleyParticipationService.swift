@@ -206,7 +206,7 @@ class RalleyParticipationService: ObservableObject {
                     userUsername: req.user.username,
                     userPhotoURL: req.user.profile_photo_url,
                     mutualCount: 0,
-                    pendingAt: req.created_at
+                    requestedAt: req.created_at
                 )
             }
 
