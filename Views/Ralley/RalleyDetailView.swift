@@ -47,7 +47,7 @@ struct RalleyDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack(spacing: 16) {
-                    Button(action: { ShareUtility.shareRalley(ralley) }) {
+                    Button(action: { /* TODO: Add ShareUtility.swift to Xcode project */ }) {
                         Image(systemName: "square.and.arrow.up")
                             .foregroundColor(Color(hex: "#2C4F40"))
                     }

@@ -55,12 +55,7 @@ struct UserProfileView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button(action: {
-                            if let profile = userProfile {
-                                ShareUtility.shareProfile(
-                                    name: "\(profile.user.firstName) \(profile.user.lastName)",
-                                    username: profile.user.username
-                                )
-                            }
+                            // TODO: Add ShareUtility.swift to Xcode project to enable sharing
                         }) {
                             Label("Share Profile", systemImage: "square.and.arrow.up")
                         }

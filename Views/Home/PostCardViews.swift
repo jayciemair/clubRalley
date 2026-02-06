@@ -257,7 +257,7 @@ struct FigmaActionButtons: View {
             }
             .frame(maxWidth: .infinity)
 
-            Button(action: { ShareUtility.sharePost(post) }) {
+            Button(action: { /* TODO: Add ShareUtility.swift to Xcode project */ }) {
                 Image(systemName: "arrowshape.turn.up.right")
                     .font(.system(size: 22, weight: .medium))
                     .foregroundColor(Color(hex: "#2C4F40"))
