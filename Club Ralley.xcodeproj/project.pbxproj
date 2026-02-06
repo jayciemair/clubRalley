@@ -352,8 +352,10 @@
 		E24FF1CADB430793B30FC69C /* PowerUpProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB90F39408419B99C0A1D3B /* PowerUpProfileViewModel.swift */; };
 		E94319448B75E8741C7FD9BC /* ProfilePhotoScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46497B54ABFD7A60EABE689C /* ProfilePhotoScreen.swift */; };
 		F43F2CCFE6CE7C2A15CB4917 /* SupabaseAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDF2BC5EF801B7B2233DA8B /* SupabaseAuth.swift */; };
-		F7366483741AA64094196CAA /* DatabaseNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69ABE321AD77F4ABED2D02A6 /* DatabaseNotification.swift */; };
 		F814EFEBCD394BA1A28247F1 /* Models/Database/DatabaseChatModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40169BDB40040F98EFA7034 /* Models/Database/DatabaseChatModels.swift */; };
+		AABB001122334455CCDD6678 /* ProfileSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB001122334455CCDD6677 /* ProfileSwitcherView.swift */; };
+		AABB001122334455EEFFAABB /* MultiProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB001122334455EEFF8899 /* MultiProfileManager.swift */; };
+		AABB001122334455DDEEFFDD /* SupabaseRealtime.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB001122334455DDEEFFCC /* SupabaseRealtime.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -377,8 +379,8 @@
 
 /* Begin PBXFileReference section */
 		01645528C6FC68853B05483D /* PrivacySettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
-		0327C66CB2664841A0DD418B /* Services/Post/PostEngagementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/Post/PostEngagementService.swift; sourceTree = "<group>"; };
 		043A60112F19E642C986D424 /* DatabaseComment.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DatabaseComment.swift; path = Database/DatabaseComment.swift; sourceTree = "<group>"; };
+		0327C66CB2664841A0DD418B /* Services/Post/PostEngagementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/Post/PostEngagementService.swift; sourceTree = "<group>"; };
 		06206BA527D8432986062EF6 /* Views/Ralley/RalleyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Ralley/RalleyDetailView.swift; sourceTree = "<group>"; };
 		067DFCD533F44CDBA51077F9 /* Models/Social/PostVisibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/Social/PostVisibility.swift; sourceTree = "<group>"; };
 		081A91ABACA6603ECA209FD7 /* WelcomeScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WelcomeScreen.swift; path = ClubRalley/Screens/WelcomeScreen.swift; sourceTree = "<group>"; };
@@ -422,9 +424,8 @@
 		5F8424D921A859CF88F64054 /* FriendshipService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FriendshipService.swift; sourceTree = "<group>"; };
 		63E5DA92175B078CC6A38C08 /* RosterPhotoStep.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RosterPhotoStep.swift; path = PowerUpProfile/Screens/RosterPhotoStep.swift; sourceTree = "<group>"; };
 		6451C6E8AE3349AB98BD814D /* ViewModels/Post/PostEngagementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels/Post/PostEngagementManager.swift; sourceTree = "<group>"; };
-		650A0B14EAF2E8BD4EB6152F /* PowerUpProfileCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PowerUpProfileCoordinator.swift; path = PowerUpProfile/PowerUpProfileCoordinator.swift; sourceTree = "<group>"; };
 		65D137DA361EDEB0C986B6A9 /* DatabaseFriendship.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DatabaseFriendship.swift; path = Database/DatabaseFriendship.swift; sourceTree = "<group>"; };
-		69ABE321AD77F4ABED2D02A6 /* DatabaseNotification.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DatabaseNotification.swift; path = Database/DatabaseNotification.swift; sourceTree = "<group>"; };
+		650A0B14EAF2E8BD4EB6152F /* PowerUpProfileCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PowerUpProfileCoordinator.swift; path = PowerUpProfile/PowerUpProfileCoordinator.swift; sourceTree = "<group>"; };
 		6A10072451F7417FA9875AAB /* ViewModels/Ralley/RalleyParticipationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels/Ralley/RalleyParticipationManager.swift; sourceTree = "<group>"; };
 		72461DC1DF9F42ED8A4BDE78 /* Services/Ralley/RalleyParticipationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/Ralley/RalleyParticipationService.swift; sourceTree = "<group>"; };
 		7BAC578F0DF7E7B918EE9537 /* RalleyFilterSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RalleyFilterSheet.swift; sourceTree = "<group>"; };
@@ -716,6 +717,9 @@
 		FC2DA1556A724B4FB9F7B2E5 /* Views/Ralley/RalleyDetailComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Ralley/RalleyDetailComponents.swift; sourceTree = "<group>"; };
 		FD7533E1FA1945D7A653D351 /* NameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NameScreen.swift; path = ClubRalley/NameScreen.swift; sourceTree = "<group>"; };
 		FD97E9A82651DF1940E181A9 /* SettingsComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsComponents.swift; sourceTree = "<group>"; };
+		AABB001122334455CCDD6677 /* ProfileSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSwitcherView.swift; sourceTree = "<group>"; };
+		AABB001122334455EEFF8899 /* MultiProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiProfileManager.swift; sourceTree = "<group>"; };
+		AABB001122334455DDEEFFCC /* SupabaseRealtime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseRealtime.swift; path = Supabase/SupabaseRealtime.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -774,7 +778,6 @@
 				B3C7CFC3F1CBD6F8DE156BF8 /* DatabaseUser.swift */,
 				043A60112F19E642C986D424 /* DatabaseComment.swift */,
 				65D137DA361EDEB0C986B6A9 /* DatabaseFriendship.swift */,
-				69ABE321AD77F4ABED2D02A6 /* DatabaseNotification.swift */,
 			);
 			name = Database;
 			sourceTree = "<group>";
@@ -785,6 +788,7 @@
 				DDDF2BC5EF801B7B2233DA8B /* SupabaseAuth.swift */,
 				E6FE3515C7EEED5331814963 /* SupabaseDatabase.swift */,
 				0DC1EAB764C6A86A3A89185E /* SupabaseQueryBuilder.swift */,
+				AABB001122334455DDEEFFCC /* SupabaseRealtime.swift */,
 			);
 			name = Supabase;
 			sourceTree = "<group>";
@@ -1308,6 +1312,7 @@
 				44A6476F33BBBFFCF3F5B03F /* AboutView.swift */,
 				FD97E9A82651DF1940E181A9 /* SettingsComponents.swift */,
 				91A0C6862F16B13600D273FC /* EditAccountabilityAnchorsView.swift */,
+				AABB001122334455CCDD6677 /* ProfileSwitcherView.swift */,
 				918D2A142EC6C364008ABBC0 /* Components */,
 				918D2A182EC6C364008ABBC0 /* SettingsView.swift */,
 			);
@@ -1832,6 +1837,7 @@
 			children = (
 				C93A2A7A2F292D8C004D160C /* ProfileService.swift */,
 				C93A2A7C2F292D8C004D160C /* SupabaseManager.swift */,
+				AABB001122334455EEFF8899 /* MultiProfileManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -2416,7 +2422,6 @@
 				DFA43A7BD99E7700CAFFF145 /* DatabaseUser.swift in Sources */,
 				3F1A84DE0E115CFD617BEBCD /* DatabaseComment.swift in Sources */,
 				7D8A99F9DA39E2067FE2EF96 /* DatabaseFriendship.swift in Sources */,
-				F7366483741AA64094196CAA /* DatabaseNotification.swift in Sources */,
 				F43F2CCFE6CE7C2A15CB4917 /* SupabaseAuth.swift in Sources */,
 				D699F2D397D325EA0269B179 /* SupabaseDatabase.swift in Sources */,
 				56B6BF9A8BD1DEDF061B9129 /* SupabaseQueryBuilder.swift in Sources */,
@@ -2452,6 +2457,9 @@
 				9C46E630F9478C0923ADFFAA /* SkillLevelPicker.swift in Sources */,
 				D7B0D10A10F967EC9921A117 /* YesNoToggle.swift in Sources */,
 				ADDA4853A0440E057BB2FCDB /* ProfileSettingsView.swift in Sources */,
+				AABB001122334455CCDD6678 /* ProfileSwitcherView.swift in Sources */,
+				AABB001122334455EEFFAABB /* MultiProfileManager.swift in Sources */,
+				AABB001122334455DDEEFFDD /* SupabaseRealtime.swift in Sources */,
 			);
 		};
 /* End PBXSourcesBuildPhase section */
