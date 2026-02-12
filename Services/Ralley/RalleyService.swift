@@ -97,7 +97,7 @@ class RalleyService: ObservableObject {
 
             // Return the ralley with updated database info
             var updatedRalley = ralley
-            updatedRalley.id = ralleyId
+            // Note: id is let constant, database generates its own ID
             updatedRalley.currentPlayers = 1 // Host is first player
 
             isLoading = false
