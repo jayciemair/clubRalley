@@ -28,16 +28,16 @@ class ProfileViewModel: ObservableObject {
     // MARK: - Current User Methods
 
     func loadCurrentUserProfile() async {
-        print("🔵 helloWORLD PROFILE_VM loadCurrentUserProfile START")
+        print("🔵 DEBUG PROFILE_VM loadCurrentUserProfile START")
         isLoading = true
         error = nil
 
         // First check if we have a saved profile from onboarding
         if let savedProfile = SavedUserProfile.loadFromStorage() {
-            print("🔵 helloWORLD PROFILE_VM - Found saved profile: \(savedProfile.firstName) \(savedProfile.lastName)")
-            print("🔵 helloWORLD PROFILE_VM - userId: \(savedProfile.id)")
-            print("🔵 helloWORLD PROFILE_VM - email: \(savedProfile.email)")
-            print("🔵 helloWORLD PROFILE_VM - username: \(savedProfile.username)")
+            print("🔵 DEBUG PROFILE_VM - Found saved profile: \(savedProfile.firstName) \(savedProfile.lastName)")
+            print("🔵 DEBUG PROFILE_VM - userId: \(savedProfile.id)")
+            print("🔵 DEBUG PROFILE_VM - email: \(savedProfile.email)")
+            print("🔵 DEBUG PROFILE_VM - username: \(savedProfile.username)")
 
             // Try to enrich with real stats from database
             var posts: [ClubRalleyPost] = []
@@ -45,19 +45,19 @@ class ProfileViewModel: ObservableObject {
             var followCounts: (followers: Int, following: Int) = (0, 0)
 
             do {
-                print("🔵 helloWORLD PROFILE_VM - Loading posts...")
+                print("🔵 DEBUG PROFILE_VM - Loading posts...")
                 posts = try await postService.loadUserPosts(userId: savedProfile.id)
-                print("🔵 helloWORLD PROFILE_VM - Loaded \(posts.count) posts")
+                print("🔵 DEBUG PROFILE_VM - Loaded \(posts.count) posts")
 
-                print("🔵 helloWORLD PROFILE_VM - Loading ralleys...")
+                print("🔵 DEBUG PROFILE_VM - Loading ralleys...")
                 ralleys = try await ralleyService.loadUserRalleys(userId: savedProfile.id)
-                print("🔵 helloWORLD PROFILE_VM - Loaded \(ralleys.count) ralleys")
+                print("🔵 DEBUG PROFILE_VM - Loaded \(ralleys.count) ralleys")
 
-                print("🔵 helloWORLD PROFILE_VM - Loading follow counts...")
+                print("🔵 DEBUG PROFILE_VM - Loading follow counts...")
                 followCounts = try await friendshipService.getFollowCounts(userId: savedProfile.id)
-                print("🔵 helloWORLD PROFILE_VM - Followers: \(followCounts.followers), Following: \(followCounts.following)")
+                print("🔵 DEBUG PROFILE_VM - Followers: \(followCounts.followers), Following: \(followCounts.following)")
             } catch {
-                print("🔴 helloWORLD PROFILE_VM - Failed to load stats: \(error)")
+                print("🔴 DEBUG PROFILE_VM - Failed to load stats: \(error)")
             }
 
             currentUserProfile = createProfileFromSavedData(
@@ -67,22 +67,22 @@ class ProfileViewModel: ObservableObject {
                 followersCount: followCounts.followers,
                 followingCount: followCounts.following
             )
-            print("🟢 helloWORLD PROFILE_VM - Created profile from saved data")
+            print("🟢 DEBUG PROFILE_VM - Created profile from saved data")
             isLoading = false
             return
         }
 
-        print("🔵 helloWORLD PROFILE_VM - No saved profile, trying Supabase...")
-        print("🔵 helloWORLD PROFILE_VM - isAuthenticated: \(supabase.isAuthenticated)")
-        print("🔵 helloWORLD PROFILE_VM - currentUser: \(supabase.currentUser?.id.uuidString ?? "nil")")
+        print("🔵 DEBUG PROFILE_VM - No saved profile, trying Supabase...")
+        print("🔵 DEBUG PROFILE_VM - isAuthenticated: \(supabase.isAuthenticated)")
+        print("🔵 DEBUG PROFILE_VM - currentUser: \(supabase.currentUser?.id.uuidString ?? "nil")")
 
         // Try to load from Supabase if user is authenticated
         if supabase.isAuthenticated, let userId = supabase.currentUser?.id {
-            print("🔵 helloWORLD PROFILE_VM - Loading from Supabase for userId: \(userId)")
+            print("🔵 DEBUG PROFILE_VM - Loading from Supabase for userId: \(userId)")
             do {
-                print("🔵 helloWORLD PROFILE_VM - Calling userService.loadUser...")
+                print("🔵 DEBUG PROFILE_VM - Calling userService.loadUser...")
                 let dbUser = try await userService.loadUser(userId)
-                print("🔵 helloWORLD PROFILE_VM - Loaded user: \(dbUser.first_name) \(dbUser.last_name)")
+                print("🔵 DEBUG PROFILE_VM - Loaded user: \(dbUser.first_name) \(dbUser.last_name)")
 
                 let posts = try await postService.loadUserPosts(userId: userId)
                 let ralleys = try await ralleyService.loadUserRalleys(userId: userId)
@@ -96,16 +96,16 @@ class ProfileViewModel: ObservableObject {
                     followingCount: followCounts.following,
                     isFollowedByCurrentUser: nil
                 )
-                print("🟢 helloWORLD PROFILE_VM - Loaded profile from Supabase")
+                print("🟢 DEBUG PROFILE_VM - Loaded profile from Supabase")
                 isLoading = false
                 return
             } catch {
-                print("🔴 helloWORLD PROFILE_VM - Supabase load FAILED: \(error)")
+                print("🔴 DEBUG PROFILE_VM - Supabase load FAILED: \(error)")
             }
         }
 
         // No profile available - user needs to complete onboarding
-        print("🔴 helloWORLD PROFILE_VM - No user profile available")
+        print("🔴 DEBUG PROFILE_VM - No user profile available")
         currentUserProfile = nil
         isLoading = false
     }

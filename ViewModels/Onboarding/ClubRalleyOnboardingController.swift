@@ -64,24 +64,24 @@ class ClubRalleyOnboardingController: ObservableObject {
     // MARK: - Navigation Methods
 
     func goToNextStep() {
-        print("🔵🔵🔵 helloWORLD goToNextStep() called - currentStep: \(currentStep)")
+        print("🔵🔵🔵 DEBUG goToNextStep() called - currentStep: \(currentStep)")
 
         // Note: Screens handle their own validation via continueEnabled
         // This method just advances to the next step
         let allSteps = ClubRalleyOnboardingStep.allCases
         guard let currentIndex = allSteps.firstIndex(of: currentStep),
               currentIndex < allSteps.count - 1 else {
-            print("🔵🔵🔵 helloWORLD goToNextStep - at end, calling completeOnboarding()")
+            print("🔵🔵🔵 DEBUG goToNextStep - at end, calling completeOnboarding()")
             completeOnboarding()
             return
         }
 
         let nextStep = allSteps[currentIndex + 1]
-        print("🔵🔵🔵 helloWORLD goToNextStep - advancing to: \(nextStep)")
+        print("🔵🔵🔵 DEBUG goToNextStep - advancing to: \(nextStep)")
 
         // If we're about to show the completion screen, submit data first
         if nextStep == .completion {
-            print("🔵🔵🔵 helloWORLD goToNextStep - nextStep is completion, calling completeOnboarding()")
+            print("🔵🔵🔵 DEBUG goToNextStep - nextStep is completion, calling completeOnboarding()")
             completeOnboarding()
         }
 
@@ -352,40 +352,40 @@ class ClubRalleyOnboardingController: ObservableObject {
     // MARK: - Completion
 
     private func completeOnboarding() {
-        print("🔵🔵🔵 helloWORLD completeOnboarding() called")
-        print("🔵🔵🔵 helloWORLD - email: \(onboardingData.profile.email)")
-        print("🔵🔵🔵 helloWORLD - username: \(onboardingData.profile.username)")
-        print("🔵🔵🔵 helloWORLD - firstName: \(onboardingData.profile.firstName)")
-        print("🔵🔵🔵 helloWORLD - lastName: \(onboardingData.profile.lastName)")
+        print("🔵🔵🔵 DEBUG completeOnboarding() called")
+        print("🔵🔵🔵 DEBUG - email: \(onboardingData.profile.email)")
+        print("🔵🔵🔵 DEBUG - username: \(onboardingData.profile.username)")
+        print("🔵🔵🔵 DEBUG - firstName: \(onboardingData.profile.firstName)")
+        print("🔵🔵🔵 DEBUG - lastName: \(onboardingData.profile.lastName)")
         Task {
             await submitOnboardingData()
         }
     }
 
     private func submitOnboardingData() async {
-        print("🔵 helloWORLD ONBOARDING_SUBMIT START")
+        print("🔵 DEBUG ONBOARDING_SUBMIT START")
         isLoading = true
         error = nil
 
         // Generate a local user ID (will be replaced by Supabase ID if signup succeeds)
         var userId = UUID()
-        print("🔵 helloWORLD ONBOARDING - Generated local UUID: \(userId)")
-        print("🔵 helloWORLD ONBOARDING - Email: \(onboardingData.profile.email)")
-        print("🔵 helloWORLD ONBOARDING - Username: \(onboardingData.profile.username)")
-        print("🔵 helloWORLD ONBOARDING - Name: \(onboardingData.profile.firstName) \(onboardingData.profile.lastName)")
-        print("🔵 helloWORLD ONBOARDING - Location: \(onboardingData.profile.city), \(onboardingData.profile.state)")
+        print("🔵 DEBUG ONBOARDING - Generated local UUID: \(userId)")
+        print("🔵 DEBUG ONBOARDING - Email: \(onboardingData.profile.email)")
+        print("🔵 DEBUG ONBOARDING - Username: \(onboardingData.profile.username)")
+        print("🔵 DEBUG ONBOARDING - Name: \(onboardingData.profile.firstName) \(onboardingData.profile.lastName)")
+        print("🔵 DEBUG ONBOARDING - Location: \(onboardingData.profile.city), \(onboardingData.profile.state)")
 
         // STEP 1: Try to create Supabase Auth account
         do {
-            print("🔵 helloWORLD ONBOARDING STEP1 - Attempting Supabase signup...")
+            print("🔵 DEBUG ONBOARDING STEP1 - Attempting Supabase signup...")
             userId = try await supabaseManager.signUp(
                 email: onboardingData.profile.email,
                 password: onboardingData.profile.password
             )
-            print("🟢 helloWORLD ONBOARDING STEP1 SUCCESS - Supabase signup complete, userId: \(userId)")
+            print("🟢 DEBUG ONBOARDING STEP1 SUCCESS - Supabase signup complete, userId: \(userId)")
 
             // STEP 2: Create profile in users table (lean 6-table schema)
-            print("🔵 helloWORLD ONBOARDING STEP2 - Creating users profile...")
+            print("🔵 DEBUG ONBOARDING STEP2 - Creating users profile...")
             try await supabaseManager.createClubUser(
                 id: userId,
                 email: onboardingData.profile.email,
@@ -396,31 +396,31 @@ class ClubRalleyOnboardingController: ObservableObject {
                 state: onboardingData.profile.state,
                 profilePhotoURL: onboardingData.profile.profilePhotoURL
             )
-            print("🟢 helloWORLD ONBOARDING STEP2 SUCCESS - Profile created in database")
+            print("🟢 DEBUG ONBOARDING STEP2 SUCCESS - Profile created in database")
 
         } catch {
-            print("🔴 helloWORLD ONBOARDING ERROR: \(error)")
-            print("🔴 helloWORLD ONBOARDING ERROR localized: \(error.localizedDescription)")
+            print("🔴 DEBUG ONBOARDING ERROR: \(error)")
+            print("🔴 DEBUG ONBOARDING ERROR localized: \(error.localizedDescription)")
             // Check if this is a critical auth error that should stop onboarding
             let errorMessage = error.localizedDescription.lowercased()
             if errorMessage.contains("already registered") || errorMessage.contains("already exists") {
-                print("🔴 helloWORLD ONBOARDING - Email already exists, stopping")
+                print("🔴 DEBUG ONBOARDING - Email already exists, stopping")
                 self.error = .emailAlreadyExists
                 isLoading = false
                 return
             } else if errorMessage.contains("weak password") || errorMessage.contains("invalid password") {
-                print("🔴 helloWORLD ONBOARDING - Weak password, stopping")
+                print("🔴 DEBUG ONBOARDING - Weak password, stopping")
                 self.error = .weakPassword
                 isLoading = false
                 return
             }
 
             // For other errors (network, not configured), continue with local-only mode
-            print("🟡 helloWORLD ONBOARDING - Non-critical error, continuing with local mode")
+            print("🟡 DEBUG ONBOARDING - Non-critical error, continuing with local mode")
         }
 
         // STEP 3: Save local profile backup and add to MultiProfileManager
-        print("🔵 helloWORLD ONBOARDING STEP3 - Saving local profile backup...")
+        print("🔵 DEBUG ONBOARDING STEP3 - Saving local profile backup...")
         do {
             let userProfile = SavedUserProfile(
                 id: userId,
@@ -435,23 +435,23 @@ class ClubRalleyOnboardingController: ObservableObject {
                 selectedSports: onboardingData.interests.selectedSports.map { $0.sport.name },
                 createdAt: Date()
             )
-            print("🔵 helloWORLD ONBOARDING STEP3 - SavedUserProfile created: \(userProfile)")
+            print("🔵 DEBUG ONBOARDING STEP3 - SavedUserProfile created: \(userProfile)")
 
             // Save to MultiProfileManager for multi-account support
             MultiProfileManager.shared.addProfile(userProfile, setAsActive: true)
-            print("🟢 helloWORLD ONBOARDING STEP3 - Profile added to MultiProfileManager")
+            print("🟢 DEBUG ONBOARDING STEP3 - Profile added to MultiProfileManager")
 
             // Also save legacy format for backward compatibility
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             let profileData = try encoder.encode(userProfile)
             UserDefaults.standard.set(profileData, forKey: "currentUserProfile")
-            print("🟢 helloWORLD ONBOARDING STEP3 - Profile saved to UserDefaults (legacy)")
+            print("🟢 DEBUG ONBOARDING STEP3 - Profile saved to UserDefaults (legacy)")
 
             // Also save profile photo data if available
             if let photoData = onboardingData.profile.profilePhotoData {
                 UserDefaults.standard.set(photoData, forKey: "currentUserProfilePhoto")
-                print("🟢 helloWORLD ONBOARDING STEP3 - Photo data saved to UserDefaults")
+                print("🟢 DEBUG ONBOARDING STEP3 - Photo data saved to UserDefaults")
             }
 
             // Update SupabaseManager with user info
@@ -462,16 +462,16 @@ class ClubRalleyOnboardingController: ObservableObject {
                 firstName: onboardingData.profile.firstName,
                 lastName: onboardingData.profile.lastName
             )
-            print("🟢 helloWORLD ONBOARDING STEP3 - SupabaseManager updated with user info")
+            print("🟢 DEBUG ONBOARDING STEP3 - SupabaseManager updated with user info")
 
         } catch {
-            print("🔴 helloWORLD ONBOARDING STEP3 FAILED: \(error)")
+            print("🔴 DEBUG ONBOARDING STEP3 FAILED: \(error)")
         }
 
         // STEP 4: Mark onboarding as complete
-        print("🔵 helloWORLD ONBOARDING STEP4 - Marking onboarding complete...")
+        print("🔵 DEBUG ONBOARDING STEP4 - Marking onboarding complete...")
         UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
-        print("🟢 helloWORLD ONBOARDING STEP4 - hasCompletedClubRalleyOnboarding set to true")
+        print("🟢 DEBUG ONBOARDING STEP4 - hasCompletedClubRalleyOnboarding set to true")
 
         // Brief delay for UX
         try? await Task.sleep(nanoseconds: 500_000_000)

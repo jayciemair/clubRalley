@@ -49,57 +49,57 @@ class ProfileService: ObservableObject {
      * - Social info: Calculate from friendships, posts engagement
      */
     func loadCurrentUserProfile() async throws -> UserProfile? {
-        print("🔵 helloWORLD PROFILE_SVC loadCurrentUserProfile START")
-        print("🔵 helloWORLD PROFILE_SVC - isAuthenticated: \(supabase.isAuthenticated)")
+        print("🔵 DEBUG PROFILE_SVC loadCurrentUserProfile START")
+        print("🔵 DEBUG PROFILE_SVC - isAuthenticated: \(supabase.isAuthenticated)")
 
         guard supabase.isAuthenticated else {
-            print("🔴 helloWORLD PROFILE_SVC - NOT AUTHENTICATED")
+            print("🔴 DEBUG PROFILE_SVC - NOT AUTHENTICATED")
             throw SupabaseManager.SupabaseError.notAuthenticated
         }
 
         guard let currentUser = supabase.currentUser else {
-            print("🔴 helloWORLD PROFILE_SVC - NO CURRENT USER")
+            print("🔴 DEBUG PROFILE_SVC - NO CURRENT USER")
             throw SupabaseManager.SupabaseError.userNotFound
         }
 
-        print("🔵 helloWORLD PROFILE_SVC - currentUser.id: \(currentUser.id)")
+        print("🔵 DEBUG PROFILE_SVC - currentUser.id: \(currentUser.id)")
 
         isLoading = true
         lastError = nil
 
         do {
             // Query user profile from database
-            print("🔵 helloWORLD PROFILE_SVC - Querying users table...")
+            print("🔵 DEBUG PROFILE_SVC - Querying users table...")
             let dbUser = try await supabase.query("club_users")
                 .select("*")
                 .eq("id", value: currentUser.id)
                 .single() as DatabaseUserProfile?
 
             guard let dbUser = dbUser else {
-                print("🔴 helloWORLD PROFILE_SVC - No user found in database")
+                print("🔴 DEBUG PROFILE_SVC - No user found in database")
                 throw SupabaseManager.SupabaseError.userNotFound
             }
 
-            print("🟢 helloWORLD PROFILE_SVC - Found user: \(dbUser.first_name) \(dbUser.last_name)")
-            print("🔵 helloWORLD PROFILE_SVC - username: \(dbUser.username)")
-            print("🔵 helloWORLD PROFILE_SVC - bio: \(dbUser.bio ?? "nil")")
+            print("🟢 DEBUG PROFILE_SVC - Found user: \(dbUser.first_name) \(dbUser.last_name)")
+            print("🔵 DEBUG PROFILE_SVC - username: \(dbUser.username)")
+            print("🔵 DEBUG PROFILE_SVC - bio: \(dbUser.bio ?? "nil")")
 
             // Load real stats from database
-            print("🔵 helloWORLD PROFILE_SVC - Loading stats...")
+            print("🔵 DEBUG PROFILE_SVC - Loading stats...")
             let stats = await loadUserStats(userId: currentUser.id)
-            print("🔵 helloWORLD PROFILE_SVC - Stats: followers=\(stats.followersCount), following=\(stats.followingCount)")
+            print("🔵 DEBUG PROFILE_SVC - Stats: followers=\(stats.followersCount), following=\(stats.followingCount)")
 
             // Build UserProfile from database data with real stats
             let profile = mapDatabaseUserToProfile(dbUser, isCurrentUser: true, stats: stats)
 
             isLoading = false
-            print("🟢 helloWORLD PROFILE_SVC loadCurrentUserProfile SUCCESS")
+            print("🟢 DEBUG PROFILE_SVC loadCurrentUserProfile SUCCESS")
             return profile
 
         } catch let error as SupabaseManager.SupabaseError {
             isLoading = false
             lastError = error
-            print("🔴 helloWORLD PROFILE_SVC - Supabase error: \(error)")
+            print("🔴 DEBUG PROFILE_SVC - Supabase error: \(error)")
 
             // Fallback to mock data for development
             return generateMockCurrentUserProfile()
@@ -108,7 +108,7 @@ class ProfileService: ObservableObject {
             isLoading = false
             let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
             lastError = supabaseError
-            print("🔴 helloWORLD PROFILE_SVC - Network error: \(error)")
+            print("🔴 DEBUG PROFILE_SVC - Network error: \(error)")
 
             // Fallback to mock data
             return generateMockCurrentUserProfile()
@@ -171,23 +171,23 @@ class ProfileService: ObservableObject {
      * @returns: Success status
      */
     func updateProfile(_ profile: UserProfile) async throws -> Bool {
-        print("🔵 helloWORLD PROFILE_SVC updateProfile START")
-        print("🔵 helloWORLD PROFILE_SVC - firstName: \(profile.user.firstName)")
-        print("🔵 helloWORLD PROFILE_SVC - lastName: \(profile.user.lastName)")
-        print("🔵 helloWORLD PROFILE_SVC - username: \(profile.user.username)")
-        print("🔵 helloWORLD PROFILE_SVC - bio: \(profile.user.bio ?? "nil")")
+        print("🔵 DEBUG PROFILE_SVC updateProfile START")
+        print("🔵 DEBUG PROFILE_SVC - firstName: \(profile.user.firstName)")
+        print("🔵 DEBUG PROFILE_SVC - lastName: \(profile.user.lastName)")
+        print("🔵 DEBUG PROFILE_SVC - username: \(profile.user.username)")
+        print("🔵 DEBUG PROFILE_SVC - bio: \(profile.user.bio ?? "nil")")
 
         guard supabase.isAuthenticated else {
-            print("🔴 helloWORLD PROFILE_SVC updateProfile - NOT AUTHENTICATED")
+            print("🔴 DEBUG PROFILE_SVC updateProfile - NOT AUTHENTICATED")
             throw SupabaseManager.SupabaseError.notAuthenticated
         }
 
         guard let currentUser = supabase.currentUser else {
-            print("🔴 helloWORLD PROFILE_SVC updateProfile - NO CURRENT USER")
+            print("🔴 DEBUG PROFILE_SVC updateProfile - NO CURRENT USER")
             throw SupabaseManager.SupabaseError.userNotFound
         }
 
-        print("🔵 helloWORLD PROFILE_SVC - Updating for userId: \(currentUser.id)")
+        print("🔵 DEBUG PROFILE_SVC - Updating for userId: \(currentUser.id)")
 
         do {
             // Map UserProfile to database format - include all editable fields
@@ -202,14 +202,14 @@ class ProfileService: ObservableObject {
                 profile_photo_url: profile.user.profilePhotoURL
             )
 
-            print("🔵 helloWORLD PROFILE_SVC - Calling supabase.update...")
+            print("🔵 DEBUG PROFILE_SVC - Calling supabase.update...")
             try await supabase.update(dbUpdate, in: "club_users", where: "id = '\(currentUser.id)'")
 
-            print("🟢 helloWORLD PROFILE_SVC updateProfile SUCCESS")
+            print("🟢 DEBUG PROFILE_SVC updateProfile SUCCESS")
             return true
 
         } catch {
-            print("🔴 helloWORLD PROFILE_SVC updateProfile FAILED: \(error)")
+            print("🔴 DEBUG PROFILE_SVC updateProfile FAILED: \(error)")
             throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
         }
     }

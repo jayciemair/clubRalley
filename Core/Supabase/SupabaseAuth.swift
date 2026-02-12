@@ -14,31 +14,31 @@ extension SupabaseManager {
 
     /// Sign up with email and password
     func signUp(email: String, password: String) async throws -> UUID {
-        print("🔵 helloWORLD AUTH_SIGNUP START - email: \(email)")
-        print("🔵 helloWORLD AUTH_SIGNUP - client exists: \(client != nil), fallbackMode: \(useFallbackMode)")
+        print("🔵 DEBUG AUTH_SIGNUP START - email: \(email)")
+        print("🔵 DEBUG AUTH_SIGNUP - client exists: \(client != nil), fallbackMode: \(useFallbackMode)")
 
         guard let client = client, !useFallbackMode else {
-            print("🔴 helloWORLD AUTH_SIGNUP FAILED - Supabase not configured")
+            print("🔴 DEBUG AUTH_SIGNUP FAILED - Supabase not configured")
             throw SupabaseError.networkError("Supabase not configured")
         }
 
-        print("🔵 helloWORLD AUTH_SIGNUP - Calling Supabase auth.signUp...")
+        print("🔵 DEBUG AUTH_SIGNUP - Calling Supabase auth.signUp...")
         let response = try await client.auth.signUp(
             email: email,
             password: password
         )
-        print("🔵 helloWORLD AUTH_SIGNUP - Got response: \(response)")
+        print("🔵 DEBUG AUTH_SIGNUP - Got response: \(response)")
 
         let userId: UUID
         switch response {
         case .session(let session):
             userId = session.user.id
             isAuthenticated = true
-            print("🟢 helloWORLD AUTH_SIGNUP - Got session, userId: \(userId)")
+            print("🟢 DEBUG AUTH_SIGNUP - Got session, userId: \(userId)")
         case .user(let user):
             userId = user.id
             isAuthenticated = true
-            print("🟢 helloWORLD AUTH_SIGNUP - Got user, userId: \(userId)")
+            print("🟢 DEBUG AUTH_SIGNUP - Got user, userId: \(userId)")
         }
 
         currentUser = SupabaseUser(
@@ -48,20 +48,20 @@ extension SupabaseManager {
             lastName: ""
         )
 
-        print("🟢 helloWORLD AUTH_SIGNUP SUCCESS - email: \(email), userId: \(userId)")
+        print("🟢 DEBUG AUTH_SIGNUP SUCCESS - email: \(email), userId: \(userId)")
         return userId
     }
 
     /// Sign in with email and password
     func signIn(email: String, password: String) async throws -> UUID {
-        print("🔵 helloWORLD AUTH_SIGNIN START - email: \(email)")
+        print("🔵 DEBUG AUTH_SIGNIN START - email: \(email)")
 
         guard let client = client, !useFallbackMode else {
-            print("🔴 helloWORLD AUTH_SIGNIN FAILED - Supabase not configured")
+            print("🔴 DEBUG AUTH_SIGNIN FAILED - Supabase not configured")
             throw SupabaseError.networkError("Supabase not configured")
         }
 
-        print("🔵 helloWORLD AUTH_SIGNIN - Calling Supabase auth.signIn...")
+        print("🔵 DEBUG AUTH_SIGNIN - Calling Supabase auth.signIn...")
         let session = try await client.auth.signIn(
             email: email,
             password: password
@@ -75,7 +75,7 @@ extension SupabaseManager {
             lastName: ""
         )
 
-        print("🟢 helloWORLD AUTH_SIGNIN SUCCESS - email: \(email), userId: \(session.user.id)")
+        print("🟢 DEBUG AUTH_SIGNIN SUCCESS - email: \(email), userId: \(session.user.id)")
         return session.user.id
     }
 
@@ -128,14 +128,14 @@ extension SupabaseManager {
 
     /// Fetch user profile from users table
     func fetchUserProfile(userId: UUID) async throws -> SavedUserProfile? {
-        print("🔵 helloWORLD FETCH_PROFILE START - userId: \(userId)")
+        print("🔵 DEBUG FETCH_PROFILE START - userId: \(userId)")
 
         guard let client = client, !useFallbackMode else {
-            print("🔴 helloWORLD FETCH_PROFILE SKIPPED - fallback mode")
+            print("🔴 DEBUG FETCH_PROFILE SKIPPED - fallback mode")
             return nil
         }
 
-        print("🔵 helloWORLD FETCH_PROFILE - Querying users table...")
+        print("🔵 DEBUG FETCH_PROFILE - Querying users table...")
         let response: [ClubUserResponse] = try await client.database
             .from("club_users")
             .select()
@@ -143,14 +143,14 @@ extension SupabaseManager {
             .execute()
             .value
 
-        print("🔵 helloWORLD FETCH_PROFILE - Got \(response.count) results")
+        print("🔵 DEBUG FETCH_PROFILE - Got \(response.count) results")
 
         guard let userData = response.first else {
-            print("🔴 helloWORLD FETCH_PROFILE - No user found for userId: \(userId)")
+            print("🔴 DEBUG FETCH_PROFILE - No user found for userId: \(userId)")
             return nil
         }
 
-        print("🟢 helloWORLD FETCH_PROFILE SUCCESS - Found user: \(userData.email), username: \(userData.username)")
+        print("🟢 DEBUG FETCH_PROFILE SUCCESS - Found user: \(userData.email), username: \(userData.username)")
         return SavedUserProfile(
             id: userData.id,
             email: userData.email,

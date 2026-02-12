@@ -21,16 +21,16 @@ struct ClubRalleyApp: App {
     @State private var hasCompletedOnboarding = false
 
     init() {
-        print("🔵🔵🔵 helloWORLD APP_INIT - THIS SHOULD APPEAR IN CONSOLE 🔵🔵🔵")
+        print("🔵🔵🔵 DEBUG APP_INIT - THIS SHOULD APPEAR IN CONSOLE 🔵🔵🔵")
         // Read onboarding state from UserDefaults
         let completed = UserDefaults.standard.bool(forKey: "hasCompletedClubRalleyOnboarding")
         _hasCompletedOnboarding = State(initialValue: completed)
         print("🚀 App init - hasCompletedOnboarding: \(completed)")
 
         // Force initialize SupabaseManager to see debug prints
-        print("🔵🔵🔵 helloWORLD - About to access SupabaseManager.shared 🔵🔵🔵")
+        print("🔵🔵🔵 DEBUG - About to access SupabaseManager.shared 🔵🔵🔵")
         let _ = SupabaseManager.shared
-        print("🔵🔵🔵 helloWORLD - SupabaseManager.shared accessed 🔵🔵🔵")
+        print("🔵🔵🔵 DEBUG - SupabaseManager.shared accessed 🔵🔵🔵")
     }
 
     // SupabaseManager for session management

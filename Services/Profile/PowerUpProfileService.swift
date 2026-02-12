@@ -19,27 +19,27 @@ class PowerUpProfileService {
 
     /// Load existing profile data from users JSONB columns
     func loadExistingProfileData() async throws -> PowerUpProfileData {
-        print("🔵 helloWORLD POWERUP loadExistingProfileData START")
-        print("🔵 helloWORLD POWERUP - isAuthenticated: \(supabase.isAuthenticated)")
-        print("🔵 helloWORLD POWERUP - currentUser: \(supabase.currentUser?.id.uuidString ?? "nil")")
+        print("🔵 DEBUG POWERUP loadExistingProfileData START")
+        print("🔵 DEBUG POWERUP - isAuthenticated: \(supabase.isAuthenticated)")
+        print("🔵 DEBUG POWERUP - currentUser: \(supabase.currentUser?.id.uuidString ?? "nil")")
 
         guard supabase.isAuthenticated, let userId = supabase.currentUser?.id else {
-            print("🔴 helloWORLD POWERUP loadExistingProfileData - NOT AUTHENTICATED")
+            print("🔴 DEBUG POWERUP loadExistingProfileData - NOT AUTHENTICATED")
             throw PowerUpProfileError.notAuthenticated
         }
 
-        print("🔵 helloWORLD POWERUP - Loading for userId: \(userId)")
+        print("🔵 DEBUG POWERUP - Loading for userId: \(userId)")
 
         var data = PowerUpProfileData()
 
         // Load user profile with JSONB columns
         do {
-            print("🔵 helloWORLD POWERUP - Calling loadUserProfile...")
+            print("🔵 DEBUG POWERUP - Calling loadUserProfile...")
             if let profile = try await loadUserProfile(userId: userId) {
-                print("🟢 helloWORLD POWERUP - Loaded profile successfully")
-                print("🔵 helloWORLD POWERUP - bio: \(profile.bio ?? "nil")")
-                print("🔵 helloWORLD POWERUP - instagram: \(profile.instagram_handle ?? "nil")")
-                print("🔵 helloWORLD POWERUP - sports count: \(profile.sports?.count ?? 0)")
+                print("🟢 DEBUG POWERUP - Loaded profile successfully")
+                print("🔵 DEBUG POWERUP - bio: \(profile.bio ?? "nil")")
+                print("🔵 DEBUG POWERUP - instagram: \(profile.instagram_handle ?? "nil")")
+                print("🔵 DEBUG POWERUP - sports count: \(profile.sports?.count ?? 0)")
 
                 data.instagramHandle = profile.instagram_handle ?? ""
                 data.bio = profile.bio ?? ""
@@ -47,13 +47,13 @@ class PowerUpProfileService {
 
                 // Load sports from JSONB
                 data.sportsWithSkills = parseSportsFromJson(profile.sports)
-                print("🔵 helloWORLD POWERUP - Parsed \(data.sportsWithSkills.count) sports")
+                print("🔵 DEBUG POWERUP - Parsed \(data.sportsWithSkills.count) sports")
 
                 // Load availability from JSONB
                 let avail = parseAvailabilityFromJson(profile.availability)
                 data.selectedDays = avail.days
                 data.timePreference = avail.timePreference
-                print("🔵 helloWORLD POWERUP - Parsed \(data.selectedDays.count) available days")
+                print("🔵 DEBUG POWERUP - Parsed \(data.selectedDays.count) available days")
 
                 // Load preferences from JSONB
                 let prefs = parsePreferencesFromJson(profile.preferences)
@@ -63,15 +63,15 @@ class PowerUpProfileService {
                 data.workoutClasses = prefs.workoutClasses
                 data.hometown = prefs.hometown
                 data.favoriteProTeam = prefs.favoriteTeam
-                print("🔵 helloWORLD POWERUP - Parsed preferences: maxDistance=\(prefs.maxDistance)")
+                print("🔵 DEBUG POWERUP - Parsed preferences: maxDistance=\(prefs.maxDistance)")
             } else {
-                print("🔴 helloWORLD POWERUP - loadUserProfile returned nil")
+                print("🔴 DEBUG POWERUP - loadUserProfile returned nil")
             }
         } catch {
-            print("🔴 helloWORLD POWERUP loadUserProfile FAILED: \(error)")
+            print("🔴 DEBUG POWERUP loadUserProfile FAILED: \(error)")
         }
 
-        print("🟢 helloWORLD POWERUP loadExistingProfileData END")
+        print("🟢 DEBUG POWERUP loadExistingProfileData END")
         return data
     }
 
@@ -79,20 +79,20 @@ class PowerUpProfileService {
 
     /// Save all Power Up Profile data to users JSONB columns
     func saveProfileData(_ data: PowerUpProfileData) async throws {
-        print("🔵 helloWORLD POWERUP saveProfileData START")
-        print("🔵 helloWORLD POWERUP - isAuthenticated: \(supabase.isAuthenticated)")
-        print("🔵 helloWORLD POWERUP - currentUser: \(supabase.currentUser?.id.uuidString ?? "nil")")
+        print("🔵 DEBUG POWERUP saveProfileData START")
+        print("🔵 DEBUG POWERUP - isAuthenticated: \(supabase.isAuthenticated)")
+        print("🔵 DEBUG POWERUP - currentUser: \(supabase.currentUser?.id.uuidString ?? "nil")")
 
         guard supabase.isAuthenticated, let userId = supabase.currentUser?.id else {
-            print("🔴 helloWORLD POWERUP saveProfileData - NOT AUTHENTICATED")
+            print("🔴 DEBUG POWERUP saveProfileData - NOT AUTHENTICATED")
             throw PowerUpProfileError.notAuthenticated
         }
 
-        print("🔵 helloWORLD POWERUP - Saving for userId: \(userId)")
-        print("🔵 helloWORLD POWERUP - bio: \(data.bio.prefix(30))...")
-        print("🔵 helloWORLD POWERUP - instagram: \(data.instagramHandle)")
-        print("🔵 helloWORLD POWERUP - sports count: \(data.sportsWithSkills.count)")
-        print("🔵 helloWORLD POWERUP - selected days: \(data.effectiveSelectedDays)")
+        print("🔵 DEBUG POWERUP - Saving for userId: \(userId)")
+        print("🔵 DEBUG POWERUP - bio: \(data.bio.prefix(30))...")
+        print("🔵 DEBUG POWERUP - instagram: \(data.instagramHandle)")
+        print("🔵 DEBUG POWERUP - sports count: \(data.sportsWithSkills.count)")
+        print("🔵 DEBUG POWERUP - selected days: \(data.effectiveSelectedDays)")
 
         // Build sports array
         let sportsArray = data.sportsWithSkills.map { sport in
@@ -101,7 +101,7 @@ class PowerUpProfileService {
                 skill: sport.skillLevel.rawValue
             )
         }
-        print("🔵 helloWORLD POWERUP - Built \(sportsArray.count) sports entries")
+        print("🔵 DEBUG POWERUP - Built \(sportsArray.count) sports entries")
 
         // Build availability array
         let availArray = data.effectiveSelectedDays.map { day in
@@ -110,7 +110,7 @@ class PowerUpProfileService {
                 time: data.timePreference.rawValue
             )
         }
-        print("🔵 helloWORLD POWERUP - Built \(availArray.count) availability entries")
+        print("🔵 DEBUG POWERUP - Built \(availArray.count) availability entries")
 
         // Build preferences
         let prefs = PreferencesDataUpdate(
@@ -121,7 +121,7 @@ class PowerUpProfileService {
             hometown: data.hometown,
             favorite_team: data.favoriteProTeam
         )
-        print("🔵 helloWORLD POWERUP - Built preferences: maxDistance=\(prefs.max_distance)")
+        print("🔵 DEBUG POWERUP - Built preferences: maxDistance=\(prefs.max_distance)")
 
         // Update users with all JSONB data
         let update = ClubUserProfileUpdate(
@@ -133,12 +133,12 @@ class PowerUpProfileService {
             preferences: prefs
         )
 
-        print("🔵 helloWORLD POWERUP - Calling supabase.update...")
+        print("🔵 DEBUG POWERUP - Calling supabase.update...")
         do {
             try await supabase.update(update, in: "club_users", where: "id = '\(userId)'")
-            print("🟢 helloWORLD POWERUP saveProfileData SUCCESS")
+            print("🟢 DEBUG POWERUP saveProfileData SUCCESS")
         } catch {
-            print("🔴 helloWORLD POWERUP saveProfileData FAILED: \(error)")
+            print("🔴 DEBUG POWERUP saveProfileData FAILED: \(error)")
             throw error
         }
     }
