@@ -562,23 +562,23 @@ struct PostWithLikes: Codable {
 }
 
 /// Update struct for post likes
-struct PostLikesUpdate: Encodable {
+struct PostLikesUpdate: Codable {
     let likes: [String]
     let likes_count: Int
 }
 
 /// Update struct for post comments count
-struct PostCommentsCountUpdate: Encodable {
+struct PostCommentsCountUpdate: Codable {
     let comments_count: Int
 }
 
 /// Update struct for post shares count
-struct PostSharesUpdate: Encodable {
+struct PostSharesUpdate: Codable {
     let shares_count: Int
 }
 
 /// Insert struct for creating a repost
-struct DatabaseRepostInsert: Encodable {
+struct DatabaseRepostInsert: Codable {
     let user_id: UUID
     let content: String
     let post_type: String

@@ -346,7 +346,7 @@
 		F6A7B8C9D0E1F2A3B4C5D6E7 /* InAppNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A7B8C9D0E1F2A3 /* Services/InAppNotificationService.swift */; };
 		A7B8C9D0E1F2A3B4C5D6E7F8 /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F6A7B8C9D0E1F2A3B4 /* Models/Notification.swift */; };
 		B8C9D0E1F2A3B4C5D6E7F8A9 /* InputValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C9D0E1F2A3B4C5 /* Core/Utilities/InputValidation.swift */; };
-		C9D0E1F2A3B4C5D6E7F8A9B0 /* DatabaseComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E1F2A3B4C5D6E7F8A9B0C1 /* Models/Database/DatabaseComment.swift */; };
+		C9D0E1F2A3B4C5D6E7F8A9B0 /* DatabaseComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E1F2A3B4C5D6E7F8A9B0C1 /* DatabaseComment.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -412,7 +412,7 @@
 		B2C3D4E5F6A7B8C9D0E1F2A3 /* Services/InAppNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/InAppNotificationService.swift; sourceTree = "<group>"; };
 		C3D4E5F6A7B8C9D0E1F2A3B4 /* Models/Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/Notification.swift; sourceTree = "<group>"; };
 		D4E5F6A7B8C9D0E1F2A3B4C5 /* Core/Utilities/InputValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Utilities/InputValidation.swift; sourceTree = "<group>"; };
-		D0E1F2A3B4C5D6E7F8A9B0C1 /* Models/Database/DatabaseComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/Database/DatabaseComment.swift; sourceTree = "<group>"; };
+		D0E1F2A3B4C5D6E7F8A9B0C1 /* DatabaseComment.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DatabaseComment.swift; path = Database/DatabaseComment.swift; sourceTree = "<group>"; };
 		5A20377013CB7D9E42AE373F /* ClubRalleyTheme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ClubRalleyTheme.swift; path = Design/ClubRalleyTheme.swift; sourceTree = "<group>"; };
 		5B8014F3C10826B206A76223 /* DatabasePost.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DatabasePost.swift; path = Database/DatabasePost.swift; sourceTree = "<group>"; };
 		5BAB5E7F14E7485FB417CDEC /* Models/Chat/ChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/Chat/ChatModels.swift; sourceTree = "<group>"; };
@@ -755,6 +755,7 @@
 		0605B4FA089A9B6F45A93BAA /* Database */ = {
 			isa = PBXGroup;
 			children = (
+				D0E1F2A3B4C5D6E7F8A9B0C1 /* DatabaseComment.swift */,
 				5B8014F3C10826B206A76223 /* DatabasePost.swift */,
 				37A708A2DA0C404601446CAC /* DatabaseRalley.swift */,
 				B3C7CFC3F1CBD6F8DE156BF8 /* DatabaseUser.swift */,
@@ -1835,7 +1836,6 @@
 				B2C3D4E5F6A7B8C9D0E1F2A3 /* Services/InAppNotificationService.swift */,
 				C3D4E5F6A7B8C9D0E1F2A3B4 /* Models/Notification.swift */,
 				D4E5F6A7B8C9D0E1F2A3B4C5 /* Core/Utilities/InputValidation.swift */,
-				D0E1F2A3B4C5D6E7F8A9B0C1 /* Models/Database/DatabaseComment.swift */,
 				6451C6E8AE3349AB98BD814D /* ViewModels/Post/PostEngagementManager.swift */,
 				6A10072451F7417FA9875AAB /* ViewModels/Ralley/RalleyParticipationManager.swift */,
 				2AE3893D70FD4875A05BDC10 /* ViewModels/Ralley/RalleyCompletionManager.swift */,
