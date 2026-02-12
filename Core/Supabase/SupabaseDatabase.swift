@@ -15,6 +15,7 @@ extension SupabaseManager {
     /// Generic query method for database operations
     func query(_ table: String) -> SupabaseQueryBuilder {
         guard let client = client, !useFallbackMode else {
+            print("⚠️ SupabaseManager.query: Creating fallback query builder for \(table) (client=\(client != nil), useFallbackMode=\(useFallbackMode))")
             return SupabaseQueryBuilder(fallbackMode: true)
         }
 

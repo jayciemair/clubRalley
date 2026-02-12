@@ -32,13 +32,20 @@ struct SupabaseConfig {
      */
     
     // MARK: - Validation
-    
+
     /// Check if Supabase is properly configured
     static var isConfigured: Bool {
-        let configured = !anonKey.contains("YOUR_SUPABASE_ANON_KEY")
-        print("🔵 DEBUG SUPABASE_CONFIG CHECK - projectURL: \(projectURL)")
-        print("🔵 DEBUG SUPABASE_CONFIG CHECK - anonKey: \(anonKey.prefix(20))...")
-        print("🔵 DEBUG SUPABASE_CONFIG CHECK - isConfigured: \(configured)")
+        // Supabase anon keys are JWTs that start with "eyJ"
+        let hasValidURL = projectURL.contains("supabase.co")
+        let hasValidKey = anonKey.hasPrefix("eyJ") && anonKey.count > 100
+        let configured = hasValidURL && hasValidKey
+
+        if !configured {
+            print("⚠️ SupabaseConfig: Invalid configuration!")
+            print("   - URL valid: \(hasValidURL) (\(projectURL))")
+            print("   - Key valid: \(hasValidKey) (starts with 'eyJ': \(anonKey.hasPrefix("eyJ")), length: \(anonKey.count))")
+            print("   ➡️ Get your anon key from: Supabase Dashboard → Settings → API")
+        }
         return configured
     }
     

@@ -77,13 +77,16 @@ class SupabaseQueryBuilder {
     /// Execute query and return single result
     func single<T: Codable>() async throws -> T? {
         if fallbackMode {
+            print("⚠️ SupabaseQueryBuilder.single: Fallback mode - returning nil for \(table)")
             return nil
         }
 
         guard let client = client else {
+            print("❌ SupabaseQueryBuilder.single: No client available")
             throw SupabaseManager.SupabaseError.networkError("No client available")
         }
 
+        print("🔍 SupabaseQueryBuilder.single: Querying \(table)...")
         var query = client.database.from(table).select(selectColumns)
 
         for filter in filters where filter.op == "eq" {
@@ -91,19 +94,23 @@ class SupabaseQueryBuilder {
         }
 
         let result: T = try await query.single().execute().value
+        print("✅ SupabaseQueryBuilder.single: Got result from \(table)")
         return result
     }
 
     /// Execute query and return array of results
     func execute<T: Codable>() async throws -> [T] {
         if fallbackMode {
+            print("⚠️ SupabaseQueryBuilder.execute: Fallback mode - returning empty array for \(table)")
             return []
         }
 
         guard let client = client else {
+            print("❌ SupabaseQueryBuilder.execute: No client available")
             throw SupabaseManager.SupabaseError.networkError("No client available")
         }
 
+        print("🔍 SupabaseQueryBuilder.execute: Querying \(table) with select(\(selectColumns))...")
         var filterQuery = client.database.from(table).select(selectColumns)
 
         for filter in filters {
@@ -122,7 +129,13 @@ class SupabaseQueryBuilder {
             transformQuery = transformQuery.range(from: from, to: to)
         }
 
-        let results: [T] = try await transformQuery.execute().value
-        return results
+        do {
+            let results: [T] = try await transformQuery.execute().value
+            print("✅ SupabaseQueryBuilder.execute: Got \(results.count) results from \(table)")
+            return results
+        } catch {
+            print("❌ SupabaseQueryBuilder.execute: Query failed for \(table): \(error)")
+            throw error
+        }
     }
 }
