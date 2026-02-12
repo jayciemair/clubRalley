@@ -21,7 +21,6 @@ struct MainView: View {
     @StateObject private var authService = AuthenticationService.shared
     @ObservedObject private var dashboardViewModel = DashboardViewModel.shared
     @State private var showCheckyChat = false
-    @State private var showTextSimulator = false
     @State private var showRelapseEncouragement = false
     @AppStorage("selectedTab") private var selectedTab: MainTab = .home
 
@@ -61,9 +60,6 @@ struct MainView: View {
             NavigationView {
                 MochiChatView()
             }
-        }
-        .fullScreenCover(isPresented: $showTextSimulator) {
-            TextSimulatorView()
         }
         .fullScreenCover(isPresented: $showRelapseEncouragement) {
             RelapseEncouragementView(isPresented: $showRelapseEncouragement)

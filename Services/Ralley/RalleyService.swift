@@ -24,6 +24,9 @@ class RalleyService: ObservableObject {
     /// Supabase client for database operations
     private let supabase = SupabaseManager.shared
 
+    /// Friendship service for block filtering
+    private let friendshipService = FriendshipService()
+
     // MARK: - Published Properties for UI Feedback
 
     /// Loading state for UI spinners
@@ -31,6 +34,14 @@ class RalleyService: ObservableObject {
 
     /// Last operation error for user feedback
     @Published var lastError: SupabaseManager.SupabaseError?
+
+    // MARK: - Cached Block List
+
+    /// Cached set of blocked user IDs
+    private var blockedUserIds: Set<UUID> = []
+
+    /// Last time blocked users were refreshed
+    private var blockedUsersLastRefresh: Date?
 
     // MARK: - Ralley Creation
 
@@ -40,20 +51,18 @@ class RalleyService: ObservableObject {
      * @returns: Created ralley with database ID and timestamps
      */
     func createRalley(_ ralley: ClubRalley) async throws -> ClubRalley {
-        print("🔵 helloWORLD RALLEY_CREATE START - title: \(ralley.title)")
-        print("🔵 helloWORLD RALLEY_CREATE - isAuthenticated: \(supabase.isAuthenticated)")
+        // Get user ID from SupabaseManager or fall back to SavedUserProfile
+        var hostUserId: UUID?
 
-        guard supabase.isAuthenticated else {
-            print("🔴 helloWORLD RALLEY_CREATE FAILED - not authenticated")
-            throw SupabaseManager.SupabaseError.notAuthenticated
+        if let currentUser = supabase.currentUser {
+            hostUserId = currentUser.id
+        } else if let savedProfile = SavedUserProfile.loadFromStorage() {
+            hostUserId = savedProfile.id
         }
 
-        guard let currentUser = supabase.currentUser else {
-            print("🔴 helloWORLD RALLEY_CREATE FAILED - no current user")
+        guard let userId = hostUserId else {
             throw SupabaseManager.SupabaseError.userNotFound
         }
-
-        print("🔵 helloWORLD RALLEY_CREATE - hostUserId: \(currentUser.id)")
 
         isLoading = true
         lastError = nil
@@ -61,7 +70,7 @@ class RalleyService: ObservableObject {
         do {
             // Map ClubRalley to database ralley structure
             let dbRalley = DatabaseRalley(
-                host_user_id: currentUser.id,
+                host_user_id: userId,
                 title: ralley.title,
                 description: ralley.description,
                 location_name: ralley.location.name,
@@ -80,11 +89,8 @@ class RalleyService: ObservableObject {
                 join_type: ralley.joinType.rawValue
             )
 
-            print("🔵 helloWORLD RALLEY_CREATE - dbRalley created, calling insert...")
             // Insert into Supabase ralleys table
             try await supabase.insert(dbRalley, into: "ralleys")
-
-            print("🟢 helloWORLD RALLEY_CREATE SUCCESS")
 
             // Return the ralley with updated database info
             var updatedRalley = ralley
@@ -96,13 +102,13 @@ class RalleyService: ObservableObject {
         } catch let error as SupabaseManager.SupabaseError {
             isLoading = false
             lastError = error
-            print("RalleyService: Create failed with Supabase error: \(error)")
+            print("❌ RalleyService: Create failed: \(error)")
             throw error
         } catch {
             isLoading = false
             let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
             lastError = supabaseError
-            print("RalleyService: Create failed with network error: \(error)")
+            print("❌ RalleyService: Create failed: \(error)")
             throw supabaseError
         }
     }
@@ -111,6 +117,8 @@ class RalleyService: ObservableObject {
 
     /**
      * Load nearby ralleys from database for discovery feed
+     * Uses server-side location filtering when coordinates are provided
+     * Filters out ralleys hosted by blocked users
      * @param latitude: User's current latitude
      * @param longitude: User's current longitude
      * @param radius: Search radius in kilometers
@@ -123,42 +131,127 @@ class RalleyService: ObservableObject {
         radius: Double = 50.0,
         limit: Int = 20
     ) async throws -> [ClubRalley] {
-        print("🔵 helloWORLD RALLEY_LOAD_NEARBY START")
         isLoading = true
         lastError = nil
 
         do {
-            print("🔵 helloWORLD RALLEY_LOAD_NEARBY - querying ralleys table...")
-            let ralleys = try await supabase.query("ralleys")
-                .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
-                .execute() as [DatabaseRalleyWithUser]
+            // Refresh blocked users cache if needed (every 5 minutes)
+            await refreshBlockedUsersIfNeeded()
 
-            // Map database results to app models
-            let mappedRalleys = ralleys.compactMap { dbRalley in
-                mapDatabaseRalleyToApp(dbRalley)
+            // Try server-side location filtering first
+            let ralleys: [DatabaseRalleyWithUser]
+            do {
+                ralleys = try await loadNearbyRalleysWithRPC(
+                    latitude: latitude,
+                    longitude: longitude,
+                    radius: radius,
+                    limit: limit
+                )
+            } catch {
+                // Fallback to client-side filtering if RPC fails
+                print("⚠️ RalleyService: RPC failed, falling back to client-side filtering: \(error)")
+                ralleys = try await supabase.query("ralleys")
+                    .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
+                    .eq("status", value: "active")
+                    .order("date_time", ascending: true)
+                    .execute()
             }
 
+            // Map database results to app models and filter blocked users
+            let mappedRalleys = ralleys
+                .filter { !blockedUserIds.contains($0.host_id) }
+                .compactMap { dbRalley in
+                    mapDatabaseRalleyToApp(dbRalley)
+                }
+
             isLoading = false
-            print("🟢 helloWORLD RALLEY_LOAD_NEARBY SUCCESS - loaded \(mappedRalleys.count) ralleys")
+            print("✅ RalleyService: Loaded \(mappedRalleys.count) ralleys (filtered \(ralleys.count - mappedRalleys.count) blocked)")
             return mappedRalleys
 
         } catch let error as SupabaseManager.SupabaseError {
             isLoading = false
             lastError = error
-            print("🔴 helloWORLD RALLEY_LOAD_NEARBY FAILED: \(error)")
-
-            // Return empty array - let UI show empty state
+            print("❌ RalleyService: Load nearby ralleys failed: \(error)")
             return []
 
         } catch {
             isLoading = false
             let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
             lastError = supabaseError
-            print("🔴 helloWORLD RALLEY_LOAD_NEARBY FAILED with network error: \(error)")
-
-            // Return empty array - let UI show empty state
+            print("❌ RalleyService: Load nearby ralleys failed with network error: \(error)")
             return []
         }
+    }
+
+    /// Load nearby ralleys using server-side RPC function
+    private func loadNearbyRalleysWithRPC(
+        latitude: Double,
+        longitude: Double,
+        radius: Double,
+        limit: Int
+    ) async throws -> [DatabaseRalleyWithUser] {
+        let params = NearbyRalleysParams(
+            user_lat: Decimal(latitude),
+            user_lon: Decimal(longitude),
+            radius_km: Int(radius),
+            max_results: limit
+        )
+
+        // Call RPC to get nearby ralleys with distance
+        let nearbyRalleys: [DatabaseNearbyRalley] = try await supabase.rpc("get_nearby_ralleys", params: params)
+
+        // We need to fetch full ralley data with user info for each result
+        // The RPC returns basic ralley data, so we fetch full details
+        var fullRalleys: [DatabaseRalleyWithUser] = []
+
+        // If we have ralley IDs, fetch them with user data
+        let ralleyIds = nearbyRalleys.map { $0.id }
+        if !ralleyIds.isEmpty {
+            // Fetch ralleys with user info
+            for ralleyId in ralleyIds {
+                if let ralley: DatabaseRalleyWithUser = try? await supabase.query("ralleys")
+                    .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
+                    .eq("id", value: ralleyId)
+                    .single() {
+                    fullRalleys.append(ralley)
+                }
+            }
+        }
+
+        return fullRalleys
+    }
+
+    /// Refresh blocked users cache if stale (older than 5 minutes)
+    private func refreshBlockedUsersIfNeeded() async {
+        let refreshInterval: TimeInterval = 300 // 5 minutes
+
+        if let lastRefresh = blockedUsersLastRefresh,
+           Date().timeIntervalSince(lastRefresh) < refreshInterval {
+            return // Cache is still fresh
+        }
+
+        do {
+            blockedUserIds = try await friendshipService.getBlockedUserIds()
+            blockedUsersLastRefresh = Date()
+        } catch {
+            print("❌ RalleyService: Failed to refresh blocked users: \(error)")
+        }
+    }
+
+    /// Force refresh of blocked users cache
+    func refreshBlockedUsers() async {
+        blockedUsersLastRefresh = nil
+        await refreshBlockedUsersIfNeeded()
+    }
+
+    /**
+     * Load more ralleys for infinite scroll
+     * @param currentCount: Current number of ralleys loaded
+     * @param limit: Number of additional ralleys to load
+     * @returns: Array of additional ralleys
+     */
+    func loadMoreRalleys(currentCount: Int, limit: Int = 20) async throws -> [ClubRalley] {
+        return try await loadNearbyRalleys(limit: limit)
     }
 
     /**
@@ -173,7 +266,7 @@ class RalleyService: ObservableObject {
         do {
             let hostedRalleys = try await supabase.query("ralleys")
                 .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
-                .eq("host_user_id", value: userId)
+                .eq("host_id", value: userId)
                 .execute() as [DatabaseRalleyWithUser]
 
             let mappedRalleys = hostedRalleys.compactMap { dbRalley in
@@ -344,7 +437,7 @@ class RalleyService: ObservableObject {
         do {
             // Verify ownership before deleting
             let ralleys = try await supabase.query("ralleys")
-                .select("host_user_id")
+                .select("host_id")
                 .eq("id", value: ralleyId)
                 .execute() as [DatabaseRalleyHostCheck]
 
@@ -352,7 +445,7 @@ class RalleyService: ObservableObject {
                 throw SupabaseManager.SupabaseError.invalidData("Ralley not found")
             }
 
-            guard ralley.host_user_id == currentUser.id else {
+            guard ralley.host_id == currentUser.id else {
                 throw SupabaseManager.SupabaseError.invalidData("Only the captain can delete this ralley")
             }
 
@@ -401,11 +494,11 @@ class RalleyService: ObservableObject {
         do {
             // Verify current user is captain
             let ralleys = try await supabase.query("ralleys")
-                .select("host_user_id")
+                .select("host_id")
                 .eq("id", value: ralleyId)
                 .execute() as [DatabaseRalleyHostCheck]
 
-            guard let ralley = ralleys.first, ralley.host_user_id == currentUser.id else {
+            guard let ralley = ralleys.first, ralley.host_id == currentUser.id else {
                 throw SupabaseManager.SupabaseError.invalidData("Only the captain can remove participants")
             }
 
@@ -476,7 +569,7 @@ class RalleyService: ObservableObject {
         )
 
         // Determine if current user is captain
-        let isCaptain = supabase.currentUser?.id == dbRalley.host_user_id
+        let isCaptain = supabase.currentUser?.id == dbRalley.host_id
 
         // Parse visibility and join type from database
         let visibility = RalleyVisibility(rawValue: dbRalley.visibility ?? "anyone") ?? .anyone
@@ -514,4 +607,39 @@ class RalleyService: ObservableObject {
         default: return "Sports"
         }
     }
+}
+
+// MARK: - RPC Helper Structs
+
+/// Parameters for get_nearby_ralleys RPC function
+struct NearbyRalleysParams: Encodable {
+    let user_lat: Decimal?
+    let user_lon: Decimal?
+    let radius_km: Int
+    let max_results: Int
+}
+
+/// Result from get_nearby_ralleys RPC function
+struct DatabaseNearbyRalley: Codable {
+    let id: UUID
+    let host_id: UUID
+    let title: String
+    let description: String?
+    let sport: String?
+    let skill_level: String?
+    let location_name: String?
+    let location_address: String?
+    let city: String?
+    let state: String?
+    let latitude: Decimal?
+    let longitude: Decimal?
+    let date_time: Date
+    let duration_minutes: Int?
+    let max_participants: Int?
+    let current_participants: Int?
+    let is_public: Bool?
+    let status: String?
+    let created_at: Date?
+    let updated_at: Date?
+    let distance_km: Decimal?
 }

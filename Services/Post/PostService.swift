@@ -24,6 +24,9 @@ class PostService: ObservableObject {
     /// Supabase client for database operations
     private let supabase = SupabaseManager.shared
 
+    /// Friendship service for block filtering
+    private let friendshipService = FriendshipService()
+
     // MARK: - Published Properties for UI Feedback
 
     /// Loading state for UI spinners
@@ -31,6 +34,14 @@ class PostService: ObservableObject {
 
     /// Last operation error for user feedback
     @Published var lastError: SupabaseManager.SupabaseError?
+
+    // MARK: - Cached Block List
+
+    /// Cached set of blocked user IDs
+    private var blockedUserIds: Set<UUID> = []
+
+    /// Last time blocked users were refreshed
+    private var blockedUsersLastRefresh: Date?
 
     // MARK: - Post Creation
 
@@ -41,20 +52,13 @@ class PostService: ObservableObject {
      * @returns: Created post with database ID and timestamps
      */
     func createPost(_ post: ClubRalleyPost, visibility: PostVisibility = .everyone) async throws -> ClubRalleyPost {
-        print("🔵 helloWORLD POST_CREATE START")
-        print("🔵 helloWORLD POST_CREATE - isAuthenticated: \(supabase.isAuthenticated)")
-
         guard supabase.isAuthenticated else {
-            print("🔴 helloWORLD POST_CREATE FAILED - not authenticated")
             throw SupabaseManager.SupabaseError.notAuthenticated
         }
 
         guard let currentUser = supabase.currentUser else {
-            print("🔴 helloWORLD POST_CREATE FAILED - no current user")
             throw SupabaseManager.SupabaseError.userNotFound
         }
-
-        print("🔵 helloWORLD POST_CREATE - userId: \(currentUser.id)")
 
         isLoading = true
         lastError = nil
@@ -74,11 +78,8 @@ class PostService: ObservableObject {
                 shares_count: 0
             )
 
-            print("🔵 helloWORLD POST_CREATE - dbPost created, calling insert...")
             // Insert into Supabase posts table
             try await supabase.insert(dbPost, into: "posts")
-
-            print("🟢 helloWORLD POST_CREATE SUCCESS")
 
             // Return the post with updated database info
             var updatedPost = post
@@ -105,47 +106,82 @@ class PostService: ObservableObject {
 
     /**
      * Load posts for home feed from database
+     * Filters out posts from blocked users
      * @param limit: Maximum number of posts to retrieve
      * @param offset: Pagination offset
      * @returns: Array of posts with user information populated
      */
     func loadHomeFeedPosts(limit: Int = 20, offset: Int = 0) async throws -> [ClubRalleyPost] {
-        print("🔵 helloWORLD POST_LOAD_FEED START")
         isLoading = true
         lastError = nil
 
         do {
-            print("🔵 helloWORLD POST_LOAD_FEED - querying posts table...")
+            // Refresh blocked users cache if needed (every 5 minutes)
+            await refreshBlockedUsersIfNeeded()
+
             let posts = try await supabase.query("posts")
                 .select("*, club_users(first_name, last_name, username, profile_photo_url)")
+                .order("created_at", ascending: false)
+                .range(from: offset, to: offset + limit - 1)
                 .execute() as [DatabasePostWithUser]
 
-            // Map database results to app models
-            let mappedPosts = posts.map { dbPost in
-                mapDatabasePostToApp(dbPost)
-            }
+            // Map database results to app models and filter blocked users
+            let mappedPosts = posts
+                .filter { !blockedUserIds.contains($0.user_id) }
+                .map { dbPost in
+                    mapDatabasePostToApp(dbPost)
+                }
 
             isLoading = false
-            print("🟢 helloWORLD POST_LOAD_FEED SUCCESS - loaded \(mappedPosts.count) posts")
+            print("✅ PostService: Loaded \(mappedPosts.count) posts (offset: \(offset), filtered \(posts.count - mappedPosts.count) blocked)")
             return mappedPosts
 
         } catch let error as SupabaseManager.SupabaseError {
             isLoading = false
             lastError = error
-            print("🔴 helloWORLD POST_LOAD_FEED FAILED: \(error)")
-
-            // Return empty array - let UI show empty state
+            print("❌ PostService: Load feed failed: \(error)")
             return []
 
         } catch {
             isLoading = false
             let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
             lastError = supabaseError
-            print("🔴 helloWORLD POST_LOAD_FEED FAILED with network error: \(error)")
-
-            // Return empty array - let UI show empty state
+            print("❌ PostService: Load feed failed with network error: \(error)")
             return []
         }
+    }
+
+    /**
+     * Load more posts for infinite scroll
+     * @param currentCount: Current number of posts loaded
+     * @param limit: Number of additional posts to load
+     * @returns: Array of additional posts
+     */
+    func loadMorePosts(currentCount: Int, limit: Int = 20) async throws -> [ClubRalleyPost] {
+        return try await loadHomeFeedPosts(limit: limit, offset: currentCount)
+    }
+
+    /// Refresh blocked users cache if stale (older than 5 minutes)
+    private func refreshBlockedUsersIfNeeded() async {
+        let refreshInterval: TimeInterval = 300 // 5 minutes
+
+        if let lastRefresh = blockedUsersLastRefresh,
+           Date().timeIntervalSince(lastRefresh) < refreshInterval {
+            return // Cache is still fresh
+        }
+
+        do {
+            blockedUserIds = try await friendshipService.getBlockedUserIds()
+            blockedUsersLastRefresh = Date()
+        } catch {
+            print("❌ PostService: Failed to refresh blocked users: \(error)")
+        }
+    }
+
+    /// Force refresh of blocked users cache
+    func refreshBlockedUsers() async {
+        blockedUsersLastRefresh = nil
+        await refreshBlockedUsersIfNeeded()
     }
 
     /**
@@ -207,22 +243,32 @@ class PostService: ObservableObject {
 
     /**
      * Report a post for review
-     * Note: post_reports table not in lean schema - logs locally only
      * @param postId: Post ID to report
      * @param reason: Reason for reporting
      */
     func reportPost(_ postId: UUID, reason: String) async throws {
-        guard supabase.isAuthenticated else {
-            throw SupabaseManager.SupabaseError.notAuthenticated
+        let reportService = ReportService()
+
+        // Map string reason to ReportReason enum
+        let reportReason: ReportReason
+        switch reason.lowercased() {
+        case let r where r.contains("spam"):
+            reportReason = .spam
+        case let r where r.contains("harass"):
+            reportReason = .harassment
+        case let r where r.contains("hate"):
+            reportReason = .hateSpeech
+        case let r where r.contains("violen"):
+            reportReason = .violence
+        case let r where r.contains("inappropriate"):
+            reportReason = .inappropriate
+        case let r where r.contains("impersonat"):
+            reportReason = .impersonation
+        default:
+            reportReason = .other
         }
 
-        guard let currentUser = supabase.currentUser else {
-            throw SupabaseManager.SupabaseError.userNotFound
-        }
-
-        // Log the report (no post_reports table in lean schema)
-        print("📋 PostService: Post report logged - Reporter: \(currentUser.id), Post: \(postId), Reason: \(reason)")
-        // In production, this would be sent to a moderation queue or external service
+        try await reportService.reportPost(postId, reason: reportReason, additionalContext: reason)
     }
 
     // MARK: - Helper Methods

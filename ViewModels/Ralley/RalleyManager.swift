@@ -177,6 +177,10 @@ class RalleyManager: ObservableObject {
 
             // Add to local cache
             ralleys.insert(newRalley, at: 0)
+
+            // Mark as joined so it appears in upcoming ralleys
+            markRalleyAsJoined(newRalley.id)
+
             print("RalleyManager: Ralley created successfully")
 
         } catch {
@@ -185,6 +189,10 @@ class RalleyManager: ObservableObject {
 
             // Add to local cache anyway for immediate UI feedback
             ralleys.insert(newRalley, at: 0)
+
+            // Mark as joined so it appears in upcoming ralleys
+            markRalleyAsJoined(newRalley.id)
+
             print("RalleyManager: Ralley added locally (backend failed)")
         }
 

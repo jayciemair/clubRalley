@@ -233,19 +233,32 @@ class ImageUploadService: ObservableObject {
      * @returns: Public URL of uploaded file
      */
     private func uploadToStorage(data: Data, path: String, bucket: String) async throws -> String {
-        // In production, this would use Supabase Storage client
-        // For now, return a mock URL that works for development
+        let storage = SupabaseClientManager.shared.storage
 
-        // Simulate upload delay
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        do {
+            // Upload file to Supabase Storage
+            let _ = try await storage.from(bucket).upload(
+                path,
+                data: data,
+                options: FileOptions(
+                    cacheControl: "3600",
+                    contentType: "image/jpeg",
+                    upsert: true
+                )
+            )
 
-        // Generate mock URL
-        // In production: return actual Supabase Storage public URL
-        let mockUrl = "https://your-supabase-project.supabase.co/storage/v1/object/public/\(bucket)/\(path)"
+            // Get the public URL
+            let publicURL = try storage.from(bucket).getPublicURL(path: path)
 
-        print("ImageUploadService: Uploaded to \(bucket)/\(path)")
+            print("✅ ImageUploadService: Uploaded to \(bucket)/\(path)")
+            print("✅ ImageUploadService: Public URL: \(publicURL.absoluteString)")
 
-        return mockUrl
+            return publicURL.absoluteString
+
+        } catch {
+            print("❌ ImageUploadService: Upload failed: \(error)")
+            throw error
+        }
     }
 
     // MARK: - Delete Image
@@ -255,10 +268,27 @@ class ImageUploadService: ObservableObject {
      * @param url: Public URL of image to delete
      */
     func deleteImage(url: String) async throws {
-        // Extract path from URL and delete from storage
-        // In production, this would call Supabase Storage delete
+        let storage = SupabaseClientManager.shared.storage
 
-        print("ImageUploadService: Delete requested for \(url)")
+        // Extract bucket and path from URL
+        // URL format: https://xxx.supabase.co/storage/v1/object/public/{bucket}/{path}
+        guard let urlComponents = URLComponents(string: url),
+              let pathComponents = urlComponents.path.split(separator: "/").dropFirst(4).map(String.init) as? [String],
+              pathComponents.count >= 2 else {
+            print("❌ ImageUploadService: Invalid URL format for deletion: \(url)")
+            return
+        }
+
+        let bucket = pathComponents[0]
+        let path = pathComponents.dropFirst().joined(separator: "/")
+
+        do {
+            try await storage.from(bucket).remove(paths: [path])
+            print("✅ ImageUploadService: Deleted \(bucket)/\(path)")
+        } catch {
+            print("❌ ImageUploadService: Delete failed: \(error)")
+            throw error
+        }
     }
 }
 

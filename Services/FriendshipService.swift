@@ -14,6 +14,7 @@ class FriendshipService: ObservableObject {
     // MARK: - Dependencies
 
     private let supabase = SupabaseManager.shared
+    private let notificationService = InAppNotificationService.shared
 
     // MARK: - Published Properties
 
@@ -44,12 +45,16 @@ class FriendshipService: ObservableObject {
             )
 
             try await supabase.insert(friendship, into: "friendships")
-            print("Followed user: \(userId)")
+
+            // Create follow notification
+            await notificationService.createFollowNotification(followedUserId: userId)
+
+            print("✅ FriendshipService: Followed user: \(userId)")
             isLoading = false
         } catch {
             isLoading = false
             self.error = error
-            print("Failed to follow user: \(error)")
+            print("❌ FriendshipService: Failed to follow user: \(error)")
             throw error
         }
     }
@@ -71,14 +76,14 @@ class FriendshipService: ObservableObject {
         do {
             try await supabase.delete(
                 from: "friendships",
-                where: "user_id = '\(currentUser.id)' AND friend_id = '\(userId)'"
+                where: "requester_id = '\(currentUser.id)' AND addressee_id = '\(userId)'"
             )
-            print("Unfollowed user: \(userId)")
+            print("✅ FriendshipService: Unfollowed user: \(userId)")
             isLoading = false
         } catch {
             isLoading = false
             self.error = error
-            print("Failed to unfollow user: \(error)")
+            print("❌ FriendshipService: Failed to unfollow user: \(error)")
             throw error
         }
     }
@@ -96,15 +101,16 @@ class FriendshipService: ObservableObject {
         }
 
         do {
-            let result: DatabaseFriendship? = try await supabase.query("friendships")
+            let result: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
-                .eq("user_id", value: currentUser.id)
-                .eq("friend_id", value: userId)
-                .single()
+                .eq("requester_id", value: currentUser.id)
+                .eq("addressee_id", value: userId)
+                .eq("status", value: "accepted")
+                .execute()
 
-            return result != nil
+            return !result.isEmpty
         } catch {
-            print("Failed to check following status: \(error)")
+            print("❌ FriendshipService: Failed to check following status: \(error)")
             return false
         }
     }
@@ -116,12 +122,13 @@ class FriendshipService: ObservableObject {
         do {
             let followers: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
-                .eq("friend_id", value: userId)
+                .eq("addressee_id", value: userId)
+                .eq("status", value: "accepted")
                 .execute()
 
             return followers.count
         } catch {
-            print("Failed to get followers count: \(error)")
+            print("❌ FriendshipService: Failed to get followers count: \(error)")
             return 0
         }
     }
@@ -133,12 +140,13 @@ class FriendshipService: ObservableObject {
         do {
             let following: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
-                .eq("user_id", value: userId)
+                .eq("requester_id", value: userId)
+                .eq("status", value: "accepted")
                 .execute()
 
             return following.count
         } catch {
-            print("Failed to get following count: \(error)")
+            print("❌ FriendshipService: Failed to get following count: \(error)")
             return 0
         }
     }
@@ -155,8 +163,9 @@ class FriendshipService: ObservableObject {
             // Check if user1 follows user2
             let user1FollowsUser2: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
-                .eq("user_id", value: userId1)
-                .eq("friend_id", value: userId2)
+                .eq("requester_id", value: userId1)
+                .eq("addressee_id", value: userId2)
+                .eq("status", value: "accepted")
                 .execute()
 
             guard !user1FollowsUser2.isEmpty else { return false }
@@ -164,13 +173,14 @@ class FriendshipService: ObservableObject {
             // Check if user2 follows user1
             let user2FollowsUser1: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
-                .eq("user_id", value: userId2)
-                .eq("friend_id", value: userId1)
+                .eq("requester_id", value: userId2)
+                .eq("addressee_id", value: userId1)
+                .eq("status", value: "accepted")
                 .execute()
 
             return !user2FollowsUser1.isEmpty
         } catch {
-            print("Failed to check mutual friends: \(error)")
+            print("❌ FriendshipService: Failed to check mutual friends: \(error)")
             return false
         }
     }
@@ -184,12 +194,13 @@ class FriendshipService: ObservableObject {
         do {
             let following: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
-                .eq("user_id", value: currentUser.id)
+                .eq("requester_id", value: currentUser.id)
+                .eq("status", value: "accepted")
                 .execute()
 
-            return Set(following.map { $0.friend_id })
+            return Set(following.map { $0.addressee_id })
         } catch {
-            print("Failed to get following IDs: \(error)")
+            print("❌ FriendshipService: Failed to get following IDs: \(error)")
             return []
         }
     }
@@ -203,12 +214,44 @@ class FriendshipService: ObservableObject {
         do {
             let followers: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
-                .eq("friend_id", value: currentUser.id)
+                .eq("addressee_id", value: currentUser.id)
+                .eq("status", value: "accepted")
                 .execute()
 
-            return Set(followers.map { $0.user_id })
+            return Set(followers.map { $0.requester_id })
         } catch {
-            print("Failed to get follower IDs: \(error)")
+            print("❌ FriendshipService: Failed to get follower IDs: \(error)")
+            return []
+        }
+    }
+
+    /// Get list of user IDs that current user has blocked
+    /// - Returns: Set of blocked user IDs
+    func getBlockedUserIds() async throws -> Set<UUID> {
+        guard supabase.isAuthenticated else { return [] }
+        guard let currentUser = supabase.currentUser else { return [] }
+
+        do {
+            // Get users that current user has blocked
+            let blockedByMe: [DatabaseFriendship] = try await supabase.query("friendships")
+                .select("*")
+                .eq("requester_id", value: currentUser.id)
+                .eq("status", value: "blocked")
+                .execute()
+
+            // Also get users who have blocked the current user
+            let blockedMe: [DatabaseFriendship] = try await supabase.query("friendships")
+                .select("*")
+                .eq("addressee_id", value: currentUser.id)
+                .eq("status", value: "blocked")
+                .execute()
+
+            var blockedIds = Set(blockedByMe.map { $0.addressee_id })
+            blockedIds.formUnion(blockedMe.map { $0.requester_id })
+
+            return blockedIds
+        } catch {
+            print("❌ FriendshipService: Failed to get blocked user IDs: \(error)")
             return []
         }
     }
@@ -228,10 +271,11 @@ class FriendshipService: ObservableObject {
     /// - Returns: Array of DatabaseUserProfile representing followers
     func loadFollowers(userId: UUID) async throws -> [DatabaseUserProfile] {
         do {
-            // Get all friendships where friend_id = userId (people following this user)
+            // Get all friendships where addressee_id = userId (people following this user)
             let friendships: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
-                .eq("friend_id", value: userId)
+                .eq("addressee_id", value: userId)
+                .eq("status", value: "accepted")
                 .execute()
 
             // Get user profiles for each follower
@@ -239,7 +283,7 @@ class FriendshipService: ObservableObject {
             for friendship in friendships {
                 let users: [DatabaseUserProfile] = try await supabase.query("club_users")
                     .select("*")
-                    .eq("id", value: friendship.user_id)
+                    .eq("id", value: friendship.requester_id)
                     .execute()
                 if let user = users.first {
                     followers.append(user)
@@ -259,10 +303,11 @@ class FriendshipService: ObservableObject {
     /// - Returns: Array of DatabaseUserProfile representing followed users
     func loadFollowing(userId: UUID) async throws -> [DatabaseUserProfile] {
         do {
-            // Get all friendships where user_id = userId (people this user follows)
+            // Get all friendships where requester_id = userId (people this user follows)
             let friendships: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
-                .eq("user_id", value: userId)
+                .eq("requester_id", value: userId)
+                .eq("status", value: "accepted")
                 .execute()
 
             // Get user profiles for each followed user
@@ -270,7 +315,7 @@ class FriendshipService: ObservableObject {
             for friendship in friendships {
                 let users: [DatabaseUserProfile] = try await supabase.query("club_users")
                     .select("*")
-                    .eq("id", value: friendship.friend_id)
+                    .eq("id", value: friendship.addressee_id)
                     .execute()
                 if let user = users.first {
                     following.append(user)
@@ -314,7 +359,7 @@ class FriendshipService: ObservableObject {
             // First, remove any existing friendship
             try? await supabase.delete(
                 from: "friendships",
-                where: "user_id = '\(currentUser.id)' AND friend_id = '\(userId)'"
+                where: "requester_id = '\(currentUser.id)' AND addressee_id = '\(userId)'"
             )
 
             // Insert blocked relationship
@@ -352,7 +397,7 @@ class FriendshipService: ObservableObject {
         do {
             try await supabase.delete(
                 from: "friendships",
-                where: "user_id = '\(currentUser.id)' AND friend_id = '\(userId)' AND status = 'blocked'"
+                where: "requester_id = '\(currentUser.id)' AND addressee_id = '\(userId)' AND status = 'blocked'"
             )
             print("✅ FriendshipService: Unblocked user: \(userId)")
             isLoading = false
@@ -373,14 +418,35 @@ class FriendshipService: ObservableObject {
         do {
             let result: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
-                .eq("user_id", value: currentUser.id)
-                .eq("friend_id", value: userId)
+                .eq("requester_id", value: currentUser.id)
+                .eq("addressee_id", value: userId)
                 .eq("status", value: "blocked")
                 .execute()
 
             return !result.isEmpty
         } catch {
-            print("FriendshipService: Check blocked status failed: \(error)")
+            print("❌ FriendshipService: Check blocked status failed: \(error)")
+            return false
+        }
+    }
+
+    /// Check if a user has blocked the current user
+    /// - Parameter userId: The ID of the user to check
+    /// - Returns: True if they blocked current user, false otherwise
+    func isBlockedBy(_ userId: UUID) async -> Bool {
+        guard let currentUser = supabase.currentUser else { return false }
+
+        do {
+            let result: [DatabaseFriendship] = try await supabase.query("friendships")
+                .select("*")
+                .eq("requester_id", value: userId)
+                .eq("addressee_id", value: currentUser.id)
+                .eq("status", value: "blocked")
+                .execute()
+
+            return !result.isEmpty
+        } catch {
+            print("❌ FriendshipService: Check is blocked by status failed: \(error)")
             return false
         }
     }
@@ -388,22 +454,32 @@ class FriendshipService: ObservableObject {
     // MARK: - Report Operations
 
     /// Report a user for inappropriate behavior
-    /// Note: user_reports table not in lean schema - logs locally only
     /// - Parameters:
     ///   - userId: The ID of the user to report
     ///   - reason: The reason for reporting
     func reportUser(_ userId: UUID, reason: String) async throws {
-        guard supabase.isAuthenticated else {
-            throw SupabaseManager.SupabaseError.notAuthenticated
+        let reportService = ReportService()
+
+        // Map string reason to ReportReason enum
+        let reportReason: ReportReason
+        switch reason.lowercased() {
+        case let r where r.contains("spam"):
+            reportReason = .spam
+        case let r where r.contains("harass"):
+            reportReason = .harassment
+        case let r where r.contains("hate"):
+            reportReason = .hateSpeech
+        case let r where r.contains("violen"):
+            reportReason = .violence
+        case let r where r.contains("inappropriate"):
+            reportReason = .inappropriate
+        case let r where r.contains("impersonat"):
+            reportReason = .impersonation
+        default:
+            reportReason = .other
         }
 
-        guard let currentUser = supabase.currentUser else {
-            throw SupabaseManager.SupabaseError.userNotFound
-        }
-
-        // Log the report (no user_reports table in lean schema)
-        print("📋 FriendshipService: User report logged - Reporter: \(currentUser.id), Reported: \(userId), Reason: \(reason)")
-        // In production, this would be sent to a moderation queue or external service
+        try await reportService.reportUser(userId, reason: reportReason, additionalContext: reason)
     }
 }
 

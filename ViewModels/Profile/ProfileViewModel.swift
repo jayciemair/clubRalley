@@ -128,8 +128,8 @@ class ProfileViewModel: ObservableObject {
             gender: .preferNotToSay,
             locationCity: saved.locationCity,
             locationState: saved.locationState,
-            bio: nil,
-            instagramHandle: nil,
+            bio: saved.bio,
+            instagramHandle: saved.instagramHandle,
             profilePhotoURL: saved.profilePhotoURL,
             isVerifiedAthlete: false,
             athleteInfo: nil,
@@ -150,7 +150,7 @@ class ProfileViewModel: ObservableObject {
         )
 
         let socialInfo = SocialInfo(
-            instagramHandle: nil,
+            instagramHandle: saved.instagramHandle,
             linkedinHandle: nil,
             twitterHandle: nil,
             isVerifiedAthlete: false,

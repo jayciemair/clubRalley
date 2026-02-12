@@ -33,11 +33,18 @@ struct ProfileTabView: View {
             .sheet(isPresented: $showingSettings) {
                 ProfileSettingsView()
             }
-            .sheet(isPresented: $showingEditProfile) {
+            .sheet(isPresented: $showingEditProfile, onDismiss: {
+                Task {
+                    await profileViewModel.loadCurrentUserProfile()
+                }
+            }) {
                 EditProfileView()
             }
         }
         .task {
+            await profileViewModel.loadCurrentUserProfile()
+        }
+        .refreshable {
             await profileViewModel.loadCurrentUserProfile()
         }
     }

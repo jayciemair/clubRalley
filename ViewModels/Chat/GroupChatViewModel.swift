@@ -37,6 +37,9 @@ class GroupChatViewModel: ObservableObject {
     /// Message input text
     @Published var messageText = ""
 
+    /// Realtime connection status
+    @Published var isRealtimeConnected = false
+
     // MARK: - Chat Info
 
     /// The chat being displayed
@@ -45,6 +48,8 @@ class GroupChatViewModel: ObservableObject {
     // MARK: - Dependencies
 
     private let chatService = ChatService()
+    private let realtimeManager = RealtimeManager.shared
+    private let supabaseManager = SupabaseManager.shared
 
     // MARK: - Initialization
 
@@ -53,6 +58,14 @@ class GroupChatViewModel: ObservableObject {
         Task {
             await loadMessages()
             await loadMembers()
+            subscribeToRealtime()
+        }
+    }
+
+    deinit {
+        // Unsubscribe when view model is deallocated
+        Task { @MainActor in
+            await realtimeManager.unsubscribeFromChatMessages()
         }
     }
 
@@ -135,6 +148,58 @@ class GroupChatViewModel: ObservableObject {
         } catch {
             print("GroupChatViewModel: Failed to remove member: \(error)")
         }
+    }
+
+    // MARK: - Realtime Subscription
+
+    /// Subscribe to realtime chat messages
+    private func subscribeToRealtime() {
+        guard let ralleyId = chat.ralleyId else { return }
+
+        realtimeManager.subscribeToChatMessages(ralleyId: ralleyId) { [weak self] payload in
+            Task { @MainActor in
+                self?.handleNewMessage(payload)
+            }
+        }
+
+        isRealtimeConnected = true
+        print("✅ GroupChatViewModel: Subscribed to realtime for chat \(chat.id)")
+    }
+
+    /// Handle incoming realtime message
+    private func handleNewMessage(_ payload: ChatMessagePayload) {
+        // Don't add if it's our own message (already added when sent)
+        guard payload.senderId != supabaseManager.currentUser?.id else { return }
+
+        // Check if message already exists
+        guard !messages.contains(where: { $0.id == payload.id }) else { return }
+
+        // Find sender info from members
+        let member = members.first(where: { $0.id == payload.senderId })
+        let messageType = ChatMessageType(rawValue: payload.messageType) ?? .text
+
+        // Create GroupChatMessage from payload
+        let newMessage = GroupChatMessage(
+            id: payload.id,
+            chatId: chat.id,
+            senderId: payload.senderId,
+            senderName: member?.name ?? "Unknown",
+            senderUsername: member?.username ?? "unknown",
+            senderPhotoURL: member?.photoURL,
+            content: payload.content,
+            messageType: messageType,
+            createdAt: payload.createdAt,
+            isFromCurrentUser: false
+        )
+
+        messages.append(newMessage)
+        print("✅ GroupChatViewModel: Received realtime message from \(payload.senderId)")
+    }
+
+    /// Unsubscribe from realtime
+    func unsubscribeFromRealtime() async {
+        await realtimeManager.unsubscribeFromChatMessages()
+        isRealtimeConnected = false
     }
 
     // MARK: - Helpers

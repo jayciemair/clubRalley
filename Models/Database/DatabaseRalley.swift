@@ -11,23 +11,22 @@ import Foundation
 
 /// Database representation of ralley (matches Supabase ralleys table - lean schema)
 struct DatabaseRalley: Codable {
-    let host_user_id: UUID
+    let host_id: UUID  // Matches database column name
     let title: String
     let description: String?
-    let sport: String?
+    let sport: String
     let skill_level: String?
-    let location_name: String?
+    let location_name: String
     let location_address: String?
-    let city: String?
-    let state: String?
+    let city: String
+    let state: String
     let latitude: Decimal?
     let longitude: Decimal?
     let date_time: Date
     let duration_minutes: Int?
     let max_participants: Int?
     let current_participants: Int
-    let visibility: String
-    let join_type: String?
+    let is_public: Bool
     let status: String?
 
     // Convenience init for creating ralleys
@@ -50,7 +49,7 @@ struct DatabaseRalley: Codable {
         visibility: String,
         join_type: String
     ) {
-        self.host_user_id = host_user_id
+        self.host_id = host_user_id  // Map to correct column name
         self.title = title
         self.description = description
         self.sport = category
@@ -65,8 +64,7 @@ struct DatabaseRalley: Codable {
         self.duration_minutes = 120
         self.max_participants = max_participants
         self.current_participants = current_participants
-        self.visibility = visibility
-        self.join_type = join_type
+        self.is_public = is_public
         self.status = "active"
     }
 }
@@ -74,7 +72,7 @@ struct DatabaseRalley: Codable {
 /// Database ralley with joined user information
 struct DatabaseRalleyWithUser: Codable {
     let id: UUID
-    let host_user_id: UUID
+    let host_id: UUID  // Matches database column name
     let title: String
     let description: String?
     let sport: String?
@@ -89,26 +87,27 @@ struct DatabaseRalleyWithUser: Codable {
     let duration_minutes: Int?
     let max_participants: Int?
     let current_participants: Int
-    let visibility: String?
-    let join_type: String?
+    let is_public: Bool
     let status: String?
     let created_at: Date
     let updated_at: Date?
     let organizer: DatabaseRalleyUser
 
     // Computed properties for backwards compatibility with services
+    var host_user_id: UUID { host_id }  // Alias for backwards compatibility
     var location_city: String { city ?? "" }
     var location_state: String { state ?? "" }
     var category: String { sport ?? "sports" }
-    var is_public: Bool { visibility == "anyone" }
+    var visibility: String? { is_public ? "anyone" : "friends" }
+    var join_type: String? { "open" }
     var sport_id: UUID? { nil }
 
     enum CodingKeys: String, CodingKey {
-        case id, host_user_id, title, description, sport, skill_level
+        case id, host_id, title, description, sport, skill_level
         case location_name, location_address, city, state
         case latitude, longitude, date_time, duration_minutes
         case max_participants, current_participants
-        case visibility, join_type, status, created_at, updated_at
+        case is_public, status, created_at, updated_at
         case organizer = "club_users"
     }
 }
@@ -154,8 +153,7 @@ struct DatabaseRalleyUpdate: Codable {
     let date_time: Date
     let sport: String
     let max_participants: Int
-    let visibility: String
-    let join_type: String
+    let is_public: Bool
 
     // Convenience init for backwards compatibility
     init(
@@ -185,12 +183,14 @@ struct DatabaseRalleyUpdate: Codable {
         self.date_time = date_time
         self.sport = category
         self.max_participants = max_participants
-        self.visibility = visibility
-        self.join_type = join_type
+        self.is_public = is_public
     }
 }
 
 /// Database model for checking ralley host ownership
 struct DatabaseRalleyHostCheck: Codable {
-    let host_user_id: UUID
+    let host_id: UUID
+
+    // Alias for backwards compatibility
+    var host_user_id: UUID { host_id }
 }
