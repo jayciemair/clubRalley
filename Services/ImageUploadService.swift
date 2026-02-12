@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import UIKit
+import Storage
 
 /**
  * ImageUploadService: Handles image uploads to Supabase Storage
