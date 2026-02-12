@@ -28,12 +28,16 @@ extension SupabaseManager {
     /// Insert new record into database
     func insert<T: Codable>(_ data: T, into table: String) async throws {
         guard let client = client, !useFallbackMode else {
-            return
+            print("⚠️ SupabaseDatabase.insert: Running in fallback mode, skipping insert to \(table)")
+            throw SupabaseError.networkError("Database unavailable - running in offline mode")
         }
 
         do {
+            print("📝 SupabaseDatabase.insert: Inserting into \(table)...")
             let _ = try await client.client.from(table).insert(data).execute()
+            print("✅ SupabaseDatabase.insert: Successfully inserted into \(table)")
         } catch {
+            print("❌ SupabaseDatabase.insert: Failed to insert into \(table): \(error)")
             throw SupabaseError.networkError(error.localizedDescription)
         }
     }
@@ -41,7 +45,8 @@ extension SupabaseManager {
     /// Update existing record in database
     func update<T: Codable>(_ data: T, in table: String, where condition: String) async throws {
         guard let client = client, !useFallbackMode else {
-            return
+            print("⚠️ SupabaseDatabase.update: Running in fallback mode")
+            throw SupabaseError.networkError("Database unavailable - running in offline mode")
         }
 
         // Parse the condition to extract column, operator, and value
@@ -71,7 +76,8 @@ extension SupabaseManager {
     /// Delete record from database
     func delete(from table: String, where condition: String) async throws {
         guard let client = client, !useFallbackMode else {
-            return
+            print("⚠️ SupabaseDatabase.delete: Running in fallback mode")
+            throw SupabaseError.networkError("Database unavailable - running in offline mode")
         }
 
         // Parse the condition to extract column and value
@@ -101,7 +107,8 @@ extension SupabaseManager {
     /// Insert new record and return generated ID
     func insertReturningId<T: Codable>(_ data: T, into table: String) async throws -> UUID {
         guard let client = client, !useFallbackMode else {
-            return UUID()
+            print("⚠️ SupabaseDatabase.insertReturningId: Running in fallback mode")
+            throw SupabaseError.networkError("Database unavailable - running in offline mode")
         }
 
         do {
@@ -130,7 +137,8 @@ extension SupabaseManager {
     /// Update record with Encodable type
     func update<T: Encodable>(_ data: T, in table: String, where condition: String) async throws {
         guard let client = client, !useFallbackMode else {
-            return
+            print("⚠️ SupabaseDatabase.update (Encodable): Running in fallback mode")
+            throw SupabaseError.networkError("Database unavailable - running in offline mode")
         }
 
         // Parse the condition to extract column, operator, and value

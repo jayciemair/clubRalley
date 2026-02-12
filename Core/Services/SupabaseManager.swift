@@ -48,26 +48,16 @@ class SupabaseManager: ObservableObject {
     // MARK: - Setup Methods
 
     private func setupSupabaseClient() {
-        print("🔵 helloWORLD SUPABASE_INIT START")
-        print("🔵 helloWORLD SUPABASE_INIT - SupabaseConfig.isConfigured: \(SupabaseConfig.isConfigured)")
-
         guard SupabaseConfig.isConfigured else {
-            print("🔴 helloWORLD SUPABASE_INIT - Configuration invalid, using FALLBACK MODE")
+            print("⚠️ SupabaseManager: Config invalid, using fallback mode")
             useFallbackMode = true
             connectionStatus = .fallback
             return
         }
 
-        do {
-            client = SupabaseClientManager.shared
-            connectionStatus = .connected
-            print("🟢 helloWORLD SUPABASE_INIT SUCCESS - Real client initialized")
-            print("🟢 helloWORLD SUPABASE_INIT - useFallbackMode: \(useFallbackMode)")
-        } catch {
-            print("🔴 helloWORLD SUPABASE_INIT FAILED: \(error)")
-            useFallbackMode = true
-            connectionStatus = .fallback
-        }
+        client = SupabaseClientManager.shared
+        connectionStatus = .connected
+        print("✅ SupabaseManager: Connected to Supabase")
     }
 
     private func setupAuthListener() {

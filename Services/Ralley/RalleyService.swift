@@ -68,6 +68,8 @@ class RalleyService: ObservableObject {
         lastError = nil
 
         do {
+            print("📝 RalleyService: Creating ralley '\(ralley.title)' for user \(userId)")
+
             // Map ClubRalley to database ralley structure
             let dbRalley = DatabaseRalley(
                 host_user_id: userId,
@@ -89,11 +91,13 @@ class RalleyService: ObservableObject {
                 join_type: ralley.joinType.rawValue
             )
 
-            // Insert into Supabase ralleys table
-            try await supabase.insert(dbRalley, into: "ralleys")
+            // Insert into Supabase ralleys table and get the ID back
+            let ralleyId = try await supabase.insertReturningId(dbRalley, into: "ralleys")
+            print("✅ RalleyService: Ralley created with ID \(ralleyId)")
 
             // Return the ralley with updated database info
             var updatedRalley = ralley
+            updatedRalley.id = ralleyId
             updatedRalley.currentPlayers = 1 // Host is first player
 
             isLoading = false
@@ -102,13 +106,13 @@ class RalleyService: ObservableObject {
         } catch let error as SupabaseManager.SupabaseError {
             isLoading = false
             lastError = error
-            print("❌ RalleyService: Create failed: \(error)")
+            print("❌ RalleyService: Create failed with SupabaseError: \(error.localizedDescription ?? "unknown")")
             throw error
         } catch {
             isLoading = false
             let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
             lastError = supabaseError
-            print("❌ RalleyService: Create failed: \(error)")
+            print("❌ RalleyService: Create failed with error: \(error)")
             throw supabaseError
         }
     }

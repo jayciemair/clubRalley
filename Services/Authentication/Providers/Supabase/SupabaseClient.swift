@@ -37,24 +37,19 @@ public class SupabaseClientManager: ObservableObject {
     // MARK: - Initialization
 
     private init() {
-        print("🔵🔵🔵 helloWORLD SupabaseClientManager INIT START")
-        print("🔵🔵🔵 helloWORLD - supabaseURL: \(AuthConfiguration.supabaseURL)")
-        print("🔵🔵🔵 helloWORLD - anonKey: \(AuthConfiguration.supabaseAnonKey.prefix(30))...")
-
         // Get configuration from AuthConfiguration
         guard let url = URL(string: AuthConfiguration.supabaseURL) else {
-            print("🔴🔴🔴 helloWORLD SupabaseClientManager FATAL - Invalid URL")
-            fatalError("Invalid Supabase URL configuration: \(AuthConfiguration.supabaseURL)")
+            fatalError("Invalid Supabase URL configuration")
         }
         let key = AuthConfiguration.supabaseAnonKey
 
-        // Initialize the Supabase client with simplified options
+        // Initialize the Supabase client
         self.client = SupabaseClient(
             supabaseURL: url,
             supabaseKey: key
         )
 
-        print("🟢🟢🟢 helloWORLD SupabaseClientManager INIT SUCCESS - client created")
+        print("✅ SupabaseClientManager: Initialized")
 
         // Setup auth state listener
         setupAuthStateListener()
