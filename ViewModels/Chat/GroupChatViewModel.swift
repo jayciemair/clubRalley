@@ -154,7 +154,7 @@ class GroupChatViewModel: ObservableObject {
 
     /// Subscribe to realtime chat messages
     private func subscribeToRealtime() {
-        guard let ralleyId = chat.ralleyId else { return }
+        let ralleyId = chat.ralleyId
 
         realtimeManager.subscribeToChatMessages(ralleyId: ralleyId) { [weak self] payload in
             Task { @MainActor in
