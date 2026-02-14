@@ -55,8 +55,8 @@ class PowerUpProfileService {
                 data.timePreference = avail.timePreference
                 print("🔵 DEBUG POWERUP - Parsed \(data.selectedDays.count) available days")
 
-                // Load preferences from JSONB
-                let prefs = parsePreferencesFromJson(profile.preferences)
+                // Load settings from JSONB
+                let prefs = parsePreferencesFromJson(profile.settings)
                 data.maxDistance = prefs.maxDistance
                 data.wouldDoHappyHour = prefs.wouldDoHappyHour
                 data.workoutBrands = prefs.workoutBrands
@@ -130,7 +130,7 @@ class PowerUpProfileService {
             profile_photo_url: data.profilePhotoURL,
             sports: sportsArray.isEmpty ? nil : sportsArray,
             availability: availArray.isEmpty ? nil : availArray,
-            preferences: prefs
+            settings: prefs
         )
 
         print("🔵 DEBUG POWERUP - Calling supabase.update...")
@@ -219,7 +219,7 @@ struct ClubUserWithJsonb: Codable {
     let instagram_handle: String?
     let sports: [SportEntry]?
     let availability: [AvailabilityEntry]?
-    let preferences: PreferencesData?
+    let settings: PreferencesData?
 }
 
 /// Helper struct for sports JSONB
@@ -272,7 +272,7 @@ struct ClubUserProfileUpdate: Encodable {
     let profile_photo_url: String?
     let sports: [SportEntryUpdate]?
     let availability: [AvailabilityEntryUpdate]?
-    let preferences: PreferencesDataUpdate?
+    let settings: PreferencesDataUpdate?
 }
 
 // MARK: - Errors

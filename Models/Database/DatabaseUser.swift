@@ -31,7 +31,7 @@ struct DatabaseUserProfile: Codable {
     let instagram_handle: String?
     let sports: [[String: Any]]?
     let availability: [[String: Any]]?
-    let preferences: [String: Any]?
+    let settings: [String: Any]?
     let athlete_info: [String: Any]?
     let friends_count: Int
     let ralleys_count: Int
@@ -49,7 +49,7 @@ struct DatabaseUserProfile: Codable {
     enum CodingKeys: String, CodingKey {
         case id, email, first_name, last_name, username
         case profile_photo_url, bio, city, state, instagram_handle
-        case sports, availability, preferences, athlete_info
+        case sports, availability, settings, athlete_info
         case friends_count, ralleys_count, created_at
     }
 
@@ -72,7 +72,7 @@ struct DatabaseUserProfile: Codable {
         // JSONB fields are decoded as nil (parsed separately if needed)
         sports = nil
         availability = nil
-        preferences = nil
+        settings = nil
         athlete_info = nil
     }
 
