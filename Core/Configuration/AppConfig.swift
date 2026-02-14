@@ -35,26 +35,14 @@ enum AppConfig {
         /// Your Supabase project URL (public, safe to include)
         /// Get this from: Supabase Dashboard → Settings → API → Project URL
         static let projectURL: String = {
-            #if DEBUG
-            // Development environment
-            return "https://yzjasxkathlqmysdtoji.supabase.co"
-            #else
-            // Production environment - replace with Club Ralley production URL
-            return "https://yzjasxkathlqmysdtoji.supabase.co"
-            #endif
+            return "https://kcxrboserpzvchbbvpbu.supabase.co"
         }()
 
         /// Your Supabase anon/public key (safe for client-side)
         /// Get this from: Supabase Dashboard → Settings → API → anon/public key
         /// This is NOT the service_role key - never use that in client apps!
         static let anonKey: String = {
-            #if DEBUG
-            // Development anon key
-            return "sb_publishable_nWGsQ3b1rRHrGF91VXZcpA_96pO6-W1"
-            #else
-            // Production anon key - replace with Club Ralley production key
-            return "sb_publishable_nWGsQ3b1rRHrGF91VXZcpA_96pO6-W1"
-            #endif
+            return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjeHJib3NlcnB6dmNoYmJ2cGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNTk4NzEsImV4cCI6MjA4NDkzNTg3MX0.Q5H15ftCj5FZgxtJ6L5AGaA18OcSulGc9F23ch0GgSo"
         }()
     }
 
