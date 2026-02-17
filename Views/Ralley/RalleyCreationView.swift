@@ -18,7 +18,7 @@ struct RalleyCreationView: View {
     // Form State
     @State private var title = ""
     @State private var selectedSport: RalleySport? = nil
-    @State private var selectedDate = Date()
+    @State private var selectedDate = Date().roundedToNext15Minutes()
     @State private var selectedDuration: RalleyDuration = .oneHour
     @State private var description = ""
 
@@ -164,6 +164,12 @@ struct RalleyCreationView: View {
                     .datePickerStyle(.compact)
                     .labelsHidden()
                     .tint(Color(hex: "#2C4F40"))
+                    .onChange(of: selectedDate) { _, newValue in
+                        let rounded = newValue.roundedToNearest15Minutes()
+                        if rounded != newValue {
+                            selectedDate = rounded
+                        }
+                    }
             }
 
             Divider()
@@ -464,5 +470,33 @@ struct RalleyCreationView: View {
             }
             isCreating = false
         }
+    }
+}
+
+// MARK: - Date Rounding to 15-Minute Intervals
+
+extension Date {
+    /// Rounds to the nearest 15-minute mark
+    func roundedToNearest15Minutes() -> Date {
+        let calendar = Calendar.current
+        let minute = calendar.component(.minute, from: self)
+        let rounded = (minute + 7) / 15 * 15
+        let diff = rounded - minute
+        return calendar.date(byAdding: .minute, value: diff, to: self)?.zeroSeconds() ?? self
+    }
+
+    /// Rounds up to the next 15-minute mark
+    func roundedToNext15Minutes() -> Date {
+        let calendar = Calendar.current
+        let minute = calendar.component(.minute, from: self)
+        let remainder = minute % 15
+        let minutesToAdd = remainder == 0 ? 0 : 15 - remainder
+        return calendar.date(byAdding: .minute, value: minutesToAdd, to: self)?.zeroSeconds() ?? self
+    }
+
+    private func zeroSeconds() -> Date {
+        let calendar = Calendar.current
+        let comps = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: self)
+        return calendar.date(from: comps) ?? self
     }
 }
