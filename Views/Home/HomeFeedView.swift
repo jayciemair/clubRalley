@@ -2,7 +2,7 @@
 //  HomeFeedView.swift
 //  Club Ralley
 //
-//  Home feed view with posts, upcoming ralleys, and notifications.
+//  Home feed with personalized greeting, trending ralleys, and posts.
 //
 
 import SwiftUI
@@ -15,19 +15,42 @@ struct HomeFeedView: View {
     @StateObject private var messagingService = MessagingService()
     @State private var showingNotifications = false
     @State private var showingMessages = false
+    @State private var searchText = ""
+
+    private var userFirstName: String {
+        if let saved = SavedUserProfile.loadFromStorage() {
+            return saved.firstName
+        }
+        return "there"
+    }
+
+    private var trendingRalleys: [ClubRalley] {
+        ralleyManager.ralleys
+            .filter { !$0.isPast && !$0.isFull }
+            .sorted { $0.currentPlayers > $1.currentPlayers }
+            .prefix(6)
+            .map { $0 }
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    // Header with notifications and messages
                     FeedHeader(
+                        userName: userFirstName,
+                        searchText: $searchText,
                         showingNotifications: $showingNotifications,
                         showingMessages: $showingMessages,
                         unreadMessageCount: messagingService.totalUnreadCount
                     )
 
-                    // Upcoming joined ralleys section
+                    // Trending ralleys
+                    if !trendingRalleys.isEmpty {
+                        TrendingRalleysSection(ralleys: trendingRalleys)
+                            .environmentObject(ralleyManager)
+                    }
+
+                    // Upcoming joined ralleys
                     let joinedRalleys = ralleyManager.getJoinedUpcomingRalleys()
                     if !joinedRalleys.isEmpty {
                         UpcomingRalleysSection(ralleys: joinedRalleys)
@@ -39,30 +62,23 @@ struct HomeFeedView: View {
                         FeedLoadingView()
                     } else if let error = postManager.error, postManager.posts.isEmpty {
                         FeedErrorView(error: error) {
-                            Task {
-                                await postManager.refreshPosts()
-                            }
+                            Task { await postManager.refreshPosts() }
                         }
                     } else {
                         ForEach(Array(postManager.posts.enumerated()), id: \.element.id) { index, post in
                             FigmaPostCard(post: post)
                                 .environmentObject(postManager)
                                 .onAppear {
-                                    // Load more when reaching near the end
                                     if index == postManager.posts.count - 3 {
-                                        Task {
-                                            await postManager.loadMorePosts()
-                                        }
+                                        Task { await postManager.loadMorePosts() }
                                     }
                                 }
                         }
 
-                        // Loading indicator for infinite scroll
                         if postManager.isLoadingMore {
                             HStack {
                                 Spacer()
-                                ProgressView()
-                                    .padding()
+                                ProgressView().padding()
                                 Spacer()
                             }
                         }
@@ -80,7 +96,7 @@ struct HomeFeedView: View {
                 await ralleyManager.refreshRalleys()
                 await messagingService.loadConversations()
             }
-            .background(Color.white)
+            .background(ClubRalleyTheme.Colors.sageBackground)
             .navigationBarHidden(true)
             .sheet(isPresented: $showingNotifications) {
                 SimpleNotificationsView()

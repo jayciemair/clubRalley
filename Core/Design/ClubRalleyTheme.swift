@@ -23,16 +23,18 @@ struct ClubRalleyTheme {
         // UI Colors
         static let background = white
         static let secondaryBackground = sageGreen
+        static let sageBackground = sageGreen.opacity(0.3)
+        static let statCardBackground = sageGreen
         static let text = black
-        static let secondaryText = Color(hex: "#666666")
+        static let secondaryText = black.opacity(0.5)
         static let accent = darkGreen
-        
+
         // Button colors
         static let primaryButton = darkGreen
         static let secondaryButton = sageGreen
         static let textButton = black
-        
-        // System colors
+
+        // System colors (for alerts, validation, settings only — not in profile/home UI)
         static let success = Color(hex: "#4CAF50")
         static let warning = Color(hex: "#FF9800")
         static let error = Color(hex: "#F44336")
@@ -136,9 +138,16 @@ extension View {
     func clubRalleyButtonStyle(_ style: ClubRalleyButtonStyle = .primary) -> some View {
         modifier(ClubRalleyButtonModifier(style: style))
     }
-    
+
     func clubRalleyShadow(_ shadow: ClubRalleyTheme.Shadow = ClubRalleyTheme.Shadows.light) -> some View {
         self.shadow(color: shadow.color, radius: shadow.radius, x: shadow.x, y: shadow.y)
+    }
+
+    func polishedCard() -> some View {
+        self
+            .background(Color.white)
+            .cornerRadius(14)
+            .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
     }
 }
 

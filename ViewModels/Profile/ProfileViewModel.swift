@@ -17,6 +17,53 @@ class ProfileViewModel: ObservableObject {
     @Published var viewedProfiles: [UUID: UserProfile] = [:]
     @Published var isLoading = false
     @Published var error: ProfileError?
+    @Published var userRalleys: [ClubRalley] = []
+    @Published var selectedSportFilter: String? = nil
+
+    // MARK: - Computed Properties
+
+    var filteredRalleys: [ClubRalley] {
+        let ralleys: [ClubRalley]
+        if let filter = selectedSportFilter {
+            ralleys = userRalleys.filter { $0.sport.lowercased() == filter.lowercased() }
+        } else {
+            ralleys = userRalleys
+        }
+        return ralleys.sorted { $0.dateTime > $1.dateTime }
+    }
+
+    var ralleyCountBySport: [String: Int] {
+        Dictionary(grouping: userRalleys, by: { $0.sport }).mapValues { $0.count }
+    }
+
+    /// Merges user's selected sports with sports from joined ralleys
+    var effectiveSportsWithSkills: [UserSportSkill] {
+        guard let profile = currentUserProfile else { return [] }
+        var sportsByName: [String: UserSportSkill] = [:]
+
+        // Add user's onboarding sports
+        for sport in profile.user.sportsWithSkills {
+            sportsByName[sport.sportName.lowercased()] = sport
+        }
+
+        // Auto-populate from joined ralleys
+        for ralley in userRalleys {
+            let key = ralley.sport.lowercased()
+            if sportsByName[key] == nil {
+                sportsByName[key] = UserSportSkill(
+                    sportName: ralley.sport,
+                    skillLevel: .intermediate,
+                    iconName: SportIconMapper.iconName(for: ralley.sport)
+                )
+            }
+        }
+
+        return Array(sportsByName.values).sorted { $0.sportName < $1.sportName }
+    }
+
+    // Profile refresh cooldown
+    private var lastProfileLoad: Date? = nil
+    private let refreshCooldown: TimeInterval = 30
 
     // MARK: - Dependencies
     private let friendshipService = FriendshipService()
@@ -27,85 +74,61 @@ class ProfileViewModel: ObservableObject {
 
     // MARK: - Current User Methods
 
-    func loadCurrentUserProfile() async {
-        print("🔵 DEBUG PROFILE_VM loadCurrentUserProfile START")
+    func loadCurrentUserProfile(force: Bool = false) async {
+        // Cooldown: skip reload if loaded recently (unless forced)
+        if !force, let lastLoad = lastProfileLoad,
+           Date().timeIntervalSince(lastLoad) < refreshCooldown {
+            return
+        }
+
         isLoading = true
         error = nil
 
-        // First check if we have a saved profile from onboarding
         if let savedProfile = SavedUserProfile.loadFromStorage() {
-            print("🔵 DEBUG PROFILE_VM - Found saved profile: \(savedProfile.firstName) \(savedProfile.lastName)")
-            print("🔵 DEBUG PROFILE_VM - userId: \(savedProfile.id)")
-            print("🔵 DEBUG PROFILE_VM - email: \(savedProfile.email)")
-            print("🔵 DEBUG PROFILE_VM - username: \(savedProfile.username)")
-
-            // Try to enrich with real stats from database
             var posts: [ClubRalleyPost] = []
             var ralleys: [ClubRalley] = []
             var followCounts: (followers: Int, following: Int) = (0, 0)
 
             do {
-                print("🔵 DEBUG PROFILE_VM - Loading posts...")
                 posts = try await postService.loadUserPosts(userId: savedProfile.id)
-                print("🔵 DEBUG PROFILE_VM - Loaded \(posts.count) posts")
-
-                print("🔵 DEBUG PROFILE_VM - Loading ralleys...")
                 ralleys = try await ralleyService.loadUserRalleys(userId: savedProfile.id)
-                print("🔵 DEBUG PROFILE_VM - Loaded \(ralleys.count) ralleys")
-
-                print("🔵 DEBUG PROFILE_VM - Loading follow counts...")
                 followCounts = try await friendshipService.getFollowCounts(userId: savedProfile.id)
-                print("🔵 DEBUG PROFILE_VM - Followers: \(followCounts.followers), Following: \(followCounts.following)")
             } catch {
-                print("🔴 DEBUG PROFILE_VM - Failed to load stats: \(error)")
+                print("ProfileVM: Failed to load stats: \(error)")
             }
 
+            self.userRalleys = ralleys
             currentUserProfile = createProfileFromSavedData(
-                savedProfile,
-                posts: posts,
-                ralleys: ralleys,
-                followersCount: followCounts.followers,
-                followingCount: followCounts.following
+                savedProfile, posts: posts, ralleys: ralleys,
+                followersCount: followCounts.followers, followingCount: followCounts.following
             )
-            print("🟢 DEBUG PROFILE_VM - Created profile from saved data")
+            lastProfileLoad = Date()
             isLoading = false
             return
         }
 
-        print("🔵 DEBUG PROFILE_VM - No saved profile, trying Supabase...")
-        print("🔵 DEBUG PROFILE_VM - isAuthenticated: \(supabase.isAuthenticated)")
-        print("🔵 DEBUG PROFILE_VM - currentUser: \(supabase.currentUser?.id.uuidString ?? "nil")")
-
-        // Try to load from Supabase if user is authenticated
         if supabase.isAuthenticated, let userId = supabase.currentUser?.id {
-            print("🔵 DEBUG PROFILE_VM - Loading from Supabase for userId: \(userId)")
             do {
-                print("🔵 DEBUG PROFILE_VM - Calling userService.loadUser...")
                 let dbUser = try await userService.loadUser(userId)
-                print("🔵 DEBUG PROFILE_VM - Loaded user: \(dbUser.first_name) \(dbUser.last_name)")
-
                 let posts = try await postService.loadUserPosts(userId: userId)
                 let ralleys = try await ralleyService.loadUserRalleys(userId: userId)
                 let followCounts = try await friendshipService.getFollowCounts(userId: userId)
 
+                self.userRalleys = ralleys
                 currentUserProfile = createProfileFromDatabaseUser(
-                    dbUser,
-                    posts: posts,
-                    ralleys: ralleys,
+                    dbUser, posts: posts, ralleys: ralleys,
                     followersCount: followCounts.followers,
                     followingCount: followCounts.following,
                     isFollowedByCurrentUser: nil
                 )
-                print("🟢 DEBUG PROFILE_VM - Loaded profile from Supabase")
+                lastProfileLoad = Date()
                 isLoading = false
                 return
             } catch {
-                print("🔴 DEBUG PROFILE_VM - Supabase load FAILED: \(error)")
+                print("ProfileVM: Supabase load failed: \(error)")
             }
         }
 
-        // No profile available - user needs to complete onboarding
-        print("🔴 DEBUG PROFILE_VM - No user profile available")
         currentUserProfile = nil
         isLoading = false
     }
@@ -350,202 +373,105 @@ class ProfileViewModel: ObservableObject {
 
     func toggleFollow(_ userId: UUID) async {
         guard let profile = viewedProfiles[userId] else { return }
-
         let isCurrentlyFollowing = profile.isFollowedByCurrentUser ?? false
         let newFollowState = !isCurrentlyFollowing
-
-        print("ProfileViewModel: Toggling follow for user \(userId): \(isCurrentlyFollowing) -> \(newFollowState)")
-
-        // Store original state for rollback
         let originalProfile = profile
 
-        // Optimistic local update
         let updatedProfile = UserProfile(
-            id: profile.id,
-            user: profile.user,
+            id: profile.id, user: profile.user,
             stats: UserStats(
                 followersCount: profile.stats.followersCount + (newFollowState ? 1 : -1),
                 followingCount: profile.stats.followingCount,
-                gamesPlayed: profile.stats.gamesPlayed,
-                wins: profile.stats.wins,
+                gamesPlayed: profile.stats.gamesPlayed, wins: profile.stats.wins,
                 postsCount: profile.stats.postsCount,
                 ralleysAttended: profile.stats.ralleysAttended,
                 ralleysHosted: profile.stats.ralleysHosted
             ),
-            socialInfo: profile.socialInfo,
-            teams: profile.teams,
-            photos: profile.photos,
-            mutualFriends: profile.mutualFriends,
+            socialInfo: profile.socialInfo, teams: profile.teams,
+            photos: profile.photos, mutualFriends: profile.mutualFriends,
             isFollowedByCurrentUser: newFollowState,
             relationshipStatus: newFollowState ? .following : .none
         )
-
         viewedProfiles[userId] = updatedProfile
 
-        // Sync with backend
         do {
-            if newFollowState {
-                try await friendshipService.followUser(userId)
-            } else {
-                try await friendshipService.unfollowUser(userId)
-            }
-            print("ProfileViewModel: Follow state synced with backend")
+            if newFollowState { try await friendshipService.followUser(userId) }
+            else { try await friendshipService.unfollowUser(userId) }
         } catch {
-            // Revert optimistic update on failure
             viewedProfiles[userId] = originalProfile
             self.error = .actionFailed("Failed to update follow status")
-            print("ProfileViewModel: Failed to sync follow state: \(error)")
         }
     }
 
     func blockUser(_ userId: UUID) async {
         guard let profile = viewedProfiles[userId] else { return }
-
-        // Optimistic UI update
         let updatedProfile = UserProfile(
-            id: profile.id,
-            user: profile.user,
-            stats: profile.stats,
-            socialInfo: profile.socialInfo,
-            teams: profile.teams,
-            photos: profile.photos,
-            mutualFriends: profile.mutualFriends,
-            isFollowedByCurrentUser: false,
-            relationshipStatus: .blocked
+            id: profile.id, user: profile.user, stats: profile.stats,
+            socialInfo: profile.socialInfo, teams: profile.teams,
+            photos: profile.photos, mutualFriends: profile.mutualFriends,
+            isFollowedByCurrentUser: false, relationshipStatus: .blocked
         )
         viewedProfiles[userId] = updatedProfile
-
-        // Persist to database
-        do {
-            try await friendshipService.blockUser(userId)
-            print("ProfileViewModel: Successfully blocked user \(userId)")
-        } catch {
-            // Revert optimistic update on failure
+        do { try await friendshipService.blockUser(userId) }
+        catch {
             viewedProfiles[userId] = profile
             self.error = .actionFailed("Failed to block user")
-            print("ProfileViewModel: Failed to block user: \(error)")
         }
     }
 
     func unblockUser(_ userId: UUID) async {
         guard let profile = viewedProfiles[userId] else { return }
-
-        // Optimistic UI update
         let updatedProfile = UserProfile(
-            id: profile.id,
-            user: profile.user,
-            stats: profile.stats,
-            socialInfo: profile.socialInfo,
-            teams: profile.teams,
-            photos: profile.photos,
-            mutualFriends: profile.mutualFriends,
-            isFollowedByCurrentUser: false,
-            relationshipStatus: .none
+            id: profile.id, user: profile.user, stats: profile.stats,
+            socialInfo: profile.socialInfo, teams: profile.teams,
+            photos: profile.photos, mutualFriends: profile.mutualFriends,
+            isFollowedByCurrentUser: false, relationshipStatus: .none
         )
         viewedProfiles[userId] = updatedProfile
-
-        // Persist to database
-        do {
-            try await friendshipService.unblockUser(userId)
-            print("ProfileViewModel: Successfully unblocked user \(userId)")
-        } catch {
-            // Revert optimistic update on failure
+        do { try await friendshipService.unblockUser(userId) }
+        catch {
             viewedProfiles[userId] = profile
             self.error = .actionFailed("Failed to unblock user")
-            print("ProfileViewModel: Failed to unblock user: \(error)")
         }
     }
 
     func reportUser(_ userId: UUID, reason: String) async {
-        // Persist report to database
-        do {
-            try await friendshipService.reportUser(userId, reason: reason)
-            print("ProfileViewModel: Successfully reported user \(userId) for: \(reason)")
-        } catch {
-            print("ProfileViewModel: Report logged locally (DB may not be configured): \(error)")
-            // Don't show error to user - report is logged even if DB fails
-        }
+        do { try await friendshipService.reportUser(userId, reason: reason) }
+        catch { /* Report logged locally even if DB fails */ }
     }
 
     // MARK: - Database Parsing Helpers
 
-    /// Parse sports array from JSONB [[String: Any]]?
     private func parseSportsFromDatabase(_ sports: [[String: Any]]?) -> [UserSportSkill] {
         guard let sports = sports else { return [] }
-
-        return sports.compactMap { sportDict -> UserSportSkill? in
-            guard let name = sportDict["name"] as? String else { return nil }
-            let skillString = sportDict["skill"] as? String ?? "intermediate"
-            let skillLevel = SkillLevelType(rawValue: skillString) ?? .intermediate
-
-            return UserSportSkill(
-                sportName: name,
-                skillLevel: skillLevel,
-                iconName: sportIcon(for: name)
-            )
+        return sports.compactMap { dict -> UserSportSkill? in
+            guard let name = dict["name"] as? String else { return nil }
+            let skill = SkillLevelType(rawValue: dict["skill"] as? String ?? "intermediate") ?? .intermediate
+            return UserSportSkill(sportName: name, skillLevel: skill, iconName: sportIcon(for: name))
         }
     }
 
-    /// Parse college athlete info from athlete_info JSONB
     private func parseCollegeAthleteInfo(_ athleteInfo: [String: Any]?) -> (playedCollege: Bool, info: CollegeAthleteInfo?) {
-        guard let info = athleteInfo else { return (false, nil) }
-
-        let playedCollege = info["played_college"] as? Bool ?? false
-        guard playedCollege else { return (false, nil) }
-
-        let sport = info["sport"] as? String ?? ""
-        let school = info["school"] as? String ?? ""
-        let divisionString = info["division"] as? String ?? "club"
-        let division = CollegeDivision(rawValue: divisionString) ?? .club
-        let yearsPlayed = info["years_played"] as? String
-        let position = info["position"] as? String
-        let achievements = info["achievements"] as? [String] ?? []
-
-        let collegeInfo = CollegeAthleteInfo(
-            sport: sport,
-            school: school,
-            division: division,
-            yearsPlayed: yearsPlayed,
-            position: position,
-            achievements: achievements
-        )
-
-        return (true, collegeInfo)
-    }
-
-    /// Parse privacy setting from settings JSONB
-    private func parsePrivacySetting(_ settings: [String: Any]?) -> Bool {
-        guard let settings = settings else { return false }
-        return settings["is_private"] as? Bool ?? false
-    }
-
-    /// Get SF Symbol icon for a sport name
-    private func sportIcon(for sport: String) -> String {
-        switch sport.lowercased() {
-        case "tennis": return "tennisball.fill"
-        case "basketball": return "basketball.fill"
-        case "soccer", "football": return "soccerball"
-        case "volleyball": return "volleyball.fill"
-        case "baseball": return "baseball.fill"
-        case "golf": return "figure.golf"
-        case "swimming": return "figure.pool.swim"
-        case "pickleball": return "figure.pickleball"
-        case "running": return "figure.run"
-        case "cycling": return "figure.outdoor.cycle"
-        case "hiking": return "figure.hiking"
-        case "yoga": return "figure.yoga"
-        case "crossfit", "fitness": return "dumbbell.fill"
-        case "lacrosse": return "figure.lacrosse"
-        case "hockey": return "hockey.puck.fill"
-        case "skiing": return "figure.skiing.downhill"
-        case "snowboarding": return "figure.snowboarding"
-        case "surfing": return "figure.surfing"
-        case "boxing": return "figure.boxing"
-        case "martial arts", "mma": return "figure.martial.arts"
-        case "rowing": return "figure.rowing"
-        case "climbing": return "figure.climbing"
-        default: return "sportscourt.fill"
+        guard let info = athleteInfo,
+              let playedCollege = info["played_college"] as? Bool, playedCollege else {
+            return (false, nil)
         }
+        return (true, CollegeAthleteInfo(
+            sport: info["sport"] as? String ?? "",
+            school: info["school"] as? String ?? "",
+            division: CollegeDivision(rawValue: info["division"] as? String ?? "club") ?? .club,
+            yearsPlayed: info["years_played"] as? String,
+            position: info["position"] as? String,
+            achievements: info["achievements"] as? [String] ?? []
+        ))
+    }
+
+    private func parsePrivacySetting(_ settings: [String: Any]?) -> Bool {
+        settings?["is_private"] as? Bool ?? false
+    }
+
+    private func sportIcon(for sport: String) -> String {
+        SportIconMapper.iconName(for: sport)
     }
 }
 

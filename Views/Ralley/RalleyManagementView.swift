@@ -87,7 +87,7 @@ struct RalleyManagementView: View {
 
     private var dateTimeSection: some View {
         Section("Date & Time") {
-            DatePicker("When", selection: $dateTime, in: Date()...)
+            FifteenMinuteDatePicker(selection: $dateTime, minimumDate: Date())
         }
     }
 

@@ -67,7 +67,7 @@ struct FindRalleysView: View {
                     ralleysSection
                 }
             }
-            .background(Color(hex: "#F5F5F5"))
+            .background(ClubRalleyTheme.Colors.sageBackground)
             .navigationBarHidden(true)
             .sheet(isPresented: $ralleyManager.showingCreateRalley) {
                 RalleyCreationView().environmentObject(ralleyManager)
@@ -150,13 +150,7 @@ struct FindRalleysView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(
-                    LinearGradient(
-                        colors: [Color(hex: "#2C4F40"), Color(hex: "#3A6B4F")],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .background(Color(hex: "#2C4F40"))
                 .cornerRadius(12)
                 .shadow(color: Color(hex: "#2C4F40").opacity(0.3), radius: 8, x: 0, y: 4)
             }

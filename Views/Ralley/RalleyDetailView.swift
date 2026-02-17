@@ -16,6 +16,7 @@ struct RalleyDetailView: View {
     @State private var showingChat = false
     @State private var showingCompletionSheet = false
     @State private var pendingRequests: [PendingJoinRequest] = []
+    @State private var attendees: [RalleyAttendee] = []
     @State private var hasPendingRequest = false
     @State private var isJoining = false
     @State private var showingError = false
@@ -26,7 +27,7 @@ struct RalleyDetailView: View {
             VStack(spacing: 0) {
                 RalleyDetailHeader(ralley: ralley)
                 RalleyInfoSection(ralley: ralley)
-                RalleyParticipantsSection(ralley: ralley)
+                RalleyParticipantsSection(ralley: ralley, attendees: attendees)
 
                 if ralley.isCaptain {
                     RalleyCaptainControls(
@@ -42,7 +43,7 @@ struct RalleyDetailView: View {
                 Spacer(minLength: 100)
             }
         }
-        .background(Color(hex: "#F5F5F5"))
+        .background(ClubRalleyTheme.Colors.sageBackground)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -186,6 +187,9 @@ struct RalleyDetailView: View {
     // MARK: - Actions
 
     private func loadData() async {
+        // Load attendees for participant list
+        attendees = await ralleyManager.participationManager?.getAttendees(for: ralley.id) ?? []
+
         if ralley.isCaptain {
             pendingRequests = await ralleyManager.loadPendingRequests(for: ralley.id)
         } else if ralley.requiresApproval {

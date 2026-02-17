@@ -10,47 +10,74 @@ import SwiftUI
 // MARK: - Feed Header
 
 struct FeedHeader: View {
+    var userName: String
+    @Binding var searchText: String
     @Binding var showingNotifications: Bool
     @Binding var showingMessages: Bool
     var unreadMessageCount: Int = 0
     var unreadNotificationCount: Int = 0
 
     var body: some View {
-        HStack {
-            Text("Home")
-                .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.black)
-
-            Spacer()
-
-            Button(action: { showingNotifications = true }) {
-                ZStack(alignment: .topTrailing) {
-                    Image(systemName: "bell")
-                        .font(.system(size: 22, weight: .medium))
+        VStack(alignment: .leading, spacing: 12) {
+            // Greeting row + icons
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Hey \(userName)")
+                        .font(.system(size: 26, weight: .bold))
                         .foregroundColor(.black)
+                    Text("Ready to rally?")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color.black.opacity(0.5))
+                }
 
-                    // Notification badge
-                    if unreadNotificationCount > 0 {
-                        NotificationBadge(count: unreadNotificationCount)
-                            .offset(x: 8, y: -6)
+                Spacer()
+
+                Button(action: { showingNotifications = true }) {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "bell")
+                            .font(.system(size: 22, weight: .medium))
+                            .foregroundColor(.black)
+                        if unreadNotificationCount > 0 {
+                            NotificationBadge(count: unreadNotificationCount)
+                                .offset(x: 8, y: -6)
+                        }
+                    }
+                }
+                .padding(.trailing, 8)
+
+                Button(action: { showingMessages = true }) {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "bubble.left.and.bubble.right")
+                            .font(.system(size: 22, weight: .medium))
+                            .foregroundColor(.black)
+                        if unreadMessageCount > 0 {
+                            NotificationBadge(count: unreadMessageCount)
+                                .offset(x: 10, y: -6)
+                        }
                     }
                 }
             }
-            .padding(.trailing, 8)
 
-            Button(action: { showingMessages = true }) {
-                ZStack(alignment: .topTrailing) {
-                    Image(systemName: "bubble.left.and.bubble.right")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(.black)
+            // Search bar
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 16))
+                    .foregroundColor(Color(hex: "#2C4F40"))
 
-                    // Unread messages badge
-                    if unreadMessageCount > 0 {
-                        NotificationBadge(count: unreadMessageCount)
-                            .offset(x: 10, y: -6)
+                TextField("Search ralleys...", text: $searchText)
+                    .font(.system(size: 15))
+
+                if !searchText.isEmpty {
+                    Button(action: { searchText = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(Color.black.opacity(0.3))
                     }
                 }
             }
+            .padding(12)
+            .background(Color(hex: "#E2E4D6"))
+            .cornerRadius(12)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -68,9 +95,118 @@ struct NotificationBadge: View {
             .foregroundColor(.white)
             .padding(.horizontal, count > 9 ? 5 : 6)
             .padding(.vertical, 2)
-            .background(Color.red)
+            .background(Color(hex: "#2C4F40"))
             .clipShape(Capsule())
             .minimumScaleFactor(0.8)
+    }
+}
+
+// MARK: - Trending Ralleys Section
+
+struct TrendingRalleysSection: View {
+    let ralleys: [ClubRalley]
+    @EnvironmentObject var ralleyManager: RalleyManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "sportscourt.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(hex: "#2C4F40"))
+                Text("Trending Ralleys Near You")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.black)
+                Spacer()
+                NavigationLink(destination: FindRalleysView().environmentObject(ralleyManager)) {
+                    Text("See All")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                }
+            }
+            .padding(.horizontal, 16)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(ralleys) { ralley in
+                        NavigationLink(destination: RalleyDetailView(ralley: ralley).environmentObject(ralleyManager)) {
+                            TrendingRalleyCard(ralley: ralley)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+        }
+        .padding(.vertical, 16)
+    }
+}
+
+// MARK: - Trending Ralley Card
+
+struct TrendingRalleyCard: View {
+    let ralley: ClubRalley
+
+    private var formattedTime: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE, h:mm a"
+        return formatter.string(from: ralley.dateTime)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Sport pill
+            HStack(spacing: 4) {
+                Image(systemName: SportIconMapper.iconName(for: ralley.sport))
+                    .font(.system(size: 12))
+                Text(ralley.sport)
+                    .font(.system(size: 12, weight: .semibold))
+            }
+            .foregroundColor(Color(hex: "#2C4F40"))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color(hex: "#E2E4D6"))
+            .cornerRadius(8)
+
+            Text(ralley.title)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.black)
+                .lineLimit(1)
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 4) {
+                    Image(systemName: "mappin").font(.system(size: 11))
+                    Text(ralley.location.name).font(.system(size: 12)).lineLimit(1)
+                }
+                .foregroundColor(Color.black.opacity(0.5))
+
+                HStack(spacing: 4) {
+                    Image(systemName: "clock").font(.system(size: 11))
+                    Text(formattedTime).font(.system(size: 12))
+                }
+                .foregroundColor(Color.black.opacity(0.5))
+            }
+
+            // Spots left
+            if !ralley.isFull {
+                Text("\(ralley.availableSpots) spots left")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(Color(hex: "#2C4F40"))
+            }
+
+            // Join CTA
+            Text("Join Ralley")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(Color(hex: "#2C4F40"))
+                .cornerRadius(10)
+        }
+        .padding(12)
+        .frame(width: 240)
+        .background(Color.white)
+        .cornerRadius(14)
+        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
     }
 }
 
@@ -106,7 +242,6 @@ struct UpcomingRalleysSection: View {
             }
         }
         .padding(.vertical, 16)
-        .background(Color(hex: "#F8F8F8"))
     }
 }
 
@@ -116,18 +251,13 @@ struct UpcomingRalleyCard: View {
     let ralley: ClubRalley
 
     private var timeUntil: String {
-        let now = Date()
-        let interval = ralley.dateTime.timeIntervalSince(now)
-
+        let interval = ralley.dateTime.timeIntervalSince(Date())
         if interval < 3600 {
-            let minutes = Int(interval / 60)
-            return "in \(minutes)m"
+            return "in \(Int(interval / 60))m"
         } else if interval < 86400 {
-            let hours = Int(interval / 3600)
-            return "in \(hours)h"
+            return "in \(Int(interval / 3600))h"
         } else {
-            let days = Int(interval / 86400)
-            return "in \(days)d"
+            return "in \(Int(interval / 86400))d"
         }
     }
 
@@ -140,16 +270,18 @@ struct UpcomingRalleyCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(ralley.sport)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Color(hex: "#2C4F40"))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color(hex: "#2C4F40").opacity(0.1))
-                    .cornerRadius(8)
-
+                HStack(spacing: 4) {
+                    Image(systemName: SportIconMapper.iconName(for: ralley.sport))
+                        .font(.system(size: 12))
+                    Text(ralley.sport)
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                .foregroundColor(Color(hex: "#2C4F40"))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color(hex: "#E2E4D6"))
+                .cornerRadius(8)
                 Spacer()
-
                 Text(timeUntil)
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.white)
@@ -166,13 +298,13 @@ struct UpcomingRalleyCard: View {
 
             Text(formattedDate)
                 .font(.system(size: 13))
-                .foregroundColor(.gray)
+                .foregroundColor(Color.black.opacity(0.5))
 
             HStack(spacing: 4) {
                 Image(systemName: "mappin").font(.system(size: 12))
                 Text(ralley.location.name).font(.system(size: 13)).lineLimit(1)
             }
-            .foregroundColor(.gray)
+            .foregroundColor(Color.black.opacity(0.5))
 
             HStack(spacing: 4) {
                 Image(systemName: "person.2").font(.system(size: 12))
@@ -181,10 +313,10 @@ struct UpcomingRalleyCard: View {
             .foregroundColor(Color(hex: "#2C4F40"))
         }
         .padding(12)
-        .frame(width: 220)
+        .frame(width: 240)
         .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+        .cornerRadius(14)
+        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
     }
 }
 
@@ -210,7 +342,6 @@ struct PostSkeletonView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Circle().fill(Color.gray.opacity(0.3)).frame(width: 50, height: 50)
-
                 VStack(alignment: .leading, spacing: 4) {
                     RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.3)).frame(width: 120, height: 16)
                     RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.2)).frame(width: 180, height: 12)
@@ -222,14 +353,6 @@ struct PostSkeletonView: View {
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.2)).frame(height: 14)
                 RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.2)).frame(width: 200, height: 14)
-            }
-            .padding(.horizontal, 16)
-
-            HStack {
-                ForEach(0..<4, id: \.self) { _ in
-                    RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.2)).frame(width: 30, height: 20)
-                    Spacer()
-                }
             }
             .padding(.horizontal, 16)
 
@@ -256,17 +379,14 @@ struct FeedErrorView: View {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 50))
                 .foregroundColor(Color(hex: "#2C4F40").opacity(0.6))
-
             Text("Unable to load feed")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(.black)
-
             Text("Check your internet connection and try again")
                 .font(.system(size: 15))
-                .foregroundColor(.gray)
+                .foregroundColor(Color.black.opacity(0.5))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
-
             Button(action: onRetry) {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.clockwise")
@@ -297,7 +417,7 @@ struct EmptyFeedView: View {
                 .foregroundColor(.black)
             Text("Start following athletes and join ralleys to see posts in your feed")
                 .font(.system(size: 16))
-                .foregroundColor(.gray)
+                .foregroundColor(Color.black.opacity(0.5))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
         }

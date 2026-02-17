@@ -14,18 +14,17 @@ struct RalleyDetailHeader: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // Sport icon
+            // Sport icon — matches actual sport
             ZStack {
                 Circle()
                     .fill(Color(hex: "#2C4F40").opacity(0.1))
                     .frame(width: 80, height: 80)
 
-                Image(systemName: sportIcon)
+                Image(systemName: SportIconMapper.iconName(for: ralley.sport))
                     .font(.system(size: 36))
                     .foregroundColor(Color(hex: "#2C4F40"))
             }
 
-            // Title
             Text(ralley.title)
                 .font(.system(size: 26, weight: .bold))
                 .multilineTextAlignment(.center)
@@ -42,7 +41,7 @@ struct RalleyDetailHeader: View {
 
                 Text("Hosted by \(ralley.organizer.name)")
                     .font(.system(size: 15))
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.black.opacity(0.5))
 
                 if ralley.isCaptain {
                     Text("(You)")
@@ -55,37 +54,24 @@ struct RalleyDetailHeader: View {
             HStack(spacing: 8) {
                 Label(ralley.visibility.displayName, systemImage: ralley.visibility.iconName)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.black.opacity(0.5))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Color.gray.opacity(0.1))
+                    .background(Color(hex: "#E2E4D6"))
                     .cornerRadius(12)
 
                 Label(ralley.joinType.displayName, systemImage: ralley.joinType.iconName)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.black.opacity(0.5))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Color.gray.opacity(0.1))
+                    .background(Color(hex: "#E2E4D6"))
                     .cornerRadius(12)
             }
         }
         .padding(24)
         .frame(maxWidth: .infinity)
         .background(Color.white)
-    }
-
-    private var sportIcon: String {
-        switch ralley.sport.lowercased() {
-        case "basketball": return "basketball.fill"
-        case "tennis": return "tennisball.fill"
-        case "soccer", "football": return "soccerball"
-        case "volleyball": return "volleyball.fill"
-        case "running": return "figure.run"
-        case "cycling": return "bicycle"
-        case "swimming": return "figure.pool.swim"
-        default: return "sportscourt.fill"
-        }
     }
 }
 
@@ -110,7 +96,7 @@ struct RalleyInfoSection: View {
                         .font(.system(size: 16, weight: .semibold))
                     Text(formattedTime)
                         .font(.system(size: 14))
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.black.opacity(0.5))
                 }
 
                 Spacer()
@@ -132,25 +118,8 @@ struct RalleyInfoSection: View {
                         .font(.system(size: 16, weight: .semibold))
                     Text(ralley.location.shortAddress)
                         .font(.system(size: 14))
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.black.opacity(0.5))
                 }
-
-                Spacer()
-            }
-
-            Divider()
-
-            // Cost
-            HStack(spacing: 12) {
-                Image(systemName: "dollarsign.circle.fill")
-                    .font(.system(size: 18))
-                    .foregroundColor(Color(hex: "#2C4F40"))
-                    .frame(width: 40, height: 40)
-                    .background(Color(hex: "#2C4F40").opacity(0.1))
-                    .cornerRadius(10)
-
-                Text(ralley.cost == 0 ? "Free" : "$\(ralley.cost) per person")
-                    .font(.system(size: 16, weight: .semibold))
 
                 Spacer()
             }
@@ -161,7 +130,7 @@ struct RalleyInfoSection: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("About")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.black.opacity(0.5))
                     Text(ralley.description)
                         .font(.system(size: 15))
                 }
@@ -174,7 +143,7 @@ struct RalleyInfoSection: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Requirements")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.black.opacity(0.5))
                     Text(ralley.requirements)
                         .font(.system(size: 15))
                 }
@@ -205,6 +174,7 @@ struct RalleyInfoSection: View {
 
 struct RalleyParticipantsSection: View {
     let ralley: ClubRalley
+    let attendees: [RalleyAttendee]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -216,19 +186,19 @@ struct RalleyParticipantsSection: View {
 
                 Text("\(ralley.currentPlayers)/\(ralley.maxPlayers)")
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(ralley.isFull ? .red : Color(hex: "#2C4F40"))
+                    .foregroundColor(ralley.isFull ? Color(hex: "#2C4F40") : Color(hex: "#2C4F40"))
             }
 
             // Progress bar
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.2))
+                        .fill(Color(hex: "#E2E4D6"))
                         .frame(height: 8)
 
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(ralley.isFull ? Color.red : Color(hex: "#2C4F40"))
-                        .frame(width: geometry.size.width * CGFloat(ralley.currentPlayers) / CGFloat(ralley.maxPlayers), height: 8)
+                        .fill(Color(hex: "#2C4F40"))
+                        .frame(width: geometry.size.width * CGFloat(ralley.currentPlayers) / CGFloat(max(ralley.maxPlayers, 1)), height: 8)
                 }
             }
             .frame(height: 8)
@@ -236,11 +206,47 @@ struct RalleyParticipantsSection: View {
             if ralley.isFull {
                 Text("This ralley is full")
                     .font(.system(size: 13))
-                    .foregroundColor(.red)
+                    .foregroundColor(Color(hex: "#2C4F40"))
             } else {
                 Text("\(ralley.availableSpots) spots remaining")
                     .font(.system(size: 13))
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.black.opacity(0.5))
+            }
+
+            // Attendee list with photo + name
+            if !attendees.isEmpty {
+                Divider().padding(.top, 4)
+
+                VStack(spacing: 10) {
+                    ForEach(attendees) { attendee in
+                        HStack(spacing: 10) {
+                            AsyncImage(url: URL(string: attendee.photoURL ?? "")) { image in
+                                image.resizable().aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                Circle()
+                                    .fill(Color(hex: "#2C4F40"))
+                                    .overlay(
+                                        Text(String(attendee.name.prefix(1)).uppercased())
+                                            .font(.system(size: 13, weight: .bold))
+                                            .foregroundColor(.white)
+                                    )
+                            }
+                            .frame(width: 36, height: 36)
+                            .clipShape(Circle())
+
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(attendee.name)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.black)
+                                Text("@\(attendee.username)")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(Color.black.opacity(0.5))
+                            }
+
+                            Spacer()
+                        }
+                    }
+                }
             }
         }
         .padding(20)
@@ -264,39 +270,41 @@ struct RalleyCaptainControls: View {
             Text("Captain Controls")
                 .font(.system(size: 18, weight: .semibold))
 
-            // Pending Requests Button
-            Button(action: { showingPendingRequests = true }) {
-                HStack {
-                    Image(systemName: "person.badge.clock")
-                        .font(.system(size: 18))
+            // Only show Pending Requests if ralley requires approval
+            if ralley.requiresApproval {
+                Button(action: { showingPendingRequests = true }) {
+                    HStack {
+                        Image(systemName: "person.badge.clock")
+                            .font(.system(size: 18))
 
-                    Text("Pending Requests")
-                        .font(.system(size: 16, weight: .medium))
+                        Text("Pending Requests")
+                            .font(.system(size: 16, weight: .medium))
 
-                    Spacer()
+                        Spacer()
 
-                    if pendingRequests.count > 0 {
-                        Text("\(pendingRequests.count)")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(Color.red)
-                            .cornerRadius(12)
+                        if pendingRequests.count > 0 {
+                            Text("\(pendingRequests.count)")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(Color(hex: "#2C4F40"))
+                                .cornerRadius(12)
+                        }
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14))
+                            .foregroundColor(Color.black.opacity(0.3))
                     }
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
+                    .padding(16)
+                    .background(Color(hex: "#E2E4D6").opacity(0.3))
+                    .cornerRadius(12)
                 }
-                .padding(16)
-                .background(Color.gray.opacity(0.05))
-                .cornerRadius(12)
+                .foregroundColor(.black)
             }
-            .foregroundColor(.black)
 
-            // Complete Ralley Button
-            if !ralley.isPast {
+            // Complete Ralley — only show after ralley end time has passed
+            if ralley.isPast {
                 Button(action: { showingCompletionSheet = true }) {
                     HStack {
                         Image(systemName: "checkmark.circle")
@@ -309,10 +317,10 @@ struct RalleyCaptainControls: View {
 
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.black.opacity(0.3))
                     }
                     .padding(16)
-                    .background(Color.gray.opacity(0.05))
+                    .background(Color(hex: "#E2E4D6").opacity(0.3))
                     .cornerRadius(12)
                 }
                 .foregroundColor(.black)

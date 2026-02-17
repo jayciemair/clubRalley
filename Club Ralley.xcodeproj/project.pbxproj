@@ -311,6 +311,9 @@
 		C9665BC52F26E80F0055C54F /* NavigationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC32F26E80F0055C54F /* NavigationModels.swift */; };
 		C9665BCB2F26E83C0055C54F /* Social.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9665BC92F26E83C0055C54F /* Social.swift */; };
 		C987EAFA2F438CF5004A9B03 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = C987EAF82F438CF5004A9B03 /* Logger.swift */; };
+		D2B3C4E5F60718293A4B5C6D /* SportIconMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4E5F60718293A4B5C /* SportIconMapper.swift */; };
+		D2B3C4E5F60718293A4B5C6E /* SportCarouselSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4E5F60718293A4B5D /* SportCarouselSection.swift */; };
+		D2B3C4E5F60718293A4B5C6F /* RalleyHistorySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4E5F60718293A4B5E /* RalleyHistorySection.swift */; };
 		C99FFB672F32647300EC948E /* MessagingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB662F32647300EC948E /* MessagingService.swift */; };
 		C99FFB682F32647300EC948E /* AudioService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB652F32647300EC948E /* AudioService.swift */; };
 		C99FFB6A2F32673900EC948E /* RalleyManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB692F32673900EC948E /* RalleyManagementView.swift */; };
@@ -333,6 +336,7 @@
 		C9AABB132F2B1002004D160C /* FindRalleysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB122F2B1002004D160C /* FindRalleysView.swift */; };
 
 		C9AABB152F2B1003004D160C /* RalleyCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB142F2B1003004D160C /* RalleyCreationView.swift */; };
+		E8B2C3D4F506A7B8C9D0E1F3 /* FifteenMinuteDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1B2C3E4F5068798A0B1C2 /* FifteenMinuteDatePicker.swift */; };
 		C9AABB172F2B1004004D160C /* UserContentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB162F2B1004004D160C /* UserContentViews.swift */; };
 		C9AABB192F2B1005004D160C /* PostCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB182F2B1005004D160C /* PostCreationView.swift */; };
 		C9D0E1F2A3B4C5D6E7F8A9B0 /* DatabaseComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E1F2A3B4C5D6E7F8A9B0C1 /* DatabaseComment.swift */; };
@@ -670,6 +674,9 @@
 		C9665BC32F26E80F0055C54F /* NavigationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationModels.swift; sourceTree = "<group>"; };
 		C9665BC92F26E83C0055C54F /* Social.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Social.swift; sourceTree = "<group>"; };
 		C987EAF82F438CF5004A9B03 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		D1A2B3C4E5F60718293A4B5C /* SportIconMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SportIconMapper.swift; sourceTree = "<group>"; };
+		D1A2B3C4E5F60718293A4B5D /* SportCarouselSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SportCarouselSection.swift; sourceTree = "<group>"; };
+		D1A2B3C4E5F60718293A4B5E /* RalleyHistorySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyHistorySection.swift; sourceTree = "<group>"; };
 		C99FFB652F32647300EC948E /* AudioService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioService.swift; sourceTree = "<group>"; };
 		C99FFB662F32647300EC948E /* MessagingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagingService.swift; sourceTree = "<group>"; };
 		C99FFB692F32673900EC948E /* RalleyManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyManagementView.swift; sourceTree = "<group>"; };
@@ -692,6 +699,7 @@
 
 		C9AABB122F2B1002004D160C /* FindRalleysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindRalleysView.swift; sourceTree = "<group>"; };
 		C9AABB142F2B1003004D160C /* RalleyCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyCreationView.swift; sourceTree = "<group>"; };
+		D7A1B2C3E4F5068798A0B1C2 /* FifteenMinuteDatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FifteenMinuteDatePicker.swift; sourceTree = "<group>"; };
 		C9AABB162F2B1004004D160C /* UserContentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserContentViews.swift; sourceTree = "<group>"; };
 		C9AABB182F2B1005004D160C /* PostCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCreationView.swift; sourceTree = "<group>"; };
 		CEB59B140C8A0E8714EAE2BC /* SportsSkillStep.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SportsSkillStep.swift; path = PowerUpProfile/Screens/SportsSkillStep.swift; sourceTree = "<group>"; };
@@ -1830,6 +1838,7 @@
 			isa = PBXGroup;
 			children = (
 				C987EAF82F438CF5004A9B03 /* Logger.swift */,
+				D1A2B3C4E5F60718293A4B5C /* SportIconMapper.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1891,6 +1900,8 @@
 			children = (
 				C99FFB7F2F3268AD00EC948E /* ProfilePhotosSection.swift */,
 				C99FFB802F3268AD00EC948E /* ProfileTeamsSection.swift */,
+				D1A2B3C4E5F60718293A4B5D /* SportCarouselSection.swift */,
+				D1A2B3C4E5F60718293A4B5E /* RalleyHistorySection.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -1942,6 +1953,7 @@
 				7BAC578F0DF7E7B918EE9537 /* RalleyFilterSheet.swift */,
 				BCAEAD266C40B99FFB229075 /* RalleyCardView.swift */,
 				C9AABB142F2B1003004D160C /* RalleyCreationView.swift */,
+				D7A1B2C3E4F5068798A0B1C2 /* FifteenMinuteDatePicker.swift */,
 			);
 			path = Ralley;
 			sourceTree = "<group>";
@@ -2225,6 +2237,9 @@
 				C9665BA42F26E3E60055C54F /* SupabaseConfig.swift in Sources */,
 				9172679E2EC36A5E0037F74F /* QuitDateCard.swift in Sources */,
 				C987EAFA2F438CF5004A9B03 /* Logger.swift in Sources */,
+				D2B3C4E5F60718293A4B5C6D /* SportIconMapper.swift in Sources */,
+				D2B3C4E5F60718293A4B5C6E /* SportCarouselSection.swift in Sources */,
+				D2B3C4E5F60718293A4B5C6F /* RalleyHistorySection.swift in Sources */,
 				918D2D7F2ED10256008ABBC0 /* RecoveryModels.swift in Sources */,
 				917267CE2EC41C040037F74F /* AppState.swift in Sources */,
 				918D2D2E2ECFDB3C008ABBC0 /* SuperwallManager.swift in Sources */,
@@ -2384,6 +2399,7 @@
 				6A8CBD45546BEE5DFF23265D /* PostCardViews.swift in Sources */,
 				6EBDC17D9C764864253C1F07 /* RalleyFilterSheet.swift in Sources */,
 				81F3DD683230CED937F3398C /* RalleyCardView.swift in Sources */,
+				E8B2C3D4F506A7B8C9D0E1F3 /* FifteenMinuteDatePicker.swift in Sources */,
 				A50B7C9A0D06C2047DFCCB99 /* ImageUploadService.swift in Sources */,
 				05F7DAEE8A5F839EB963809C /* ProfileViewModel.swift in Sources */,
 				CCDD112233445566AABBFF00 /* ProfileTabView.swift in Sources */,

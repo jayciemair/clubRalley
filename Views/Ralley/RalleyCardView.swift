@@ -16,18 +16,34 @@ struct RalleyCardView: View {
     @State private var isLoading = false
     @State private var showingManagement = false
 
-    var sportIcon: String {
-        switch ralley.sport.lowercased() {
-        case "basketball": return "basketball.fill"
-        case "tennis": return "tennisball.fill"
-        case "soccer": return "soccerball"
-        case "pickleball": return "figure.pickleball"
-        default: return "sportscourt.fill"
-        }
-    }
-
     var body: some View {
         VStack(spacing: 0) {
+            // Sport type pill
+            HStack {
+                HStack(spacing: 4) {
+                    Image(systemName: SportIconMapper.iconName(for: ralley.sport))
+                        .font(.system(size: 12))
+                    Text(ralley.sport)
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                .foregroundColor(Color(hex: "#2C4F40"))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Color(hex: "#E2E4D6"))
+                .cornerRadius(8)
+
+                Spacer()
+
+                if !ralley.isFull {
+                    Text("\(ralley.availableSpots) spots left")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 8)
+
             // Header
             HStack(spacing: 12) {
                 AsyncImage(url: URL(string: ralley.organizer.photoURL)) { image in
@@ -65,10 +81,6 @@ struct RalleyCardView: View {
                 }
 
                 Spacer()
-
-                Image(systemName: sportIcon)
-                    .font(.system(size: 24))
-                    .foregroundColor(Color(hex: "#2C4F40"))
             }
             .padding(16)
 
@@ -85,7 +97,7 @@ struct RalleyCardView: View {
                             .foregroundColor(.white)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.orange)
+                            .background(Color(hex: "#2C4F40"))
                             .cornerRadius(4)
                     }
                 }
@@ -119,14 +131,6 @@ struct RalleyCardView: View {
                 .foregroundColor(.gray)
 
                 Spacer()
-
-                Text(ralley.cost == 0 ? "FREE" : "$\(ralley.cost)")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color(hex: "#2C4F40"))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color(hex: "#2C4F40").opacity(0.1))
-                    .cornerRadius(8)
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -136,7 +140,7 @@ struct RalleyCardView: View {
         }
         .background(Color.white)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
+        .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
         .task {
             await checkUserParticipationStatus()
         }
@@ -209,7 +213,7 @@ struct RalleyCardView: View {
     private var buttonTextColor: Color {
         switch participationStatus {
         case .notJoined: return .white
-        case .pending: return .orange
+        case .pending: return Color(hex: "#2C4F40")
         case .joined: return Color(hex: "#2C4F40")
         }
     }
@@ -217,7 +221,7 @@ struct RalleyCardView: View {
     private var buttonBackground: Color {
         switch participationStatus {
         case .notJoined: return Color(hex: "#2C4F40")
-        case .pending: return Color.orange.opacity(0.2)
+        case .pending: return Color(hex: "#E2E4D6")
         case .joined: return Color(hex: "#2C4F40").opacity(0.1)
         }
     }

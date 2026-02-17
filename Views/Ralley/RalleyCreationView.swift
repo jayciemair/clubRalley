@@ -160,16 +160,8 @@ struct RalleyCreationView: View {
                 Text("Date & Start Time")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
-                DatePicker("", selection: $selectedDate, in: Date()..., displayedComponents: [.date, .hourAndMinute])
-                    .datePickerStyle(.compact)
-                    .labelsHidden()
-                    .tint(Color(hex: "#2C4F40"))
-                    .onChange(of: selectedDate) { _, newValue in
-                        let rounded = newValue.roundedToNearest15Minutes()
-                        if rounded != newValue {
-                            selectedDate = rounded
-                        }
-                    }
+                FifteenMinuteDatePicker(selection: $selectedDate, minimumDate: Date())
+                    .fixedSize()
             }
 
             Divider()
