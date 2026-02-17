@@ -60,7 +60,7 @@ final class UserProfileService {
     // MARK: - Properties
 
     private let supabase = SupabaseClientManager.shared
-    private let logger = Logger(subsystem: "com.getoverhim", category: "UserProfile")
+    private let logger = os.Logger(subsystem: "com.getoverhim", category: "UserProfile")
 
     // MARK: - Initialization
 

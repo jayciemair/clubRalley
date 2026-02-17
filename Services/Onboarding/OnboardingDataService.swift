@@ -17,7 +17,7 @@ final class OnboardingDataService {
 
     // MARK: - Properties
 
-    private let logger = Logger(subsystem: "com.getoverhim", category: "OnboardingDataSync")
+    private let logger = os.Logger(subsystem: "com.getoverhim", category: "OnboardingDataSync")
 
     // MARK: - Initialization
 

@@ -11,9 +11,8 @@ import SwiftUI
 // MARK: - Onboarding Flow Steps
 
 enum ClubRalleyOnboardingStep: String, CaseIterable {
-    case welcome = "welcome"
-    case email = "email"
-    case password = "password"
+    case phoneInput = "phone_input"
+    case otpVerification = "otp_verification"
     case name = "name"
     case username = "username"
     case profilePhoto = "profile_photo"
@@ -23,12 +22,10 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .welcome:
-            return "Ralley Connect"
-        case .email:
-            return "What's your email?"
-        case .password:
-            return "Create password"
+        case .phoneInput:
+            return "What's your phone number?"
+        case .otpVerification:
+            return "Enter verification code"
         case .name:
             return "What's your name?"
         case .username:
@@ -46,11 +43,9 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
 
     var subtitle: String? {
         switch self {
-        case .welcome:
-            return "Meet and reconnect with athletes in our digital locker room."
-        case .email:
-            return nil
-        case .password:
+        case .phoneInput:
+            return "We'll send you a verification code"
+        case .otpVerification:
             return nil
         case .name:
             return "This is how your teammates will see you!"
@@ -74,8 +69,10 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
 
     var canGoBack: Bool {
         switch self {
-        case .welcome, .completion:
+        case .phoneInput, .completion:
             return false
+        case .otpVerification:
+            return true
         default:
             return true
         }
@@ -258,9 +255,8 @@ struct CompleteOnboardingData {
     var availability: OnboardingAvailabilityData = OnboardingAvailabilityData()
 
     var isComplete: Bool {
-        profile.isEmailComplete &&
+        profile.isPhoneComplete &&
         profile.isUsernameComplete &&
-        profile.isPasswordComplete &&
         profile.isLocationComplete
     }
 
@@ -288,14 +284,17 @@ struct CompleteOnboardingData {
             bio: profile.bio.isEmpty ? nil : profile.bio,
             instagramHandle: profile.instagramHandle.isEmpty ? nil : profile.instagramHandle,
             isVerifiedAthlete: athlete.isAthlete,
-            athleteInfo: athlete.isAthlete ? AthleteInfo(
-                sport: athlete.sport!,
-                school: athlete.school!,
-                verificationStatus: .pending,
-                verificationImageURL: athlete.verificationImageURL,
-                submittedAt: Date(),
-                verifiedAt: nil
-            ) : nil,
+            athleteInfo: {
+                guard athlete.isAthlete, let sport = athlete.sport, let school = athlete.school else { return nil }
+                return AthleteInfo(
+                    sport: sport,
+                    school: school,
+                    verificationStatus: .pending,
+                    verificationImageURL: athlete.verificationImageURL,
+                    submittedAt: Date(),
+                    verifiedAt: nil
+                )
+            }(),
             selectedSports: interests.selectedSports,
             hobbies: interests.hobbies,
             availabilitySlots: availability.availabilitySlots,
@@ -444,6 +443,16 @@ enum ClubRalleyOnboardingError: LocalizedError {
     }
 }
 
+// MARK: - Saved College Athlete Info (for persistence)
+
+struct SavedCollegeAthleteInfo: Codable {
+    let sport: String
+    let school: String
+    let division: String  // Stored as string for Codable simplicity
+    let yearsPlayed: String?
+    let position: String?
+}
+
 // MARK: - Saved User Profile (for persistence)
 
 struct SavedUserProfile: Codable {
@@ -461,6 +470,11 @@ struct SavedUserProfile: Codable {
     var bio: String?
     var instagramHandle: String?
 
+    // New profile fields
+    var isPrivateAccount: Bool?
+    var playedCollegeSport: Bool?
+    var collegeAthleteInfo: SavedCollegeAthleteInfo?
+
     var fullName: String {
         "\(firstName) \(lastName)"
     }
@@ -474,9 +488,10 @@ struct SavedUserProfile: Codable {
         case id, email, firstName, lastName, username, phoneNumber
         case locationCity, locationState, profilePhotoURL, selectedSports, createdAt
         case bio, instagramHandle
+        case isPrivateAccount, playedCollegeSport, collegeAthleteInfo
     }
 
-    init(id: UUID, email: String, firstName: String, lastName: String, username: String, phoneNumber: String, locationCity: String, locationState: String, profilePhotoURL: String?, selectedSports: [String], createdAt: Date, bio: String? = nil, instagramHandle: String? = nil) {
+    init(id: UUID, email: String, firstName: String, lastName: String, username: String, phoneNumber: String, locationCity: String, locationState: String, profilePhotoURL: String?, selectedSports: [String], createdAt: Date, bio: String? = nil, instagramHandle: String? = nil, isPrivateAccount: Bool? = nil, playedCollegeSport: Bool? = nil, collegeAthleteInfo: SavedCollegeAthleteInfo? = nil) {
         self.id = id
         self.email = email
         self.firstName = firstName
@@ -490,6 +505,9 @@ struct SavedUserProfile: Codable {
         self.createdAt = createdAt
         self.bio = bio
         self.instagramHandle = instagramHandle
+        self.isPrivateAccount = isPrivateAccount
+        self.playedCollegeSport = playedCollegeSport
+        self.collegeAthleteInfo = collegeAthleteInfo
     }
 
     init(from decoder: Decoder) throws {
@@ -507,6 +525,9 @@ struct SavedUserProfile: Codable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         bio = try container.decodeIfPresent(String.self, forKey: .bio)
         instagramHandle = try container.decodeIfPresent(String.self, forKey: .instagramHandle)
+        isPrivateAccount = try container.decodeIfPresent(Bool.self, forKey: .isPrivateAccount)
+        playedCollegeSport = try container.decodeIfPresent(Bool.self, forKey: .playedCollegeSport)
+        collegeAthleteInfo = try container.decodeIfPresent(SavedCollegeAthleteInfo.self, forKey: .collegeAthleteInfo)
     }
 
     /// Load saved profile from UserDefaults

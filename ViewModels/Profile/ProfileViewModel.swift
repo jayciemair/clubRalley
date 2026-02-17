@@ -118,6 +118,27 @@ class ProfileViewModel: ObservableObject {
         followersCount: Int = 0,
         followingCount: Int = 0
     ) -> UserProfile {
+        // Parse sports with skills from saved data
+        let sportsWithSkills = saved.selectedSports.map { sportName in
+            UserSportSkill(
+                sportName: sportName,
+                skillLevel: .intermediate,  // Default, would come from saved data
+                iconName: sportIcon(for: sportName)
+            )
+        }
+
+        // Convert saved college athlete info to model type
+        let collegeInfo: CollegeAthleteInfo? = {
+            guard let info = saved.collegeAthleteInfo else { return nil }
+            return CollegeAthleteInfo(
+                sport: info.sport,
+                school: info.school,
+                division: CollegeDivision(rawValue: info.division) ?? .club,
+                yearsPlayed: info.yearsPlayed,
+                position: info.position
+            )
+        }()
+
         let user = User(
             id: saved.id,
             email: saved.email,
@@ -136,7 +157,11 @@ class ProfileViewModel: ObservableObject {
             friendsCount: followersCount,
             ralleysCount: ralleys.count,
             createdAt: saved.createdAt,
-            updatedAt: Date()
+            updatedAt: Date(),
+            isPrivateAccount: saved.isPrivateAccount ?? false,
+            sportsWithSkills: sportsWithSkills,
+            playedCollegeSport: saved.playedCollegeSport ?? false,
+            collegeAthleteInfo: collegeInfo
         )
 
         let stats = UserStats(
@@ -238,6 +263,15 @@ class ProfileViewModel: ObservableObject {
         followingCount: Int,
         isFollowedByCurrentUser: Bool?
     ) -> UserProfile {
+        // Parse sports from JSONB
+        let sportsWithSkills = parseSportsFromDatabase(dbUser.sports)
+
+        // Parse college athlete info from athlete_info JSONB
+        let (playedCollege, collegeInfo) = parseCollegeAthleteInfo(dbUser.athlete_info)
+
+        // Parse privacy setting from settings JSONB
+        let isPrivate = parsePrivacySetting(dbUser.settings)
+
         // Lean schema doesn't store DOB/gender - use defaults
         let user = User(
             id: dbUser.id,
@@ -257,7 +291,11 @@ class ProfileViewModel: ObservableObject {
             friendsCount: followersCount,
             ralleysCount: ralleys.count,
             createdAt: dbUser.created_at,
-            updatedAt: dbUser.created_at  // Lean schema doesn't have updated_at
+            updatedAt: dbUser.created_at,  // Lean schema doesn't have updated_at
+            isPrivateAccount: isPrivate,
+            sportsWithSkills: sportsWithSkills,
+            playedCollegeSport: playedCollege,
+            collegeAthleteInfo: collegeInfo
         )
 
         let hostedRalleys = ralleys.filter { $0.organizer.id == dbUser.id }
@@ -426,6 +464,87 @@ class ProfileViewModel: ObservableObject {
         } catch {
             print("ProfileViewModel: Report logged locally (DB may not be configured): \(error)")
             // Don't show error to user - report is logged even if DB fails
+        }
+    }
+
+    // MARK: - Database Parsing Helpers
+
+    /// Parse sports array from JSONB [[String: Any]]?
+    private func parseSportsFromDatabase(_ sports: [[String: Any]]?) -> [UserSportSkill] {
+        guard let sports = sports else { return [] }
+
+        return sports.compactMap { sportDict -> UserSportSkill? in
+            guard let name = sportDict["name"] as? String else { return nil }
+            let skillString = sportDict["skill"] as? String ?? "intermediate"
+            let skillLevel = SkillLevelType(rawValue: skillString) ?? .intermediate
+
+            return UserSportSkill(
+                sportName: name,
+                skillLevel: skillLevel,
+                iconName: sportIcon(for: name)
+            )
+        }
+    }
+
+    /// Parse college athlete info from athlete_info JSONB
+    private func parseCollegeAthleteInfo(_ athleteInfo: [String: Any]?) -> (playedCollege: Bool, info: CollegeAthleteInfo?) {
+        guard let info = athleteInfo else { return (false, nil) }
+
+        let playedCollege = info["played_college"] as? Bool ?? false
+        guard playedCollege else { return (false, nil) }
+
+        let sport = info["sport"] as? String ?? ""
+        let school = info["school"] as? String ?? ""
+        let divisionString = info["division"] as? String ?? "club"
+        let division = CollegeDivision(rawValue: divisionString) ?? .club
+        let yearsPlayed = info["years_played"] as? String
+        let position = info["position"] as? String
+        let achievements = info["achievements"] as? [String] ?? []
+
+        let collegeInfo = CollegeAthleteInfo(
+            sport: sport,
+            school: school,
+            division: division,
+            yearsPlayed: yearsPlayed,
+            position: position,
+            achievements: achievements
+        )
+
+        return (true, collegeInfo)
+    }
+
+    /// Parse privacy setting from settings JSONB
+    private func parsePrivacySetting(_ settings: [String: Any]?) -> Bool {
+        guard let settings = settings else { return false }
+        return settings["is_private"] as? Bool ?? false
+    }
+
+    /// Get SF Symbol icon for a sport name
+    private func sportIcon(for sport: String) -> String {
+        switch sport.lowercased() {
+        case "tennis": return "tennisball.fill"
+        case "basketball": return "basketball.fill"
+        case "soccer", "football": return "soccerball"
+        case "volleyball": return "volleyball.fill"
+        case "baseball": return "baseball.fill"
+        case "golf": return "figure.golf"
+        case "swimming": return "figure.pool.swim"
+        case "pickleball": return "figure.pickleball"
+        case "running": return "figure.run"
+        case "cycling": return "figure.outdoor.cycle"
+        case "hiking": return "figure.hiking"
+        case "yoga": return "figure.yoga"
+        case "crossfit", "fitness": return "dumbbell.fill"
+        case "lacrosse": return "figure.lacrosse"
+        case "hockey": return "hockey.puck.fill"
+        case "skiing": return "figure.skiing.downhill"
+        case "snowboarding": return "figure.snowboarding"
+        case "surfing": return "figure.surfing"
+        case "boxing": return "figure.boxing"
+        case "martial arts", "mma": return "figure.martial.arts"
+        case "rowing": return "figure.rowing"
+        case "climbing": return "figure.climbing"
+        default: return "sportscourt.fill"
         }
     }
 }

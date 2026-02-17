@@ -12,93 +12,51 @@ import Supabase
 
 extension SupabaseManager {
 
-    /// Sign up with email and password
-    func signUp(email: String, password: String) async throws -> UUID {
-        print("🔵 DEBUG AUTH_SIGNUP START - email: \(email)")
-        print("🔵 DEBUG AUTH_SIGNUP - client exists: \(client != nil), fallbackMode: \(useFallbackMode)")
-
+    /// Send OTP code to phone number via SMS
+    /// - Parameter phone: Phone number in E.164 format (e.g. "+15551234567")
+    func sendOTP(phone: String) async throws {
         guard let client = client, !useFallbackMode else {
-            print("🔴 DEBUG AUTH_SIGNUP FAILED - Supabase not configured")
             throw SupabaseError.networkError("Supabase not configured")
         }
 
-        print("🔵 DEBUG AUTH_SIGNUP - Calling Supabase auth.signUp...")
-        let response = try await client.auth.signUp(
-            email: email,
-            password: password
+        try await client.auth.signInWithOTP(phone: phone)
+        print("✅ SupabaseManager: OTP sent to \(phone)")
+    }
+
+    /// Verify OTP code and authenticate user
+    /// - Parameters:
+    ///   - phone: Phone number in E.164 format (e.g. "+15551234567")
+    ///   - code: 6-digit verification code
+    /// - Returns: The authenticated user's UUID
+    func verifyOTP(phone: String, code: String) async throws -> UUID {
+        guard let client = client, !useFallbackMode else {
+            throw SupabaseError.networkError("Supabase not configured")
+        }
+
+        let response = try await client.auth.verifyOTP(
+            phone: phone,
+            token: code,
+            type: .sms
         )
-        print("🔵 DEBUG AUTH_SIGNUP - Got response: \(response)")
 
         let userId: UUID
         switch response {
         case .session(let session):
             userId = session.user.id
-            isAuthenticated = true
-            print("🟢 DEBUG AUTH_SIGNUP - Got session, userId: \(userId)")
         case .user(let user):
             userId = user.id
-            isAuthenticated = true
-            print("🟢 DEBUG AUTH_SIGNUP - Got user, userId: \(userId)")
         }
 
+        isAuthenticated = true
         currentUser = SupabaseUser(
             id: userId,
-            email: email,
+            email: "",
             firstName: "",
             lastName: ""
         )
 
-        print("🟢 DEBUG AUTH_SIGNUP SUCCESS - email: \(email), userId: \(userId)")
+        print("✅ SupabaseManager: OTP verified, userId: \(userId)")
         return userId
-    }
-
-    /// Sign in with email and password
-    func signIn(email: String, password: String) async throws -> UUID {
-        print("🔵 DEBUG AUTH_SIGNIN START - email: \(email)")
-
-        guard let client = client, !useFallbackMode else {
-            print("🔴 DEBUG AUTH_SIGNIN FAILED - Supabase not configured")
-            throw SupabaseError.networkError("Supabase not configured")
-        }
-
-        print("🔵 DEBUG AUTH_SIGNIN - Calling Supabase auth.signIn...")
-        let session = try await client.auth.signIn(
-            email: email,
-            password: password
-        )
-
-        isAuthenticated = true
-        currentUser = SupabaseUser(
-            id: session.user.id,
-            email: session.user.email ?? email,
-            firstName: "",
-            lastName: ""
-        )
-
-        print("🟢 DEBUG AUTH_SIGNIN SUCCESS - email: \(email), userId: \(session.user.id)")
-        return session.user.id
-    }
-
-    /// Sign in with Google (OAuth)
-    func signInWithGoogle(idToken: String) async throws -> UUID {
-        guard let client = client, !useFallbackMode else {
-            throw SupabaseError.networkError("Supabase not configured")
-        }
-
-        let session = try await client.auth.signInWithIdToken(
-            credentials: .init(provider: .google, idToken: idToken)
-        )
-
-        isAuthenticated = true
-        currentUser = SupabaseUser(
-            id: session.user.id,
-            email: session.user.email ?? "",
-            firstName: "",
-            lastName: ""
-        )
-
-        print("✅ SupabaseManager: User signed in with Google successfully")
-        return session.user.id
     }
 
     /// Restore existing session on app launch
@@ -116,7 +74,7 @@ extension SupabaseManager {
                 firstName: "",
                 lastName: ""
             )
-            print("✅ SupabaseManager: Session restored for user: \(session.user.email ?? "unknown")")
+            print("✅ SupabaseManager: Session restored for user: \(session.user.id)")
             return true
         } catch {
             print("📡 SupabaseManager: No existing session - \(error.localizedDescription)")
@@ -128,14 +86,10 @@ extension SupabaseManager {
 
     /// Fetch user profile from users table
     func fetchUserProfile(userId: UUID) async throws -> SavedUserProfile? {
-        print("🔵 DEBUG FETCH_PROFILE START - userId: \(userId)")
-
         guard let client = client, !useFallbackMode else {
-            print("🔴 DEBUG FETCH_PROFILE SKIPPED - fallback mode")
             return nil
         }
 
-        print("🔵 DEBUG FETCH_PROFILE - Querying users table...")
         let response: [ClubUserResponse] = try await client.database
             .from("club_users")
             .select()
@@ -143,14 +97,10 @@ extension SupabaseManager {
             .execute()
             .value
 
-        print("🔵 DEBUG FETCH_PROFILE - Got \(response.count) results")
-
         guard let userData = response.first else {
-            print("🔴 DEBUG FETCH_PROFILE - No user found for userId: \(userId)")
             return nil
         }
 
-        print("🟢 DEBUG FETCH_PROFILE SUCCESS - Found user: \(userData.email), username: \(userData.username)")
         return SavedUserProfile(
             id: userData.id,
             email: userData.email,
@@ -170,14 +120,12 @@ extension SupabaseManager {
     func setAuthenticatedUser(_ user: SupabaseUser) {
         isAuthenticated = true
         currentUser = user
-        print("SupabaseManager: User authenticated: \(user.email)")
     }
 
     /// Clear authenticated user (called by AuthenticationService on sign out)
     func clearAuthenticatedUser() {
         isAuthenticated = false
         currentUser = nil
-        print("SupabaseManager: User cleared")
     }
 
     /// Sign out current user and clear all cached data
@@ -185,7 +133,6 @@ extension SupabaseManager {
         if let client = client, !useFallbackMode {
             do {
                 try await client.auth.signOut()
-                print("🚪 Real Supabase sign out successful")
             } catch {
                 print("❌ Supabase sign out error: \(error)")
             }
@@ -193,7 +140,6 @@ extension SupabaseManager {
 
         isAuthenticated = false
         currentUser = nil
-        print("🧹 User session cleared locally")
     }
 
     /// Check current authentication status
@@ -221,41 +167,8 @@ extension SupabaseManager {
                 currentUser = nil
             }
         } catch {
-            print("❌ SupabaseManager: Auth check failed: \(error)")
             isAuthenticated = false
             currentUser = nil
-        }
-    }
-
-    /// Send password reset email
-    /// - Parameter email: The email address to send the reset link to
-    func resetPassword(email: String) async throws {
-        guard let client = client, !useFallbackMode else {
-            throw SupabaseError.networkError("Supabase not configured")
-        }
-
-        do {
-            try await client.auth.resetPasswordForEmail(email)
-            print("✅ SupabaseManager: Password reset email sent to: \(email)")
-        } catch {
-            print("❌ SupabaseManager: Password reset failed: \(error)")
-            throw SupabaseError.networkError(error.localizedDescription)
-        }
-    }
-
-    /// Update user password (after reset)
-    /// - Parameter newPassword: The new password to set
-    func updatePassword(newPassword: String) async throws {
-        guard let client = client, !useFallbackMode else {
-            throw SupabaseError.networkError("Supabase not configured")
-        }
-
-        do {
-            try await client.auth.update(user: .init(password: newPassword))
-            print("✅ SupabaseManager: Password updated successfully")
-        } catch {
-            print("❌ SupabaseManager: Password update failed: \(error)")
-            throw SupabaseError.networkError(error.localizedDescription)
         }
     }
 }

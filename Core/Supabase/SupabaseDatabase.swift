@@ -165,8 +165,10 @@ extension SupabaseManager {
     }
 
     /// Create a new Club Ralley user profile in the database
+    /// Note: id and authId are typically the same (the Supabase auth user ID)
     func createClubUser(
         id: UUID,
+        authId: UUID? = nil,
         email: String,
         firstName: String,
         lastName: String,
@@ -177,6 +179,7 @@ extension SupabaseManager {
     ) async throws {
         let userData = ClubUserInsert(
             id: id,
+            auth_id: authId ?? id,  // Use authId if provided, otherwise use id
             email: email,
             first_name: firstName,
             last_name: lastName,
@@ -197,6 +200,7 @@ extension SupabaseManager {
 /// Database model for inserting users (matches users table schema)
 struct ClubUserInsert: Codable {
     let id: UUID
+    let auth_id: UUID  // Links to Supabase auth.users.id for RLS
     let email: String
     let first_name: String
     let last_name: String

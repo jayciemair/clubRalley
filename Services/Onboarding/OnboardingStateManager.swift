@@ -19,7 +19,7 @@ final class OnboardingStateManager {
     
     private let userDefaults = UserDefaults.standard
     private let progressKey = "com.dial.onboarding.progress"
-    private let logger = Logger(subsystem: "com.dial", category: "OnboardingState")
+    private let logger = os.Logger(subsystem: "com.dial", category: "OnboardingState")
     
     /// Current flow version - should match flow JSON
     private let currentFlowVersion = "1.0.0"
@@ -125,7 +125,7 @@ final class OnboardingStateManager {
         
         // Check version compatibility
         if !isVersionCompatible(progress.flowVersion) {
-            logger.warning("Progress version \(progress.flowVersion, privacy: .public) incompatible with current \(self.currentFlowVersion, privacy: .public)")
+            logger.warning("Progress version \(progress.flowVersion) incompatible with current \(self.currentFlowVersion)")
             return nil
         }
         
@@ -151,7 +151,7 @@ final class OnboardingStateManager {
     func migrateProgressIfNeeded(from oldVersion: String, to newVersion: String) {
         // Implementation for future version migrations
         // This would handle changes in flow structure between versions
-        logger.info("Migration check from \(oldVersion) to \(newVersion, privacy: .public)")
+        logger.info("Migration check from \(oldVersion) to \(newVersion)")
         
         // Example migration logic:
         // if oldVersion == "1.0.0" && newVersion == "1.1.0" {

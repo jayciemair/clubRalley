@@ -62,8 +62,8 @@ final class DailyCheckInManager: ObservableObject {
 
         if stayedClean {
             // Update streak only if they stayed clean
-            if let lastDate = getLastCheckInDate() {
-                let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
+            if let lastDate = getLastCheckInDate(),
+               let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today) {
                 if Calendar.current.isDate(lastDate, inSameDayAs: yesterday) {
                     // Consecutive day - increment streak
                     checkInStreak += 1
@@ -238,8 +238,8 @@ final class DailyCheckInManager: ObservableObject {
             hasCheckedInToday = Calendar.current.isDate(lastDate, inSameDayAs: today)
 
             // Also check if streak should be reset due to missed days
-            let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
-            if !Calendar.current.isDate(lastDate, inSameDayAs: today) &&
+            if let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today),
+               !Calendar.current.isDate(lastDate, inSameDayAs: today),
                !Calendar.current.isDate(lastDate, inSameDayAs: yesterday) {
                 // Missed more than one day - streak will reset on next check-in
             }

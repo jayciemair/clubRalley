@@ -221,13 +221,6 @@ struct InitialsView: View {
 struct AddAccountView: View {
     let onComplete: () -> Void
 
-    @State private var email = ""
-    @State private var password = ""
-    @State private var isLoading = false
-    @State private var errorMessage: String?
-
-    private let supabase = SupabaseManager.shared
-
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
@@ -254,52 +247,9 @@ struct AddAccountView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
 
-                // Form
-                VStack(spacing: 16) {
-                    TextField("Email", text: $email)
-                        .textFieldStyle(.roundedBorder)
-                        .textContentType(.emailAddress)
-                        .autocapitalization(.none)
-                        .keyboardType(.emailAddress)
-
-                    SecureField("Password", text: $password)
-                        .textFieldStyle(.roundedBorder)
-                        .textContentType(.password)
-
-                    if let error = errorMessage {
-                        Text(error)
-                            .font(.caption)
-                            .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                .padding(.horizontal, 32)
-
-                // Sign In Button
+                // Sign in with phone
                 Button {
-                    signIn()
-                } label: {
-                    HStack {
-                        if isLoading {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
-                            Text("Sign In")
-                                .fontWeight(.semibold)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(hex: "#2C4F40"))
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                }
-                .disabled(email.isEmpty || password.isEmpty || isLoading)
-                .padding(.horizontal, 32)
-
-                // Create Account Link
-                Button {
-                    // Navigate to onboarding for new account
+                    // Sign out and go to phone auth flow
                     UserDefaults.standard.set(false, forKey: "hasCompletedClubRalleyOnboarding")
                     NotificationCenter.default.post(
                         name: NSNotification.Name("UserDidLogout"),
@@ -307,10 +257,15 @@ struct AddAccountView: View {
                     )
                     onComplete()
                 } label: {
-                    Text("Create new account")
-                        .font(.subheadline)
-                        .foregroundColor(Color(hex: "#2C4F40"))
+                    Text("Sign in with phone number")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(hex: "#2C4F40"))
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
                 }
+                .padding(.horizontal, 32)
 
                 Spacer()
             }
@@ -321,35 +276,6 @@ struct AddAccountView: View {
                     Button("Cancel") {
                         onComplete()
                     }
-                }
-            }
-        }
-    }
-
-    private func signIn() {
-        isLoading = true
-        errorMessage = nil
-
-        Task {
-            do {
-                let userId = try await supabase.signIn(email: email, password: password)
-
-                // Fetch profile
-                if let profile = try await supabase.fetchUserProfile(userId: userId) {
-                    MultiProfileManager.shared.addProfile(profile, setAsActive: true)
-
-                    // Mark as completed onboarding
-                    UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
-                }
-
-                await MainActor.run {
-                    isLoading = false
-                    onComplete()
-                }
-            } catch {
-                await MainActor.run {
-                    isLoading = false
-                    errorMessage = error.localizedDescription
                 }
             }
         }

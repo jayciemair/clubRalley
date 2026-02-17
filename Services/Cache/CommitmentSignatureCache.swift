@@ -15,7 +15,7 @@ class CommitmentSignatureCache {
 
     private let imageDataCacheKey = "cached_commitment_signature_image_data"
     private let signedDateCacheKey = "cached_commitment_signed_date"
-    private let logger = Logger(subsystem: "com.checkpoint.cache", category: "CommitmentSignature")
+    private let logger = os.Logger(subsystem: "com.checkpoint.cache", category: "CommitmentSignature")
 
     private init() {}
 

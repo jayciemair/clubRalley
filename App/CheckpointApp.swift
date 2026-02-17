@@ -11,9 +11,9 @@ struct ClubRalleyApp: App {
 
     let persistenceController = PersistenceController.shared
     @StateObject var onboardingFlowController = OnboardingFlowController()  // Shared across entire app
-    @StateObject var storeManager = StoreManager.shared  // Initialize StoreManager
-    @StateObject var versionService = AppVersionService.shared  // Version check service
-    @StateObject var appearanceManager = AppearanceManager.shared  // Appearance mode manager
+    @ObservedObject var storeManager = StoreManager.shared  // Initialize StoreManager
+    @ObservedObject var versionService = AppVersionService.shared  // Version check service
+    @ObservedObject var appearanceManager = AppearanceManager.shared  // Appearance mode manager
     @State var selectedTab: MainTab = .home  // Default to home tab
 
     // Track if Club Ralley onboarding has been completed

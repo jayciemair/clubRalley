@@ -17,8 +17,12 @@ struct ClubRalleyOnboardingCoordinator: View {
             Color.white
                 .ignoresSafeArea()
 
-            if controller.isComplete {
-                // Completion celebration
+            if controller.isComplete && controller.isReturningUser {
+                // Returning user — skip completion view, go straight to main app
+                Color.white.ignoresSafeArea()
+                    .onAppear { completion() }
+            } else if controller.isComplete {
+                // New user — show completion celebration
                 OnboardingCompletionView {
                     completion()
                 }
@@ -26,8 +30,8 @@ struct ClubRalleyOnboardingCoordinator: View {
             } else {
                 // Main onboarding content
                 VStack(spacing: 0) {
-                    // Progress bar (hide on welcome and completion screens)
-                    if controller.currentStep != .welcome && controller.currentStep != .completion {
+                    // Progress bar (hide on completion screen)
+                    if controller.currentStep != .completion {
                         ClubRalleyProgressBar(progress: controller.currentProgress)
                             .padding(.horizontal, 24)
                             .padding(.top, 8)
@@ -60,16 +64,8 @@ struct ClubRalleyOnboardingCoordinator: View {
     @ViewBuilder
     private func screenView(for step: ClubRalleyOnboardingStep) -> some View {
         switch step {
-        case .welcome:
-            RalleyWelcomeScreen()
-                .environmentObject(controller)
-
-        case .email:
-            EmailScreen()
-                .environmentObject(controller)
-
-        case .password:
-            PasswordScreen()
+        case .phoneInput, .otpVerification:
+            PhoneNumberScreen()
                 .environmentObject(controller)
 
         case .name:

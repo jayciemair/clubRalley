@@ -44,9 +44,27 @@ struct HomeFeedView: View {
                             }
                         }
                     } else {
-                        ForEach(postManager.posts) { post in
+                        ForEach(Array(postManager.posts.enumerated()), id: \.element.id) { index, post in
                             FigmaPostCard(post: post)
                                 .environmentObject(postManager)
+                                .onAppear {
+                                    // Load more when reaching near the end
+                                    if index == postManager.posts.count - 3 {
+                                        Task {
+                                            await postManager.loadMorePosts()
+                                        }
+                                    }
+                                }
+                        }
+
+                        // Loading indicator for infinite scroll
+                        if postManager.isLoadingMore {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                    .padding()
+                                Spacer()
+                            }
                         }
 
                         if postManager.posts.isEmpty {

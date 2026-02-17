@@ -27,8 +27,17 @@ class PostManager: ObservableObject {
     /// Loading state for UI feedback
     @Published var isLoading = false
 
+    /// Loading more posts (for infinite scroll)
+    @Published var isLoadingMore = false
+
+    /// Whether there are more posts to load
+    @Published var hasMorePosts = true
+
     /// Error state for user notifications
     @Published var error: Error?
+
+    /// Page size for pagination
+    private let pageSize = 20
 
     // MARK: - Dependencies
 
@@ -321,7 +330,36 @@ class PostManager: ObservableObject {
      */
     func refreshPosts() async {
         print("PostManager: Refreshing posts from database")
+        hasMorePosts = true
         await loadPosts()
+    }
+
+    /**
+     * Load more posts for infinite scroll
+     */
+    func loadMorePosts() async {
+        guard !isLoadingMore && hasMorePosts else { return }
+
+        isLoadingMore = true
+
+        do {
+            let morePosts = try await postService.loadMorePosts(currentCount: posts.count, limit: pageSize)
+
+            if morePosts.isEmpty {
+                hasMorePosts = false
+            } else {
+                posts.append(contentsOf: morePosts)
+                // If we got fewer than requested, no more posts available
+                if morePosts.count < pageSize {
+                    hasMorePosts = false
+                }
+            }
+            print("PostManager: Loaded \(morePosts.count) more posts, total: \(posts.count)")
+        } catch {
+            print("PostManager: Failed to load more posts: \(error)")
+        }
+
+        isLoadingMore = false
     }
 
     /**

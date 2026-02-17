@@ -52,8 +52,11 @@ class MessagingService: ObservableObject {
 
             for msg in sentMessages {
                 let partnerId = msg.recipient_id
-                if conversationPartners[partnerId] == nil ||
-                   msg.created_at > conversationPartners[partnerId]!.lastMessage.created_at {
+                if let existing = conversationPartners[partnerId] {
+                    if msg.created_at > existing.lastMessage.created_at {
+                        conversationPartners[partnerId] = (lastMessage: msg, unreadCount: 0)
+                    }
+                } else {
                     conversationPartners[partnerId] = (lastMessage: msg, unreadCount: 0)
                 }
             }

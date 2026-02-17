@@ -19,128 +19,48 @@ struct EditProfileView: View {
     @State private var state: String = ""
     @State private var instagramHandle: String = ""
 
+    // New profile fields
+    @State private var isPrivateAccount: Bool = false
+    @State private var playedCollegeSport: Bool = false
+    @State private var collegeSport: String = ""
+    @State private var collegeSchool: String = ""
+    @State private var collegeDivision: CollegeDivision = .club
+    @State private var collegeYears: String = ""
+    @State private var collegePosition: String = ""
+
     @State private var showingImagePicker = false
     @State private var selectedImage: UIImage?
     @State private var showingSaveError = false
+    @State private var showingSportsEditor = false
+
+    /// Check if form is valid for submission
+    private var isFormValid: Bool {
+        let trimmedFirstName = firstName.trimmingCharacters(in: .whitespaces)
+        let trimmedLastName = lastName.trimmingCharacters(in: .whitespaces)
+        let trimmedUsername = username.trimmingCharacters(in: .whitespaces)
+
+        return !trimmedFirstName.isEmpty &&
+               !trimmedLastName.isEmpty &&
+               trimmedUsername.count >= 3 &&
+               bio.count <= EditProfileViewModel.maxBioLength
+    }
 
     var body: some View {
         ScrollView {
             VStack(spacing: ClubRalleyTheme.Spacing.lg) {
-                // Profile Photo Section
                 profilePhotoSection
-
-                // Name Section
-                VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-                    Text("Name")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-
-                    HStack(spacing: ClubRalleyTheme.Spacing.md) {
-                        TextField("First Name", text: $firstName)
-                            .textFieldStyle(ClubRalleyTextFieldStyle())
-
-                        TextField("Last Name", text: $lastName)
-                            .textFieldStyle(ClubRalleyTextFieldStyle())
-                    }
-                }
-
-                // Username Section
-                VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-                    Text("Username")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-
-                    TextField("username", text: $username)
-                        .textFieldStyle(ClubRalleyTextFieldStyle())
-                        .autocapitalization(.none)
-                        .autocorrectionDisabled()
-
-                    if let error = viewModel.usernameError {
-                        Text(error)
-                            .font(ClubRalleyTheme.Typography.caption)
-                            .foregroundColor(ClubRalleyTheme.Colors.error)
-                    }
-                }
-
-                // Bio Section
-                VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-                    Text("Bio")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-
-                    TextEditor(text: $bio)
-                        .frame(minHeight: 100)
-                        .padding(8)
-                        .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
-                        .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: ClubRalleyTheme.CornerRadius.medium)
-                                .stroke(ClubRalleyTheme.Colors.accent.opacity(0.3), lineWidth: 1)
-                        )
-
-                    Text("\(bio.count)/150 characters")
-                        .font(ClubRalleyTheme.Typography.caption)
-                        .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                }
-
-                // Location Section
-                VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-                    Text("Location")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-
-                    HStack(spacing: ClubRalleyTheme.Spacing.md) {
-                        TextField("City", text: $city)
-                            .textFieldStyle(ClubRalleyTextFieldStyle())
-
-                        TextField("State", text: $state)
-                            .textFieldStyle(ClubRalleyTextFieldStyle())
-                            .frame(width: 80)
-                    }
-                }
-
-                // Instagram Section
-                VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-                    Text("Instagram")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-
-                    HStack {
-                        Text("@")
-                            .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                        TextField("username", text: $instagramHandle)
-                            .autocapitalization(.none)
-                            .autocorrectionDisabled()
-                    }
-                    .padding()
-                    .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
-                    .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
-                }
-
-                // MARK: - Save Button
-                Button(action: {
-                    Task {
-                        await saveProfile()
-                    }
-                }) {
-                    HStack {
-                        if viewModel.isSaving {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                .padding(.trailing, 8)
-                        }
-                        Text(viewModel.isSaving ? "Saving..." : "Save Profile")
-                            .font(ClubRalleyTheme.Typography.bodyBold)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(ClubRalleyTheme.Colors.accent)
-                    .foregroundColor(.white)
-                    .cornerRadius(ClubRalleyTheme.CornerRadius.large)
-                }
-                .disabled(viewModel.isSaving)
-                .padding(.top, ClubRalleyTheme.Spacing.lg)
-
+                nameSection
+                usernameSection
+                bioSection
+                locationSection
+                instagramSection
+                Divider().padding(.vertical, 8)
+                privacySection
+                Divider().padding(.vertical, 8)
+                collegeAthleteSection
+                Divider().padding(.vertical, 8)
+                sportsSection
+                saveButtonSection
                 Spacer(minLength: 50)
             }
             .padding(ClubRalleyTheme.Spacing.lg)
@@ -148,11 +68,16 @@ struct EditProfileView: View {
         .navigationTitle("Edit Profile")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Cancel") {
+                    dismiss()
+                }
+                .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                .disabled(viewModel.isSaving)
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Save") {
-                    Task {
-                        await saveProfile()
-                    }
+                    Task { await saveProfile() }
                 }
                 .font(ClubRalleyTheme.Typography.bodyBold)
                 .foregroundColor(ClubRalleyTheme.Colors.accent)
@@ -169,19 +94,281 @@ struct EditProfileView: View {
         }
         .overlay {
             if viewModel.isSaving {
-                Color.black.opacity(0.3)
-                    .ignoresSafeArea()
-                    .overlay {
-                        ProgressView("Saving...")
-                            .padding()
-                            .background(Color.white)
-                            .cornerRadius(12)
-                    }
+                ProgressView("Saving...")
+                    .padding(24)
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.2), radius: 12)
             }
         }
+        .allowsHitTesting(!viewModel.isSaving)
         .onAppear {
             loadCurrentProfile()
         }
+    }
+
+    // MARK: - Body Subsections
+
+    private var nameSection: some View {
+        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+            Text("Name")
+                .font(ClubRalleyTheme.Typography.headline)
+                .foregroundColor(ClubRalleyTheme.Colors.text)
+
+            HStack(spacing: ClubRalleyTheme.Spacing.md) {
+                TextField("First Name", text: $firstName)
+                    .textFieldStyle(ClubRalleyTextFieldStyle())
+                TextField("Last Name", text: $lastName)
+                    .textFieldStyle(ClubRalleyTextFieldStyle())
+            }
+
+            if let nameError = viewModel.nameError {
+                Text(nameError)
+                    .font(ClubRalleyTheme.Typography.caption)
+                    .foregroundColor(ClubRalleyTheme.Colors.error)
+            }
+        }
+    }
+
+    private var usernameSection: some View {
+        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+            Text("Username")
+                .font(ClubRalleyTheme.Typography.headline)
+                .foregroundColor(ClubRalleyTheme.Colors.text)
+
+            TextField("username", text: $username)
+                .textFieldStyle(ClubRalleyTextFieldStyle())
+                .autocapitalization(.none)
+                .autocorrectionDisabled()
+
+            if let error = viewModel.usernameError {
+                Text(error)
+                    .font(ClubRalleyTheme.Typography.caption)
+                    .foregroundColor(ClubRalleyTheme.Colors.error)
+            }
+        }
+    }
+
+    private var bioSection: some View {
+        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+            Text("Bio")
+                .font(ClubRalleyTheme.Typography.headline)
+                .foregroundColor(ClubRalleyTheme.Colors.text)
+
+            TextEditor(text: $bio)
+                .frame(minHeight: 100)
+                .padding(8)
+                .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
+                .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
+                .overlay(
+                    RoundedRectangle(cornerRadius: ClubRalleyTheme.CornerRadius.medium)
+                        .stroke(ClubRalleyTheme.Colors.accent.opacity(0.3), lineWidth: 1)
+                )
+
+            HStack {
+                Text("\(bio.count)/\(EditProfileViewModel.maxBioLength) characters")
+                    .font(ClubRalleyTheme.Typography.caption)
+                    .foregroundColor(bio.count > EditProfileViewModel.maxBioLength ? ClubRalleyTheme.Colors.error : ClubRalleyTheme.Colors.secondaryText)
+                Spacer()
+                if bio.count > EditProfileViewModel.maxBioLength {
+                    Text("Too long")
+                        .font(ClubRalleyTheme.Typography.caption)
+                        .foregroundColor(ClubRalleyTheme.Colors.error)
+                }
+            }
+
+            if let bioError = viewModel.bioError {
+                Text(bioError)
+                    .font(ClubRalleyTheme.Typography.caption)
+                    .foregroundColor(ClubRalleyTheme.Colors.error)
+            }
+        }
+    }
+
+    private var locationSection: some View {
+        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+            Text("Location")
+                .font(ClubRalleyTheme.Typography.headline)
+                .foregroundColor(ClubRalleyTheme.Colors.text)
+
+            HStack(spacing: ClubRalleyTheme.Spacing.md) {
+                TextField("City", text: $city)
+                    .textFieldStyle(ClubRalleyTextFieldStyle())
+                TextField("State", text: $state)
+                    .textFieldStyle(ClubRalleyTextFieldStyle())
+                    .frame(width: 80)
+            }
+        }
+    }
+
+    private var instagramSection: some View {
+        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+            Text("Instagram")
+                .font(ClubRalleyTheme.Typography.headline)
+                .foregroundColor(ClubRalleyTheme.Colors.text)
+
+            HStack {
+                Text("@")
+                    .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                TextField("username", text: $instagramHandle)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled()
+            }
+            .padding()
+            .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
+            .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
+        }
+    }
+
+    private var privacySection: some View {
+        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+            Text("Privacy")
+                .font(ClubRalleyTheme.Typography.headline)
+                .foregroundColor(ClubRalleyTheme.Colors.text)
+
+            Toggle(isOn: $isPrivateAccount) {
+                HStack(spacing: 12) {
+                    Image(systemName: isPrivateAccount ? "lock.fill" : "lock.open.fill")
+                        .foregroundColor(ClubRalleyTheme.Colors.accent)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Private Account")
+                            .font(ClubRalleyTheme.Typography.body)
+                        Text(isPrivateAccount ? "Only approved followers can see your profile" : "Anyone can see your profile")
+                            .font(ClubRalleyTheme.Typography.caption)
+                            .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                    }
+                }
+            }
+            .tint(ClubRalleyTheme.Colors.accent)
+        }
+    }
+
+    private var collegeAthleteSection: some View {
+        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.md) {
+            Text("College Athlete")
+                .font(ClubRalleyTheme.Typography.headline)
+                .foregroundColor(ClubRalleyTheme.Colors.text)
+
+            Toggle(isOn: $playedCollegeSport) {
+                HStack(spacing: 12) {
+                    Image(systemName: "graduationcap.fill")
+                        .foregroundColor(ClubRalleyTheme.Colors.accent)
+                    Text("I played a sport in college")
+                        .font(ClubRalleyTheme.Typography.body)
+                }
+            }
+            .tint(ClubRalleyTheme.Colors.accent)
+
+            if playedCollegeSport {
+                collegeFieldsSection
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: playedCollegeSport)
+    }
+
+    private var collegeFieldsSection: some View {
+        VStack(spacing: ClubRalleyTheme.Spacing.md) {
+            TextField("Sport (e.g., Tennis, Soccer)", text: $collegeSport)
+                .textFieldStyle(ClubRalleyTextFieldStyle())
+            TextField("School Name", text: $collegeSchool)
+                .textFieldStyle(ClubRalleyTextFieldStyle())
+            HStack {
+                Text("Division")
+                    .font(ClubRalleyTheme.Typography.body)
+                    .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                Spacer()
+                Picker("Division", selection: $collegeDivision) {
+                    ForEach(CollegeDivision.allCases, id: \.self) { division in
+                        Text(division.displayName).tag(division)
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(ClubRalleyTheme.Colors.accent)
+            }
+            .padding()
+            .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
+            .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
+            TextField("Position (optional)", text: $collegePosition)
+                .textFieldStyle(ClubRalleyTextFieldStyle())
+            TextField("Years played (e.g., 2019-2023)", text: $collegeYears)
+                .textFieldStyle(ClubRalleyTextFieldStyle())
+        }
+        .padding(.leading, 8)
+        .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+
+    private var sportsSection: some View {
+        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+            HStack {
+                Text("My Sports")
+                    .font(ClubRalleyTheme.Typography.headline)
+                    .foregroundColor(ClubRalleyTheme.Colors.text)
+                Spacer()
+                Button(action: { showingSportsEditor = true }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "pencil")
+                        Text("Edit")
+                    }
+                    .font(ClubRalleyTheme.Typography.caption)
+                    .foregroundColor(ClubRalleyTheme.Colors.accent)
+                }
+            }
+
+            Text("Add sports and skill levels to help others find you for ralleys")
+                .font(ClubRalleyTheme.Typography.caption)
+                .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+
+            if let profile = SavedUserProfile.loadFromStorage(), !profile.selectedSports.isEmpty {
+                sportsTagsView(sports: profile.selectedSports)
+            } else {
+                Text("No sports added yet")
+                    .font(ClubRalleyTheme.Typography.body)
+                    .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                    .padding(.vertical, 8)
+            }
+        }
+    }
+
+    private func sportsTagsView(sports: [String]) -> some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
+            ForEach(sports, id: \.self) { sport in
+                HStack(spacing: 4) {
+                    Image(systemName: "sportscourt.fill")
+                        .font(.system(size: 12))
+                    Text(sport)
+                        .font(.system(size: 13, weight: .medium))
+                }
+                .foregroundColor(ClubRalleyTheme.Colors.accent)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(ClubRalleyTheme.Colors.accent.opacity(0.1))
+                .cornerRadius(16)
+            }
+        }
+    }
+
+    private var saveButtonSection: some View {
+        Button(action: {
+            Task { await saveProfile() }
+        }) {
+            HStack {
+                if viewModel.isSaving {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .padding(.trailing, 8)
+                }
+                Text(viewModel.isSaving ? "Saving..." : "Save Profile")
+                    .font(ClubRalleyTheme.Typography.bodyBold)
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(ClubRalleyTheme.Colors.accent)
+            .foregroundColor(.white)
+            .cornerRadius(ClubRalleyTheme.CornerRadius.large)
+        }
+        .disabled(viewModel.isSaving || !isFormValid)
+        .opacity(isFormValid ? 1.0 : 0.6)
+        .padding(.top, ClubRalleyTheme.Spacing.lg)
     }
 
     // MARK: - Profile Photo Section
@@ -258,6 +445,17 @@ struct EditProfileView: View {
             bio = profile.bio ?? ""
             instagramHandle = profile.instagramHandle ?? ""
             viewModel.currentPhotoURL = profile.profilePhotoURL
+
+            // Load new fields from extended profile data
+            isPrivateAccount = profile.isPrivateAccount ?? false
+            playedCollegeSport = profile.playedCollegeSport ?? false
+            if let collegeInfo = profile.collegeAthleteInfo {
+                collegeSport = collegeInfo.sport
+                collegeSchool = collegeInfo.school
+                collegeDivision = CollegeDivision(rawValue: collegeInfo.division) ?? .club
+                collegeYears = collegeInfo.yearsPlayed ?? ""
+                collegePosition = collegeInfo.position ?? ""
+            }
 
             print("📝 EDIT_PROFILE - Fields populated from local storage")
         } else {
@@ -355,7 +553,14 @@ struct EditProfileView: View {
             city: city,
             state: state,
             instagramHandle: instagramHandle,
-            profilePhotoURL: photoURL
+            profilePhotoURL: photoURL,
+            isPrivateAccount: isPrivateAccount,
+            playedCollegeSport: playedCollegeSport,
+            collegeSport: collegeSport,
+            collegeSchool: collegeSchool,
+            collegeDivision: collegeDivision,
+            collegeYears: collegeYears,
+            collegePosition: collegePosition
         )
 
         if success {
@@ -375,9 +580,78 @@ class EditProfileViewModel: ObservableObject {
     @Published var isSaving = false
     @Published var saveError: String?
     @Published var usernameError: String?
+    @Published var bioError: String?
+    @Published var nameError: String?
     @Published var currentPhotoURL: String?
 
     private let supabase = SupabaseManager.shared
+
+    /// Maximum bio length
+    static let maxBioLength = 150
+
+    /// Validate all fields and return true if valid
+    func validateFields(firstName: String, lastName: String, username: String, bio: String) -> Bool {
+        var isValid = true
+
+        // Reset errors
+        nameError = nil
+        usernameError = nil
+        bioError = nil
+
+        // Validate name
+        if firstName.trimmingCharacters(in: .whitespaces).isEmpty {
+            nameError = "First name is required"
+            isValid = false
+        } else if lastName.trimmingCharacters(in: .whitespaces).isEmpty {
+            nameError = "Last name is required"
+            isValid = false
+        }
+
+        // Validate username
+        let usernameValidation = validateUsername(username)
+        if let error = usernameValidation {
+            usernameError = error
+            isValid = false
+        }
+
+        // Validate bio length
+        if bio.count > Self.maxBioLength {
+            bioError = "Bio must be \(Self.maxBioLength) characters or less"
+            isValid = false
+        }
+
+        return isValid
+    }
+
+    /// Validate username format
+    func validateUsername(_ username: String) -> String? {
+        let trimmed = username.trimmingCharacters(in: .whitespaces)
+
+        if trimmed.count < 3 {
+            return "Username must be at least 3 characters"
+        }
+
+        if trimmed.count > 30 {
+            return "Username must be 30 characters or less"
+        }
+
+        // Only allow alphanumeric and underscores
+        let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "_"))
+        if trimmed.unicodeScalars.contains(where: { !allowedCharacters.contains($0) }) {
+            return "Username can only contain letters, numbers, and underscores"
+        }
+
+        return nil
+    }
+
+    // New profile fields
+    @Published var isPrivateAccount: Bool = false
+    @Published var playedCollegeSport: Bool = false
+    @Published var collegeSport: String = ""
+    @Published var collegeSchool: String = ""
+    @Published var collegeDivision: CollegeDivision = .club
+    @Published var collegeYears: String = ""
+    @Published var collegePosition: String = ""
 
     func saveProfile(
         firstName: String,
@@ -387,7 +661,14 @@ class EditProfileViewModel: ObservableObject {
         city: String,
         state: String,
         instagramHandle: String,
-        profilePhotoURL: String?
+        profilePhotoURL: String?,
+        isPrivateAccount: Bool = false,
+        playedCollegeSport: Bool = false,
+        collegeSport: String = "",
+        collegeSchool: String = "",
+        collegeDivision: CollegeDivision = .club,
+        collegeYears: String = "",
+        collegePosition: String = ""
     ) async -> Bool {
         print("📝 VIEWMODEL saveProfile START")
         print("📝 VIEWMODEL - firstName: \(firstName), lastName: \(lastName)")
@@ -396,6 +677,8 @@ class EditProfileViewModel: ObservableObject {
         print("📝 VIEWMODEL - city: \(city), state: \(state)")
         print("📝 VIEWMODEL - instagramHandle: \(instagramHandle)")
         print("📝 VIEWMODEL - profilePhotoURL: \(profilePhotoURL ?? "nil")")
+        print("📝 VIEWMODEL - isPrivateAccount: \(isPrivateAccount)")
+        print("📝 VIEWMODEL - playedCollegeSport: \(playedCollegeSport)")
 
         isSaving = true
         saveError = nil
@@ -405,10 +688,9 @@ class EditProfileViewModel: ObservableObject {
             print("📝 VIEWMODEL saveProfile END - isSaving set to false")
         }
 
-        // Validate username
-        if username.count < 3 {
-            print("❌ VIEWMODEL - Username validation failed: too short")
-            usernameError = "Username must be at least 3 characters"
+        // Validate all fields
+        guard validateFields(firstName: firstName, lastName: lastName, username: username, bio: bio) else {
+            print("❌ VIEWMODEL - Validation failed")
             return false
         }
 
@@ -429,7 +711,16 @@ class EditProfileViewModel: ObservableObject {
                 selectedSports: profile.selectedSports,
                 createdAt: profile.createdAt,
                 bio: bio.isEmpty ? nil : bio,
-                instagramHandle: instagramHandle.isEmpty ? nil : instagramHandle
+                instagramHandle: instagramHandle.isEmpty ? nil : instagramHandle,
+                isPrivateAccount: isPrivateAccount,
+                playedCollegeSport: playedCollegeSport,
+                collegeAthleteInfo: playedCollegeSport ? SavedCollegeAthleteInfo(
+                    sport: collegeSport,
+                    school: collegeSchool,
+                    division: collegeDivision.rawValue,
+                    yearsPlayed: collegeYears.isEmpty ? nil : collegeYears,
+                    position: collegePosition.isEmpty ? nil : collegePosition
+                ) : nil
             )
 
             // Save to UserDefaults

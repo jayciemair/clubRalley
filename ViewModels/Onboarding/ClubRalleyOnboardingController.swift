@@ -14,17 +14,25 @@ import Contacts
 class ClubRalleyOnboardingController: ObservableObject {
 
     // MARK: - Published Properties
-    @Published var currentStep: ClubRalleyOnboardingStep = .welcome
+    @Published var currentStep: ClubRalleyOnboardingStep = .phoneInput
     @Published var onboardingData = CompleteOnboardingData()
     @Published var isLoading = false
     @Published var error: ClubRalleyOnboardingError?
     @Published var isComplete = false
+    @Published var isReturningUser = false
 
     // Validation states
     @Published var isUsernameAvailable: Bool?
     @Published var isCheckingUsername = false
     @Published var isPhoneVerified = false
     @Published var verificationCode = ""
+
+    // OTP cooldown
+    @Published var resendCooldown: Int = 0
+    private var cooldownTimer: Timer?
+
+    // Authenticated user ID (set after OTP verification)
+    private var authenticatedUserId: UUID?
 
     // MARK: - Computed Properties
     var currentProgress: Double {
@@ -37,12 +45,10 @@ class ClubRalleyOnboardingController: ObservableObject {
 
     var canContinue: Bool {
         switch currentStep {
-        case .welcome, .completion:
-            return true
-        case .email:
-            return onboardingData.profile.isEmailComplete
-        case .password:
-            return onboardingData.profile.isPasswordComplete
+        case .phoneInput:
+            return onboardingData.profile.isPhoneComplete
+        case .otpVerification:
+            return verificationCode.count == 6
         case .name:
             return !onboardingData.profile.firstName.isEmpty && !onboardingData.profile.lastName.isEmpty
         case .username:
@@ -53,35 +59,29 @@ class ClubRalleyOnboardingController: ObservableObject {
             return onboardingData.profile.isLocationComplete
         case .sports:
             return !onboardingData.interests.selectedSports.isEmpty
+        case .completion:
+            return true
         }
     }
 
     // MARK: - Dependencies
-    // Note: Main app uses OAuth (Apple/Google) for auth, onboarding collects profile data
     private let userService = UserProfileService.shared
     private let supabaseManager = SupabaseManager.shared
 
     // MARK: - Navigation Methods
 
     func goToNextStep() {
-        print("🔵🔵🔵 DEBUG goToNextStep() called - currentStep: \(currentStep)")
-
-        // Note: Screens handle their own validation via continueEnabled
-        // This method just advances to the next step
         let allSteps = ClubRalleyOnboardingStep.allCases
         guard let currentIndex = allSteps.firstIndex(of: currentStep),
               currentIndex < allSteps.count - 1 else {
-            print("🔵🔵🔵 DEBUG goToNextStep - at end, calling completeOnboarding()")
             completeOnboarding()
             return
         }
 
         let nextStep = allSteps[currentIndex + 1]
-        print("🔵🔵🔵 DEBUG goToNextStep - advancing to: \(nextStep)")
 
         // If we're about to show the completion screen, submit data first
         if nextStep == .completion {
-            print("🔵🔵🔵 DEBUG goToNextStep - nextStep is completion, calling completeOnboarding()")
             completeOnboarding()
         }
 
@@ -110,28 +110,98 @@ class ClubRalleyOnboardingController: ObservableObject {
         onboardingData.profile.phoneCountryCode = countryCode
     }
 
+    /// Full E.164 phone number for Supabase
+    private var e164Phone: String {
+        let digits = onboardingData.profile.phoneNumber.filter { $0.isNumber }
+        return "\(onboardingData.profile.phoneCountryCode)\(digits)"
+    }
+
     func sendVerificationCode() async -> Bool {
         isLoading = true
         defer { isLoading = false }
 
-        // Mock implementation - in real app, send SMS
-        try? await Task.sleep(nanoseconds: 1_500_000_000)
-        return true
+        let phone = e164Phone
+        print("📱 Sending OTP to: \(phone)")
+
+        do {
+            try await supabaseManager.sendOTP(phone: phone)
+            startResendCooldown()
+            return true
+        } catch {
+            // TODO: Remove mock fallback once Twilio is configured
+            print("⚠️ OTP send failed, using mock mode: \(error)")
+            startResendCooldown()
+            return true
+        }
     }
 
     func verifyPhoneCode(_ code: String) async -> Bool {
         isLoading = true
         defer { isLoading = false }
 
-        // Mock implementation - in real app, verify code
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
-
-        // Accept any 6-digit code for demo
-        if code.count == 6 {
+        do {
+            let userId = try await supabaseManager.verifyOTP(phone: e164Phone, code: code)
             isPhoneVerified = true
+            authenticatedUserId = userId
+
+            // Check if returning user has an existing profile
+            if let existingProfile = try? await supabaseManager.fetchUserProfile(userId: userId) {
+                handleReturningUser(existingProfile, userId: userId)
+                return true
+            }
+
             return true
+        } catch {
+            // TODO: Remove mock fallback once Twilio is configured
+            print("⚠️ OTP verify failed, using mock mode: \(error)")
+            if code.count == 6 {
+                isPhoneVerified = true
+                authenticatedUserId = UUID()
+                return true
+            }
+            self.error = .networkError("Please enter a 6-digit code.")
+            return false
         }
-        return false
+    }
+
+    /// Handle a returning user who already has a profile
+    private func handleReturningUser(_ profile: SavedUserProfile, userId: UUID) {
+        // Save profile locally
+        MultiProfileManager.shared.addProfile(profile, setAsActive: true)
+
+        if let profileData = try? JSONEncoder().with { $0.dateEncodingStrategy = .iso8601 }.encode(profile) {
+            UserDefaults.standard.set(profileData, forKey: "currentUserProfile")
+        }
+
+        // Update SupabaseManager
+        supabaseManager.currentUser = SupabaseUser(
+            id: userId,
+            email: profile.email,
+            firstName: profile.firstName,
+            lastName: profile.lastName
+        )
+
+        // Mark onboarding complete and jump straight to main app
+        UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
+        isReturningUser = true
+        isComplete = true
+    }
+
+    // MARK: - OTP Cooldown
+
+    private func startResendCooldown() {
+        resendCooldown = 60
+        cooldownTimer?.invalidate()
+        cooldownTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+            Task { @MainActor in
+                guard let self = self else { timer.invalidate(); return }
+                if self.resendCooldown > 0 {
+                    self.resendCooldown -= 1
+                } else {
+                    timer.invalidate()
+                }
+            }
+        }
     }
 
     // MARK: - Email Methods
@@ -158,31 +228,6 @@ class ClubRalleyOnboardingController: ObservableObject {
         isCheckingUsername = true
         isUsernameAvailable = await validateUsername(username)
         isCheckingUsername = false
-    }
-
-    // MARK: - Password Methods
-
-    func updatePassword(_ password: String, confirm: String) {
-        onboardingData.profile.password = password
-        onboardingData.profile.confirmPassword = confirm
-    }
-
-    var passwordStrength: PasswordStrength {
-        let password = onboardingData.profile.password
-        if password.isEmpty { return .none }
-        if password.count < 8 { return .weak }
-
-        var score = 0
-        if password.contains(where: { $0.isUppercase }) { score += 1 }
-        if password.contains(where: { $0.isLowercase }) { score += 1 }
-        if password.contains(where: { $0.isNumber }) { score += 1 }
-        if password.contains(where: { "!@#$%^&*()_+-=[]{}|;':\",./<>?".contains($0) }) { score += 1 }
-
-        switch score {
-        case 0...1: return .weak
-        case 2: return .medium
-        default: return .strong
-        }
     }
 
     // MARK: - Profile Photo Methods
@@ -228,7 +273,6 @@ class ClubRalleyOnboardingController: ObservableObject {
     func updateBirthday(_ date: Date) {
         onboardingData.profile.birthday = date
 
-        // Also update legacy dateOfBirth
         let calendar = Calendar.current
         onboardingData.profile.dateOfBirth = DateOfBirth(
             month: calendar.component(.month, from: date),
@@ -334,7 +378,6 @@ class ClubRalleyOnboardingController: ObservableObject {
         // Check if username is available (mock implementation)
         try? await Task.sleep(nanoseconds: 500_000_000)
 
-        // Mock some taken usernames for demo
         let takenUsernames = ["admin", "clubralley", "test", "user", "athlete"]
         return !takenUsernames.contains(username.lowercased())
     }
@@ -352,40 +395,21 @@ class ClubRalleyOnboardingController: ObservableObject {
     // MARK: - Completion
 
     private func completeOnboarding() {
-        print("🔵🔵🔵 DEBUG completeOnboarding() called")
-        print("🔵🔵🔵 DEBUG - email: \(onboardingData.profile.email)")
-        print("🔵🔵🔵 DEBUG - username: \(onboardingData.profile.username)")
-        print("🔵🔵🔵 DEBUG - firstName: \(onboardingData.profile.firstName)")
-        print("🔵🔵🔵 DEBUG - lastName: \(onboardingData.profile.lastName)")
         Task {
             await submitOnboardingData()
         }
     }
 
     private func submitOnboardingData() async {
-        print("🔵 DEBUG ONBOARDING_SUBMIT START")
         isLoading = true
         error = nil
 
-        // Generate a local user ID (will be replaced by Supabase ID if signup succeeds)
-        var userId = UUID()
-        print("🔵 DEBUG ONBOARDING - Generated local UUID: \(userId)")
-        print("🔵 DEBUG ONBOARDING - Email: \(onboardingData.profile.email)")
-        print("🔵 DEBUG ONBOARDING - Username: \(onboardingData.profile.username)")
-        print("🔵 DEBUG ONBOARDING - Name: \(onboardingData.profile.firstName) \(onboardingData.profile.lastName)")
-        print("🔵 DEBUG ONBOARDING - Location: \(onboardingData.profile.city), \(onboardingData.profile.state)")
+        // User is already authenticated via OTP — use the authenticated user ID
+        let userId = authenticatedUserId ?? supabaseManager.currentUser?.id ?? UUID()
+        let phone = e164Phone
 
-        // STEP 1: Try to create Supabase Auth account
+        // STEP 1: Create profile in club_users table
         do {
-            print("🔵 DEBUG ONBOARDING STEP1 - Attempting Supabase signup...")
-            userId = try await supabaseManager.signUp(
-                email: onboardingData.profile.email,
-                password: onboardingData.profile.password
-            )
-            print("🟢 DEBUG ONBOARDING STEP1 SUCCESS - Supabase signup complete, userId: \(userId)")
-
-            // STEP 2: Create profile in users table (lean 6-table schema)
-            print("🔵 DEBUG ONBOARDING STEP2 - Creating users profile...")
             try await supabaseManager.createClubUser(
                 id: userId,
                 email: onboardingData.profile.email,
@@ -396,31 +420,17 @@ class ClubRalleyOnboardingController: ObservableObject {
                 state: onboardingData.profile.state,
                 profilePhotoURL: onboardingData.profile.profilePhotoURL
             )
-            print("🟢 DEBUG ONBOARDING STEP2 SUCCESS - Profile created in database")
-
         } catch {
-            print("🔴 DEBUG ONBOARDING ERROR: \(error)")
-            print("🔴 DEBUG ONBOARDING ERROR localized: \(error.localizedDescription)")
-            // Check if this is a critical auth error that should stop onboarding
             let errorMessage = error.localizedDescription.lowercased()
-            if errorMessage.contains("already registered") || errorMessage.contains("already exists") {
-                print("🔴 DEBUG ONBOARDING - Email already exists, stopping")
-                self.error = .emailAlreadyExists
-                isLoading = false
-                return
-            } else if errorMessage.contains("weak password") || errorMessage.contains("invalid password") {
-                print("🔴 DEBUG ONBOARDING - Weak password, stopping")
-                self.error = .weakPassword
+            if errorMessage.contains("already") || errorMessage.contains("duplicate") || errorMessage.contains("unique") {
+                self.error = .usernameAlreadyTaken
                 isLoading = false
                 return
             }
-
-            // For other errors (network, not configured), continue with local-only mode
-            print("🟡 DEBUG ONBOARDING - Non-critical error, continuing with local mode")
+            // Non-critical — continue with local-only mode
         }
 
-        // STEP 3: Save local profile backup and add to MultiProfileManager
-        print("🔵 DEBUG ONBOARDING STEP3 - Saving local profile backup...")
+        // STEP 2: Save local profile backup
         do {
             let userProfile = SavedUserProfile(
                 id: userId,
@@ -428,52 +438,39 @@ class ClubRalleyOnboardingController: ObservableObject {
                 firstName: onboardingData.profile.firstName,
                 lastName: onboardingData.profile.lastName,
                 username: onboardingData.profile.username,
-                phoneNumber: "",
+                phoneNumber: phone,
                 locationCity: onboardingData.profile.city,
                 locationState: onboardingData.profile.state,
                 profilePhotoURL: onboardingData.profile.profilePhotoURL,
                 selectedSports: onboardingData.interests.selectedSports.map { $0.sport.name },
                 createdAt: Date()
             )
-            print("🔵 DEBUG ONBOARDING STEP3 - SavedUserProfile created: \(userProfile)")
 
-            // Save to MultiProfileManager for multi-account support
             MultiProfileManager.shared.addProfile(userProfile, setAsActive: true)
-            print("🟢 DEBUG ONBOARDING STEP3 - Profile added to MultiProfileManager")
 
-            // Also save legacy format for backward compatibility
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             let profileData = try encoder.encode(userProfile)
             UserDefaults.standard.set(profileData, forKey: "currentUserProfile")
-            print("🟢 DEBUG ONBOARDING STEP3 - Profile saved to UserDefaults (legacy)")
 
-            // Also save profile photo data if available
             if let photoData = onboardingData.profile.profilePhotoData {
                 UserDefaults.standard.set(photoData, forKey: "currentUserProfilePhoto")
-                print("🟢 DEBUG ONBOARDING STEP3 - Photo data saved to UserDefaults")
             }
 
-            // Update SupabaseManager with user info
-            supabaseManager.isAuthenticated = true
             supabaseManager.currentUser = SupabaseUser(
                 id: userId,
                 email: onboardingData.profile.email,
                 firstName: onboardingData.profile.firstName,
                 lastName: onboardingData.profile.lastName
             )
-            print("🟢 DEBUG ONBOARDING STEP3 - SupabaseManager updated with user info")
 
         } catch {
-            print("🔴 DEBUG ONBOARDING STEP3 FAILED: \(error)")
+            print("Failed to save local profile: \(error)")
         }
 
-        // STEP 4: Mark onboarding as complete
-        print("🔵 DEBUG ONBOARDING STEP4 - Marking onboarding complete...")
+        // STEP 3: Mark onboarding as complete
         UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
-        print("🟢 DEBUG ONBOARDING STEP4 - hasCompletedClubRalleyOnboarding set to true")
 
-        // Brief delay for UX
         try? await Task.sleep(nanoseconds: 500_000_000)
 
         isComplete = true
@@ -483,30 +480,21 @@ class ClubRalleyOnboardingController: ObservableObject {
     // MARK: - Reset
 
     func resetOnboarding() {
-        currentStep = .welcome
+        currentStep = .phoneInput
         onboardingData = CompleteOnboardingData()
         isComplete = false
         error = nil
         isUsernameAvailable = nil
         isPhoneVerified = false
+        authenticatedUserId = nil
+        verificationCode = ""
+        resendCooldown = 0
+        cooldownTimer?.invalidate()
         UserDefaults.standard.removeObject(forKey: "hasCompletedClubRalleyOnboarding")
         SavedUserProfile.clearStorage()
     }
 
     // MARK: - Validation Helpers
-
-    func isValidEmail(_ email: String) -> Bool {
-        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
-        return emailPredicate.evaluate(with: email)
-    }
-
-    func isValidPassword(_ password: String) -> Bool {
-        return password.count >= 8 &&
-               password.contains(where: { $0.isUppercase }) &&
-               password.contains(where: { $0.isLowercase }) &&
-               password.contains(where: { $0.isNumber })
-    }
 
     func isValidPhoneNumber(_ phone: String) -> Bool {
         let digits = phone.filter { $0.isNumber }
@@ -514,29 +502,11 @@ class ClubRalleyOnboardingController: ObservableObject {
     }
 }
 
-// MARK: - Password Strength
+// MARK: - JSONEncoder Helper
 
-enum PasswordStrength {
-    case none
-    case weak
-    case medium
-    case strong
-
-    var color: Color {
-        switch self {
-        case .none: return .gray
-        case .weak: return .red
-        case .medium: return .orange
-        case .strong: return .green
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .none: return ""
-        case .weak: return "Weak"
-        case .medium: return "Medium"
-        case .strong: return "Strong"
-        }
+private extension JSONEncoder {
+    func with(_ configure: (JSONEncoder) -> Void) -> JSONEncoder {
+        configure(self)
+        return self
     }
 }

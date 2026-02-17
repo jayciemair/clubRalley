@@ -107,7 +107,7 @@ class MilestoneNotificationManager {
             }
 
             // Calculate unlock date
-            let unlockDate = Calendar.current.date(byAdding: .day, value: days, to: streakStartedAt)!
+            guard let unlockDate = Calendar.current.date(byAdding: .day, value: days, to: streakStartedAt) else { continue }
 
             // Skip if unlock date already passed
             if unlockDate < Date() {

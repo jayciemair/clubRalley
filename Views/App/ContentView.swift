@@ -132,8 +132,12 @@ enum RosterTab: String, CaseIterable {
 
 struct RosterView: View {
     @StateObject private var userService = UserService()
+    @StateObject private var messagingService = MessagingService()
     @State private var searchText = ""
-    @State private var selectedTab: RosterTab = .people
+    @State private var selectedRosterTab: RosterTab = .people
+    @State private var messageTargetUser: RosterUserData?
+    @State private var activeConversation: DirectConversation?
+    @State private var isLoadingMessage = false
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
     var body: some View {
@@ -153,14 +157,14 @@ struct RosterView: View {
                     // Tab picker
                     HStack(spacing: 0) {
                         ForEach(RosterTab.allCases, id: \.self) { tab in
-                            Button(action: { withAnimation(.easeInOut(duration: 0.2)) { selectedTab = tab } }) {
+                            Button(action: { withAnimation(.easeInOut(duration: 0.2)) { selectedRosterTab = tab } }) {
                                 VStack(spacing: 8) {
                                     Text(tab.rawValue)
-                                        .font(.system(size: 16, weight: selectedTab == tab ? .semibold : .medium))
-                                        .foregroundColor(selectedTab == tab ? Color(hex: "#2C4F40") : .gray)
+                                        .font(.system(size: 16, weight: selectedRosterTab == tab ? .semibold : .medium))
+                                        .foregroundColor(selectedRosterTab == tab ? Color(hex: "#2C4F40") : .gray)
 
                                     Rectangle()
-                                        .fill(selectedTab == tab ? Color(hex: "#2C4F40") : Color.clear)
+                                        .fill(selectedRosterTab == tab ? Color(hex: "#2C4F40") : Color.clear)
                                         .frame(height: 3)
                                         .cornerRadius(1.5)
                                 }
@@ -173,7 +177,7 @@ struct RosterView: View {
                 .background(Color.white)
 
                 // Content based on selected tab
-                if selectedTab == .people {
+                if selectedRosterTab == .people {
                     peopleContent
                 } else {
                     ChatsListView()
@@ -183,6 +187,11 @@ struct RosterView: View {
             .navigationBarHidden(true)
         }
         .task { await userService.loadUsers(); await userService.loadFollowingStatus() }
+        .sheet(item: $activeConversation) { conversation in
+            NavigationStack {
+                DirectMessageView(conversation: conversation, messagingService: messagingService)
+            }
+        }
     }
 
     // MARK: - People Content
@@ -220,12 +229,35 @@ struct RosterView: View {
                 } else {
                     LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(userService.users) { user in
-                            RosterUserCardView(user: user, userService: userService)
+                            RosterUserCardView(
+                                user: user,
+                                userService: userService,
+                                isLoadingMessage: isLoadingMessage && messageTargetUser?.id == user.id,
+                                onMessageTapped: { openDirectMessage(for: user) }
+                            )
                         }
                     }.padding(.horizontal, 16)
                 }
                 Spacer(minLength: 100)
             }
+        }
+    }
+
+    // MARK: - Messaging
+
+    private func openDirectMessage(for user: RosterUserData) {
+        guard !isLoadingMessage else { return }
+        messageTargetUser = user
+        isLoadingMessage = true
+        Task {
+            do {
+                let conversation = try await messagingService.getOrCreateConversation(with: user.id)
+                activeConversation = conversation
+            } catch {
+                print("Failed to open conversation: \(error)")
+            }
+            isLoadingMessage = false
+            messageTargetUser = nil
         }
     }
 }
@@ -235,10 +267,8 @@ struct RosterView: View {
 struct RosterUserCardView: View {
     let user: RosterUserData
     @ObservedObject var userService: UserService
-    @StateObject private var messagingService = MessagingService()
-    @State private var showingDirectMessage = false
-    @State private var conversation: DirectConversation?
-    @State private var isLoadingMessage = false
+    let isLoadingMessage: Bool
+    let onMessageTapped: () -> Void
 
     var body: some View {
         VStack(spacing: 8) {
@@ -274,7 +304,7 @@ struct RosterUserCardView: View {
                         .cornerRadius(6).overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "#2C4F40"), lineWidth: 1))
                 }
 
-                Button(action: { Task { await openDirectMessage() } }) {
+                Button(action: onMessageTapped) {
                     ZStack {
                         if isLoadingMessage {
                             ProgressView()
@@ -292,141 +322,6 @@ struct RosterUserCardView: View {
         }
         .padding(12).background(Color.white).cornerRadius(12)
         .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
-        .sheet(isPresented: $showingDirectMessage) {
-            if let conversation = conversation {
-                NavigationStack {
-                    DirectMessageView(conversation: conversation, messagingService: messagingService)
-                }
-            }
-        }
-    }
-
-    private func openDirectMessage() async {
-        isLoadingMessage = true
-        do {
-            conversation = try await messagingService.getOrCreateConversation(with: user.id)
-            showingDirectMessage = true
-        } catch {
-            print("Failed to open conversation: \(error)")
-        }
-        isLoadingMessage = false
-    }
-}
-
-// MARK: - Profile Tab View
-
-struct ProfileTabView: View {
-    @State private var showingSettings = false
-    @State private var showingEditProfile = false
-    @State private var isLoading = true
-    private let supabase = SupabaseManager.shared
-
-    // Current user data from Supabase
-    private var currentUser: (name: String, username: String, location: String, photoURL: String, followers: Int, following: Int, ralleys: Int, bio: String?, isVerified: Bool) {
-        if let user = supabase.currentUser {
-            let username = user.email.components(separatedBy: "@").first ?? "user"
-            return (user.displayName, username, "Chicago, IL", "https://picsum.photos/100/100?random=\(user.id.hashValue % 100)", 130, 95, 15, "Love staying active and meeting new people through sports!", false)
-        }
-        return ("Your Name", "yourname", "Chicago, IL", "https://picsum.photos/100/100?random=50", 130, 95, 15, "Love staying active!", false)
-    }
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    currentUserHeader
-                    currentUserInfo
-                    editProfileButton
-                    profileTeamsSection
-                    profilePhotosSection
-                    Spacer(minLength: 100)
-                }
-            }
-            .background(Color(hex: "#F5F5F5")).navigationBarHidden(true)
-            .sheet(isPresented: $showingSettings) {
-                ProfileSettingsView()
-            }
-            .sheet(isPresented: $showingEditProfile) {
-                EditProfileView()
-            }
-        }
-    }
-
-    private var currentUserHeader: some View {
-        VStack(spacing: 20) {
-            HStack {
-                Button(action: { showingSettings = true }) {
-                    Image(systemName: "gearshape").font(.system(size: 22, weight: .medium)).foregroundColor(Color(hex: "#2C4F40"))
-                }
-                Spacer()
-                HStack(spacing: 6) {
-                    Image(systemName: "location.fill").font(.system(size: 14)).foregroundColor(.gray)
-                    Text(currentUser.location).font(.system(size: 16, weight: .medium)).foregroundColor(.gray)
-                }
-            }.padding(.horizontal, 24)
-
-            AsyncImage(url: URL(string: currentUser.photoURL)) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: { Circle().fill(Color(hex: "#2C4F40")) }
-            .frame(width: 110, height: 110).clipShape(Circle())
-            .overlay(Circle().stroke(Color.white, lineWidth: 4))
-            .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
-
-            VStack(spacing: 8) {
-                HStack(spacing: 8) {
-                    Text(currentUser.name).font(.system(size: 26, weight: .bold)).foregroundColor(.black)
-                    if currentUser.isVerified {
-                        Image(systemName: "checkmark.seal.fill").foregroundColor(Color(hex: "#2C4F40")).font(.system(size: 18))
-                    }
-                }
-                Text("@\(currentUser.username)").font(.system(size: 16, weight: .medium)).foregroundColor(.gray)
-            }
-        }.padding(.top, 16).padding(.bottom, 24)
-    }
-
-    private var currentUserInfo: some View {
-        VStack(spacing: 24) {
-            HStack(spacing: 32) {
-                VStack(spacing: 4) { Text("\(currentUser.followers)").font(.system(size: 22, weight: .bold)); Text("Followers").font(.system(size: 14, weight: .medium)).foregroundColor(.gray) }
-                VStack(spacing: 4) { Text("\(currentUser.following)").font(.system(size: 22, weight: .bold)); Text("Following").font(.system(size: 14, weight: .medium)).foregroundColor(.gray) }
-                VStack(spacing: 4) { Text("\(currentUser.ralleys)").font(.system(size: 22, weight: .bold)); Text("Ralleys").font(.system(size: 14, weight: .medium)).foregroundColor(.gray) }
-            }
-            if let bio = currentUser.bio, !bio.isEmpty {
-                Text(bio).font(.system(size: 15)).foregroundColor(.gray).multilineTextAlignment(.center).padding(.horizontal, 40)
-            }
-        }.padding(.horizontal, 24).padding(.bottom, 24)
-    }
-
-    private var editProfileButton: some View {
-        Button(action: { showingEditProfile = true }) {
-            HStack(spacing: 8) {
-                Image(systemName: "pencil").font(.system(size: 16, weight: .medium))
-                Text("Edit Profile").font(.system(size: 17, weight: .semibold))
-            }
-            .foregroundColor(Color(hex: "#2C4F40")).frame(maxWidth: .infinity).padding(.vertical, 16)
-            .background(Color.white).overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: "#2C4F40"), lineWidth: 2)).cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-        }.padding(.horizontal, 24).padding(.bottom, 32)
-    }
-
-    private var profileTeamsSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack { Text("My Teams").font(.system(size: 22, weight: .bold)); Spacer(); Button(action: {}) { Text("View All").font(.system(size: 16, weight: .medium)).foregroundColor(Color(hex: "#2C4F40")) } }
-            Text("No teams yet. Join a ralley to connect with teams!").font(.system(size: 15)).foregroundColor(.gray)
-        }.padding(.horizontal, 24).padding(.bottom, 32)
-    }
-
-    private var profilePhotosSection: some View {
-        let columns = [GridItem(.flexible(), spacing: 4), GridItem(.flexible(), spacing: 4), GridItem(.flexible(), spacing: 4)]
-        return VStack(alignment: .leading, spacing: 20) {
-            HStack { Text("Photos").font(.system(size: 22, weight: .bold)); Spacer(); Button(action: {}) { Text("View All").font(.system(size: 16, weight: .medium)).foregroundColor(Color(hex: "#2C4F40")) } }
-            LazyVGrid(columns: columns, spacing: 4) {
-                ForEach(1...9, id: \.self) { i in
-                    AsyncImage(url: URL(string: "https://picsum.photos/150/150?random=\(i + 400)")) { img in img.resizable().aspectRatio(contentMode: .fill) } placeholder: { Rectangle().fill(Color.gray.opacity(0.2)) }
-                        .frame(height: 110).clipped().cornerRadius(8)
-                }
-            }
-        }.padding(.horizontal, 24)
     }
 }
 

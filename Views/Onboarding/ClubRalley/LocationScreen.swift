@@ -103,15 +103,15 @@ private struct LocationRow: View {
         Button(action: onTap) {
             HStack(spacing: 16) {
                 // Location icon
-                Image(systemName: "mappin.circle.fill")
+                Image(systemName: isSelected ? "mappin.circle.fill" : "mappin.circle.fill")
                     .font(.system(size: 22))
-                    .foregroundColor(isSelected ? Color(hex: "#2C4F40") : .gray)
+                    .foregroundColor(isSelected ? .white : .gray)
                     .frame(width: 32)
 
                 // City name
                 Text("\(city.name), \(city.stateAbbreviation)")
-                    .font(.system(size: 17))
-                    .foregroundColor(.black)
+                    .font(.system(size: 17, weight: isSelected ? .semibold : .regular))
+                    .foregroundColor(isSelected ? .white : .black)
 
                 Spacer()
 
@@ -119,16 +119,22 @@ private struct LocationRow: View {
                 if isSelected {
                     Image(systemName: "checkmark")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(hex: "#2C4F40"))
+                        .foregroundColor(.white)
                 }
             }
             .padding(.vertical, 16)
-            .background(Color.white)
+            .padding(.horizontal, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? Color(hex: "#2C4F40") : Color.clear)
+            )
         }
         .buttonStyle(PlainButtonStyle())
 
-        Divider()
-            .padding(.leading, 48)
+        if !isSelected {
+            Divider()
+                .padding(.leading, 48)
+        }
     }
 }
 

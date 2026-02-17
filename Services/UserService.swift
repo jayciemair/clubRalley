@@ -155,9 +155,12 @@ class UserService: ObservableObject {
 
             let followingIds = Set(friendships.map { $0.friend_id })
 
-            for i in users.indices {
-                users[i].isFollowing = followingIds.contains(users[i].id)
+            // Batch update to trigger a single @Published notification
+            var updatedUsers = users
+            for i in updatedUsers.indices {
+                updatedUsers[i].isFollowing = followingIds.contains(updatedUsers[i].id)
             }
+            users = updatedUsers
 
             print("✅ UserService: Updated following status for \(users.count) users")
 

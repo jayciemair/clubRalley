@@ -14,8 +14,8 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject private var viewModel = SettingsViewModel.shared
-    @StateObject private var appearanceManager = AppearanceManager.shared
-    @StateObject private var storeManager = StoreManager.shared
+    @ObservedObject private var appearanceManager = AppearanceManager.shared
+    @ObservedObject private var storeManager = StoreManager.shared
     @State private var isRestoringPurchases = false
     @State private var showRestoreAlert = false
     @State private var restoreAlertMessage = ""
