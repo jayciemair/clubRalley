@@ -61,7 +61,7 @@ enum RalleySportCategory: String, CaseIterable {
 
 extension RalleySport {
 
-    /// Initial supported sports for Club Ralley
+    /// All supported sports for Club Ralley (matches onboarding sports list)
     static let supportedSports: [RalleySport] = [
         RalleySport(
             id: "tennis",
@@ -86,6 +86,54 @@ extension RalleySport {
             name: "Soccer",
             iconName: "soccerball",
             category: .team
+        ),
+        RalleySport(
+            id: "volleyball",
+            name: "Volleyball",
+            iconName: "volleyball.fill",
+            category: .team
+        ),
+        RalleySport(
+            id: "golf",
+            name: "Golf",
+            iconName: "figure.golf",
+            category: .individual
+        ),
+        RalleySport(
+            id: "running",
+            name: "Running",
+            iconName: "figure.run",
+            category: .individual
+        ),
+        RalleySport(
+            id: "cycling",
+            name: "Cycling",
+            iconName: "bicycle",
+            category: .individual
+        ),
+        RalleySport(
+            id: "swimming",
+            name: "Swimming",
+            iconName: "figure.pool.swim",
+            category: .individual
+        ),
+        RalleySport(
+            id: "hiking",
+            name: "Hiking",
+            iconName: "figure.hiking",
+            category: .individual
+        ),
+        RalleySport(
+            id: "yoga",
+            name: "Yoga",
+            iconName: "figure.yoga",
+            category: .individual
+        ),
+        RalleySport(
+            id: "crossfit",
+            name: "CrossFit",
+            iconName: "dumbbell.fill",
+            category: .individual
         )
     ]
 
