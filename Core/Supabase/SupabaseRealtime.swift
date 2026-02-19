@@ -30,6 +30,7 @@ class RealtimeManager: ObservableObject {
     private var chatMessageChannel: RealtimeChannelV2?
     private var notificationChannel: RealtimeChannelV2?
     private var participantChannel: RealtimeChannelV2?
+    private var feedParticipantChannel: RealtimeChannelV2?
 
     // MARK: - Published State
 
@@ -42,6 +43,7 @@ class RealtimeManager: ObservableObject {
     private var onChatMessage: ((ChatMessagePayload) -> Void)?
     private var onNotification: ((NotificationPayload) -> Void)?
     private var onParticipantChange: ((ParticipantChangePayload) -> Void)?
+    private var onFeedParticipantChange: ((ParticipantChangePayload) -> Void)?
 
     // MARK: - Initialization
 
@@ -317,6 +319,91 @@ class RealtimeManager: ObservableObject {
         }
     }
 
+    // MARK: - Feed Participant Subscriptions (All Ralleys)
+
+    /// Subscribe to participant changes across ALL ralleys (for feed count sync)
+    func subscribeToAllParticipantChanges(
+        onChange: @escaping (ParticipantChangePayload) -> Void
+    ) {
+        guard let client = client else {
+            print("RealtimeManager: No Supabase client available")
+            return
+        }
+
+        // Unsubscribe from existing feed channel
+        Task {
+            await unsubscribeFromAllParticipantChanges()
+        }
+
+        self.onFeedParticipantChange = onChange
+
+        // Create channel for all participant changes (no filter)
+        let channel = client.channel("feed_participants")
+
+        // Listen for inserts (new participants)
+        let insertions = channel.postgresChange(
+            InsertAction.self,
+            schema: "public",
+            table: "ralley_participants"
+        )
+
+        // Listen for updates (status changes, e.g. pending → joined)
+        let updates = channel.postgresChange(
+            UpdateAction.self,
+            schema: "public",
+            table: "ralley_participants"
+        )
+
+        // Listen for deletes (participant left)
+        let deletions = channel.postgresChange(
+            DeleteAction.self,
+            schema: "public",
+            table: "ralley_participants"
+        )
+
+        Task {
+            for await insertion in insertions {
+                await MainActor.run {
+                    self.onFeedParticipantChange?(ParticipantChangePayload(type: .joined, record: insertion.record as? [String: Any]))
+                }
+            }
+        }
+
+        Task {
+            for await update in updates {
+                await MainActor.run {
+                    self.onFeedParticipantChange?(ParticipantChangePayload(type: .updated, record: update.record as? [String: Any]))
+                }
+            }
+        }
+
+        Task {
+            for await deletion in deletions {
+                await MainActor.run {
+                    self.onFeedParticipantChange?(ParticipantChangePayload(type: .left, record: deletion.oldRecord as? [String: Any]))
+                }
+            }
+        }
+
+        // Subscribe to the channel
+        Task {
+            await channel.subscribe()
+            await MainActor.run {
+                self.feedParticipantChannel = channel
+                print("RealtimeManager: Subscribed to all participant changes (feed sync)")
+            }
+        }
+    }
+
+    /// Unsubscribe from feed-level participant changes
+    func unsubscribeFromAllParticipantChanges() async {
+        if let channel = feedParticipantChannel {
+            await channel.unsubscribe()
+            feedParticipantChannel = nil
+            print("RealtimeManager: Unsubscribed from feed participant changes")
+        }
+    }
+
     // MARK: - Cleanup
 
     /// Unsubscribe from all channels
@@ -325,6 +412,7 @@ class RealtimeManager: ObservableObject {
         await unsubscribeFromChatMessages()
         await unsubscribeFromNotifications()
         await unsubscribeFromParticipants()
+        await unsubscribeFromAllParticipantChanges()
         isConnected = false
         print("RealtimeManager: Unsubscribed from all channels")
     }

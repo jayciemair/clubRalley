@@ -18,6 +18,7 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
     case profilePhoto = "profile_photo"
     case location = "location"
     case sports = "sports"
+    case collegeAthlete = "college_athlete"
     case completion = "completion"
 
     var title: String {
@@ -36,6 +37,8 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
             return "Where do you compete the most?"
         case .sports:
             return "What sports do you play?"
+        case .collegeAthlete:
+            return "Were you a college athlete?"
         case .completion:
             return "Congrats! You made the team!"
         }
@@ -57,6 +60,8 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
             return nil
         case .sports:
             return nil
+        case .collegeAthlete:
+            return "This helps us connect you with fellow athletes"
         case .completion:
             return nil
         }

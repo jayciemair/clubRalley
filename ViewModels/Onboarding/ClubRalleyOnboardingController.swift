@@ -59,6 +59,8 @@ class ClubRalleyOnboardingController: ObservableObject {
             return onboardingData.profile.isLocationComplete
         case .sports:
             return !onboardingData.interests.selectedSports.isEmpty
+        case .collegeAthlete:
+            return true
         case .completion:
             return true
         }
@@ -418,7 +420,8 @@ class ClubRalleyOnboardingController: ObservableObject {
                 username: onboardingData.profile.username,
                 city: onboardingData.profile.city,
                 state: onboardingData.profile.state,
-                profilePhotoURL: onboardingData.profile.profilePhotoURL
+                profilePhotoURL: onboardingData.profile.profilePhotoURL,
+                isVerifiedAthlete: onboardingData.athlete.isAthlete
             )
         } catch {
             let errorMessage = error.localizedDescription.lowercased()
@@ -443,7 +446,8 @@ class ClubRalleyOnboardingController: ObservableObject {
                 locationState: onboardingData.profile.state,
                 profilePhotoURL: onboardingData.profile.profilePhotoURL,
                 selectedSports: onboardingData.interests.selectedSports.map { $0.sport.name },
-                createdAt: Date()
+                createdAt: Date(),
+                playedCollegeSport: onboardingData.athlete.isAthlete
             )
 
             MultiProfileManager.shared.addProfile(userProfile, setAsActive: true)

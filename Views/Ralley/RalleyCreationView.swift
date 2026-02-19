@@ -25,8 +25,10 @@ struct RalleyCreationView: View {
     // Location State
     @State private var locationName = ""
     @State private var locationAddress = ""
-    @State private var locationCity = "San Francisco"
-    @State private var locationState = "CA"
+    @State private var locationCity = "Lewisburg"
+    @State private var locationState = "PA"
+    @State private var locationLatitude: Double = 0.0
+    @State private var locationLongitude: Double = 0.0
     @State private var showingLocationSearch = false
 
     // Player Count State
@@ -82,7 +84,9 @@ struct RalleyCreationView: View {
                 locationName: $locationName,
                 locationAddress: $locationAddress,
                 locationCity: $locationCity,
-                locationState: $locationState
+                locationState: $locationState,
+                locationLatitude: $locationLatitude,
+                locationLongitude: $locationLongitude
             )
         }
         .alert("Error", isPresented: $showingError) {
@@ -161,7 +165,6 @@ struct RalleyCreationView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
                 FifteenMinuteDatePicker(selection: $selectedDate, minimumDate: Date())
-                    .fixedSize()
             }
 
             Divider()
@@ -298,6 +301,16 @@ struct RalleyCreationView: View {
 
     // MARK: - Privacy Section
 
+    private var availableVisibilityOptions: [RalleyVisibility] {
+        let isFormerCollegeAthlete = SavedUserProfile.loadFromStorage()?.playedCollegeSport == true
+        return RalleyVisibility.allCases.filter { option in
+            if option == .collegeAthletesOnly {
+                return isFormerCollegeAthlete
+            }
+            return true
+        }
+    }
+
     private var privacySection: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionHeader(title: "Privacy Settings", icon: "lock.fill")
@@ -306,7 +319,7 @@ struct RalleyCreationView: View {
                 Text("Who can see this Ralley?")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
-                ForEach(RalleyVisibility.allCases, id: \.self) { option in
+                ForEach(availableVisibilityOptions, id: \.self) { option in
                     PrivacyOptionRow(
                         title: option.displayName,
                         description: option.description,
@@ -437,6 +450,8 @@ struct RalleyCreationView: View {
                 address: locationAddress,
                 city: locationCity,
                 state: locationState,
+                latitude: locationLatitude,
+                longitude: locationLongitude,
                 maxPlayers: maxPlayers,
                 cost: 0,
                 description: description.isEmpty ? "Join us for a fun \(selectedSport?.name ?? "game")!" : description,

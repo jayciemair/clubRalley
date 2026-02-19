@@ -157,6 +157,11 @@ struct ClubRalley: Identifiable, Codable {
         return dateTime > Date() && dateTime < twoHoursFromNow
     }
 
+    /// Whether this ralley is restricted to former college athletes
+    var isCollegeAthletesOnly: Bool {
+        visibility == .collegeAthletesOnly
+    }
+
     /// Whether this ralley requires approval to join
     var requiresApproval: Bool {
         joinType == .approvalRequired

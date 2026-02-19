@@ -14,8 +14,24 @@ import SwiftUI
  * Purpose: Manages join/leave operations and join request management
  * Database: Uses ralley_participants table
  */
+// MARK: - Protocol
+
 @MainActor
-class RalleyParticipationService: ObservableObject {
+protocol RalleyParticipationServiceProtocol: ObservableObject {
+    var isLoading: Bool { get }
+    func joinRalley(ralleyId: UUID) async throws -> Bool
+    func leaveRalley(ralleyId: UUID) async throws -> Bool
+    func requestToJoin(ralleyId: UUID) async throws -> Bool
+    func approveJoinRequest(ralleyId: UUID, userId: UUID) async throws -> Bool
+    func rejectJoinRequest(ralleyId: UUID, userId: UUID) async throws -> Bool
+    func loadPendingRequests(ralleyId: UUID) async throws -> [PendingJoinRequest]
+    func getPendingRequestsCount(ralleyId: UUID) async throws -> Int
+    func hasPendingRequest(ralleyId: UUID) async throws -> Bool
+    func getAttendees(ralleyId: UUID) async throws -> [RalleyAttendee]
+}
+
+@MainActor
+class RalleyParticipationService: ObservableObject, RalleyParticipationServiceProtocol {
 
     // MARK: - Dependencies
 

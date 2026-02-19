@@ -9,8 +9,22 @@
 import Foundation
 import SwiftUI
 
+// MARK: - Protocol
+
 @MainActor
-class MessagingService: ObservableObject {
+protocol MessagingServiceProtocol: ObservableObject {
+    var conversations: [DirectConversation] { get }
+    var isLoading: Bool { get }
+    var totalUnreadCount: Int { get }
+    func loadConversations(limit: Int, offset: Int) async
+    func getOrCreateConversation(with userId: UUID) async throws -> DirectConversation
+    func loadMessages(conversationId: UUID, limit: Int, before: Date?) async throws -> [DirectMessage]
+    func sendMessage(conversationId: UUID, recipientId: UUID, content: String) async throws -> DirectMessage
+    func markAsRead(conversationId: UUID) async
+}
+
+@MainActor
+class MessagingService: ObservableObject, MessagingServiceProtocol {
 
     // MARK: - Dependencies
 
@@ -25,7 +39,7 @@ class MessagingService: ObservableObject {
     // MARK: - Load Conversations
 
     /// Load all direct message conversations for the current user
-    func loadConversations() async {
+    func loadConversations(limit: Int = 200, offset: Int = 0) async {
         guard supabase.isAuthenticated else { return }
         guard let currentUser = supabase.currentUser else { return }
 
@@ -39,12 +53,14 @@ class MessagingService: ObservableObject {
                 .select("*")
                 .eq("sender_id", value: currentUser.id)
                 .order("created_at", ascending: false)
+                .limit(limit)
                 .execute()
 
             let receivedMessages: [DatabaseDirectMessageRecord] = try await supabase.query("direct_messages")
                 .select("*")
                 .eq("recipient_id", value: currentUser.id)
                 .order("created_at", ascending: false)
+                .limit(limit)
                 .execute()
 
             // Combine and find unique conversation partners

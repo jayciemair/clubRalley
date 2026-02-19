@@ -60,7 +60,7 @@ class RalleyCompletionManager: ObservableObject {
     // MARK: - Dependencies
 
     /// Service layer for completion operations
-    private let completionService = RalleyCompletionService()
+    private let completionService: RalleyCompletionService
 
     /// Reference to parent RalleyManager
     private weak var ralleyManager: RalleyManager?
@@ -84,8 +84,9 @@ class RalleyCompletionManager: ObservableObject {
 
     // MARK: - Initialization
 
-    init(ralleyManager: RalleyManager) {
+    init(ralleyManager: RalleyManager, completionService: RalleyCompletionService? = nil) {
         self.ralleyManager = ralleyManager
+        self.completionService = completionService ?? ServiceContainer.shared.ralleyCompletionService
         loadProcessedRalleyIds()
     }
 

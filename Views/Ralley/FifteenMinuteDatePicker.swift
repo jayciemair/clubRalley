@@ -2,60 +2,69 @@
 //  FifteenMinuteDatePicker.swift
 //  Club Ralley
 //
-//  UIKit-backed date picker that only shows 15-minute intervals
+//  Date picker with time restricted to 15-minute intervals
 //
 
 import SwiftUI
-import UIKit
 
-struct FifteenMinuteDatePicker: UIViewRepresentable {
+struct FifteenMinuteDatePicker: View {
     @Binding var selection: Date
     var minimumDate: Date?
 
-    func makeUIView(context: Context) -> UIDatePicker {
-        let picker = UIDatePicker()
-        picker.datePickerMode = .dateAndTime
-        picker.preferredDatePickerStyle = .compact
-        picker.minuteInterval = 15
-        picker.minimumDate = minimumDate
-        picker.overrideUserInterfaceStyle = .light
-        // Use UIColor directly to avoid SwiftUI Color conversion issues
-        picker.tintColor = UIColor(red: 44/255.0, green: 79/255.0, blue: 64/255.0, alpha: 1)
-        picker.setContentCompressionResistancePriority(.required, for: .horizontal)
-        picker.setContentCompressionResistancePriority(.required, for: .vertical)
-        picker.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        picker.addTarget(context.coordinator, action: #selector(Coordinator.dateChanged(_:)), for: .valueChanged)
-
-        // Snap initial value to nearest 15 minutes
-        let snapped = selection.roundedToNearest15Minutes()
-        picker.date = snapped
-        if snapped != selection {
-            DispatchQueue.main.async { selection = snapped }
-        }
-
-        return picker
+    /// Minutes from midnight, snapped to nearest 15
+    private var currentSlot: Int {
+        let cal = Calendar.current
+        let hour = cal.component(.hour, from: selection)
+        let minute = cal.component(.minute, from: selection)
+        return hour * 60 + ((minute / 15) * 15)
     }
 
-    func updateUIView(_ picker: UIDatePicker, context: Context) {
-        picker.minimumDate = minimumDate
-        if picker.date != selection {
-            picker.date = selection
+    /// All 96 fifteen-minute slots in a day (0, 15, 30, ... 1425)
+    private let timeSlots: [Int] = Array(stride(from: 0, to: 1440, by: 15))
+
+    var body: some View {
+        HStack {
+            // Date — native SwiftUI picker (renders correctly)
+            DatePicker(
+                "",
+                selection: $selection,
+                in: (minimumDate ?? .distantPast)...,
+                displayedComponents: .date
+            )
+            .labelsHidden()
+            .tint(Color(hex: "#2C4F40"))
+
+            // Time — menu picker showing only 15-min intervals
+            Picker("Time", selection: slotBinding) {
+                ForEach(timeSlots, id: \.self) { slot in
+                    Text(formatSlot(slot)).tag(slot)
+                }
+            }
+            .tint(Color(hex: "#2C4F40"))
         }
     }
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(selection: $selection)
+    /// Two-way binding between the Date and the selected time slot
+    private var slotBinding: Binding<Int> {
+        Binding(
+            get: { currentSlot },
+            set: { newSlot in
+                let cal = Calendar.current
+                var components = cal.dateComponents([.year, .month, .day], from: selection)
+                components.hour = newSlot / 60
+                components.minute = newSlot % 60
+                if let newDate = cal.date(from: components) {
+                    selection = newDate
+                }
+            }
+        )
     }
 
-    class Coordinator: NSObject {
-        var selection: Binding<Date>
-
-        init(selection: Binding<Date>) {
-            self.selection = selection
-        }
-
-        @objc func dateChanged(_ picker: UIDatePicker) {
-            selection.wrappedValue = picker.date
-        }
+    private func formatSlot(_ minutesFromMidnight: Int) -> String {
+        let hour = minutesFromMidnight / 60
+        let minute = minutesFromMidnight % 60
+        let period = hour >= 12 ? "PM" : "AM"
+        let displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour)
+        return String(format: "%d:%02d %@", displayHour, minute, period)
     }
 }

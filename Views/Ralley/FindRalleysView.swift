@@ -6,11 +6,17 @@
 //
 
 import SwiftUI
+import MapKit
 
 // MARK: - Find Ralleys View
 
 struct FindRalleysView: View {
     @EnvironmentObject var ralleyManager: RalleyManager
+    @StateObject private var mapViewModel = MapViewModel()
+
+    // Map State
+    @State private var mapPosition: MapCameraPosition = .automatic
+    @State private var isMapExpanded = false
 
     // Filter State
     @State private var selectedSportFilter: String? = nil
@@ -57,59 +63,167 @@ struct FindRalleysView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    headerSection
-                    searchBar
-                    quickActionsSection
-                    if hasActiveFilters { activeFiltersSection }
-                    ralleysSection
-                }
+        ScrollView {
+            VStack(spacing: 24) {
+                headerSection
+                mapSection
+                mapSportFilterStrip
+                searchBar
+                quickActionsSection
+                if hasActiveFilters { activeFiltersSection }
+                ralleysSection
             }
-            .background(ClubRalleyTheme.Colors.sageBackground)
-            .navigationBarHidden(true)
-            .sheet(isPresented: $ralleyManager.showingCreateRalley) {
-                RalleyCreationView().environmentObject(ralleyManager)
+        }
+        .background(ClubRalleyTheme.Colors.sageBackground)
+        .navigationBarHidden(true)
+        .sheet(isPresented: $ralleyManager.showingCreateRalley) {
+            RalleyCreationView().environmentObject(ralleyManager)
+        }
+        .sheet(isPresented: $showingFilterSheet) {
+            RalleyFilterSheet(selectedSport: $selectedSportFilter, selectedDate: $selectedDateFilter)
+        }
+        .sheet(item: completingRalleyBinding) { ralley in
+            RalleyCompletionSheet(ralley: ralley).environmentObject(ralleyManager)
+        }
+        .sheet(isPresented: $mapViewModel.showingVenueDetail) {
+            if let venue = mapViewModel.selectedVenue {
+                VenueDetailSheet(venue: venue)
+                    .environmentObject(ralleyManager)
             }
-            .sheet(isPresented: $showingFilterSheet) {
-                RalleyFilterSheet(selectedSport: $selectedSportFilter, selectedDate: $selectedDateFilter)
+        }
+        .refreshable {
+            await ralleyManager.refreshRalleys()
+        }
+        .onAppear {
+            ralleyManager.completionManager?.startMonitoring()
+            updateMapPosition(for: mapViewModel.selectedCity)
+        }
+        .onChange(of: mapViewModel.selectedCity) { _, newCity in
+            withAnimation(.easeInOut(duration: 0.5)) {
+                updateMapPosition(for: newCity)
             }
-            .sheet(item: completingRalleyBinding) { ralley in
-                RalleyCompletionSheet(ralley: ralley).environmentObject(ralleyManager)
-            }
-            .refreshable {
-                await ralleyManager.refreshRalleys()
-            }
-            .onAppear {
-                ralleyManager.completionManager?.startMonitoring()
-            }
-            .onDisappear {
-                ralleyManager.completionManager?.stopMonitoring()
-            }
+        }
+        .onDisappear {
+            ralleyManager.completionManager?.stopMonitoring()
         }
     }
 
     // MARK: - Header Section
 
     private var headerSection: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "sportscourt.fill")
-                .font(.system(size: 32, weight: .bold))
-                .foregroundColor(Color(hex: "#2C4F40"))
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Find Ralleys")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.black)
-                Text("Join pickup games near you")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.gray)
-            }
-            Spacer()
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Find Ralleys")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(.black)
+            Text("Join pickup games near you")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(.gray)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 24)
         .padding(.top, 16)
+    }
+
+    // MARK: - Map Section
+
+    private var mapSection: some View {
+        ZStack(alignment: .topLeading) {
+            Map(position: $mapPosition, selection: Binding<Venue.ID?>(
+                get: { mapViewModel.selectedVenue?.id },
+                set: { newId in
+                    if let id = newId,
+                       let venue = mapViewModel.filteredVenues.first(where: { $0.id == id }) {
+                        mapViewModel.selectVenue(venue)
+                    }
+                }
+            )) {
+                ForEach(mapViewModel.filteredVenues) { venue in
+                    Annotation(venue.name, coordinate: venue.coordinate, anchor: .bottom) {
+                        VenueMapPin(
+                            venue: venue,
+                            isSelected: mapViewModel.selectedVenue?.id == venue.id
+                        )
+                        .onTapGesture {
+                            mapViewModel.selectVenue(venue)
+                        }
+                    }
+                    .tag(venue.id)
+                }
+            }
+            .mapStyle(.standard(pointsOfInterest: .excludingAll))
+            .frame(height: isMapExpanded ? 450 : 220)
+            .cornerRadius(16)
+            .onTapGesture {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    isMapExpanded.toggle()
+                }
+            }
+
+            // Top-left: city label
+            HStack(spacing: 6) {
+                Image(systemName: "mappin.circle.fill")
+                    .font(.system(size: 14))
+                Text(mapViewModel.selectedCity.displayName)
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color(hex: "#2C4F40"))
+            .cornerRadius(20)
+            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+            .padding(12)
+
+            // Bottom-right: expand/collapse button
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            isMapExpanded.toggle()
+                        }
+                    }) {
+                        Image(systemName: isMapExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color(hex: "#2C4F40"))
+                            .frame(width: 36, height: 36)
+                            .background(.white)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+                    }
+                }
+            }
+            .padding(12)
+            .frame(height: isMapExpanded ? 450 : 220)
+        }
+        .padding(.horizontal, 24)
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: isMapExpanded)
+    }
+
+    // MARK: - Map Sport Filter Strip
+
+    private var mapSportFilterStrip: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                FilterPill(
+                    title: "All",
+                    iconName: "sportscourt.fill",
+                    isSelected: mapViewModel.selectedSportFilter == nil,
+                    action: { mapViewModel.filterBySport(nil) }
+                )
+
+                ForEach(RalleySport.supportedSports) { sport in
+                    FilterPill(
+                        title: sport.name,
+                        iconName: sport.iconName,
+                        isSelected: mapViewModel.selectedSportFilter?.lowercased() == sport.name.lowercased(),
+                        action: { mapViewModel.filterBySport(sport.name) }
+                    )
+                }
+            }
+            .padding(.horizontal, 24)
+        }
     }
 
     // MARK: - Search Bar
@@ -134,7 +248,7 @@ struct FindRalleysView: View {
         .padding(12)
         .background(Color.white)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 1)
         .padding(.horizontal, 24)
     }
 
@@ -239,9 +353,14 @@ struct FindRalleysView: View {
                     .foregroundColor(.black)
                 Spacer()
                 if !ralleyManager.isLoading {
-                    Text("\(filteredRalleys.count) found")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.gray)
+                    HStack(spacing: 4) {
+                        Text("\(filteredRalleys.count) found")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.gray)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.gray)
+                    }
                 }
             }
             .padding(.horizontal, 24)
@@ -261,6 +380,19 @@ struct FindRalleysView: View {
                             RalleyCardView(ralley: ralley).environmentObject(ralleyManager)
                         }
                         .buttonStyle(PlainButtonStyle())
+                        .onAppear {
+                            // Trigger pagination when near the last item
+                            if ralley.id == filteredRalleys.last?.id && ralleyManager.hasMoreRalleys {
+                                Task {
+                                    await ralleyManager.loadMoreRalleys()
+                                }
+                            }
+                        }
+                    }
+
+                    if ralleyManager.isLoadingMore {
+                        ProgressView()
+                            .padding(.vertical, 16)
                     }
                 }
                 .padding(.horizontal, 24)
@@ -317,6 +449,12 @@ struct FindRalleysView: View {
             }
         }
         .padding(.top, 40)
+    }
+
+    // MARK: - Map Helpers
+
+    private func updateMapPosition(for city: MapCity) {
+        mapPosition = .region(city.region)
     }
 }
 

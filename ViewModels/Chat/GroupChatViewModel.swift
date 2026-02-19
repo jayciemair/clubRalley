@@ -47,14 +47,15 @@ class GroupChatViewModel: ObservableObject {
 
     // MARK: - Dependencies
 
-    private let chatService = ChatService()
+    private let chatService: ChatService
     private let realtimeManager = RealtimeManager.shared
     private let supabaseManager = SupabaseManager.shared
 
     // MARK: - Initialization
 
-    init(chat: GroupChat) {
+    init(chat: GroupChat, chatService: ChatService? = nil) {
         self.chat = chat
+        self.chatService = chatService ?? ServiceContainer.shared.chatService
         Task {
             await loadMessages()
             await loadMembers()

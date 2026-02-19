@@ -24,7 +24,7 @@ struct FigmaPostCard: View {
             if post.visibility != .everyone {
                 VisibilityBadge(visibility: post.visibility)
                     .padding(.horizontal, 16)
-                    .padding(.top, 8)
+                    .padding(.top, 6)
             }
 
             if post.isRepost, let originalAuthor = post.originalAuthorName {
@@ -34,7 +34,7 @@ struct FigmaPostCard: View {
                 }
                 .foregroundColor(.gray)
                 .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.top, 6)
             }
 
             if post.postType == .ralleyCompletion {
@@ -48,15 +48,15 @@ struct FigmaPostCard: View {
                 .background(Color(hex: "#2C4F40").opacity(0.1))
                 .cornerRadius(12)
                 .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.top, 6)
             }
 
             if let title = post.title, !title.isEmpty {
                 Text(title)
-                    .font(.system(size: 20, weight: .bold))
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundColor(Color(hex: "#2C4F40"))
                     .padding(.horizontal, 16)
-                    .padding(.top, 12)
+                    .padding(.top, 10)
             }
 
             if let quoteComment = post.repostComment, !quoteComment.isEmpty {
@@ -64,7 +64,7 @@ struct FigmaPostCard: View {
                     .font(.system(size: 16))
                     .foregroundColor(.black)
                     .padding(.horizontal, 16)
-                    .padding(.top, 8)
+                    .padding(.top, 6)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(post.content)
@@ -77,13 +77,13 @@ struct FigmaPostCard: View {
                 .background(Color.gray.opacity(0.05))
                 .cornerRadius(10)
                 .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.top, 6)
             } else {
                 Text(post.content)
                     .font(.system(size: 16))
                     .foregroundColor(.black)
                     .padding(.horizontal, 16)
-                    .padding(.top, 8)
+                    .padding(.top, 6)
             }
 
             if !post.taggedUserIds.isEmpty {
@@ -93,18 +93,17 @@ struct FigmaPostCard: View {
                 }
                 .foregroundColor(Color(hex: "#2C4F40"))
                 .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.top, 6)
             }
-
-            FigmaSocialProof().padding(.horizontal, 16).padding(.top, 16)
-            FigmaActionButtons(post: post, showingComments: $showingComments, showingRepost: $showingRepost, postManager: postManager)
-                .padding(.horizontal, 16).padding(.top, 12)
 
             if !post.images.isEmpty {
-                FigmaPostImage(images: post.images).padding(.top, 16)
+                FigmaPostImage(images: post.images).padding(.top, 12)
             }
 
-            Divider().padding(.top, 16)
+            FigmaActionButtons(post: post, showingComments: $showingComments, showingRepost: $showingRepost, postManager: postManager)
+                .padding(.horizontal, 16).padding(.top, 10)
+
+            Divider().padding(.top, 12)
         }
         .background(Color.white)
         .sheet(isPresented: $showingComments) { SimpleCommentsSheet(post: post).environmentObject(postManager) }
@@ -135,37 +134,36 @@ struct FigmaPostHeader: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                // Tappable author name
-                if let authorId = post.authorId {
-                    NavigationLink(destination: UserProfileView(userId: authorId)) {
+                HStack(spacing: 6) {
+                    // Tappable author name
+                    if let authorId = post.authorId {
+                        NavigationLink(destination: UserProfileView(userId: authorId)) {
+                            Text(post.authorName)
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.black)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    } else {
                         Text(post.authorName)
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 15, weight: .bold))
                             .foregroundColor(.black)
                     }
-                    .buttonStyle(PlainButtonStyle())
-                } else {
-                    Text(post.authorName)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.black)
+
+                    Spacer()
+
+                    Text(post.timeAgo)
+                        .font(.system(size: 13))
+                        .foregroundColor(.gray)
                 }
 
                 Text(subtitleText)
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
                     .foregroundColor(.gray)
-
-                HStack(spacing: 4) {
-                    Text(post.timeAgo).font(.system(size: 14)).foregroundColor(.gray)
-                    Text("-").font(.system(size: 14)).foregroundColor(.gray)
-                    Text(post.authorLocation ?? "Chicago, IL")
-                        .font(.system(size: 14, weight: .medium))
-                        .italic()
-                        .foregroundColor(Color(hex: "#2C4F40"))
-                }
+                    .lineLimit(1)
             }
-            Spacer()
         }
         .padding(.horizontal, 16)
-        .padding(.top, 16)
+        .padding(.top, 14)
     }
 
     private var profileImage: some View {
@@ -174,7 +172,7 @@ struct FigmaPostHeader: View {
         } placeholder: {
             Circle().fill(Color(hex: "#2C4F40"))
         }
-        .frame(width: 50, height: 50)
+        .frame(width: 44, height: 44)
         .clipShape(Circle())
     }
 }
@@ -224,22 +222,10 @@ struct FigmaActionButtons: View {
             Button(action: { Task { await postManager.toggleLike(for: post.id) } }) {
                 HStack(spacing: 4) {
                     Image(systemName: post.isLiked ? "heart.fill" : "heart")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(post.isLiked ? .red : Color(hex: "#2C4F40"))
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(post.isLiked ? .red : .gray)
                     if post.likes > 0 {
-                        Text("\(post.likes)").font(.system(size: 14)).foregroundColor(.gray)
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity)
-
-            Button(action: { showingRepost = true }) {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.2.squarepath")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(Color(hex: "#2C4F40"))
-                    if post.shares > 0 {
-                        Text("\(post.shares)").font(.system(size: 14)).foregroundColor(.gray)
+                        Text("\(post.likes)").font(.system(size: 13)).foregroundColor(.gray)
                     }
                 }
             }
@@ -248,23 +234,35 @@ struct FigmaActionButtons: View {
             Button(action: { showingComments = true }) {
                 HStack(spacing: 4) {
                     Image(systemName: "bubble.left")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(Color(hex: "#2C4F40"))
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.gray)
                     if post.comments > 0 {
-                        Text("\(post.comments)").font(.system(size: 14)).foregroundColor(.gray)
+                        Text("\(post.comments)").font(.system(size: 13)).foregroundColor(.gray)
                     }
                 }
             }
             .frame(maxWidth: .infinity)
 
-            Button(action: { /* TODO: Add ShareUtility.swift to Xcode project */ }) {
-                Image(systemName: "arrowshape.turn.up.right")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(Color(hex: "#2C4F40"))
+            Button(action: { showingRepost = true }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.2.squarepath")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.gray)
+                    if post.shares > 0 {
+                        Text("\(post.shares)").font(.system(size: 13)).foregroundColor(.gray)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity)
+
+            Button(action: { ShareHelper.sharePost(post) }) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(.gray)
             }
             .frame(maxWidth: .infinity)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 6)
     }
 }
 

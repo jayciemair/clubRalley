@@ -28,13 +28,23 @@ class ChatsListViewModel: ObservableObject {
     /// Error state
     @Published var error: Error?
 
+    /// Whether more chats are available for pagination
+    @Published var hasMoreChats = true
+
+    /// Whether currently loading more chats
+    @Published var isLoadingMore = false
+
+    /// Page size for pagination
+    private let pageSize = 50
+
     // MARK: - Dependencies
 
-    private let chatService = ChatService()
+    private let chatService: ChatService
 
     // MARK: - Initialization
 
-    init() {
+    init(chatService: ChatService? = nil) {
+        self.chatService = chatService ?? ServiceContainer.shared.chatService
         Task {
             await loadChats()
         }
@@ -59,7 +69,32 @@ class ChatsListViewModel: ObservableObject {
 
     /// Refresh chats
     func refresh() async {
+        hasMoreChats = true
         await loadChats()
+    }
+
+    /// Load more chats for infinite scroll
+    func loadMoreChats() async {
+        guard !isLoadingMore && hasMoreChats else { return }
+
+        isLoadingMore = true
+
+        do {
+            let moreChats = try await chatService.loadUserChats(limit: pageSize, offset: chats.count)
+
+            if moreChats.isEmpty {
+                hasMoreChats = false
+            } else {
+                chats.append(contentsOf: moreChats)
+                if moreChats.count < pageSize {
+                    hasMoreChats = false
+                }
+            }
+        } catch {
+            print("ChatsListViewModel: Failed to load more chats: \(error)")
+        }
+
+        isLoadingMore = false
     }
 
     // MARK: - Computed Properties

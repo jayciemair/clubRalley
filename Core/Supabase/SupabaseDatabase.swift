@@ -175,7 +175,8 @@ extension SupabaseManager {
         username: String,
         city: String,
         state: String,
-        profilePhotoURL: String?
+        profilePhotoURL: String?,
+        isVerifiedAthlete: Bool = false
     ) async throws {
         let userData = ClubUserInsert(
             id: id,
@@ -188,7 +189,8 @@ extension SupabaseManager {
             state: state,
             profile_photo_url: profilePhotoURL,
             friends_count: 0,
-            ralleys_count: 0
+            ralleys_count: 0,
+            is_verified_athlete: isVerifiedAthlete
         )
 
         try await insert(userData, into: "club_users")
@@ -210,6 +212,7 @@ struct ClubUserInsert: Codable {
     let profile_photo_url: String?
     let friends_count: Int
     let ralleys_count: Int
+    let is_verified_athlete: Bool
 }
 
 /// Helper struct for returning IDs from inserts

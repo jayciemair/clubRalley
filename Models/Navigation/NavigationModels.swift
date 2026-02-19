@@ -91,7 +91,7 @@ enum NavigationRoute: Hashable {
 struct TabSelection {
     var selectedTab: MainTab
     var homeNavigation: [NavigationRoute] = []
-    var findRalleysNavigation: [NavigationRoute] = []
+    var ralleysNavigation: [NavigationRoute] = []
     var teamsNavigation: [NavigationRoute] = []
     var profileNavigation: [NavigationRoute] = []
     
@@ -99,8 +99,8 @@ struct TabSelection {
         switch tab {
         case .home:
             homeNavigation.append(route)
-        case .findRalleys:
-            findRalleysNavigation.append(route)
+        case .ralleys:
+            ralleysNavigation.append(route)
         case .post:
             break // Post is modal, no navigation stack
         case .teams:
@@ -114,8 +114,8 @@ struct TabSelection {
         switch tab {
         case .home:
             homeNavigation.removeAll()
-        case .findRalleys:
-            findRalleysNavigation.removeAll()
+        case .ralleys:
+            ralleysNavigation.removeAll()
         case .post:
             break // Post is modal
         case .teams:
@@ -131,9 +131,9 @@ struct TabSelection {
             if !homeNavigation.isEmpty {
                 homeNavigation.removeLast()
             }
-        case .findRalleys:
-            if !findRalleysNavigation.isEmpty {
-                findRalleysNavigation.removeLast()
+        case .ralleys:
+            if !ralleysNavigation.isEmpty {
+                ralleysNavigation.removeLast()
             }
         case .post:
             break // Post is modal

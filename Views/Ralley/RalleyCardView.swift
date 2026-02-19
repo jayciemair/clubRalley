@@ -140,7 +140,7 @@ struct RalleyCardView: View {
         }
         .background(Color.white)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
+        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
         .task {
             await checkUserParticipationStatus()
         }
@@ -236,6 +236,13 @@ struct RalleyCardView: View {
 
     private func handleJoinAction() async {
         guard participationStatus == .notJoined else { return }
+
+        // Block non-athletes from joining college-athletes-only ralleys
+        if ralley.isCollegeAthletesOnly {
+            let isFormerAthlete = SavedUserProfile.loadFromStorage()?.playedCollegeSport == true
+            guard isFormerAthlete else { return }
+        }
+
         isLoading = true
 
         if ralley.joinType == .open {
@@ -254,22 +261,29 @@ struct RalleyCardView: View {
 struct EmptyRalleysView: View {
     var hasFilters: Bool = false
     var onCreateRalley: (() -> Void)? = nil
+    @State private var isVisible = false
 
     var body: some View {
         VStack(spacing: 20) {
             Image(systemName: hasFilters ? "line.3.horizontal.decrease.circle" : "sportscourt")
                 .font(.system(size: 60))
                 .foregroundColor(Color(hex: "#2C4F40").opacity(0.6))
+                .scaleEffect(isVisible ? 1 : 0.5)
+                .opacity(isVisible ? 1 : 0)
 
             Text(hasFilters ? "No matching ralleys" : "No ralleys nearby")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.black)
+                .opacity(isVisible ? 1 : 0)
+                .offset(y: isVisible ? 0 : 10)
 
             Text(hasFilters ? "Try adjusting your filters or search" : "Be the first to create a pickup game in your area!")
                 .font(.system(size: 16, weight: .regular))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
+                .opacity(isVisible ? 1 : 0)
+                .offset(y: isVisible ? 0 : 10)
 
             if !hasFilters, let onCreateRalley = onCreateRalley {
                 Button(action: onCreateRalley) {
@@ -281,9 +295,16 @@ struct EmptyRalleysView: View {
                         .background(Color(hex: "#2C4F40"))
                         .cornerRadius(12)
                 }
+                .opacity(isVisible ? 1 : 0)
+                .offset(y: isVisible ? 0 : 10)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                isVisible = true
+            }
+        }
     }
 }

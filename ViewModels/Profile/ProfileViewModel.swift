@@ -66,11 +66,19 @@ class ProfileViewModel: ObservableObject {
     private let refreshCooldown: TimeInterval = 30
 
     // MARK: - Dependencies
-    private let friendshipService = FriendshipService()
+    private let friendshipService: FriendshipService
     private let userService = UserService()
-    private let postService = PostService()
-    private let ralleyService = RalleyService()
+    private let postService: PostService
+    private let ralleyService: RalleyService
     private let supabase = SupabaseManager.shared
+
+    // MARK: - Initialization
+    init(friendshipService: FriendshipService? = nil, postService: PostService? = nil, ralleyService: RalleyService? = nil) {
+        let container = ServiceContainer.shared
+        self.friendshipService = friendshipService ?? container.friendshipService
+        self.postService = postService ?? container.postService
+        self.ralleyService = ralleyService ?? container.ralleyService
+    }
 
     // MARK: - Current User Methods
 

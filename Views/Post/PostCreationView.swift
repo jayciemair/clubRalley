@@ -239,24 +239,28 @@ struct ThreadComposerView: View {
     // MARK: - Header
 
     private var headerView: some View {
-        HStack {
-            Button(action: { dismiss() }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.black)
-            }
+        VStack(spacing: 0) {
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.black)
+                }
 
-            Spacer()
+                Spacer()
 
-            Button(action: createPost) {
-                Text("Post")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(canPost ? Color(hex: "#2C4F40") : .gray)
+                Button(action: createPost) {
+                    Text("Post")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(canPost ? Color(hex: "#2C4F40") : .gray)
+                }
+                .disabled(!canPost || isPosting)
             }
-            .disabled(!canPost || isPosting)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+
+            Divider()
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
     }
 
     // MARK: - Text Input Section

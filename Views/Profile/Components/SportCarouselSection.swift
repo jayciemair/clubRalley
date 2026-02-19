@@ -14,15 +14,15 @@ struct SportCarouselSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Section header
+            // Section header — pill badge
             HStack(spacing: 8) {
                 Text("My Sports")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 6)
-                    .background(Color(hex: "#2C4F40"))
-                    .cornerRadius(14)
+                    .background(Color(hex: "#2D4A3E"))
+                    .cornerRadius(20)
 
                 Spacer()
 
@@ -30,7 +30,7 @@ struct SportCarouselSection: View {
                     Button(action: { viewModel.selectedSportFilter = nil }) {
                         Text("Show All")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Color(hex: "#2C4F40"))
+                            .foregroundColor(Color(hex: "#2D4A3E"))
                     }
                 }
             }
@@ -41,7 +41,7 @@ struct SportCarouselSection: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(viewModel.effectiveSportsWithSkills) { sport in
-                            ProfileSportCarouselCard(
+                            ProfileSportCard(
                                 sport: sport,
                                 isSelected: viewModel.selectedSportFilter == sport.sportName
                             ) {
@@ -67,22 +67,23 @@ struct SportCarouselSection: View {
             Spacer()
             VStack(spacing: 8) {
                 Image(systemName: "sportscourt.fill")
-                    .font(.system(size: 30))
-                    .foregroundColor(Color.black.opacity(0.3))
-                Text("No sports added yet — Join a ralley to get started!")
+                    .font(.system(size: 28))
+                    .foregroundColor(Color(hex: "#2D4A3E").opacity(0.3))
+                Text("Add your sports")
                     .font(.system(size: 14))
-                    .foregroundColor(Color.black.opacity(0.5))
-                    .multilineTextAlignment(.center)
+                    .foregroundColor(Color(hex: "#6B7B6E"))
             }
-            .padding(.vertical, 20)
+            .padding(.vertical, 24)
             Spacer()
         }
+        .background(Color(hex: "#E8E4DA").opacity(0.5))
+        .cornerRadius(14)
     }
 }
 
-// MARK: - Sport Carousel Card
+// MARK: - Sport Card (Premium)
 
-struct ProfileSportCarouselCard: View {
+struct ProfileSportCard: View {
     let sport: UserSportSkill
     let isSelected: Bool
     let onTap: () -> Void
@@ -91,21 +92,26 @@ struct ProfileSportCarouselCard: View {
         Button(action: onTap) {
             VStack(spacing: 8) {
                 Image(systemName: SportIconMapper.iconName(for: sport.sportName))
-                    .font(.system(size: 28))
-                    .foregroundColor(isSelected ? .white : Color(hex: "#2C4F40"))
+                    .font(.system(size: 26))
+                    .foregroundColor(isSelected ? .white : Color(hex: "#2D4A3E"))
 
                 Text(sport.sportName)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(isSelected ? .white : .black)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(isSelected ? .white : Color(hex: "#2D4A3E"))
                     .lineLimit(1)
 
                 Text(sport.skillLevel.displayName)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(isSelected ? .white.opacity(0.8) : Color.black.opacity(0.5))
+                    .foregroundColor(isSelected ? .white.opacity(0.8) : Color(hex: "#6B7B6E"))
             }
             .frame(width: 110, height: 100)
-            .background(isSelected ? Color(hex: "#2C4F40") : Color(hex: "#E2E4D6"))
+            .background(isSelected ? Color(hex: "#2D4A3E") : Color(hex: "#F5F2EB"))
             .cornerRadius(14)
+            .shadow(color: Color.black.opacity(isSelected ? 0.15 : 0.06), radius: isSelected ? 8 : 4, x: 0, y: 2)
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(isSelected ? Color.clear : Color(hex: "#E8E4DA"), lineWidth: 1)
+            )
         }
         .buttonStyle(PlainButtonStyle())
     }

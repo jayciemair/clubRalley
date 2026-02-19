@@ -37,10 +37,10 @@ class RalleyParticipationManager: ObservableObject {
     // MARK: - Dependencies
 
     /// Service layer for participation operations
-    private let participationService = RalleyParticipationService()
+    private let participationService: RalleyParticipationService
 
     /// Chat service for creating and managing group chats
-    private let chatService = ChatService()
+    private let chatService: ChatService
 
     /// Reference to parent RalleyManager
     private weak var ralleyManager: RalleyManager?
@@ -50,8 +50,11 @@ class RalleyParticipationManager: ObservableObject {
 
     // MARK: - Initialization
 
-    init(ralleyManager: RalleyManager) {
+    init(ralleyManager: RalleyManager, participationService: RalleyParticipationService? = nil, chatService: ChatService? = nil) {
+        let container = ServiceContainer.shared
         self.ralleyManager = ralleyManager
+        self.participationService = participationService ?? container.ralleyParticipationService
+        self.chatService = chatService ?? container.chatService
     }
 
     // MARK: - Join/Leave Operations
@@ -65,6 +68,15 @@ class RalleyParticipationManager: ObservableObject {
               let index = ralleyManager.indexOfRalley(ralleyId) else { return }
 
         let ralley = ralleyManager.ralleys[index]
+
+        // Check college athletes only restriction
+        if ralley.isCollegeAthletesOnly {
+            let isFormerAthlete = SavedUserProfile.loadFromStorage()?.playedCollegeSport == true
+            guard isFormerAthlete else {
+                self.error = NSError(domain: "RalleyParticipation", code: 3, userInfo: [NSLocalizedDescriptionKey: "This ralley is for former college athletes only"])
+                return
+            }
+        }
 
         // Check if ralley is full
         guard ralley.currentPlayers < ralley.maxPlayers else {

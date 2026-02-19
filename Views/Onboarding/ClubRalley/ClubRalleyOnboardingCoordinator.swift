@@ -88,6 +88,10 @@ struct ClubRalleyOnboardingCoordinator: View {
             SportsOnboardingScreen()
                 .environmentObject(controller)
 
+        case .collegeAthlete:
+            CollegeAthleteScreen()
+                .environmentObject(controller)
+
         case .completion:
             OnboardingCompletionView {
                 completion()

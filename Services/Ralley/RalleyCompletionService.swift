@@ -14,8 +14,22 @@ import SwiftUI
  * Purpose: Manages the completion flow for ralleys, including generating
  * auto-posts that tag attendees and share the ralley experience.
  */
+// MARK: - Protocol
+
 @MainActor
-class RalleyCompletionService: ObservableObject {
+protocol RalleyCompletionServiceProtocol: ObservableObject {
+    var isLoading: Bool { get }
+    func completeRalley(_ ralleyId: UUID) async throws
+    func getAttendees(_ ralleyId: UUID) async throws -> [RalleyAttendee]
+    func generateCompletionPost(ralley: ClubRalley, attendees: [RalleyAttendee], visibility: PostVisibility) async throws -> ClubRalleyPost
+    func saveCompletionPost(_ post: ClubRalleyPost) async throws -> ClubRalleyPost
+    func optOutOfPost(ralleyId: UUID, userId: UUID) async throws
+    func hasOptedOut(ralleyId: UUID, userId: UUID) async throws -> Bool
+    func removeOptOut(ralleyId: UUID, userId: UUID) async throws
+}
+
+@MainActor
+class RalleyCompletionService: ObservableObject, RalleyCompletionServiceProtocol {
 
     // MARK: - Dependencies
 
@@ -23,7 +37,17 @@ class RalleyCompletionService: ObservableObject {
     private let supabase = SupabaseManager.shared
 
     /// Participation service for getting attendees
-    private let participationService = RalleyParticipationService()
+    private let participationService: RalleyParticipationService
+
+    // MARK: - Initialization
+
+    init(participationService: RalleyParticipationService) {
+        self.participationService = participationService
+    }
+
+    convenience init() {
+        self.init(participationService: RalleyParticipationService())
+    }
 
     // MARK: - Published Properties
 

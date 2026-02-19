@@ -42,10 +42,10 @@ class PostManager: ObservableObject {
     // MARK: - Dependencies
 
     /// Service layer for post database operations
-    private let postService = PostService()
+    private let postService: PostService
 
     /// Engagement service for likes, comments, reposts
-    private let engagementService = PostEngagementService()
+    private let engagementService: PostEngagementService
 
     /// Supabase authentication state
     private let supabase = SupabaseManager.shared
@@ -57,7 +57,11 @@ class PostManager: ObservableObject {
 
     // MARK: - Initialization
 
-    init() {
+    init(postService: PostService? = nil, engagementService: PostEngagementService? = nil) {
+        let container = ServiceContainer.shared
+        self.postService = postService ?? container.postService
+        self.engagementService = engagementService ?? container.postEngagementService
+
         self.engagementManager = PostEngagementManager(postManager: self)
         // Load posts from backend on startup
         Task {

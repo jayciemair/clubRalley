@@ -33,16 +33,28 @@ class RalleyManager: ObservableObject {
     /// Error state for user notifications
     @Published var error: Error?
 
+    /// Whether more ralleys are available for pagination
+    @Published var hasMoreRalleys = true
+
+    /// Whether currently loading more ralleys
+    @Published var isLoadingMore = false
+
+    /// Page size for pagination
+    private let pageSize = 20
+
     // MARK: - Dependencies
 
     /// Service layer for ralley database operations
-    private let ralleyService = RalleyService()
+    private let ralleyService: RalleyService
 
     /// Service layer for chat operations
-    private let chatService = ChatService()
+    private let chatService: ChatService
 
     /// Supabase authentication state
     private let supabase = SupabaseManager.shared
+
+    /// Realtime manager for live participant count sync
+    private let realtimeManager = RealtimeManager.shared
 
     // MARK: - Sub-managers
 
@@ -54,7 +66,11 @@ class RalleyManager: ObservableObject {
 
     // MARK: - Initialization
 
-    init() {
+    init(ralleyService: RalleyService? = nil, chatService: ChatService? = nil) {
+        let container = ServiceContainer.shared
+        self.ralleyService = ralleyService ?? container.ralleyService
+        self.chatService = chatService ?? container.chatService
+
         self.participationManager = RalleyParticipationManager(ralleyManager: self)
         self.completionManager = RalleyCompletionManager(ralleyManager: self)
 
@@ -89,6 +105,9 @@ class RalleyManager: ObservableObject {
 
         isLoading = false
 
+        // Subscribe to live participant count changes
+        subscribeToParticipantChanges()
+
         // Start monitoring for ended ralleys (for captain completion flow)
         completionManager?.startMonitoring()
     }
@@ -105,8 +124,10 @@ class RalleyManager: ObservableObject {
         durationMinutes: Int = 60,
         locationName: String,
         address: String = "",
-        city: String = "San Francisco",
-        state: String = "CA",
+        city: String = "Lewisburg",
+        state: String = "PA",
+        latitude: Double = 0.0,
+        longitude: Double = 0.0,
         maxPlayers: Int,
         cost: Double = 0.0,
         description: String,
@@ -142,8 +163,8 @@ class RalleyManager: ObservableObject {
                 address: address,
                 city: city,
                 state: state,
-                latitude: 37.7749,
-                longitude: -122.4194
+                latitude: latitude,
+                longitude: longitude
             ),
             maxPlayers: maxPlayers,
             currentPlayers: 1,
@@ -300,11 +321,72 @@ class RalleyManager: ObservableObject {
             .sorted { $0.dateTime < $1.dateTime }
     }
 
+    // MARK: - Realtime Participant Sync
+
+    /// Subscribe to all participant changes so counts update live across devices
+    private func subscribeToParticipantChanges() {
+        realtimeManager.subscribeToAllParticipantChanges { [weak self] payload in
+            Task { @MainActor in
+                self?.handleParticipantChange(payload)
+            }
+        }
+    }
+
+    /// Handle a realtime participant change — update the matching ralley's player count
+    private func handleParticipantChange(_ payload: ParticipantChangePayload) {
+        guard let ralleyId = payload.ralleyId,
+              let index = indexOfRalley(ralleyId) else { return }
+
+        switch payload.type {
+        case .joined:
+            // Only count confirmed joins, not pending requests
+            if payload.status == "joined" {
+                ralleys[index].currentPlayers += 1
+                print("RalleyManager: Realtime — player joined ralley \(ralleyId), now \(ralleys[index].currentPlayers)")
+            }
+        case .updated:
+            // A pending request was approved → count as a new join
+            if payload.status == "joined" {
+                ralleys[index].currentPlayers += 1
+                print("RalleyManager: Realtime — request approved for ralley \(ralleyId), now \(ralleys[index].currentPlayers)")
+            }
+        case .left:
+            ralleys[index].currentPlayers = max(0, ralleys[index].currentPlayers - 1)
+            print("RalleyManager: Realtime — player left ralley \(ralleyId), now \(ralleys[index].currentPlayers)")
+        }
+    }
+
     // MARK: - Feed Management
 
     func refreshRalleys() async {
         print("RalleyManager: Refreshing ralleys from database")
+        hasMoreRalleys = true
         await loadRalleys()
+    }
+
+    /// Load more ralleys for infinite scroll
+    func loadMoreRalleys() async {
+        guard !isLoadingMore && hasMoreRalleys else { return }
+
+        isLoadingMore = true
+
+        do {
+            let moreRalleys = try await ralleyService.loadMoreRalleys(currentCount: ralleys.count, limit: pageSize)
+
+            if moreRalleys.isEmpty {
+                hasMoreRalleys = false
+            } else {
+                ralleys.append(contentsOf: moreRalleys)
+                if moreRalleys.count < pageSize {
+                    hasMoreRalleys = false
+                }
+            }
+            print("RalleyManager: Loaded \(moreRalleys.count) more ralleys, total: \(ralleys.count)")
+        } catch {
+            print("RalleyManager: Failed to load more ralleys: \(error)")
+        }
+
+        isLoadingMore = false
     }
 
     func clearError() {

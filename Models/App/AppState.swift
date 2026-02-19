@@ -72,7 +72,7 @@ enum OnboardingFlowType {
 /// Main tab navigation for Club Ralley (based on Figma design)
 enum MainTab: String, CaseIterable {
     case home = "home"
-    case findRalleys = "find_ralleys"
+    case ralleys = "ralleys"
     case post = "post"
     case teams = "teams"
     case profile = "profile"
@@ -80,7 +80,7 @@ enum MainTab: String, CaseIterable {
     var displayName: String {
         switch self {
         case .home: return "Home"
-        case .findRalleys: return "Find Ralleys"
+        case .ralleys: return "Ralleys"
         case .post: return "Post"
         case .teams: return "Teams"
         case .profile: return "Profile"
@@ -90,7 +90,7 @@ enum MainTab: String, CaseIterable {
     var iconName: String {
         switch self {
         case .home: return "house"
-        case .findRalleys: return "sportscourt"
+        case .ralleys: return "sportscourt"
         case .post: return "plus.circle"
         case .teams: return "person.2"
         case .profile: return "person"
@@ -100,7 +100,7 @@ enum MainTab: String, CaseIterable {
     var selectedIconName: String {
         switch self {
         case .home: return "house.fill"
-        case .findRalleys: return "sportscourt.fill"
+        case .ralleys: return "sportscourt.fill"
         case .post: return "plus.circle.fill"
         case .teams: return "person.2.fill"
         case .profile: return "person.fill"

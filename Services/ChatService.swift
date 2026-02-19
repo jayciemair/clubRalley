@@ -17,8 +17,24 @@ import SwiftUI
  * Strategy: Each ralley has an implicit group chat (no separate chat table needed)
  * Database: Uses chat_messages table with ralley_id as the chat identifier
  */
+// MARK: - Protocol
+
 @MainActor
-class ChatService: ObservableObject {
+protocol ChatServiceProtocol: ObservableObject {
+    var isLoading: Bool { get }
+    func createRalleyChat(ralleyId: UUID, captainId: UUID) async throws -> UUID
+    func loadUserChats(limit: Int, offset: Int) async throws -> [GroupChat]
+    func loadMessages(chatId: UUID, limit: Int, before: Date?) async throws -> [GroupChatMessage]
+    func sendMessage(chatId: UUID, content: String) async throws -> GroupChatMessage
+    func addMember(chatId: UUID, userId: UUID, role: ChatMemberRole) async throws
+    func removeMember(chatId: UUID, userId: UUID) async throws
+    func loadMembers(chatId: UUID) async throws -> [GroupChatMember]
+    func markChatAsRead(chatId: UUID)
+    func hasUnreadMessages(chatId: UUID, lastMessageAt: Date?) -> Bool
+}
+
+@MainActor
+class ChatService: ObservableObject, ChatServiceProtocol {
 
     // MARK: - Dependencies
 
@@ -127,7 +143,7 @@ class ChatService: ObservableObject {
      * Finds ralleys user is participating in that have messages
      * @returns: Array of GroupChat models
      */
-    func loadUserChats() async throws -> [GroupChat] {
+    func loadUserChats(limit: Int = 50, offset: Int = 0) async throws -> [GroupChat] {
         guard supabase.isAuthenticated else {
             throw SupabaseManager.SupabaseError.notAuthenticated
         }

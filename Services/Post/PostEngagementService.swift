@@ -15,8 +15,24 @@ import SwiftUI
  * Purpose: Manages likes and comments for posts
  * Database: Uses posts.likes JSONB column and comments table
  */
+// MARK: - Protocol
+
 @MainActor
-class PostEngagementService: ObservableObject {
+protocol PostEngagementServiceProtocol: ObservableObject {
+    var isLoading: Bool { get }
+    func toggleLike(postId: UUID) async throws -> Bool
+    func hasLiked(postId: UUID) async -> Bool
+    func getLikeCount(postId: UUID) async -> Int
+    func loadComments(postId: UUID) async throws -> [PostComment]
+    func addComment(postId: UUID, content: String) async throws -> PostComment
+    func deleteComment(commentId: UUID) async throws
+    func repost(postId: UUID, comment: String?) async throws -> Bool
+    func undoRepost(postId: UUID) async throws -> Bool
+    func hasReposted(postId: UUID) async throws -> Bool
+}
+
+@MainActor
+class PostEngagementService: ObservableObject, PostEngagementServiceProtocol {
 
     // MARK: - Dependencies
 

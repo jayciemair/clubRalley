@@ -32,15 +32,16 @@ class PostEngagementManager: ObservableObject {
     // MARK: - Dependencies
 
     /// Service layer for engagement operations
-    private let engagementService = PostEngagementService()
+    private let engagementService: PostEngagementService
 
     /// Reference to parent PostManager
     private weak var postManager: PostManager?
 
     // MARK: - Initialization
 
-    init(postManager: PostManager) {
+    init(postManager: PostManager, engagementService: PostEngagementService? = nil) {
         self.postManager = postManager
+        self.engagementService = engagementService ?? ServiceContainer.shared.postEngagementService
     }
 
     // MARK: - Like Operations

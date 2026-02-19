@@ -49,47 +49,39 @@ struct ContentView: View {
     // MARK: - Main Tab View
 
     private var mainTabView: some View {
-        TabView(selection: $selectedTab) {
-            HomeFeedView()
-                .environmentObject(postManager)
-                .environmentObject(ralleyManager)
-                .tabItem {
-                    Image(systemName: selectedTab == .home ? "house.fill" : "house")
-                    Text("Home")
+        ZStack(alignment: .bottom) {
+            Group {
+                switch selectedTab {
+                case .home:
+                    NavigationStack {
+                        HomeFeedView()
+                            .environmentObject(postManager)
+                            .environmentObject(ralleyManager)
+                    }
+                case .ralleys:
+                    NavigationStack {
+                        FindRalleysView()
+                            .environmentObject(ralleyManager)
+                    }
+                case .post:
+                    PostCreationInterfaceView()
+                        .environmentObject(postManager)
+                case .teams:
+                    NavigationStack {
+                        RosterView()
+                    }
+                case .profile:
+                    NavigationStack {
+                        ProfileTabView()
+                    }
                 }
-                .tag(MainTab.home)
+            }
+            .transition(.opacity.animation(.easeInOut(duration: 0.15)))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            FindRalleysView()
-                .environmentObject(ralleyManager)
-                .tabItem {
-                    Image(systemName: selectedTab == .findRalleys ? "sportscourt.fill" : "sportscourt")
-                    Text("Find Ralleys")
-                }
-                .tag(MainTab.findRalleys)
-
-            PostCreationInterfaceView()
-                .environmentObject(postManager)
-                .tabItem {
-                    Image(systemName: selectedTab == .post ? "plus.circle.fill" : "plus.circle")
-                    Text("Post")
-                }
-                .tag(MainTab.post)
-
-            RosterView()
-                .tabItem {
-                    Image(systemName: selectedTab == .teams ? "person.2.fill" : "person.2")
-                    Text("Roster")
-                }
-                .tag(MainTab.teams)
-
-            ProfileTabView()
-                .tabItem {
-                    Image(systemName: selectedTab == .profile ? "person.fill" : "person")
-                    Text("Profile")
-                }
-                .tag(MainTab.profile)
+            ClubRalleyTabBar(selectedTab: $selectedTab)
         }
-        .accentColor(Color(hex: "#2C4F40"))
+        .ignoresSafeArea(.keyboard)
     }
 
     // MARK: - Welcome Overlay
@@ -132,7 +124,7 @@ enum RosterTab: String, CaseIterable {
 
 struct RosterView: View {
     @StateObject private var userService = UserService()
-    @StateObject private var messagingService = MessagingService()
+    private var messagingService: MessagingService { ServiceContainer.shared.messagingService }
     @State private var searchText = ""
     @State private var selectedRosterTab: RosterTab = .people
     @State private var messageTargetUser: RosterUserData?
@@ -141,8 +133,7 @@ struct RosterView: View {
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 // Header with tab picker
                 VStack(spacing: 16) {
                     HStack {
@@ -184,8 +175,6 @@ struct RosterView: View {
                 }
             }
             .background(Color(hex: "#F5F5F5"))
-            .navigationBarHidden(true)
-        }
         .task { await userService.loadUsers(); await userService.loadFollowingStatus() }
         .sheet(item: $activeConversation) { conversation in
             NavigationStack {
@@ -219,7 +208,7 @@ struct RosterView: View {
                 .padding(.top, 16)
 
                 if userService.isLoading {
-                    HStack { Spacer(); ProgressView(); Spacer() }.padding(.top, 40)
+                    RosterSkeletonView()
                 } else if userService.users.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "person.3").font(.system(size: 48)).foregroundColor(Color(hex: "#2C4F40").opacity(0.5))
@@ -322,6 +311,47 @@ struct RosterUserCardView: View {
         }
         .padding(12).background(Color.white).cornerRadius(12)
         .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+    }
+}
+
+// MARK: - Roster Skeleton View
+
+private struct RosterSkeletonView: View {
+    @State private var isAnimating = false
+    private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+
+    var body: some View {
+        LazyVGrid(columns: columns, spacing: 12) {
+            ForEach(0..<6, id: \.self) { _ in
+                VStack(spacing: 8) {
+                    Circle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 56, height: 56)
+
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 60, height: 10)
+
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 44, height: 8)
+
+                    Spacer(minLength: 4)
+
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 32)
+                }
+                .padding(12)
+                .background(Color.white)
+                .cornerRadius(12)
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+            }
+        }
+        .padding(.horizontal, 16)
+        .opacity(isAnimating ? 1.0 : 0.6)
+        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
+        .onAppear { isAnimating = true }
     }
 }
 

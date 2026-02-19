@@ -18,12 +18,12 @@ struct FeedHeader: View {
     var unreadNotificationCount: Int = 0
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             // Greeting row + icons
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Hey \(userName)")
-                        .font(.system(size: 26, weight: .bold))
+                        .font(.system(size: 24, weight: .bold))
                         .foregroundColor(.black)
                     Text("Ready to rally?")
                         .font(.system(size: 14, weight: .medium))
@@ -35,7 +35,7 @@ struct FeedHeader: View {
                 Button(action: { showingNotifications = true }) {
                     ZStack(alignment: .topTrailing) {
                         Image(systemName: "bell")
-                            .font(.system(size: 22, weight: .medium))
+                            .font(.system(size: 20, weight: .medium))
                             .foregroundColor(.black)
                         if unreadNotificationCount > 0 {
                             NotificationBadge(count: unreadNotificationCount)
@@ -48,7 +48,7 @@ struct FeedHeader: View {
                 Button(action: { showingMessages = true }) {
                     ZStack(alignment: .topTrailing) {
                         Image(systemName: "bubble.left.and.bubble.right")
-                            .font(.system(size: 22, weight: .medium))
+                            .font(.system(size: 20, weight: .medium))
                             .foregroundColor(.black)
                         if unreadMessageCount > 0 {
                             NotificationBadge(count: unreadMessageCount)
@@ -80,7 +80,7 @@ struct FeedHeader: View {
             .cornerRadius(12)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
     }
 }
 
@@ -407,20 +407,35 @@ struct FeedErrorView: View {
 // MARK: - Empty Feed View
 
 struct EmptyFeedView: View {
+    @State private var isVisible = false
+
     var body: some View {
         VStack(spacing: 20) {
             Image(systemName: "sportscourt")
                 .font(.system(size: 60))
                 .foregroundColor(Color(hex: "#2C4F40").opacity(0.6))
+                .scaleEffect(isVisible ? 1 : 0.5)
+                .opacity(isVisible ? 1 : 0)
+
             Text("Welcome to Club Ralley!")
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.black)
+                .opacity(isVisible ? 1 : 0)
+                .offset(y: isVisible ? 0 : 10)
+
             Text("Start following athletes and join ralleys to see posts in your feed")
                 .font(.system(size: 16))
                 .foregroundColor(Color.black.opacity(0.5))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
+                .opacity(isVisible ? 1 : 0)
+                .offset(y: isVisible ? 0 : 10)
         }
         .padding(.top, 60)
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                isVisible = true
+            }
+        }
     }
 }

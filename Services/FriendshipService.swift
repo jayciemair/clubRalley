@@ -8,8 +8,30 @@
 import Foundation
 import SwiftUI
 
+// MARK: - Protocol
+
 @MainActor
-class FriendshipService: ObservableObject {
+protocol FriendshipServiceProtocol: ObservableObject {
+    var isLoading: Bool { get }
+    var error: Error? { get }
+    func followUser(_ userId: UUID) async throws
+    func unfollowUser(_ userId: UUID) async throws
+    func isFollowing(_ userId: UUID) async throws -> Bool
+    func getFollowersCount(_ userId: UUID) async throws -> Int
+    func getFollowingCount(_ userId: UUID) async throws -> Int
+    func getBlockedUserIds() async throws -> Set<UUID>
+    func loadFollowers(userId: UUID, limit: Int, offset: Int) async throws -> [DatabaseUserProfile]
+    func loadFollowing(userId: UUID, limit: Int, offset: Int) async throws -> [DatabaseUserProfile]
+    func getFollowCounts(userId: UUID) async throws -> (followers: Int, following: Int)
+    func blockUser(_ userId: UUID) async throws
+    func unblockUser(_ userId: UUID) async throws
+    func hasBlocked(_ userId: UUID) async -> Bool
+    func isBlockedBy(_ userId: UUID) async -> Bool
+    func reportUser(_ userId: UUID, reason: String) async throws
+}
+
+@MainActor
+class FriendshipService: ObservableObject, FriendshipServiceProtocol {
 
     // MARK: - Dependencies
 
@@ -267,28 +289,29 @@ class FriendshipService: ObservableObject {
     // MARK: - User List Methods
 
     /// Load followers for a specific user
-    /// - Parameter userId: The user ID to get followers for
+    /// - Parameters:
+    ///   - userId: The user ID to get followers for
+    ///   - limit: Maximum number of results (default 50)
+    ///   - offset: Pagination offset (default 0)
     /// - Returns: Array of DatabaseUserProfile representing followers
-    func loadFollowers(userId: UUID) async throws -> [DatabaseUserProfile] {
+    func loadFollowers(userId: UUID, limit: Int = 50, offset: Int = 0) async throws -> [DatabaseUserProfile] {
         do {
-            // Get all friendships where addressee_id = userId (people following this user)
+            // Get friendships with pagination
             let friendships: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
                 .eq("addressee_id", value: userId)
                 .eq("status", value: "accepted")
+                .range(from: offset, to: offset + limit - 1)
                 .execute()
 
-            // Get user profiles for each follower
-            var followers: [DatabaseUserProfile] = []
-            for friendship in friendships {
-                let users: [DatabaseUserProfile] = try await supabase.query("club_users")
-                    .select("*")
-                    .eq("id", value: friendship.requester_id)
-                    .execute()
-                if let user = users.first {
-                    followers.append(user)
-                }
-            }
+            // Batch load user profiles with .in() instead of N+1 loop
+            let followerIds = friendships.map { $0.requester_id }
+            guard !followerIds.isEmpty else { return [] }
+
+            let followers: [DatabaseUserProfile] = try await supabase.query("club_users")
+                .select("*")
+                .in("id", values: followerIds)
+                .execute()
 
             print("✅ FriendshipService: Loaded \(followers.count) followers")
             return followers
@@ -299,28 +322,29 @@ class FriendshipService: ObservableObject {
     }
 
     /// Load users that a specific user is following
-    /// - Parameter userId: The user ID to get following for
+    /// - Parameters:
+    ///   - userId: The user ID to get following for
+    ///   - limit: Maximum number of results (default 50)
+    ///   - offset: Pagination offset (default 0)
     /// - Returns: Array of DatabaseUserProfile representing followed users
-    func loadFollowing(userId: UUID) async throws -> [DatabaseUserProfile] {
+    func loadFollowing(userId: UUID, limit: Int = 50, offset: Int = 0) async throws -> [DatabaseUserProfile] {
         do {
-            // Get all friendships where requester_id = userId (people this user follows)
+            // Get friendships with pagination
             let friendships: [DatabaseFriendship] = try await supabase.query("friendships")
                 .select("*")
                 .eq("requester_id", value: userId)
                 .eq("status", value: "accepted")
+                .range(from: offset, to: offset + limit - 1)
                 .execute()
 
-            // Get user profiles for each followed user
-            var following: [DatabaseUserProfile] = []
-            for friendship in friendships {
-                let users: [DatabaseUserProfile] = try await supabase.query("club_users")
-                    .select("*")
-                    .eq("id", value: friendship.addressee_id)
-                    .execute()
-                if let user = users.first {
-                    following.append(user)
-                }
-            }
+            // Batch load user profiles with .in() instead of N+1 loop
+            let followingIds = friendships.map { $0.addressee_id }
+            guard !followingIds.isEmpty else { return [] }
+
+            let following: [DatabaseUserProfile] = try await supabase.query("club_users")
+                .select("*")
+                .in("id", values: followingIds)
+                .execute()
 
             print("✅ FriendshipService: Loaded \(following.count) following")
             return following

@@ -16,8 +16,25 @@ import SwiftUI
  * Strategy: Real Supabase calls with mock fallbacks for reliability
  * Database: Maps ClubRalley model to 'ralleys' table
  */
+// MARK: - Protocol
+
 @MainActor
-class RalleyService: ObservableObject {
+protocol RalleyServiceProtocol: ObservableObject {
+    var isLoading: Bool { get }
+    var lastError: SupabaseManager.SupabaseError? { get }
+    func createRalley(_ ralley: ClubRalley) async throws -> ClubRalley
+    func loadNearbyRalleys(latitude: Double, longitude: Double, radius: Double, limit: Int) async throws -> [ClubRalley]
+    func loadMoreRalleys(currentCount: Int, limit: Int) async throws -> [ClubRalley]
+    func loadUserRalleys(userId: UUID, limit: Int, offset: Int) async throws -> [ClubRalley]
+    func loadAttendedRalleys(userId: UUID, limit: Int, offset: Int) async throws -> [ClubRalley]
+    func loadRalley(id: UUID) async throws -> ClubRalley?
+    func updateRalley(_ ralley: ClubRalley) async throws -> ClubRalley
+    func deleteRalley(_ ralleyId: UUID) async throws
+    func removeParticipant(userId: UUID, from ralleyId: UUID) async throws
+}
+
+@MainActor
+class RalleyService: ObservableObject, RalleyServiceProtocol {
 
     // MARK: - Dependencies
 
@@ -25,7 +42,10 @@ class RalleyService: ObservableObject {
     private let supabase = SupabaseManager.shared
 
     /// Friendship service for block filtering
-    private let friendshipService = FriendshipService()
+    private let friendshipService: FriendshipService
+
+    /// Shared blocked user state
+    private let sharedUserState: SharedUserState
 
     // MARK: - Published Properties for UI Feedback
 
@@ -35,13 +55,17 @@ class RalleyService: ObservableObject {
     /// Last operation error for user feedback
     @Published var lastError: SupabaseManager.SupabaseError?
 
-    // MARK: - Cached Block List
+    // MARK: - Initialization
 
-    /// Cached set of blocked user IDs
-    private var blockedUserIds: Set<UUID> = []
+    init(friendshipService: FriendshipService, sharedUserState: SharedUserState) {
+        self.friendshipService = friendshipService
+        self.sharedUserState = sharedUserState
+    }
 
-    /// Last time blocked users were refreshed
-    private var blockedUsersLastRefresh: Date?
+    convenience init() {
+        let fs = FriendshipService()
+        self.init(friendshipService: fs, sharedUserState: SharedUserState(friendshipService: fs))
+    }
 
     // MARK: - Ralley Creation
 
@@ -140,7 +164,7 @@ class RalleyService: ObservableObject {
 
         do {
             // Refresh blocked users cache if needed (every 5 minutes)
-            await refreshBlockedUsersIfNeeded()
+            await sharedUserState.refreshBlockedUsersIfNeeded()
 
             // Try server-side location filtering first
             let ralleys: [DatabaseRalleyWithUser]
@@ -163,7 +187,7 @@ class RalleyService: ObservableObject {
 
             // Map database results to app models and filter blocked users
             let mappedRalleys = ralleys
-                .filter { !blockedUserIds.contains($0.host_id) }
+                .filter { !self.sharedUserState.isBlocked($0.host_id) }
                 .compactMap { dbRalley in
                     mapDatabaseRalleyToApp(dbRalley)
                 }
@@ -225,27 +249,9 @@ class RalleyService: ObservableObject {
         return fullRalleys
     }
 
-    /// Refresh blocked users cache if stale (older than 5 minutes)
-    private func refreshBlockedUsersIfNeeded() async {
-        let refreshInterval: TimeInterval = 300 // 5 minutes
-
-        if let lastRefresh = blockedUsersLastRefresh,
-           Date().timeIntervalSince(lastRefresh) < refreshInterval {
-            return // Cache is still fresh
-        }
-
-        do {
-            blockedUserIds = try await friendshipService.getBlockedUserIds()
-            blockedUsersLastRefresh = Date()
-        } catch {
-            print("❌ RalleyService: Failed to refresh blocked users: \(error)")
-        }
-    }
-
     /// Force refresh of blocked users cache
     func refreshBlockedUsers() async {
-        blockedUsersLastRefresh = nil
-        await refreshBlockedUsersIfNeeded()
+        await sharedUserState.forceRefresh()
     }
 
     /**
@@ -263,7 +269,7 @@ class RalleyService: ObservableObject {
      * @param userId: User ID to load ralleys for
      * @returns: Array of user's ralleys
      */
-    func loadUserRalleys(userId: UUID) async throws -> [ClubRalley] {
+    func loadUserRalleys(userId: UUID, limit: Int = 50, offset: Int = 0) async throws -> [ClubRalley] {
         isLoading = true
         lastError = nil
 
@@ -271,6 +277,7 @@ class RalleyService: ObservableObject {
             let hostedRalleys = try await supabase.query("ralleys")
                 .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
                 .eq("host_id", value: userId)
+                .range(from: offset, to: offset + limit - 1)
                 .execute() as [DatabaseRalleyWithUser]
 
             let mappedRalleys = hostedRalleys.compactMap { dbRalley in
@@ -295,28 +302,34 @@ class RalleyService: ObservableObject {
      * @param userId: User ID to load attended ralleys for
      * @returns: Array of attended ralleys
      */
-    func loadAttendedRalleys(userId: UUID) async throws -> [ClubRalley] {
+    func loadAttendedRalleys(userId: UUID, limit: Int = 50, offset: Int = 0) async throws -> [ClubRalley] {
         isLoading = true
         lastError = nil
 
         do {
-            // First get all ralley participations for this user
+            // Get participations with pagination
             let participations: [DatabaseRalleyParticipantWithId] = try await supabase.query("ralley_participants")
                 .select("*")
                 .eq("user_id", value: userId)
                 .eq("status", value: "joined")
+                .range(from: offset, to: offset + limit - 1)
                 .execute()
 
-            // Then load the actual ralleys
-            var attendedRalleys: [ClubRalley] = []
-            for participation in participations {
-                if let ralley = try await loadRalley(id: participation.ralley_id) {
-                    // Only include if user is not the host
-                    if ralley.organizer.id != userId {
-                        attendedRalleys.append(ralley)
-                    }
-                }
+            // Batch load ralleys with .in() instead of N+1 loop
+            let ralleyIds = participations.map { $0.ralley_id }
+            guard !ralleyIds.isEmpty else {
+                isLoading = false
+                return []
             }
+
+            let ralleys: [DatabaseRalleyWithUser] = try await supabase.query("ralleys")
+                .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
+                .in("id", values: ralleyIds)
+                .execute()
+
+            let attendedRalleys = ralleys
+                .compactMap { mapDatabaseRalleyToApp($0) }
+                .filter { $0.organizer.id != userId }
 
             isLoading = false
             print("RalleyService: Loaded \(attendedRalleys.count) attended ralleys from database")

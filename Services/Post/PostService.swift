@@ -16,8 +16,22 @@ import SwiftUI
  * Strategy: Real Supabase calls with mock fallbacks for reliability
  * Database: Maps ClubRalleyPost model to 'posts' table schema
  */
+// MARK: - Protocol
+
 @MainActor
-class PostService: ObservableObject {
+protocol PostServiceProtocol: ObservableObject {
+    var isLoading: Bool { get }
+    var lastError: SupabaseManager.SupabaseError? { get }
+    func createPost(_ post: ClubRalleyPost, visibility: PostVisibility) async throws -> ClubRalleyPost
+    func loadHomeFeedPosts(limit: Int, offset: Int) async throws -> [ClubRalleyPost]
+    func loadMorePosts(currentCount: Int, limit: Int) async throws -> [ClubRalleyPost]
+    func loadUserPosts(userId: UUID) async throws -> [ClubRalleyPost]
+    func deletePost(_ postId: UUID) async throws
+    func reportPost(_ postId: UUID, reason: String) async throws
+}
+
+@MainActor
+class PostService: ObservableObject, PostServiceProtocol {
 
     // MARK: - Dependencies
 
@@ -25,7 +39,10 @@ class PostService: ObservableObject {
     private let supabase = SupabaseManager.shared
 
     /// Friendship service for block filtering
-    private let friendshipService = FriendshipService()
+    private let friendshipService: FriendshipService
+
+    /// Shared blocked user state
+    private let sharedUserState: SharedUserState
 
     // MARK: - Published Properties for UI Feedback
 
@@ -35,13 +52,17 @@ class PostService: ObservableObject {
     /// Last operation error for user feedback
     @Published var lastError: SupabaseManager.SupabaseError?
 
-    // MARK: - Cached Block List
+    // MARK: - Initialization
 
-    /// Cached set of blocked user IDs
-    private var blockedUserIds: Set<UUID> = []
+    init(friendshipService: FriendshipService, sharedUserState: SharedUserState) {
+        self.friendshipService = friendshipService
+        self.sharedUserState = sharedUserState
+    }
 
-    /// Last time blocked users were refreshed
-    private var blockedUsersLastRefresh: Date?
+    convenience init() {
+        let fs = FriendshipService()
+        self.init(friendshipService: fs, sharedUserState: SharedUserState(friendshipService: fs))
+    }
 
     // MARK: - Post Creation
 
@@ -117,7 +138,7 @@ class PostService: ObservableObject {
 
         do {
             // Refresh blocked users cache if needed (every 5 minutes)
-            await refreshBlockedUsersIfNeeded()
+            await sharedUserState.refreshBlockedUsersIfNeeded()
 
             let posts = try await supabase.query("posts")
                 .select("*, club_users(first_name, last_name, username, profile_photo_url)")
@@ -127,7 +148,7 @@ class PostService: ObservableObject {
 
             // Map database results to app models and filter blocked users
             let mappedPosts = posts
-                .filter { !blockedUserIds.contains($0.user_id) }
+                .filter { !self.sharedUserState.isBlocked($0.user_id) }
                 .map { dbPost in
                     mapDatabasePostToApp(dbPost)
                 }
@@ -161,27 +182,9 @@ class PostService: ObservableObject {
         return try await loadHomeFeedPosts(limit: limit, offset: currentCount)
     }
 
-    /// Refresh blocked users cache if stale (older than 5 minutes)
-    private func refreshBlockedUsersIfNeeded() async {
-        let refreshInterval: TimeInterval = 300 // 5 minutes
-
-        if let lastRefresh = blockedUsersLastRefresh,
-           Date().timeIntervalSince(lastRefresh) < refreshInterval {
-            return // Cache is still fresh
-        }
-
-        do {
-            blockedUserIds = try await friendshipService.getBlockedUserIds()
-            blockedUsersLastRefresh = Date()
-        } catch {
-            print("❌ PostService: Failed to refresh blocked users: \(error)")
-        }
-    }
-
     /// Force refresh of blocked users cache
     func refreshBlockedUsers() async {
-        blockedUsersLastRefresh = nil
-        await refreshBlockedUsersIfNeeded()
+        await sharedUserState.forceRefresh()
     }
 
     /**

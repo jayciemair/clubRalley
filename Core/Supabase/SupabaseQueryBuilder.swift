@@ -18,6 +18,7 @@ class SupabaseQueryBuilder {
     // Track query state for building the actual query
     private var selectColumns: String = "*"
     private var filters: [(column: String, op: String, value: String)] = []
+    private var inFilters: [(column: String, values: [String])] = []
     private var orderColumn: String?
     private var orderAscending: Bool = true
     private var limitCount: Int?
@@ -51,6 +52,12 @@ class SupabaseQueryBuilder {
     /// Add OR filter condition
     func or(_ condition: String) -> Self {
         filters.append((column: "", op: "or", value: condition))
+        return self
+    }
+
+    /// Add IN filter (column value must be in the provided array)
+    func `in`(_ column: String, values: [Any]) -> Self {
+        inFilters.append((column: column, values: values.map { "\($0)" }))
         return self
     }
 
@@ -90,6 +97,10 @@ class SupabaseQueryBuilder {
             query = query.eq(filter.column, value: filter.value)
         }
 
+        for inFilter in inFilters {
+            query = query.in(inFilter.column, values: inFilter.values)
+        }
+
         let result: T = try await query.single().execute().value
         return result
     }
@@ -112,6 +123,10 @@ class SupabaseQueryBuilder {
             } else if filter.op == "or" {
                 filterQuery = filterQuery.or(filter.value)
             }
+        }
+
+        for inFilter in inFilters {
+            filterQuery = filterQuery.in(inFilter.column, values: inFilter.values)
         }
 
         var transformQuery = filterQuery.order(orderColumn ?? "created_at", ascending: orderAscending)

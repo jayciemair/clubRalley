@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MessagesView: View {
-    @StateObject private var messagingService = MessagingService()
+    private var messagingService: MessagingService { ServiceContainer.shared.messagingService }
     @State private var searchText = ""
 
     private let realtimeManager = RealtimeManager.shared
@@ -119,18 +119,10 @@ struct MessagesView: View {
         .background(Color.white)
     }
 
-    // MARK: - Loading View
+    // MARK: - Loading View (Skeleton)
 
     private var loadingView: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            ProgressView()
-                .scaleEffect(1.5)
-            Text("Loading messages...")
-                .font(.system(size: 16))
-                .foregroundColor(.gray)
-            Spacer()
-        }
+        MessagesSkeletonView()
     }
 
     // MARK: - Error View
@@ -176,6 +168,8 @@ struct MessagesView: View {
 
     // MARK: - Empty State View
 
+    @State private var emptyStateVisible = false
+
     private var emptyStateView: some View {
         VStack(spacing: 20) {
             Spacer()
@@ -183,18 +177,29 @@ struct MessagesView: View {
             Image(systemName: "message.fill")
                 .font(.system(size: 60))
                 .foregroundColor(Color(hex: "#2C4F40").opacity(0.5))
+                .scaleEffect(emptyStateVisible ? 1 : 0.5)
+                .opacity(emptyStateVisible ? 1 : 0)
 
             Text("No Messages Yet")
                 .font(.system(size: 22, weight: .bold))
                 .foregroundColor(.black)
+                .opacity(emptyStateVisible ? 1 : 0)
+                .offset(y: emptyStateVisible ? 0 : 10)
 
             Text("Start a conversation by tapping the message button on someone's profile or in the roster.")
                 .font(.system(size: 16))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
+                .opacity(emptyStateVisible ? 1 : 0)
+                .offset(y: emptyStateVisible ? 0 : 10)
 
             Spacer()
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                emptyStateVisible = true
+            }
         }
     }
 
@@ -302,6 +307,55 @@ struct ConversationRow: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(conversation.hasUnread ? Color(hex: "#2C4F40").opacity(0.05) : Color.clear)
+    }
+}
+
+// MARK: - Messages Skeleton View
+
+struct MessagesSkeletonView: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ForEach(0..<5, id: \.self) { _ in
+                    HStack(spacing: 12) {
+                        Circle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 48, height: 48)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 120, height: 16)
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: 200, height: 12)
+                        }
+
+                        Spacer()
+
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 40, height: 12)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+
+                    Divider().padding(.leading, 76)
+                }
+            }
+            .background(Color.white)
+            .cornerRadius(12)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+        .opacity(isAnimating ? 0.6 : 1.0)
+        .onAppear {
+            withAnimation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                isAnimating = true
+            }
+        }
     }
 }
 

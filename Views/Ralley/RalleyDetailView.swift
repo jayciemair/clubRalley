@@ -135,6 +135,21 @@ struct RalleyDetailView: View {
                         .cornerRadius(12)
                     }
                 }
+            } else if ralley.isCollegeAthletesOnly && SavedUserProfile.loadFromStorage()?.playedCollegeSport != true {
+                // Non-athlete viewing a college-athletes-only ralley
+                Button(action: {}) {
+                    HStack {
+                        Image(systemName: "graduationcap.fill")
+                        Text("College Athletes Only")
+                    }
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(12)
+                }
+                .disabled(true)
             } else if ralley.requiresApproval {
                 // Private ralley - show request button
                 Button(action: { Task { await requestToJoin() } }) {

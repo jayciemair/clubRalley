@@ -2,7 +2,7 @@
 //  ProfilePhotosSection.swift
 //  Club Ralley
 //
-//  Photos grid section for profile view matching Figma design
+//  Photos grid section for profile view — 4-column layout with pill badge header
 //
 
 import SwiftUI
@@ -11,35 +11,36 @@ struct ProfilePhotosSection: View {
     let photos: [UserPhoto]
     @State private var showingAllPhotos = false
     @State private var selectedPhoto: UserPhoto?
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.md) {
-            // Section header
+        VStack(alignment: .leading, spacing: 16) {
+            // Pill badge header
             HStack {
-                Button(action: {
-                    showingAllPhotos = true
-                }) {
-                    Text("My Pics")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-                        .padding(.horizontal, ClubRalleyTheme.Spacing.md)
-                        .padding(.vertical, ClubRalleyTheme.Spacing.sm)
-                        .background(
-                            Capsule()
-                                .fill(ClubRalleyTheme.Colors.accent)
-                        )
-                }
-                .clubRalleyButtonStyle(.primary)
-                
+                Text("My Pics")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(Color(hex: "#2D4A3E"))
+                    .cornerRadius(20)
+
                 Spacer()
+
+                if photos.count > 8 {
+                    Button(action: { showingAllPhotos = true }) {
+                        Text("See All")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(Color(hex: "#2D4A3E"))
+                    }
+                }
             }
-            
-            // Photos grid - 4x2 grid showing first 8 photos
+
+            // 4-column photo grid
             LazyVGrid(
                 columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 4),
                 spacing: 4
             ) {
-                ForEach(Array(photos.prefix(8).enumerated()), id: \.offset) { index, photo in
+                ForEach(Array(photos.prefix(8).enumerated()), id: \.offset) { _, photo in
                     PhotoGridItem(photo: photo, onTap: {
                         selectedPhoto = photo
                     })
@@ -58,7 +59,7 @@ struct ProfilePhotosSection: View {
 struct PhotoGridItem: View {
     let photo: UserPhoto
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
             AsyncImage(url: URL(string: photo.imageURL)) { image in
@@ -67,14 +68,15 @@ struct PhotoGridItem: View {
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
                 Rectangle()
-                    .fill(ClubRalleyTheme.Colors.sageGreen)
+                    .fill(Color(hex: "#E8E4DA"))
                     .overlay(
                         Image(systemName: "photo")
-                            .foregroundColor(ClubRalleyTheme.Colors.accent)
+                            .foregroundColor(Color(hex: "#2D4A3E").opacity(0.3))
                     )
             }
-            .frame(width: 80, height: 80)
-            .clipShape(RoundedRectangle(cornerRadius: ClubRalleyTheme.CornerRadius.small))
+            .frame(minHeight: 80)
+            .aspectRatio(1, contentMode: .fill)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -84,7 +86,7 @@ struct AllPhotosView: View {
     let photos: [UserPhoto]
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPhoto: UserPhoto?
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -100,7 +102,7 @@ struct AllPhotosView: View {
                                 .clipped()
                         } placeholder: {
                             Rectangle()
-                                .fill(ClubRalleyTheme.Colors.sageGreen)
+                                .fill(Color(hex: "#E8E4DA"))
                                 .aspectRatio(1, contentMode: .fit)
                                 .overlay(
                                     ProgressView()
@@ -117,10 +119,8 @@ struct AllPhotosView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                    .foregroundColor(ClubRalleyTheme.Colors.accent)
+                    Button("Done") { dismiss() }
+                        .foregroundColor(Color(hex: "#2D4A3E"))
                 }
             }
             .sheet(item: $selectedPhoto) { photo in
@@ -133,101 +133,89 @@ struct AllPhotosView: View {
 struct PhotoDetailView: View {
     let photo: UserPhoto
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationStack {
             VStack {
-                // Main photo
                 AsyncImage(url: URL(string: photo.imageURL)) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                 } placeholder: {
                     Rectangle()
-                        .fill(ClubRalleyTheme.Colors.sageGreen)
-                        .overlay(
-                            ProgressView()
-                        )
+                        .fill(Color(hex: "#E8E4DA"))
+                        .overlay(ProgressView())
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
+
                 // Photo info
-                VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.md) {
+                VStack(alignment: .leading, spacing: 12) {
                     if let caption = photo.caption, !caption.isEmpty {
                         Text(caption)
-                            .font(ClubRalleyTheme.Typography.body)
-                            .foregroundColor(ClubRalleyTheme.Colors.text)
+                            .font(.system(size: 15))
+                            .foregroundColor(Color(hex: "#2D4A3E"))
                     }
-                    
-                    // Engagement stats
-                    HStack(spacing: ClubRalleyTheme.Spacing.lg) {
+
+                    HStack(spacing: 16) {
                         HStack(spacing: 4) {
                             Image(systemName: "heart.fill")
-                                .foregroundColor(ClubRalleyTheme.Colors.error)
+                                .foregroundColor(.red.opacity(0.8))
                             Text("\(photo.likesCount)")
-                                .font(ClubRalleyTheme.Typography.footnote)
-                                .foregroundColor(ClubRalleyTheme.Colors.text)
+                                .font(.system(size: 13))
+                                .foregroundColor(Color(hex: "#2D4A3E"))
                         }
-                        
+
                         HStack(spacing: 4) {
                             Image(systemName: "bubble.right.fill")
-                                .foregroundColor(ClubRalleyTheme.Colors.accent)
+                                .foregroundColor(Color(hex: "#2D4A3E"))
                             Text("\(photo.commentsCount)")
-                                .font(ClubRalleyTheme.Typography.footnote)
-                                .foregroundColor(ClubRalleyTheme.Colors.text)
+                                .font(.system(size: 13))
+                                .foregroundColor(Color(hex: "#2D4A3E"))
                         }
-                        
+
                         Spacer()
-                        
+
                         Text(formatDate(photo.createdAt))
-                            .font(ClubRalleyTheme.Typography.caption)
-                            .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                            .font(.system(size: 12))
+                            .foregroundColor(Color(hex: "#6B7B6E"))
                     }
-                    
-                    // Tags
+
                     if !photo.tags.isEmpty {
                         ScrollView(.horizontal, showsIndicators: false) {
-                            HStack {
+                            HStack(spacing: 6) {
                                 ForEach(photo.tags, id: \.self) { tag in
                                     Text("#\(tag)")
-                                        .font(ClubRalleyTheme.Typography.caption)
-                                        .foregroundColor(ClubRalleyTheme.Colors.accent)
+                                        .font(.system(size: 12))
+                                        .foregroundColor(Color(hex: "#2D4A3E"))
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
                                         .background(
-                                            Capsule()
-                                                .fill(ClubRalleyTheme.Colors.sageGreen)
+                                            Capsule().fill(Color(hex: "#E8E4DA"))
                                         )
                                 }
                             }
-                            .padding(.horizontal, ClubRalleyTheme.Spacing.md)
                         }
                     }
                 }
-                .padding(ClubRalleyTheme.Spacing.md)
-                .background(ClubRalleyTheme.Colors.background)
+                .padding(16)
+                .background(Color(hex: "#F5F2EB"))
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
-                        dismiss()
-                    }
-                    .foregroundColor(ClubRalleyTheme.Colors.accent)
+                    Button("Close") { dismiss() }
+                        .foregroundColor(Color(hex: "#2D4A3E"))
                 }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        // Handle share action
-                    }) {
+                    Button(action: {}) {
                         Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(ClubRalleyTheme.Colors.accent)
+                            .foregroundColor(Color(hex: "#2D4A3E"))
                     }
                 }
             }
         }
     }
-    
+
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -240,9 +228,9 @@ struct PhotoDetailView: View {
 struct ProfilePhotosSection_Previews: PreviewProvider {
     static var mockPhotos: [UserPhoto] {
         (1...12).map { index -> UserPhoto in
-            let caption: String? = index % 3 == 0 ? "Great game today! #tennis #bucknell" : nil
+            let caption: String? = index % 3 == 0 ? "Great game today!" : nil
             let date = Date().addingTimeInterval(-Double(index) * 86400)
-            let tags: [String] = index % 2 == 0 ? ["tennis", "bucknell", "game"] : []
+            let tags: [String] = index % 2 == 0 ? ["tennis", "bucknell"] : []
             return UserPhoto(
                 id: UUID(),
                 imageURL: "https://picsum.photos/200/200?random=\(index)",

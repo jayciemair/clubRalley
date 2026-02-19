@@ -51,6 +51,7 @@ struct ClubRalleyApp: App {
                         .environment(\.managedObjectContext, persistenceController.container.viewContext)
                         .environmentObject(onboardingFlowController)
                         .environmentObject(storeManager)
+                        .environmentObject(ServiceContainer.shared)
                         .preferredColorScheme(appearanceManager.colorScheme)
                         .onAppear {
                             UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor.systemBlue
@@ -152,21 +153,16 @@ struct ClubRalleyApp: App {
 
     private var splashView: some View {
         ZStack {
-            Color.white.ignoresSafeArea()
+            Color(hex: "#2C4F40").ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                ZStack {
-                    Circle()
-                        .fill(Color(hex: "#2C4F40"))
-                        .frame(width: 100, height: 100)
+            VStack(spacing: 8) {
+                Text("Ralley")
+                    .font(.system(size: 42, weight: .bold, design: .serif))
+                    .foregroundColor(.white)
 
-                    Image(systemName: "figure.run")
-                        .font(.system(size: 44, weight: .semibold))
-                        .foregroundColor(.white)
-                }
-
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "#2C4F40")))
+                Text("the athletes' network.")
+                    .font(.system(size: 16, weight: .regular))
+                    .foregroundColor(.white.opacity(0.8))
             }
         }
     }
@@ -198,8 +194,8 @@ struct ClubRalleyApp: App {
         switch url.host {
         case "home":
             selectedTab = .home
-        case "find-ralleys", "ralleys", "discover":
-            selectedTab = .findRalleys
+        case "find-ralleys", "ralleys", "discover", "map":
+            selectedTab = .ralleys
         case "post", "create":
             selectedTab = .post
         case "teams", "ralleys":

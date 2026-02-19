@@ -22,11 +22,15 @@ enum RalleyVisibility: String, Codable, CaseIterable {
     /// Only friends (people you follow who follow you back) can see
     case friends = "friends"
 
+    /// Only former college athletes can see and join
+    case collegeAthletesOnly = "college_athletes_only"
+
     var displayName: String {
         switch self {
         case .anyone: return "Anyone"
         case .mutualFriends: return "Mutual Friends"
         case .friends: return "Friends Only"
+        case .collegeAthletesOnly: return "College Athletes Only"
         }
     }
 
@@ -35,6 +39,7 @@ enum RalleyVisibility: String, Codable, CaseIterable {
         case .anyone: return "Visible to everyone on Club Ralley"
         case .mutualFriends: return "Only people you both follow can see"
         case .friends: return "Only your friends can see this ralley"
+        case .collegeAthletesOnly: return "Only former college athletes can see and join"
         }
     }
 
@@ -43,6 +48,7 @@ enum RalleyVisibility: String, Codable, CaseIterable {
         case .anyone: return "globe"
         case .mutualFriends: return "person.2"
         case .friends: return "lock"
+        case .collegeAthletesOnly: return "graduationcap.fill"
         }
     }
 }

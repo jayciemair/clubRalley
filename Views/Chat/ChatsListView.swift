@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ChatsListView: View {
     @StateObject private var viewModel = ChatsListViewModel()
+    @State private var isVisible = false
 
     var body: some View {
         Group {
@@ -28,11 +29,7 @@ struct ChatsListView: View {
     // MARK: - Loading View
 
     private var loadingView: some View {
-        VStack {
-            Spacer()
-            ProgressView()
-            Spacer()
-        }
+        ChatsSkeletonView()
     }
 
     // MARK: - Empty State
@@ -53,6 +50,10 @@ struct ChatsListView: View {
                 .padding(.horizontal, 40)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .opacity(isVisible ? 1 : 0)
+        .offset(y: isVisible ? 0 : 12)
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isVisible)
+        .onAppear { isVisible = true }
     }
 
     // MARK: - Chats List
@@ -65,11 +66,24 @@ struct ChatsListView: View {
                         ChatListRow(chat: chat)
                     }
                     .buttonStyle(PlainButtonStyle())
+                    .onAppear {
+                        // Trigger pagination when near the last item
+                        if chat.id == viewModel.chats.last?.id && viewModel.hasMoreChats {
+                            Task {
+                                await viewModel.loadMoreChats()
+                            }
+                        }
+                    }
 
                     if chat.id != viewModel.chats.last?.id {
                         Divider()
                             .padding(.leading, 76)
                     }
+                }
+
+                if viewModel.isLoadingMore {
+                    ProgressView()
+                        .padding(.vertical, 16)
                 }
             }
             .background(Color.white)
@@ -169,6 +183,57 @@ private struct ChatListRow: View {
         case "outdoor": return "mountain.2.fill"
         default: return "sportscourt.fill"
         }
+    }
+}
+
+// MARK: - Chats Skeleton View
+
+private struct ChatsSkeletonView: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(0..<4, id: \.self) { index in
+                    HStack(spacing: 12) {
+                        Circle()
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 52, height: 52)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(width: 120, height: 12)
+
+                                Spacer()
+
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(width: 36, height: 10)
+                            }
+
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: 180, height: 10)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+
+                    if index < 3 {
+                        Divider().padding(.leading, 76)
+                    }
+                }
+            }
+            .background(Color.white)
+            .cornerRadius(16)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+        .opacity(isAnimating ? 1.0 : 0.6)
+        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
+        .onAppear { isAnimating = true }
     }
 }
 

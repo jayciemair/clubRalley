@@ -16,10 +16,14 @@ struct LocationSearchSheet: View {
     @Binding var locationAddress: String
     @Binding var locationCity: String
     @Binding var locationState: String
+    @Binding var locationLatitude: Double
+    @Binding var locationLongitude: Double
 
     @State private var searchText = ""
     @State private var searchResults: [LocationSuggestion] = []
     @State private var isSearching = false
+    @State private var searchTask: Task<Void, Never>?
+    @State private var defaultSuggestions: [LocationSuggestion] = []
 
     var body: some View {
         NavigationStack {
@@ -38,7 +42,10 @@ struct LocationSearchSheet: View {
                         }
 
                     if !searchText.isEmpty {
-                        Button(action: { searchText = "" }) {
+                        Button(action: {
+                            searchText = ""
+                            searchResults = defaultSuggestions
+                        }) {
                             Image(systemName: "xmark.circle.fill")
                                 .font(.system(size: 16))
                                 .foregroundColor(.gray)
@@ -145,23 +152,114 @@ struct LocationSearchSheet: View {
         }
     }
 
+    // MARK: - Search
+
     private func searchLocations(query: String) {
+        searchTask?.cancel()
+
         guard !query.isEmpty else {
-            loadNearbyLocations()
+            searchResults = defaultSuggestions
+            isSearching = false
             return
         }
 
         isSearching = true
 
-        // Simulate search with mock data
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            searchResults = LocationSuggestion.mockSearchResults(for: query)
-            isSearching = false
+        searchTask = Task {
+            // Debounce: wait 300ms before searching
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            guard !Task.isCancelled else { return }
+
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = query
+            // Bias results toward Lewisburg, PA area
+            request.region = MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: 40.9568, longitude: -76.8844),
+                span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
+            )
+
+            do {
+                let search = MKLocalSearch(request: request)
+                let response = try await search.start()
+                guard !Task.isCancelled else { return }
+
+                let suggestions = response.mapItems.compactMap { item -> LocationSuggestion? in
+                    guard let name = item.name else { return nil }
+                    let placemark = item.placemark
+                    return LocationSuggestion(
+                        name: name,
+                        address: placemark.formattedAddress,
+                        city: placemark.locality ?? "Lewisburg",
+                        state: placemark.administrativeArea ?? "PA",
+                        type: inferLocationType(from: item),
+                        latitude: placemark.coordinate.latitude,
+                        longitude: placemark.coordinate.longitude
+                    )
+                }
+
+                await MainActor.run {
+                    searchResults = suggestions
+                    isSearching = false
+                }
+            } catch {
+                guard !Task.isCancelled else { return }
+                await MainActor.run {
+                    searchResults = []
+                    isSearching = false
+                }
+            }
         }
     }
 
     private func loadNearbyLocations() {
-        searchResults = LocationSuggestion.mockNearbyLocations()
+        // Show mock data immediately, then replace with Supabase venues
+        let mockSuggestions = Venue.allVenues.map { venue in
+            LocationSuggestion(
+                name: venue.name,
+                address: venue.address,
+                city: venue.city,
+                state: venue.state,
+                type: venue.type,
+                latitude: venue.latitude,
+                longitude: venue.longitude
+            )
+        }
+        defaultSuggestions = mockSuggestions
+        searchResults = mockSuggestions
+
+        // Load venues from Supabase + Overpass discovery
+        Task {
+            let venueService = VenueService()
+            do {
+                let city = MapCity.defaultCity
+                let venues = try await venueService.discoverVenues(
+                    latitude: city.latitude,
+                    longitude: city.longitude,
+                    city: city.name,
+                    state: city.state
+                )
+                let suggestions = venues.map { venue in
+                    LocationSuggestion(
+                        name: venue.name,
+                        address: venue.address,
+                        city: venue.city,
+                        state: venue.state,
+                        type: venue.type,
+                        latitude: venue.latitude,
+                        longitude: venue.longitude
+                    )
+                }
+                if !suggestions.isEmpty {
+                    defaultSuggestions = suggestions
+                    // Only replace if user hasn't started typing
+                    if searchText.isEmpty {
+                        searchResults = suggestions
+                    }
+                }
+            } catch {
+                print("LocationSearchSheet: Failed to load Supabase venues, using mock data: \(error)")
+            }
+        }
     }
 
     private func selectLocation(_ location: LocationSuggestion) {
@@ -169,7 +267,47 @@ struct LocationSearchSheet: View {
         locationAddress = location.address
         locationCity = location.city
         locationState = location.state
+        locationLatitude = location.latitude
+        locationLongitude = location.longitude
         dismiss()
+    }
+
+    // MARK: - Helpers
+
+    private func inferLocationType(from item: MKMapItem) -> LocationSuggestion.LocationType {
+        if let category = item.pointOfInterestCategory {
+            switch category {
+            case .park, .nationalPark:
+                return .park
+            case .fitnessCenter:
+                return .gym
+            case .stadium:
+                return .field
+            default:
+                break
+            }
+        }
+        // Fallback: check the name for keywords
+        let name = (item.name ?? "").lowercased()
+        if name.contains("park") || name.contains("trail") {
+            return .park
+        } else if name.contains("gym") || name.contains("fitness") || name.contains("recreation") {
+            return .gym
+        } else if name.contains("field") || name.contains("stadium") {
+            return .field
+        } else if name.contains("court") {
+            return .court
+        }
+        return .other
+    }
+}
+
+// MARK: - MKPlacemark Address Helper
+
+extension MKPlacemark {
+    var formattedAddress: String {
+        let components = [subThoroughfare, thoroughfare, locality, administrativeArea]
+        return components.compactMap { $0 }.joined(separator: " ")
     }
 }
 
@@ -204,29 +342,6 @@ struct LocationSuggestion: Identifiable {
             case .gym: return "dumbbell.fill"
             case .other: return "mappin.circle.fill"
             }
-        }
-    }
-
-    static func mockNearbyLocations() -> [LocationSuggestion] {
-        [
-            LocationSuggestion(name: "Golden Gate Park Tennis Courts", address: "501 Stanyan St", city: "San Francisco", state: "CA", type: .court, latitude: 37.7694, longitude: -122.4533),
-            LocationSuggestion(name: "Dolores Park", address: "19th & Dolores St", city: "San Francisco", state: "CA", type: .park, latitude: 37.7596, longitude: -122.4269),
-            LocationSuggestion(name: "Mission Rec Center", address: "745 Treat Ave", city: "San Francisco", state: "CA", type: .gym, latitude: 37.7558, longitude: -122.4145),
-            LocationSuggestion(name: "Potrero Hill Rec Center", address: "801 Arkansas St", city: "San Francisco", state: "CA", type: .court, latitude: 37.7559, longitude: -122.3961),
-            LocationSuggestion(name: "Marina Green", address: "Marina Blvd", city: "San Francisco", state: "CA", type: .field, latitude: 37.8066, longitude: -122.4374)
-        ]
-    }
-
-    static func mockSearchResults(for query: String) -> [LocationSuggestion] {
-        let allLocations = mockNearbyLocations() + [
-            LocationSuggestion(name: "Crissy Field", address: "Mason St & Halleck St", city: "San Francisco", state: "CA", type: .field, latitude: 37.8038, longitude: -122.4658),
-            LocationSuggestion(name: "Kezar Pavilion", address: "755 Stanyan St", city: "San Francisco", state: "CA", type: .gym, latitude: 37.7668, longitude: -122.4537),
-            LocationSuggestion(name: "Ocean Beach", address: "Great Highway", city: "San Francisco", state: "CA", type: .other, latitude: 37.7593, longitude: -122.5107)
-        ]
-
-        return allLocations.filter {
-            $0.name.lowercased().contains(query.lowercased()) ||
-            $0.address.lowercased().contains(query.lowercased())
         }
     }
 }
