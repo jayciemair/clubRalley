@@ -323,6 +323,7 @@
 		C99FFB702F32675A00EC948E /* RalleyDetailComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB6F2F32675A00EC948E /* RalleyDetailComponents.swift */; };
 		C99FFB712F32675A00EC948E /* PendingRequestsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB6D2F32675A00EC948E /* PendingRequestsSheet.swift */; };
 		C99FFB722F32675A00EC948E /* RalleyCompletionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB6E2F32675A00EC948E /* RalleyCompletionSheet.swift */; };
+		C99FFB012F32675A00EC948E /* RalleyRecapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB002F32675A00EC948E /* RalleyRecapView.swift */; };
 		C99FFB762F32677A00EC948E /* DirectMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB732F32677A00EC948E /* DirectMessageView.swift */; };
 		C99FFB772F32677A00EC948E /* MessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB742F32677A00EC948E /* MessagesView.swift */; };
 		C99FFB792F32680200EC948E /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99FFB782F32680200EC948E /* ProfileView.swift */; };
@@ -694,6 +695,7 @@
 		C99FFB6B2F32674000EC948E /* RalleyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyDetailView.swift; sourceTree = "<group>"; };
 		C99FFB6D2F32675A00EC948E /* PendingRequestsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingRequestsSheet.swift; sourceTree = "<group>"; };
 		C99FFB6E2F32675A00EC948E /* RalleyCompletionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyCompletionSheet.swift; sourceTree = "<group>"; };
+		C99FFB002F32675A00EC948E /* RalleyRecapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyRecapView.swift; sourceTree = "<group>"; };
 		C99FFB6F2F32675A00EC948E /* RalleyDetailComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyDetailComponents.swift; sourceTree = "<group>"; };
 		C99FFB732F32677A00EC948E /* DirectMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessageView.swift; sourceTree = "<group>"; };
 		C99FFB742F32677A00EC948E /* MessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesView.swift; sourceTree = "<group>"; };
@@ -1963,6 +1965,7 @@
 			children = (
 				C99FFB6D2F32675A00EC948E /* PendingRequestsSheet.swift */,
 				C99FFB6E2F32675A00EC948E /* RalleyCompletionSheet.swift */,
+				C99FFB002F32675A00EC948E /* RalleyRecapView.swift */,
 				C99FFB6F2F32675A00EC948E /* RalleyDetailComponents.swift */,
 				C99FFB6B2F32674000EC948E /* RalleyDetailView.swift */,
 				C99FFB692F32673900EC948E /* RalleyManagementView.swift */,
@@ -2439,6 +2442,7 @@
 				C99FFB702F32675A00EC948E /* RalleyDetailComponents.swift in Sources */,
 				C99FFB712F32675A00EC948E /* PendingRequestsSheet.swift in Sources */,
 				C99FFB722F32675A00EC948E /* RalleyCompletionSheet.swift in Sources */,
+				C99FFB012F32675A00EC948E /* RalleyRecapView.swift in Sources */,
 				D5C5578667B111864E3B9978 /* ContactsAccessScreen.swift in Sources */,
 				19BE62C4C0351902958C7168 /* ClubRalleyOnboardingLayout.swift in Sources */,
 				54315A09916994A3E1C9B10B /* ClubRalleyOnboardingController.swift in Sources */,

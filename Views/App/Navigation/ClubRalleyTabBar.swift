@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ClubRalleyTabBar: View {
     @Binding var selectedTab: MainTab
-    @Namespace private var tabIndicator
 
     private let tabs: [(tab: MainTab, icon: String, filledIcon: String, title: String)] = [
         (.home, "house", "house.fill", "Home"),
@@ -27,20 +26,22 @@ struct ClubRalleyTabBar: View {
                     icon: selectedTab == item.tab ? item.filledIcon : item.icon,
                     title: item.title,
                     isSelected: selectedTab == item.tab,
-                    namespace: tabIndicator,
                     action: { selectedTab = item.tab }
                 )
             }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 12)
-        .padding(.bottom, 8)
+        .padding(.top, 8)
         .padding(.bottom, safeAreaBottomInset)
         .background(
-            Rectangle()
-                .fill(ClubRalleyTheme.Colors.background)
-                .clubRalleyShadow(ClubRalleyTheme.Shadows.medium)
-                .ignoresSafeArea(.container, edges: .bottom)
+            VStack(spacing: 0) {
+                Rectangle()
+                    .fill(Color(hex: "#d5d7cb"))
+                    .frame(height: 1)
+                Rectangle()
+                    .fill(Color.white)
+            }
+            .ignoresSafeArea(.container, edges: .bottom)
         )
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selectedTab)
     }
@@ -57,7 +58,6 @@ struct TabBarButton: View {
     let icon: String
     let title: String
     let isSelected: Bool
-    var namespace: Namespace.ID
     let action: () -> Void
 
     var body: some View {
@@ -68,26 +68,15 @@ struct TabBarButton: View {
         }) {
             VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: 20, weight: isSelected ? .semibold : .regular))
                     .frame(height: 24)
 
                 Text(title)
-                    .font(ClubRalleyTheme.Typography.caption2)
+                    .font(.system(size: 9.5, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-
-                if isSelected {
-                    Circle()
-                        .fill(ClubRalleyTheme.Colors.accent)
-                        .frame(width: 5, height: 5)
-                        .matchedGeometryEffect(id: "tabIndicator", in: namespace)
-                } else {
-                    Circle()
-                        .fill(Color.clear)
-                        .frame(width: 5, height: 5)
-                }
             }
-            .foregroundColor(isSelected ? ClubRalleyTheme.Colors.accent : ClubRalleyTheme.Colors.secondaryText)
+            .foregroundColor(isSelected ? Color(hex: "#2C4F40") : Color(hex: "#bbbbbb"))
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }

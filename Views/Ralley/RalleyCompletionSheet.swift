@@ -20,6 +20,7 @@ struct RalleyCompletionSheet: View {
     @State private var isLoading = true
     @State private var isSubmitting = false
     @State private var postContent = ""
+    @State private var showingRecap = false
 
     var body: some View {
         NavigationStack {
@@ -62,6 +63,16 @@ struct RalleyCompletionSheet: View {
             }
             .task {
                 await loadData()
+            }
+            .sheet(isPresented: $showingRecap) {
+                RalleyRecapView(
+                    ralley: ralley,
+                    attendees: attendees
+                )
+                .environmentObject(ralleyManager)
+                .onDisappear {
+                    dismiss()
+                }
             }
         }
     }
@@ -277,6 +288,8 @@ struct RalleyCompletionSheet: View {
         if let completionManager = ralleyManager.completionManager {
             if skipPost {
                 await completionManager.skipAndComplete()
+                isSubmitting = false
+                dismiss()
             } else {
                 // Set up the completion manager state
                 completionManager.taggedUserIds = taggedUserIds
@@ -286,13 +299,18 @@ struct RalleyCompletionSheet: View {
 
                 // Complete and share
                 await completionManager.completeAndShare()
-            }
-        }
+                isSubmitting = false
 
-        isSubmitting = false
-        dismiss()
+                // Show the recap screen
+                showingRecap = true
+            }
+        } else {
+            isSubmitting = false
+            dismiss()
+        }
     }
 }
+
 
 // MARK: - Attendee Row
 

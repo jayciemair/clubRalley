@@ -308,3 +308,68 @@ struct EmptyRalleysView: View {
         }
     }
 }
+
+// MARK: - No Nearby Ralleys View (Empty State without filters)
+
+struct NoNearbyRalleysView: View {
+    var onCreateRalley: () -> Void
+    var onNotifyMe: () -> Void = {}
+    @State private var isVisible = false
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "figure.run.circle")
+                .font(.system(size: 64))
+                .foregroundColor(Color(hex: "#2C4F40").opacity(0.7))
+                .scaleEffect(isVisible ? 1 : 0.5)
+                .opacity(isVisible ? 1 : 0)
+
+            Text("No Ralleys near you yet")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(.black)
+                .opacity(isVisible ? 1 : 0)
+                .offset(y: isVisible ? 0 : 10)
+
+            Text("Be the first to rally! Create a game and invite your friends.")
+                .font(.system(size: 16))
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+                .opacity(isVisible ? 1 : 0)
+                .offset(y: isVisible ? 0 : 10)
+
+            Button(action: onCreateRalley) {
+                HStack(spacing: 8) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 18))
+                    Text("Create a Ralley")
+                        .font(.system(size: 18, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color(hex: "#2C4F40"))
+                .cornerRadius(14)
+                .shadow(color: Color(hex: "#2C4F40").opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+            .padding(.horizontal, 24)
+            .opacity(isVisible ? 1 : 0)
+            .offset(y: isVisible ? 0 : 10)
+
+            Button(action: onNotifyMe) {
+                Text("Notify me when Ralleys appear nearby")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(Color(hex: "#2C4F40"))
+            }
+            .opacity(isVisible ? 1 : 0)
+            .offset(y: isVisible ? 0 : 10)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                isVisible = true
+            }
+        }
+    }
+}

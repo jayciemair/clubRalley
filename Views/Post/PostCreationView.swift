@@ -8,155 +8,252 @@
 import SwiftUI
 import PhotosUI
 
-// MARK: - Post Type Selection Popup
-
-struct PostTypePopup: View {
-    @Binding var isPresented: Bool
-    let onSelectThread: () -> Void
-    let onSelectPhotos: () -> Void
-    let onSelectCamera: () -> Void
-
-    var body: some View {
-        ZStack {
-            // Dimmed background
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        isPresented = false
-                    }
-                }
-
-            // Popup content
-            VStack {
-                Spacer()
-
-                VStack(spacing: 0) {
-                    PostTypeOption(
-                        title: "Thread",
-                        icon: "square.and.pencil",
-                        action: {
-                            withAnimation { isPresented = false }
-                            onSelectThread()
-                        }
-                    )
-
-                    Divider()
-
-                    PostTypeOption(
-                        title: "Photos",
-                        icon: "photo.on.rectangle",
-                        action: {
-                            withAnimation { isPresented = false }
-                            onSelectPhotos()
-                        }
-                    )
-
-                    Divider()
-
-                    PostTypeOption(
-                        title: "Camera",
-                        icon: "camera",
-                        action: {
-                            withAnimation { isPresented = false }
-                            onSelectCamera()
-                        }
-                    )
-                }
-                .background(Color.white)
-                .cornerRadius(12)
-                .padding(.horizontal, 60)
-                .padding(.bottom, 120)
-                .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
-            }
-        }
-    }
-}
-
-struct PostTypeOption: View {
-    let title: String
-    let icon: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Text(title)
-                    .font(.system(size: 17, weight: .regular))
-                    .foregroundColor(.black)
-
-                Spacer()
-
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(.gray)
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
-
-// MARK: - Post Creation Interface (Tab View)
+// MARK: - Post Creation Interface (Inline Composer)
 
 struct PostCreationInterfaceView: View {
     @EnvironmentObject var postManager: PostManager
-    @State private var showingPopup = false
-    @State private var showingThreadComposer = false
+    @AppStorage("selectedTab") var selectedTab: MainTab = .home
+
+    // Composer state
+    @State private var postText = ""
+    @State private var selectedImages: [UIImage] = []
+    @State private var selectedItems: [PhotosPickerItem] = []
+    @State private var isPosting = false
     @State private var showingPhotosPicker = false
     @State private var showingCamera = false
+    @State private var showingError = false
+    @State private var errorMessage = ""
+
+    // Auto-focus
+    @FocusState private var isTextFieldFocused: Bool
+
+    private let supabase = SupabaseManager.shared
+
+    private var canPost: Bool {
+        !postText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !selectedImages.isEmpty
+    }
+
+    private var userProfile: SavedUserProfile? {
+        SavedUserProfile.loadFromStorage()
+    }
 
     var body: some View {
-        ZStack {
-            // Empty placeholder - actual content shows via sheets/popups
-            VStack {
-                Spacer()
-                Text("Tap the + button to create a post")
-                    .font(.system(size: 16))
-                    .foregroundColor(.gray)
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(hex: "#F5F5F5"))
-            .onAppear {
-                // Show popup when tab is selected
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    if !showingThreadComposer && !showingPhotosPicker && !showingCamera {
-                        showingPopup = true
+        VStack(spacing: 0) {
+            // Top bar
+            composerHeader
+
+            Divider()
+
+            // Composer area
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    composerInput
+
+                    if !selectedImages.isEmpty {
+                        imagePreviewSection
                     }
+
+                    Spacer(minLength: 100)
                 }
             }
 
-            // Post type popup
-            if showingPopup {
-                PostTypePopup(
-                    isPresented: $showingPopup,
-                    onSelectThread: {
-                        showingThreadComposer = true
-                    },
-                    onSelectPhotos: {
-                        showingPhotosPicker = true
-                    },
-                    onSelectCamera: {
-                        showingCamera = true
-                    }
-                )
-                .transition(.opacity)
+            // Bottom toolbar
+            composerToolbar
+        }
+        .background(Color.white)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                isTextFieldFocused = true
             }
         }
-        .fullScreenCover(isPresented: $showingThreadComposer) {
-            ThreadComposerView()
-                .environmentObject(postManager)
-        }
-        .fullScreenCover(isPresented: $showingPhotosPicker) {
-            PhotoPostView()
-                .environmentObject(postManager)
+        .photosPicker(isPresented: $showingPhotosPicker, selection: $selectedItems, maxSelectionCount: 4, matching: .images)
+        .onChange(of: selectedItems) { _, newItems in
+            Task {
+                selectedImages.removeAll()
+                for item in newItems {
+                    if let data = try? await item.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data) {
+                        selectedImages.append(image)
+                    }
+                }
+            }
         }
         .fullScreenCover(isPresented: $showingCamera) {
-            CameraPostView()
-                .environmentObject(postManager)
+            PostCameraView(capturedImage: Binding(
+                get: { nil },
+                set: { image in
+                    if let image = image {
+                        selectedImages.append(image)
+                    }
+                }
+            ))
+        }
+        .alert("Error", isPresented: $showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
+    }
+
+    // MARK: - Top Bar
+
+    private var composerHeader: some View {
+        HStack {
+            Button(action: { selectedTab = .home }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(.black)
+            }
+
+            Spacer()
+
+            Button(action: submitPost) {
+                Text("Post")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(canPost ? Color(hex: "#2C4F40") : .gray.opacity(0.5))
+            }
+            .disabled(!canPost || isPosting)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+    }
+
+    // MARK: - Composer Input
+
+    private var composerInput: some View {
+        HStack(alignment: .top, spacing: 12) {
+            // User profile photo
+            if let photoURL = userProfile?.profilePhotoURL, !photoURL.isEmpty {
+                AsyncImage(url: URL(string: photoURL)) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    profileInitials
+                }
+                .frame(width: 36, height: 36)
+                .clipShape(Circle())
+            } else {
+                profileInitials
+            }
+
+            // Text input
+            TextField("What's happening?", text: $postText, axis: .vertical)
+                .font(.system(size: 17))
+                .foregroundColor(.black)
+                .lineLimit(20, reservesSpace: false)
+                .focused($isTextFieldFocused)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+    }
+
+    private var profileInitials: some View {
+        let initials: String = {
+            let first = userProfile?.firstName.prefix(1) ?? "?"
+            return String(first).uppercased()
+        }()
+
+        return Text(initials)
+            .font(.system(size: 15, weight: .bold))
+            .foregroundColor(.white)
+            .frame(width: 36, height: 36)
+            .background(Color(hex: "#2C4F40"))
+            .clipShape(Circle())
+    }
+
+    // MARK: - Image Preview
+
+    private var imagePreviewSection: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(selectedImages.indices, id: \.self) { index in
+                    ZStack(alignment: .topTrailing) {
+                        Image(uiImage: selectedImages[index])
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 120, height: 120)
+                            .clipped()
+                            .cornerRadius(12)
+
+                        Button(action: {
+                            selectedImages.remove(at: index)
+                            if index < selectedItems.count {
+                                selectedItems.remove(at: index)
+                            }
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 22))
+                                .foregroundColor(.white)
+                                .background(Circle().fill(Color.black.opacity(0.6)))
+                        }
+                        .offset(x: 6, y: -6)
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+
+    // MARK: - Bottom Toolbar
+
+    private var composerToolbar: some View {
+        VStack(spacing: 0) {
+            Divider()
+
+            HStack(spacing: 24) {
+                // Photo library
+                Button(action: { showingPhotosPicker = true }) {
+                    Image(systemName: "photo.on.rectangle")
+                        .font(.system(size: 20))
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                }
+
+                // Camera
+                Button(action: { showingCamera = true }) {
+                    Image(systemName: "camera")
+                        .font(.system(size: 20))
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+        }
+        .background(Color.white)
+    }
+
+    // MARK: - Submit
+
+    private func submitPost() {
+        guard canPost && !isPosting else { return }
+        isPosting = true
+
+        Task { @MainActor in
+            let previousError = postManager.error
+
+            let imageUrls = selectedImages.isEmpty ? [] :
+                Array(0..<selectedImages.count).map { "https://picsum.photos/300/300?random=\($0 + 600)" }
+
+            await postManager.createPost(
+                content: postText,
+                title: nil,
+                images: imageUrls,
+                visibility: .everyone
+            )
+
+            if postManager.error != nil && postManager.error?.localizedDescription != previousError?.localizedDescription {
+                errorMessage = "Failed to create post. Please check your connection and try again."
+                showingError = true
+                isPosting = false
+                return
+            }
+
+            // Reset state and navigate to home
+            postText = ""
+            selectedImages = []
+            selectedItems = []
+            isPosting = false
+            selectedTab = .home
         }
     }
 }

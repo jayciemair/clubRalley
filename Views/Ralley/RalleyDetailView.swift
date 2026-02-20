@@ -19,6 +19,7 @@ struct RalleyDetailView: View {
     @State private var attendees: [RalleyAttendee] = []
     @State private var hasPendingRequest = false
     @State private var isJoining = false
+    @State private var hasJoined = false
     @State private var showingError = false
     @State private var errorMessage = ""
 
@@ -28,6 +29,7 @@ struct RalleyDetailView: View {
                 RalleyDetailHeader(ralley: ralley)
                 RalleyInfoSection(ralley: ralley)
                 RalleyParticipantsSection(ralley: ralley, attendees: attendees)
+                AddToCalendarButton(ralley: ralley)
 
                 if ralley.isCaptain {
                     RalleyCaptainControls(
@@ -135,6 +137,26 @@ struct RalleyDetailView: View {
                         .cornerRadius(12)
                     }
                 }
+            } else if hasJoined {
+                // Post-join state
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                    Text("You're In!")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color(hex: "#2C4F40").opacity(0.1))
+                .cornerRadius(12)
+
+                Button(action: { Task { await leaveRalley() } }) {
+                    Text("Leave Ralley")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.gray)
+                }
             } else if ralley.isCollegeAthletesOnly && SavedUserProfile.loadFromStorage()?.playedCollegeSport != true {
                 // Non-athlete viewing a college-athletes-only ralley
                 Button(action: {}) {
@@ -147,6 +169,21 @@ struct RalleyDetailView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(Color.gray.opacity(0.2))
+                    .cornerRadius(12)
+                }
+                .disabled(true)
+            } else if ralley.isFull {
+                // Full state
+                Button(action: {}) {
+                    HStack {
+                        Image(systemName: "nosign")
+                        Text("Ralley Full")
+                    }
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.gray)
                     .cornerRadius(12)
                 }
                 .disabled(true)
@@ -169,7 +206,9 @@ struct RalleyDetailView: View {
                     .background(hasPendingRequest ? Color.gray : Color(hex: "#2C4F40"))
                     .cornerRadius(12)
                 }
-                .disabled(hasPendingRequest || isJoining || ralley.isFull)
+                .disabled(hasPendingRequest || isJoining)
+
+                commitmentMessage
             } else {
                 // Open ralley - join directly
                 Button(action: { Task { await joinRalley() } }) {
@@ -186,10 +225,12 @@ struct RalleyDetailView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(ralley.isFull ? Color.gray : Color(hex: "#2C4F40"))
+                    .background(Color(hex: "#2C4F40"))
                     .cornerRadius(12)
                 }
-                .disabled(ralley.isFull || isJoining)
+                .disabled(isJoining)
+
+                commitmentMessage
             }
         }
         .padding(20)
@@ -199,11 +240,22 @@ struct RalleyDetailView: View {
         .padding(.top, 16)
     }
 
+    private var commitmentMessage: some View {
+        Text("By joining, you're committing to show up for your teammates.")
+            .font(.system(size: 12))
+            .foregroundColor(Color.black.opacity(0.4))
+            .multilineTextAlignment(.center)
+            .padding(.top, 4)
+    }
+
     // MARK: - Actions
 
     private func loadData() async {
         // Load attendees for participant list
         attendees = await ralleyManager.participationManager?.getAttendees(for: ralley.id) ?? []
+
+        // Check if user already joined
+        hasJoined = ralleyManager.joinedRalleyIds.contains(ralley.id)
 
         if ralley.isCaptain {
             pendingRequests = await ralleyManager.loadPendingRequests(for: ralley.id)
@@ -220,8 +272,19 @@ struct RalleyDetailView: View {
         if ralleyManager.error != nil && ralleyManager.error?.localizedDescription != previousError?.localizedDescription {
             errorMessage = "Failed to join ralley. Please check your connection and try again."
             showingError = true
+        } else {
+            withAnimation(.spring(response: 0.4)) {
+                hasJoined = true
+            }
         }
         isJoining = false
+    }
+
+    private func leaveRalley() async {
+        ralleyManager.markRalleyAsLeft(ralley.id)
+        withAnimation(.spring(response: 0.4)) {
+            hasJoined = false
+        }
     }
 
     private func requestToJoin() async {

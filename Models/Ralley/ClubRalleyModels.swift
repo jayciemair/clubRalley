@@ -121,6 +121,9 @@ struct ClubRalley: Identifiable, Codable {
     /// Duration of the ralley in minutes (default: 60)
     var durationMinutes: Int
 
+    /// Whether this ralley repeats weekly
+    var isRecurring: Bool
+
     // MARK: - Computed Properties
 
     /// Calculated end time based on start time and duration
@@ -195,7 +198,8 @@ struct ClubRalley: Identifiable, Codable {
         isCaptain: Bool = false,
         chatId: UUID? = nil,
         pendingRequestsCount: Int = 0,
-        durationMinutes: Int = 60
+        durationMinutes: Int = 60,
+        isRecurring: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -217,6 +221,7 @@ struct ClubRalley: Identifiable, Codable {
         self.chatId = chatId
         self.pendingRequestsCount = pendingRequestsCount
         self.durationMinutes = durationMinutes
+        self.isRecurring = isRecurring
     }
 }
 

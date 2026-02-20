@@ -13,39 +13,34 @@ struct ProfilePhotosSection: View {
     @State private var selectedPhoto: UserPhoto?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Pill badge header
+        VStack(alignment: .leading, spacing: 14) {
+            // Green pill header
             HStack {
-                Text("My Pics")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 6)
-                    .background(Color(hex: "#2D4A3E"))
-                    .cornerRadius(20)
+                ProfileSectionHeader(title: "My Pics")
 
                 Spacer()
 
-                if photos.count > 8 {
+                if photos.count > 9 {
                     Button(action: { showingAllPhotos = true }) {
                         Text("See All")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Color(hex: "#2D4A3E"))
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundColor(Color(hex: "#2C4F40"))
                     }
                 }
             }
 
-            // 4-column photo grid
+            // 3-column photo grid
             LazyVGrid(
-                columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 4),
-                spacing: 4
+                columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 3),
+                spacing: 2
             ) {
-                ForEach(Array(photos.prefix(8).enumerated()), id: \.offset) { _, photo in
+                ForEach(Array(photos.prefix(9).enumerated()), id: \.offset) { _, photo in
                     PhotoGridItem(photo: photo, onTap: {
                         selectedPhoto = photo
                     })
                 }
             }
+            .clipShape(RoundedRectangle(cornerRadius: 4))
         }
         .sheet(isPresented: $showingAllPhotos) {
             AllPhotosView(photos: photos)
@@ -68,15 +63,14 @@ struct PhotoGridItem: View {
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
                 Rectangle()
-                    .fill(Color(hex: "#E8E4DA"))
+                    .fill(Color(hex: "#E2E4D6").opacity(0.5))
                     .overlay(
                         Image(systemName: "photo")
-                            .foregroundColor(Color(hex: "#2D4A3E").opacity(0.3))
+                            .foregroundColor(Color(hex: "#2C4F40").opacity(0.3))
                     )
             }
-            .frame(minHeight: 80)
             .aspectRatio(1, contentMode: .fill)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipped()
         }
         .buttonStyle(PlainButtonStyle())
     }

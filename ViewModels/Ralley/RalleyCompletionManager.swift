@@ -36,6 +36,9 @@ class RalleyCompletionManager: ObservableObject {
     /// Whether the completion sheet should be shown
     @Published var showingCompletionSheet = false
 
+    /// Whether the recap sheet should be shown (after completion)
+    @Published var showingRecapSheet = false
+
     /// Generated post for preview
     @Published var generatedPost: ClubRalleyPost?
 
@@ -304,13 +307,23 @@ class RalleyCompletionManager: ObservableObject {
             }
 
             isLoading = false
-            dismissSheet()
+
+            // Show the recap sheet so the captain can add a photo/message
+            showingRecapSheet = true
 
         } catch {
             isLoading = false
             self.error = error
             print("RalleyCompletionManager: Failed to complete ralley: \(error)")
         }
+    }
+
+    /**
+     * Dismiss the recap sheet and clean up
+     */
+    func dismissRecapSheet() {
+        showingRecapSheet = false
+        dismissSheet()
     }
 
     /**
@@ -346,6 +359,7 @@ class RalleyCompletionManager: ObservableObject {
         }
 
         showingCompletionSheet = false
+        showingRecapSheet = false
         completingRalley = nil
         attendees = []
         generatedPost = nil

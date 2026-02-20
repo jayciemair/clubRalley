@@ -40,6 +40,13 @@ struct RalleyCreationView: View {
     @State private var visibility: RalleyVisibility = .anyone
     @State private var joinType: RalleyJoinType = .open
 
+    // Recurring & Sharing State
+    @State private var repeatWeekly = false
+    @State private var shareToFeed = true
+
+    // PostManager for share-to-feed
+    @EnvironmentObject var postManager: PostManager
+
     // UI State
     @State private var isCreating = false
     @State private var showingSuccessMessage = false
@@ -57,10 +64,11 @@ struct RalleyCreationView: View {
                     headerSection
                     VStack(spacing: 20) {
                         sportSelectionSection
-                        titleSection
                         timeSection
                         locationSection
+                        titleSection
                         playerCountSection
+                        repeatAndShareSection
                         privacySection
                         descriptionSection
                         createButton
@@ -88,6 +96,12 @@ struct RalleyCreationView: View {
                 locationLatitude: $locationLatitude,
                 locationLongitude: $locationLongitude
             )
+        }
+        .onChange(of: locationName) { _, _ in
+            autoGenerateTitle()
+        }
+        .onChange(of: selectedDate) { _, _ in
+            autoGenerateTitle()
         }
         .alert("Error", isPresented: $showingError) {
             Button("OK", role: .cancel) {}
@@ -129,7 +143,7 @@ struct RalleyCreationView: View {
                             onSelect: {
                                 withAnimation(.spring(response: 0.3)) {
                                     selectedSport = sport
-                                    if title.isEmpty { title = "\(sport.name) Pickup" }
+                                    autoGenerateTitle()
                                 }
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             }
@@ -433,6 +447,61 @@ struct RalleyCreationView: View {
         }
     }
 
+    // MARK: - Repeat & Share Section
+
+    private var repeatAndShareSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionHeader(title: "Options", icon: "gearshape.fill")
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Repeat Every Week")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.black)
+                    Text("This ralley will recur weekly")
+                        .font(.system(size: 12))
+                        .foregroundColor(.gray)
+                }
+                Spacer()
+                Toggle("", isOn: $repeatWeekly)
+                    .labelsHidden()
+                    .tint(Color(hex: "#2C4F40"))
+            }
+
+            Divider()
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Share to Feed")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.black)
+                    Text("Auto-post to your followers when created")
+                        .font(.system(size: 12))
+                        .foregroundColor(.gray)
+                }
+                Spacer()
+                Toggle("", isOn: $shareToFeed)
+                    .labelsHidden()
+                    .tint(Color(hex: "#2C4F40"))
+            }
+        }
+        .formCard()
+    }
+
+    // MARK: - Auto-Generate Title
+
+    private func autoGenerateTitle() {
+        let sportName = selectedSport?.name ?? ""
+        if !locationName.isEmpty {
+            title = "\(sportName) at \(locationName)"
+        } else {
+            let dayFormatter = DateFormatter()
+            dayFormatter.dateFormat = "EEEE"
+            let dayOfWeek = dayFormatter.string(from: selectedDate)
+            title = sportName.isEmpty ? "" : "\(sportName) — \(dayOfWeek)"
+        }
+    }
+
     // MARK: - Actions
 
     private func createRalley() {
@@ -457,7 +526,10 @@ struct RalleyCreationView: View {
                 description: description.isEmpty ? "Join us for a fun \(selectedSport?.name ?? "game")!" : description,
                 requirements: "",
                 visibility: visibility,
-                joinType: joinType
+                joinType: joinType,
+                isRecurring: repeatWeekly,
+                shareToFeed: shareToFeed,
+                postManager: postManager
             )
 
             // Check if error was set during operation

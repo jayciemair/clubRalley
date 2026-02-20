@@ -133,7 +133,10 @@ class RalleyManager: ObservableObject {
         description: String,
         requirements: String = "",
         visibility: RalleyVisibility = .anyone,
-        joinType: RalleyJoinType = .open
+        joinType: RalleyJoinType = .open,
+        isRecurring: Bool = false,
+        shareToFeed: Bool = false,
+        postManager: PostManager? = nil
     ) async {
         guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             print("RalleyManager: Cannot create ralley with empty title")
@@ -176,7 +179,8 @@ class RalleyManager: ObservableObject {
             isCaptain: true,
             chatId: nil,
             pendingRequestsCount: 0,
-            durationMinutes: durationMinutes
+            durationMinutes: durationMinutes,
+            isRecurring: isRecurring
         )
 
         do {
@@ -201,6 +205,15 @@ class RalleyManager: ObservableObject {
 
             // Mark as joined so it appears in upcoming ralleys
             markRalleyAsJoined(newRalley.id)
+
+            // Auto-post to feed if requested
+            if shareToFeed, let postManager = postManager {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .medium
+                dateFormatter.timeStyle = .short
+                let postContent = "Just created a \(sport) ralley at \(locationName) on \(dateFormatter.string(from: dateTime)). Who's in?"
+                await postManager.createPost(content: postContent, title: title)
+            }
 
             print("RalleyManager: Ralley created successfully")
 

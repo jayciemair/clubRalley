@@ -2,7 +2,7 @@
 //  UserProfileView.swift
 //  Club Ralley
 //
-//  View for displaying other users' profiles — centered layout with Follow/Message
+//  View for displaying other users' profiles — horizontal header with Follow/Message/Invite
 //
 
 import SwiftUI
@@ -27,39 +27,38 @@ struct UserProfileView: View {
         ScrollView {
             if let profile = userProfile {
                 VStack(spacing: 0) {
-                    // Centered header
-                    ProfileCenteredHeader(profile: profile)
-                        .padding(.top, 16)
+                    // Horizontal header (avatar + name + stats)
+                    ProfileHeaderRow(profile: profile)
 
-                    // Stats row
-                    ProfileStatsRow(profile: profile)
-                        .padding(.top, 20)
-
-                    // Bio + credentials
+                    // Bio
                     ProfileBioSection(profile: profile)
-                        .padding(.top, 16)
+                        .padding(.top, 14)
 
-                    // Mutual friends (only on other profiles)
+                    // Mutual friends row
                     if !isOwnProfile && !profile.mutualFriends.isEmpty {
-                        OtherProfileMutualFriends(mutualFriends: profile.mutualFriends)
-                            .padding(.top, 12)
-                            .padding(.horizontal, 24)
+                        ProfileFriendsRow(mutualFriends: profile.mutualFriends)
+                            .padding(.top, 14)
                     }
 
                     // Action buttons
                     if !isOwnProfile {
-                        OtherProfileActionButtons(
+                        ProfileActionButtons(
                             isFollowing: $isFollowing,
                             isLoadingFollow: $isLoadingFollow,
                             onToggleFollow: { Task { await toggleFollow() } },
-                            onMessage: { showingMessages = true }
+                            onMessage: { showingMessages = true },
+                            onInvite: { /* TODO: Invite to ralley flow */ }
                         )
-                        .padding(.top, 16)
+                        .padding(.top, 14)
                     }
 
-                    // My Sports (reuse from own profile)
+                    // Divider
+                    ProfileDivider()
+                        .padding(.top, 16)
+
+                    // My Sports
                     SportCarouselSection(viewModel: viewModel)
-                        .padding(.top, 24)
+                        .padding(.top, 16)
 
                     // Rally History
                     RalleyHistorySection(viewModel: viewModel)
@@ -67,7 +66,7 @@ struct UserProfileView: View {
                     // My Pics
                     if !profile.photos.isEmpty {
                         ProfilePhotosSection(photos: profile.photos)
-                            .padding(.horizontal, 24)
+                            .padding(.horizontal, 22)
                             .padding(.bottom, 24)
                     }
 
@@ -81,7 +80,7 @@ struct UserProfileView: View {
                 }
             }
         }
-        .background(Color(hex: "#F5F2EB"))
+        .background(Color(hex: "#f6f5f1"))
         .refreshable {
             await loadProfile()
         }
@@ -106,7 +105,7 @@ struct UserProfileView: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis")
-                        .foregroundColor(Color(hex: "#2D4A3E"))
+                        .foregroundColor(Color(hex: "#2C4F40"))
                 }
             }
         }
@@ -120,7 +119,7 @@ struct UserProfileView: View {
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
                             Button("Close") { showingMessages = false }
-                                .foregroundColor(Color(hex: "#2D4A3E"))
+                                .foregroundColor(Color(hex: "#2C4F40"))
                         }
                     }
                 }
@@ -177,114 +176,6 @@ struct UserProfileView: View {
     }
 }
 
-// MARK: - Mutual Friends Row (Other Profiles Only)
-
-struct OtherProfileMutualFriends: View {
-    let mutualFriends: [MutualFriend]
-
-    var body: some View {
-        HStack(spacing: 8) {
-            // Overlapping avatar circles
-            HStack(spacing: -8) {
-                ForEach(Array(mutualFriends.prefix(3).enumerated()), id: \.offset) { index, friend in
-                    AsyncImage(url: URL(string: friend.profileImageURL ?? "")) { image in
-                        image.resizable().aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Circle()
-                            .fill(Color(hex: "#2D4A3E").opacity(0.2))
-                            .overlay(
-                                Text(String(friend.displayName.prefix(1)).uppercased())
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(Color(hex: "#2D4A3E"))
-                            )
-                    }
-                    .frame(width: 28, height: 28)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white, lineWidth: 1.5))
-                    .zIndex(Double(3 - index))
-                }
-            }
-
-            mutualFriendsText
-                .font(.system(size: 13))
-                .foregroundColor(Color(hex: "#6B7B6E"))
-
-            Spacer()
-        }
-    }
-
-    private var mutualFriendsText: Text {
-        let friends = mutualFriends
-        if friends.count == 1 {
-            return Text("Also friends with ") + Text(friends[0].displayName).bold()
-        } else if friends.count == 2 {
-            return Text("Also friends with ") + Text(friends[0].displayName).bold() + Text(" and ") + Text(friends[1].displayName).bold()
-        } else {
-            let remaining = friends.count - 2
-            return Text("Also friends with ") + Text(friends[0].displayName).bold() + Text(", ") + Text(friends[1].displayName).bold() + Text(", and ") + Text("\(remaining) others").bold()
-        }
-    }
-}
-
-// MARK: - Follow + Message Buttons (Other Profiles)
-
-struct OtherProfileActionButtons: View {
-    @Binding var isFollowing: Bool
-    @Binding var isLoadingFollow: Bool
-    let onToggleFollow: () -> Void
-    let onMessage: () -> Void
-
-    var body: some View {
-        HStack(spacing: 12) {
-            // Follow / Following button
-            Button(action: onToggleFollow) {
-                HStack(spacing: 8) {
-                    if isLoadingFollow {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: isFollowing ? Color(hex: "#2D4A3E") : .white))
-                            .scaleEffect(0.8)
-                    } else {
-                        Image(systemName: isFollowing ? "checkmark" : "plus")
-                            .font(.system(size: 14, weight: .semibold))
-                    }
-                    Text(isFollowing ? "Following" : "Follow")
-                        .font(.system(size: 16, weight: .semibold))
-                }
-                .foregroundColor(isFollowing ? Color(hex: "#2D4A3E") : .white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(isFollowing ? Color.clear : Color(hex: "#2D4A3E"))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color(hex: "#2D4A3E"), lineWidth: 2)
-                )
-                .cornerRadius(20)
-            }
-            .disabled(isLoadingFollow)
-
-            // Message button
-            Button(action: onMessage) {
-                HStack(spacing: 8) {
-                    Image(systemName: "message.fill")
-                        .font(.system(size: 14))
-                    Text("Message")
-                        .font(.system(size: 16, weight: .semibold))
-                }
-                .foregroundColor(Color(hex: "#2D4A3E"))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.clear)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color(hex: "#2D4A3E"), lineWidth: 2)
-                )
-                .cornerRadius(20)
-            }
-        }
-        .padding(.horizontal, 24)
-    }
-}
-
 // MARK: - Profile Error View
 
 struct ProfileErrorView: View {
@@ -294,15 +185,15 @@ struct ProfileErrorView: View {
         VStack(spacing: 20) {
             Image(systemName: "person.crop.circle.badge.exclamationmark")
                 .font(.system(size: 60))
-                .foregroundColor(Color(hex: "#6B7B6E"))
+                .foregroundColor(Color(hex: "#7a8a81"))
 
             Text("Unable to load profile")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(Color(hex: "#2D4A3E"))
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundColor(.black)
 
             Text("Please check your connection and try again")
-                .font(.system(size: 15))
-                .foregroundColor(Color(hex: "#6B7B6E"))
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundColor(Color(hex: "#7a8a81"))
                 .multilineTextAlignment(.center)
 
             Button("Try Again") { onRetry() }
@@ -343,11 +234,11 @@ struct TappableProfileAvatar: View {
             image.resizable().aspectRatio(contentMode: .fill)
         } placeholder: {
             Circle()
-                .fill(Color(hex: "#2D4A3E").opacity(0.15))
+                .fill(Color(hex: "#2C4F40").opacity(0.15))
                 .overlay(
                     Image(systemName: "person.fill")
                         .font(.system(size: size * 0.4))
-                        .foregroundColor(Color(hex: "#2D4A3E"))
+                        .foregroundColor(Color(hex: "#2C4F40"))
                 )
         }
         .frame(width: size, height: size)
@@ -400,11 +291,11 @@ struct TappableProfileHeader: View {
                     image.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     Circle()
-                        .fill(Color(hex: "#2D4A3E").opacity(0.15))
+                        .fill(Color(hex: "#2C4F40").opacity(0.15))
                         .overlay(
                             Image(systemName: "person.fill")
                                 .font(.system(size: avatarSize * 0.4))
-                                .foregroundColor(Color(hex: "#2D4A3E"))
+                                .foregroundColor(Color(hex: "#2C4F40"))
                         )
                 }
                 .frame(width: avatarSize, height: avatarSize)
@@ -412,13 +303,13 @@ struct TappableProfileHeader: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(name)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(Color(hex: "#2D4A3E"))
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(.black)
 
                     if let subtitle = subtitle {
                         Text(subtitle)
-                            .font(.system(size: 14))
-                            .foregroundColor(Color(hex: "#6B7B6E"))
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(hex: "#7a8a81"))
                     }
                 }
             }

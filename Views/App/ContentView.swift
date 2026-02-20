@@ -62,6 +62,7 @@ struct ContentView: View {
                     NavigationStack {
                         FindRalleysView()
                             .environmentObject(ralleyManager)
+                            .environmentObject(postManager)
                     }
                 case .post:
                     PostCreationInterfaceView()
@@ -79,7 +80,9 @@ struct ContentView: View {
             .transition(.opacity.animation(.easeInOut(duration: 0.15)))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            ClubRalleyTabBar(selectedTab: $selectedTab)
+            if selectedTab != .post {
+                ClubRalleyTabBar(selectedTab: $selectedTab)
+            }
         }
         .ignoresSafeArea(.keyboard)
     }

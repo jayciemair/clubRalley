@@ -184,39 +184,31 @@ struct RalleyParticipantsSection: View {
 
                 Spacer()
 
-                Text("\(ralley.currentPlayers)/\(ralley.maxPlayers)")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(ralley.isFull ? Color(hex: "#2C4F40") : Color(hex: "#2C4F40"))
+                Text("\(ralley.currentPlayers)/\(ralley.maxPlayers) spots filled")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(ralley.isFull ? .orange : Color(hex: "#2C4F40"))
             }
 
-            // Progress bar
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(hex: "#E2E4D6"))
-                        .frame(height: 8)
-
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(hex: "#2C4F40"))
-                        .frame(width: geometry.size.width * CGFloat(ralley.currentPlayers) / CGFloat(max(ralley.maxPlayers, 1)), height: 8)
-                }
-            }
-            .frame(height: 8)
+            // Spots progress bar
+            SpotsProgressBar(current: ralley.currentPlayers, max: ralley.maxPlayers)
 
             if ralley.isFull {
                 Text("This ralley is full")
-                    .font(.system(size: 13))
-                    .foregroundColor(Color(hex: "#2C4F40"))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.orange)
             } else {
                 Text("\(ralley.availableSpots) spots remaining")
                     .font(.system(size: 13))
                     .foregroundColor(Color.black.opacity(0.5))
             }
 
-            // Attendee list with photo + name
+            // Attendee thumbnail row
             if !attendees.isEmpty {
                 Divider().padding(.top, 4)
 
+                AttendeeThumbRow(attendees: attendees)
+
+                // Full attendee list
                 VStack(spacing: 10) {
                     ForEach(attendees) { attendee in
                         HStack(spacing: 10) {
@@ -254,6 +246,109 @@ struct RalleyParticipantsSection: View {
         .cornerRadius(16)
         .padding(.horizontal, 16)
         .padding(.top, 16)
+    }
+}
+
+// MARK: - Spots Progress Bar
+
+struct SpotsProgressBar: View {
+    let current: Int
+    let max: Int
+
+    private var fillRatio: CGFloat {
+        CGFloat(current) / CGFloat(Swift.max(max, 1))
+    }
+
+    private var barColor: Color {
+        if fillRatio >= 1.0 { return .orange }
+        if fillRatio >= 0.75 { return Color(hex: "#D4A017") }
+        return Color(hex: "#2C4F40")
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(Color(hex: "#E2E4D6"))
+                    .frame(height: 10)
+
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(barColor)
+                    .frame(width: geometry.size.width * fillRatio, height: 10)
+                    .animation(.spring(response: 0.4), value: current)
+            }
+        }
+        .frame(height: 10)
+    }
+}
+
+// MARK: - Attendee Thumbnail Row
+
+struct AttendeeThumbRow: View {
+    let attendees: [RalleyAttendee]
+
+    var body: some View {
+        HStack(spacing: -8) {
+            ForEach(Array(attendees.prefix(6))) { attendee in
+                AsyncImage(url: URL(string: attendee.photoURL ?? "")) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Circle()
+                        .fill(Color(hex: "#2C4F40"))
+                        .overlay(
+                            Text(String(attendee.name.prefix(1)).uppercased())
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+                        )
+                }
+                .frame(width: 32, height: 32)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Color.white, lineWidth: 2))
+            }
+
+            if attendees.count > 6 {
+                Text("+\(attendees.count - 6)")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 32, height: 32)
+                    .background(Color(hex: "#2C4F40").opacity(0.7))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white, lineWidth: 2))
+            }
+
+            Spacer()
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+// MARK: - Add to Calendar Button
+
+struct AddToCalendarButton: View {
+    let ralley: ClubRalley
+
+    var body: some View {
+        Button(action: addToCalendar) {
+            HStack(spacing: 8) {
+                Image(systemName: "calendar.badge.plus")
+                    .font(.system(size: 16))
+                Text("Add to Calendar")
+                    .font(.system(size: 16, weight: .semibold))
+            }
+            .foregroundColor(Color(hex: "#2C4F40"))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(Color.white)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: "#2C4F40"), lineWidth: 1.5))
+            .cornerRadius(12)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+    }
+
+    private func addToCalendar() {
+        // Stub: In production, use EventKit to add to calendar
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 }
 

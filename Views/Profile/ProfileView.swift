@@ -16,18 +16,19 @@ struct ProfileView: View {
             ScrollView {
                 if let profile = viewModel.currentUserProfile {
                     VStack(spacing: 0) {
-                        ProfileCenteredHeader(profile: profile)
-                            .padding(.top, 16)
-                        ProfileStatsRow(profile: profile)
-                            .padding(.top, 20)
+                        ProfileHeaderRow(profile: profile)
                         ProfileBioSection(profile: profile)
+                            .padding(.top, 14)
+
+                        ProfileDivider()
                             .padding(.top, 16)
+
                         SportCarouselSection(viewModel: viewModel)
-                            .padding(.top, 24)
+                            .padding(.top, 16)
                         RalleyHistorySection(viewModel: viewModel)
                         if !profile.photos.isEmpty {
                             ProfilePhotosSection(photos: profile.photos)
-                                .padding(.horizontal, 24)
+                                .padding(.horizontal, 22)
                                 .padding(.bottom, 24)
                         }
                         Spacer(minLength: 100)
@@ -40,7 +41,7 @@ struct ProfileView: View {
                     }
                 }
             }
-            .background(Color(hex: "#F5F2EB"))
+            .background(Color(hex: "#f6f5f1"))
             .refreshable {
                 await viewModel.loadCurrentUserProfile()
             }

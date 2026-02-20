@@ -12,11 +12,17 @@ import MapKit
 
 struct FindRalleysView: View {
     @EnvironmentObject var ralleyManager: RalleyManager
+    @EnvironmentObject var postManager: PostManager
     @StateObject private var mapViewModel = MapViewModel()
 
     // Map State
     @State private var mapPosition: MapCameraPosition = .automatic
     @State private var isMapExpanded = false
+
+    /// Whether the ralleys list is empty with no active filters (used to shrink map)
+    private var isEmptyNoFilters: Bool {
+        filteredRalleys.isEmpty && !hasActiveFilters && !ralleyManager.isLoading && ralleyManager.error == nil
+    }
 
     // Filter State
     @State private var selectedSportFilter: String? = nil
@@ -77,7 +83,9 @@ struct FindRalleysView: View {
         .background(ClubRalleyTheme.Colors.sageBackground)
         .navigationBarHidden(true)
         .sheet(isPresented: $ralleyManager.showingCreateRalley) {
-            RalleyCreationView().environmentObject(ralleyManager)
+            RalleyCreationView()
+                .environmentObject(ralleyManager)
+                .environmentObject(postManager)
         }
         .sheet(isPresented: $showingFilterSheet) {
             RalleyFilterSheet(selectedSport: $selectedSportFilter, selectedDate: $selectedDateFilter)
@@ -151,7 +159,7 @@ struct FindRalleysView: View {
                 }
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
-            .frame(height: isMapExpanded ? 450 : 220)
+            .frame(height: isMapExpanded ? 450 : (isEmptyNoFilters ? 160 : 220))
             .cornerRadius(16)
             .onTapGesture {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
@@ -195,10 +203,11 @@ struct FindRalleysView: View {
                 }
             }
             .padding(12)
-            .frame(height: isMapExpanded ? 450 : 220)
+            .frame(height: isMapExpanded ? 450 : (isEmptyNoFilters ? 160 : 220))
         }
         .padding(.horizontal, 24)
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: isMapExpanded)
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: isEmptyNoFilters)
     }
 
     // MARK: - Map Sport Filter Strip
@@ -369,8 +378,12 @@ struct FindRalleysView: View {
                 ralleysLoadingView
             } else if let error = ralleyManager.error, ralleyManager.ralleys.isEmpty {
                 ralleysErrorView(error: error)
+            } else if filteredRalleys.isEmpty && !hasActiveFilters {
+                NoNearbyRalleysView(onCreateRalley: {
+                    ralleyManager.showingCreateRalley = true
+                })
             } else if filteredRalleys.isEmpty {
-                EmptyRalleysView(hasFilters: hasActiveFilters, onCreateRalley: {
+                EmptyRalleysView(hasFilters: true, onCreateRalley: {
                     ralleyManager.showingCreateRalley = true
                 })
             } else {
