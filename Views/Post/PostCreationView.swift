@@ -229,7 +229,8 @@ struct PostCreationInterfaceView: View {
         isPosting = true
 
         Task { @MainActor in
-            let previousError = postManager.error
+            // Clear any previous error before attempting
+            postManager.clearError()
 
             let imageUrls = selectedImages.isEmpty ? [] :
                 Array(0..<selectedImages.count).map { "https://picsum.photos/300/300?random=\($0 + 600)" }
@@ -241,18 +242,19 @@ struct PostCreationInterfaceView: View {
                 visibility: .everyone
             )
 
-            if postManager.error != nil && postManager.error?.localizedDescription != previousError?.localizedDescription {
+            isPosting = false
+
+            // If an error occurred, show it and keep composer open with text preserved
+            if postManager.error != nil {
                 errorMessage = "Failed to create post. Please check your connection and try again."
                 showingError = true
-                isPosting = false
                 return
             }
 
-            // Reset state and navigate to home
+            // Success — reset state and navigate to home
             postText = ""
             selectedImages = []
             selectedItems = []
-            isPosting = false
             selectedTab = .home
         }
     }
@@ -472,7 +474,8 @@ struct ThreadComposerView: View {
         isPosting = true
 
         Task { @MainActor in
-            let previousError = postManager.error
+            // Clear any previous error before attempting
+            postManager.clearError()
 
             // In production, upload images and get URLs
             let imageUrls = selectedImages.isEmpty ? [] :
@@ -485,15 +488,16 @@ struct ThreadComposerView: View {
                 visibility: .everyone
             )
 
-            // Check if error was set during operation
-            if postManager.error != nil && postManager.error?.localizedDescription != previousError?.localizedDescription {
+            isPosting = false
+
+            // If an error occurred, show it and keep composer open with text preserved
+            if postManager.error != nil {
                 errorMessage = "Failed to create post. Please check your connection and try again."
                 showingError = true
-                isPosting = false
                 return
             }
 
-            isPosting = false
+            // Success — dismiss
             dismiss()
         }
     }
@@ -612,7 +616,9 @@ struct PhotoPostView: View {
         isPosting = true
 
         Task { @MainActor in
-            let previousError = postManager.error
+            // Clear any previous error before attempting
+            postManager.clearError()
+
             let imageUrls = Array(0..<selectedImages.count).map { "https://picsum.photos/300/300?random=\($0 + 700)" }
 
             await postManager.createPost(
@@ -622,15 +628,16 @@ struct PhotoPostView: View {
                 visibility: .everyone
             )
 
-            // Check if error was set during operation
-            if postManager.error != nil && postManager.error?.localizedDescription != previousError?.localizedDescription {
+            isPosting = false
+
+            // If an error occurred, show it and keep view open with selections preserved
+            if postManager.error != nil {
                 errorMessage = "Failed to create post. Please check your connection and try again."
                 showingError = true
-                isPosting = false
                 return
             }
 
-            isPosting = false
+            // Success — dismiss
             dismiss()
         }
     }
@@ -723,7 +730,8 @@ struct CameraPostView: View {
         isPosting = true
 
         Task { @MainActor in
-            let previousError = postManager.error
+            // Clear any previous error before attempting
+            postManager.clearError()
 
             await postManager.createPost(
                 content: "",
@@ -732,15 +740,16 @@ struct CameraPostView: View {
                 visibility: .everyone
             )
 
-            // Check if error was set during operation
-            if postManager.error != nil && postManager.error?.localizedDescription != previousError?.localizedDescription {
+            isPosting = false
+
+            // If an error occurred, show it and keep view open with photo preserved
+            if postManager.error != nil {
                 errorMessage = "Failed to create post. Please check your connection and try again."
                 showingError = true
-                isPosting = false
                 return
             }
 
-            isPosting = false
+            // Success — dismiss
             dismiss()
         }
     }

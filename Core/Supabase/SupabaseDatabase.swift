@@ -28,8 +28,8 @@ extension SupabaseManager {
     /// Insert new record into database
     func insert<T: Codable>(_ data: T, into table: String) async throws {
         guard let client = client, !useFallbackMode else {
-            print("📱 SupabaseDatabase.insert: Offline mode - simulating insert to \(table)")
-            return // Success in offline mode
+            print("📱 SupabaseDatabase.insert: Offline mode - cannot insert to \(table)")
+            throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
         do {
@@ -44,8 +44,8 @@ extension SupabaseManager {
     /// Update existing record in database
     func update<T: Codable>(_ data: T, in table: String, where condition: String) async throws {
         guard let client = client, !useFallbackMode else {
-            print("📱 SupabaseDatabase.update: Offline mode - simulating update to \(table)")
-            return // Success in offline mode
+            print("📱 SupabaseDatabase.update: Offline mode - cannot update \(table)")
+            throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
         // Parse the condition to extract column, operator, and value
@@ -75,8 +75,8 @@ extension SupabaseManager {
     /// Delete record from database
     func delete(from table: String, where condition: String) async throws {
         guard let client = client, !useFallbackMode else {
-            print("📱 SupabaseDatabase.delete: Offline mode - simulating delete from \(table)")
-            return // Success in offline mode
+            print("📱 SupabaseDatabase.delete: Offline mode - cannot delete from \(table)")
+            throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
         // Parse the condition to extract column and value
@@ -106,8 +106,8 @@ extension SupabaseManager {
     /// Insert new record and return generated ID
     func insertReturningId<T: Codable>(_ data: T, into table: String) async throws -> UUID {
         guard let client = client, !useFallbackMode else {
-            print("📱 SupabaseDatabase.insertReturningId: Offline mode - returning mock ID for \(table)")
-            return UUID() // Return mock ID in offline mode
+            print("📱 SupabaseDatabase.insertReturningId: Offline mode - cannot insert to \(table)")
+            throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
         do {
@@ -136,8 +136,8 @@ extension SupabaseManager {
     /// Update record with Encodable type
     func update<T: Encodable>(_ data: T, in table: String, where condition: String) async throws {
         guard let client = client, !useFallbackMode else {
-            print("📱 SupabaseDatabase.update: Offline mode - simulating update to \(table)")
-            return // Success in offline mode
+            print("📱 SupabaseDatabase.update: Offline mode - cannot update \(table)")
+            throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
         // Parse the condition to extract column, operator, and value

@@ -84,7 +84,7 @@ class SupabaseQueryBuilder {
     /// Execute query and return single result
     func single<T: Codable>() async throws -> T? {
         if fallbackMode {
-            return nil // Offline mode
+            throw SupabaseManager.SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
         guard let client = client else {
@@ -108,7 +108,7 @@ class SupabaseQueryBuilder {
     /// Execute query and return array of results
     func execute<T: Codable>() async throws -> [T] {
         if fallbackMode {
-            return [] // Offline mode
+            throw SupabaseManager.SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
         guard let client = client else {

@@ -213,10 +213,6 @@ class PostManager: ObservableObject {
         } catch {
             print("PostManager: Failed to create post: \(error)")
             self.error = error
-
-            // Even if backend fails, add to local cache for immediate UI feedback
-            posts.insert(newPost, at: 0)
-            print("PostManager: Post added locally (backend failed)")
         }
 
         isLoading = false
