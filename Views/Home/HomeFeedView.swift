@@ -2,7 +2,7 @@
 //  HomeFeedView.swift
 //  Club Ralley
 //
-//  Home feed with personalized greeting, trending ralleys, and posts.
+//  Home feed — top bar, upcoming ralleys, posts feed with sample data
 //
 
 import SwiftUI
@@ -12,90 +12,36 @@ import SwiftUI
 struct HomeFeedView: View {
     @EnvironmentObject var postManager: PostManager
     @EnvironmentObject var ralleyManager: RalleyManager
-    private var messagingService: MessagingService { ServiceContainer.shared.messagingService }
     @State private var showingNotifications = false
     @State private var showingMessages = false
-    @State private var searchText = ""
-
-    private var userFirstName: String {
-        if let saved = SavedUserProfile.loadFromStorage() {
-            return saved.firstName
-        }
-        return "there"
-    }
-
-    private var trendingRalleys: [ClubRalley] {
-        ralleyManager.ralleys
-            .filter { !$0.isPast && !$0.isFull }
-            .sorted { $0.currentPlayers > $1.currentPlayers }
-            .prefix(6)
-            .map { $0 }
-    }
 
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: 0) {
-                FeedHeader(
-                    userName: userFirstName,
-                    searchText: $searchText,
+            VStack(spacing: 0) {
+                // Top bar
+                HomeTopBar(
                     showingNotifications: $showingNotifications,
-                    showingMessages: $showingMessages,
-                    unreadMessageCount: messagingService.totalUnreadCount
+                    showingMessages: $showingMessages
                 )
 
-                // Trending ralleys
-                if !trendingRalleys.isEmpty {
-                    TrendingRalleysSection(ralleys: trendingRalleys)
-                        .environmentObject(ralleyManager)
-                }
+                // Upcoming ralleys
+                HomeUpcomingSection()
 
-                // Upcoming joined ralleys
-                let joinedRalleys = ralleyManager.getJoinedUpcomingRalleys()
-                if !joinedRalleys.isEmpty {
-                    UpcomingRalleysSection(ralleys: joinedRalleys)
-                        .environmentObject(ralleyManager)
-                }
+                // Feed separator
+                FeedSeparator()
 
-                // Feed content
-                if postManager.isLoading && postManager.posts.isEmpty {
-                    FeedLoadingView()
-                } else if let error = postManager.error, postManager.posts.isEmpty {
-                    FeedErrorView(error: error) {
-                        Task { await postManager.refreshPosts() }
-                    }
-                } else {
-                    ForEach(Array(postManager.posts.enumerated()), id: \.element.id) { index, post in
-                        FigmaPostCard(post: post)
-                            .environmentObject(postManager)
-                            .onAppear {
-                                if index == postManager.posts.count - 3 {
-                                    Task { await postManager.loadMorePosts() }
-                                }
-                            }
-                    }
-
-                    if postManager.isLoadingMore {
-                        HStack {
-                            Spacer()
-                            ProgressView().padding()
-                            Spacer()
-                        }
-                    }
-
-                    if postManager.posts.isEmpty {
-                        EmptyFeedView()
+                // Posts feed
+                LazyVStack(spacing: 0) {
+                    ForEach(HomeSampleData.posts) { post in
+                        HomeFeedPostCard(post: post)
+                        FeedSeparator()
                     }
                 }
 
                 Spacer(minLength: 100)
             }
         }
-        .refreshable {
-            await postManager.refreshPosts()
-            await ralleyManager.refreshRalleys()
-            await messagingService.loadConversations()
-        }
-        .background(ClubRalleyTheme.Colors.sageBackground)
+        .background(Color(hex: "#F6F5F1"))
         .navigationBarHidden(true)
         .sheet(isPresented: $showingNotifications) {
             SimpleNotificationsView()
@@ -103,8 +49,88 @@ struct HomeFeedView: View {
         .sheet(isPresented: $showingMessages) {
             MessagesView()
         }
-        .task {
-            await messagingService.loadConversations()
+        .refreshable {
+            await postManager.refreshPosts()
+            await ralleyManager.refreshRalleys()
         }
     }
+}
+
+// MARK: - Sample Data Models
+
+struct SampleFeedPost: Identifiable {
+    let id = UUID()
+    let authorName: String
+    let initials: String
+    let time: String
+    let location: String
+    let title: String?
+    let body: String?
+    let photoURLs: [String]
+    let showMutuals: Bool
+}
+
+struct SampleUpcomingRalley: Identifiable {
+    let id = UUID()
+    let sport: String
+    let title: String
+    let dateString: String
+    let location: String
+    let currentPlayers: Int
+    let maxPlayers: Int
+    let timeUntil: String
+}
+
+// MARK: - Sample Data
+
+enum HomeSampleData {
+    static let upcomingRalleys: [SampleUpcomingRalley] = [
+        SampleUpcomingRalley(
+            sport: "Pickleball",
+            title: "Pickleball at Bucknell Turf",
+            dateString: "Thu Feb 19 at 6:45 PM",
+            location: "Bucknell Turf Fields",
+            currentPlayers: 1,
+            maxPlayers: 4,
+            timeUntil: "in 11m"
+        ),
+        SampleUpcomingRalley(
+            sport: "Soccer",
+            title: "Sunday Pickup Soccer",
+            dateString: "Sun Feb 22 at 10:00 AM",
+            location: "Millennium Park",
+            currentPlayers: 3,
+            maxPlayers: 10,
+            timeUntil: "in 3d"
+        )
+    ]
+
+    static let posts: [SampleFeedPost] = [
+        SampleFeedPost(
+            authorName: "Gracie King",
+            initials: "GK",
+            time: "Today",
+            location: "Chicago, IL",
+            title: "Tennis Club Event",
+            body: "Just played my first game at Club Ralley sponsored rec-league Chicago sports!",
+            photoURLs: [
+                "https://picsum.photos/400/400?random=101",
+                "https://picsum.photos/400/400?random=102",
+                "https://picsum.photos/400/400?random=103",
+                "https://picsum.photos/400/400?random=104",
+                "https://picsum.photos/400/400?random=105"
+            ],
+            showMutuals: true
+        ),
+        SampleFeedPost(
+            authorName: "Ryan Smith",
+            initials: "RS",
+            time: "Today",
+            location: "Chicago, IL",
+            title: "Tennis Match",
+            body: "I need a hitting partner for tomorrow afternoon. Send help!",
+            photoURLs: [],
+            showMutuals: true
+        )
+    ]
 }

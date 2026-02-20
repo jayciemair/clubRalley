@@ -2,321 +2,201 @@
 //  FeedComponents.swift
 //  Club Ralley
 //
-//  Components for the home feed
+//  Components for the home feed — top bar, upcoming ralleys, separators
 //
 
 import SwiftUI
 
-// MARK: - Feed Header
+// MARK: - Top Bar
 
-struct FeedHeader: View {
-    var userName: String
-    @Binding var searchText: String
+struct HomeTopBar: View {
     @Binding var showingNotifications: Bool
     @Binding var showingMessages: Bool
-    var unreadMessageCount: Int = 0
-    var unreadNotificationCount: Int = 0
+    @State private var hasUnreadNotifications = true
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Greeting row + icons
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Hey \(userName)")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.black)
-                    Text("Ready to rally?")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color.black.opacity(0.5))
-                }
+        HStack {
+            Text("Club Ralley")
+                .font(.system(size: 24, weight: .heavy))
+                .fontDesign(.rounded)
+                .foregroundColor(.black)
 
-                Spacer()
+            Spacer()
 
+            HStack(spacing: 14) {
+                // Bell with red dot badge
                 Button(action: { showingNotifications = true }) {
                     ZStack(alignment: .topTrailing) {
                         Image(systemName: "bell")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.black)
-                        if unreadNotificationCount > 0 {
-                            NotificationBadge(count: unreadNotificationCount)
-                                .offset(x: 8, y: -6)
+                            .font(.system(size: 22, weight: .medium))
+                            .foregroundColor(Color(hex: "#2C4F40"))
+
+                        if hasUnreadNotifications {
+                            Circle()
+                                .fill(Color(hex: "#E74C3C"))
+                                .frame(width: 7, height: 7)
+                                .overlay(Circle().stroke(Color.white, lineWidth: 1.5))
+                                .offset(x: 2, y: -1)
                         }
                     }
                 }
-                .padding(.trailing, 8)
 
+                // Message icon
                 Button(action: { showingMessages = true }) {
-                    ZStack(alignment: .topTrailing) {
-                        Image(systemName: "bubble.left.and.bubble.right")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.black)
-                        if unreadMessageCount > 0 {
-                            NotificationBadge(count: unreadMessageCount)
-                                .offset(x: 10, y: -6)
-                        }
-                    }
-                }
-            }
-
-            // Search bar
-            HStack(spacing: 10) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 16))
-                    .foregroundColor(Color(hex: "#2C4F40"))
-
-                TextField("Search ralleys...", text: $searchText)
-                    .font(.system(size: 15))
-
-                if !searchText.isEmpty {
-                    Button(action: { searchText = "" }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(Color.black.opacity(0.3))
-                    }
-                }
-            }
-            .padding(12)
-            .background(Color(hex: "#E2E4D6"))
-            .cornerRadius(12)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-    }
-}
-
-// MARK: - Notification Badge
-
-struct NotificationBadge: View {
-    let count: Int
-
-    var body: some View {
-        Text(count > 99 ? "99+" : "\(count)")
-            .font(.system(size: 11, weight: .bold))
-            .foregroundColor(.white)
-            .padding(.horizontal, count > 9 ? 5 : 6)
-            .padding(.vertical, 2)
-            .background(Color(hex: "#2C4F40"))
-            .clipShape(Capsule())
-            .minimumScaleFactor(0.8)
-    }
-}
-
-// MARK: - Trending Ralleys Section
-
-struct TrendingRalleysSection: View {
-    let ralleys: [ClubRalley]
-    @EnvironmentObject var ralleyManager: RalleyManager
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "sportscourt.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color(hex: "#2C4F40"))
-                Text("Trending Ralleys Near You")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.black)
-                Spacer()
-                NavigationLink(destination: FindRalleysView().environmentObject(ralleyManager)) {
-                    Text("See All")
-                        .font(.system(size: 14, weight: .semibold))
+                    Image(systemName: "message")
+                        .font(.system(size: 22, weight: .medium))
                         .foregroundColor(Color(hex: "#2C4F40"))
                 }
             }
-            .padding(.horizontal, 16)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(ralleys) { ralley in
-                        NavigationLink(destination: RalleyDetailView(ralley: ralley).environmentObject(ralleyManager)) {
-                            TrendingRalleyCard(ralley: ralley)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-                .padding(.horizontal, 16)
-            }
         }
-        .padding(.vertical, 16)
-    }
-}
-
-// MARK: - Trending Ralley Card
-
-struct TrendingRalleyCard: View {
-    let ralley: ClubRalley
-
-    private var formattedTime: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEE, h:mm a"
-        return formatter.string(from: ralley.dateTime)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Sport pill
-            HStack(spacing: 4) {
-                Image(systemName: SportIconMapper.iconName(for: ralley.sport))
-                    .font(.system(size: 12))
-                Text(ralley.sport)
-                    .font(.system(size: 12, weight: .semibold))
-            }
-            .foregroundColor(Color(hex: "#2C4F40"))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color(hex: "#E2E4D6"))
-            .cornerRadius(8)
-
-            Text(ralley.title)
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.black)
-                .lineLimit(1)
-
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 4) {
-                    Image(systemName: "mappin").font(.system(size: 11))
-                    Text(ralley.location.name).font(.system(size: 12)).lineLimit(1)
-                }
-                .foregroundColor(Color.black.opacity(0.5))
-
-                HStack(spacing: 4) {
-                    Image(systemName: "clock").font(.system(size: 11))
-                    Text(formattedTime).font(.system(size: 12))
-                }
-                .foregroundColor(Color.black.opacity(0.5))
-            }
-
-            // Spots left
-            if !ralley.isFull {
-                Text("\(ralley.availableSpots) spots left")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(Color(hex: "#2C4F40"))
-            }
-
-            // Join CTA
-            Text("Join Ralley")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(Color(hex: "#2C4F40"))
-                .cornerRadius(10)
-        }
-        .padding(12)
-        .frame(width: 240)
-        .background(Color.white)
-        .cornerRadius(14)
-        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+        .padding(.horizontal, 22)
+        .padding(.bottom, 14)
     }
 }
 
 // MARK: - Upcoming Ralleys Section
 
-struct UpcomingRalleysSection: View {
-    let ralleys: [ClubRalley]
-    @EnvironmentObject var ralleyManager: RalleyManager
-
+struct HomeUpcomingSection: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "calendar.badge.clock")
-                    .font(.system(size: 16, weight: .semibold))
+        VStack(alignment: .leading, spacing: 0) {
+            // Section label
+            HStack(spacing: 7) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 15))
                     .foregroundColor(Color(hex: "#2C4F40"))
-                Text("Your Upcoming Ralleys")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.black)
-                Spacer()
+
+                Text("YOUR UPCOMING RALLEYS")
+                    .font(.system(size: 13, weight: .heavy))
+                    .fontDesign(.rounded)
+                    .foregroundColor(Color(hex: "#7A8A81"))
+                    .textCase(.uppercase)
+                    .tracking(0.91)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 22)
+            .padding(.bottom, 10)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(ralleys) { ralley in
-                        NavigationLink(destination: RalleyDetailView(ralley: ralley).environmentObject(ralleyManager)) {
-                            UpcomingRalleyCard(ralley: ralley)
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                HStack(spacing: 10) {
+                    ForEach(HomeSampleData.upcomingRalleys) { ralley in
+                        HomeUpcomingCard(ralley: ralley)
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 22)
+                .padding(.bottom, 20)
             }
         }
-        .padding(.vertical, 16)
     }
 }
 
-// MARK: - Upcoming Ralley Card
+// MARK: - Upcoming Ralley Card (Dark Green)
 
-struct UpcomingRalleyCard: View {
-    let ralley: ClubRalley
-
-    private var timeUntil: String {
-        let interval = ralley.dateTime.timeIntervalSince(Date())
-        if interval < 3600 {
-            return "in \(Int(interval / 60))m"
-        } else if interval < 86400 {
-            return "in \(Int(interval / 3600))h"
-        } else {
-            return "in \(Int(interval / 86400))d"
-        }
-    }
-
-    private var formattedDate: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEE, MMM d 'at' h:mm a"
-        return formatter.string(from: ralley.dateTime)
-    }
+struct HomeUpcomingCard: View {
+    let ralley: SampleUpcomingRalley
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Top row: sport pill + time badge
             HStack {
-                HStack(spacing: 4) {
+                HStack(spacing: 5) {
                     Image(systemName: SportIconMapper.iconName(for: ralley.sport))
-                        .font(.system(size: 12))
+                        .font(.system(size: 11))
+                        .foregroundColor(.white.opacity(0.65))
                     Text(ralley.sport)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: 11, weight: .semibold))
+                        .fontDesign(.rounded)
+                        .foregroundColor(.white.opacity(0.65))
                 }
-                .foregroundColor(Color(hex: "#2C4F40"))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color(hex: "#E2E4D6"))
-                .cornerRadius(8)
+
                 Spacer()
-                Text(timeUntil)
-                    .font(.system(size: 12, weight: .bold))
+
+                Text(ralley.timeUntil)
+                    .font(.system(size: 11, weight: .bold))
+                    .fontDesign(.rounded)
                     .foregroundColor(.white)
                     .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color(hex: "#2C4F40"))
-                    .cornerRadius(8)
+                    .padding(.vertical, 3)
+                    .background(Color.white.opacity(0.2))
+                    .cornerRadius(6)
             }
 
+            // Title
             Text(ralley.title)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.black)
-                .lineLimit(1)
+                .font(.system(size: 15, weight: .bold))
+                .fontDesign(.rounded)
+                .foregroundColor(.white)
+                .lineLimit(2)
 
-            Text(formattedDate)
-                .font(.system(size: 13))
-                .foregroundColor(Color.black.opacity(0.5))
-
-            HStack(spacing: 4) {
-                Image(systemName: "mappin").font(.system(size: 12))
-                Text(ralley.location.name).font(.system(size: 13)).lineLimit(1)
+            // Info rows
+            VStack(alignment: .leading, spacing: 4) {
+                infoRow(icon: "clock", text: ralley.dateString)
+                infoRow(icon: "mappin", text: ralley.location)
+                infoRow(icon: "person.2", text: "\(ralley.currentPlayers)/\(ralley.maxPlayers) joined")
             }
-            .foregroundColor(Color.black.opacity(0.5))
-
-            HStack(spacing: 4) {
-                Image(systemName: "person.2").font(.system(size: 12))
-                Text("\(ralley.currentPlayers)/\(ralley.maxPlayers) joined").font(.system(size: 13))
-            }
-            .foregroundColor(Color(hex: "#2C4F40"))
         }
-        .padding(12)
-        .frame(width: 240)
-        .background(Color.white)
-        .cornerRadius(14)
-        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+        .padding(14)
+        .frame(width: 230)
+        .background(Color(hex: "#2C4F40"))
+        .cornerRadius(16)
+        .shadow(color: .green.opacity(0.25), radius: 12, x: 0, y: 6)
+    }
+
+    private func infoRow(icon: String, text: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.system(size: 11))
+            Text(text)
+                .font(.system(size: 11, weight: .medium))
+                .fontDesign(.rounded)
+                .lineLimit(1)
+        }
+        .foregroundColor(.white.opacity(0.7))
+    }
+}
+
+// MARK: - Feed Separator
+
+struct FeedSeparator: View {
+    var body: some View {
+        Rectangle()
+            .fill(Color(hex: "#ECE9E2"))
+            .frame(height: 10)
+    }
+}
+
+// MARK: - Mutuals Row
+
+struct HomeMutualsRow: View {
+    var body: some View {
+        HStack(spacing: 0) {
+            // Overlapping avatar circles
+            overlappingAvatars
+                .frame(width: 48)
+
+            Text("& your friends loved this post")
+                .font(.system(size: 11, weight: .semibold))
+                .fontDesign(.rounded)
+                .foregroundColor(Color(hex: "#7A8A81"))
+                .padding(.leading, 12)
+
+            Spacer()
+        }
+    }
+
+    private var overlappingAvatars: some View {
+        ZStack(alignment: .leading) {
+            mutualAvatar(index: 0)
+            mutualAvatar(index: 1)
+            mutualAvatar(index: 2)
+        }
+    }
+
+    private func mutualAvatar(index: Int) -> some View {
+        let opacity = 0.15 + Double(index) * 0.1
+        return Circle()
+            .fill(Color(hex: "#2C4F40").opacity(opacity))
+            .frame(width: 20, height: 20)
+            .overlay(Circle().stroke(Color(hex: "#F6F5F1"), lineWidth: 2))
+            .offset(x: CGFloat(index) * 14)
     }
 }
 
@@ -340,25 +220,19 @@ struct PostSkeletonView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                Circle().fill(Color.gray.opacity(0.3)).frame(width: 50, height: 50)
+            HStack(spacing: 10) {
+                Circle().fill(Color.gray.opacity(0.2)).frame(width: 42, height: 42)
                 VStack(alignment: .leading, spacing: 4) {
-                    RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.3)).frame(width: 120, height: 16)
-                    RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.2)).frame(width: 180, height: 12)
+                    RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.2)).frame(width: 120, height: 14)
+                    RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.15)).frame(width: 80, height: 11)
                 }
                 Spacer()
             }
-            .padding(.horizontal, 16)
-
-            VStack(alignment: .leading, spacing: 8) {
-                RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.2)).frame(height: 14)
-                RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.2)).frame(width: 200, height: 14)
-            }
-            .padding(.horizontal, 16)
-
-            Divider()
+            RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.2)).frame(height: 15)
+            RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.15)).frame(width: 220, height: 13)
         }
-        .padding(.vertical, 16)
+        .padding(.horizontal, 22)
+        .padding(.vertical, 14)
         .opacity(isAnimating ? 0.6 : 1.0)
         .onAppear {
             withAnimation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
@@ -381,10 +255,12 @@ struct FeedErrorView: View {
                 .foregroundColor(Color(hex: "#2C4F40").opacity(0.6))
             Text("Unable to load feed")
                 .font(.system(size: 20, weight: .semibold))
+                .fontDesign(.rounded)
                 .foregroundColor(.black)
             Text("Check your internet connection and try again")
                 .font(.system(size: 15))
-                .foregroundColor(Color.black.opacity(0.5))
+                .fontDesign(.rounded)
+                .foregroundColor(Color(hex: "#7A8A81"))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             Button(action: onRetry) {
@@ -393,6 +269,7 @@ struct FeedErrorView: View {
                     Text("Try Again")
                 }
                 .font(.system(size: 16, weight: .semibold))
+                .fontDesign(.rounded)
                 .foregroundColor(.white)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
@@ -419,13 +296,15 @@ struct EmptyFeedView: View {
 
             Text("Welcome to Club Ralley!")
                 .font(.system(size: 24, weight: .bold))
+                .fontDesign(.rounded)
                 .foregroundColor(.black)
                 .opacity(isVisible ? 1 : 0)
                 .offset(y: isVisible ? 0 : 10)
 
             Text("Start following athletes and join ralleys to see posts in your feed")
                 .font(.system(size: 16))
-                .foregroundColor(Color.black.opacity(0.5))
+                .fontDesign(.rounded)
+                .foregroundColor(Color(hex: "#7A8A81"))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
                 .opacity(isVisible ? 1 : 0)
