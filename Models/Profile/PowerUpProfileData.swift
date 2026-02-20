@@ -252,6 +252,25 @@ struct WorkoutClassOptions {
     ]
 }
 
+// MARK: - Default Sports List (shared by EditProfileView and PowerUpProfileViewModel)
+
+struct DefaultSports {
+    static let all: [Sport] = [
+        Sport(id: UUID(), name: "Basketball", category: .team, iconName: "basketball.fill", isPopular: true),
+        Sport(id: UUID(), name: "Football", category: .team, iconName: "football.fill", isPopular: true),
+        Sport(id: UUID(), name: "Soccer", category: .team, iconName: "soccerball", isPopular: true),
+        Sport(id: UUID(), name: "Tennis", category: .individual, iconName: "tennisball.fill", isPopular: true),
+        Sport(id: UUID(), name: "Running", category: .individual, iconName: "figure.run", isPopular: true),
+        Sport(id: UUID(), name: "Swimming", category: .waterSports, iconName: "figure.pool.swim", isPopular: true),
+        Sport(id: UUID(), name: "Volleyball", category: .team, iconName: "volleyball.fill", isPopular: true),
+        Sport(id: UUID(), name: "Golf", category: .individual, iconName: "figure.golf", isPopular: false),
+        Sport(id: UUID(), name: "Cycling", category: .individual, iconName: "bicycle", isPopular: false),
+        Sport(id: UUID(), name: "Yoga", category: .fitness, iconName: "figure.yoga", isPopular: true),
+        Sport(id: UUID(), name: "Boxing", category: .combatSports, iconName: "figure.boxing", isPopular: false),
+        Sport(id: UUID(), name: "Hiking", category: .recreational, iconName: "figure.hiking", isPopular: true)
+    ]
+}
+
 // MARK: - Day of Week Helper
 
 struct DayOfWeek {

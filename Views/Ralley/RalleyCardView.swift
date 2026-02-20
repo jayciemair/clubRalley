@@ -16,213 +16,247 @@ struct RalleyCardView: View {
     @State private var isLoading = false
     @State private var showingManagement = false
 
-    var body: some View {
-        VStack(spacing: 0) {
-            // Sport type pill
-            HStack {
-                HStack(spacing: 4) {
-                    Image(systemName: SportIconMapper.iconName(for: ralley.sport))
-                        .font(.system(size: 12))
-                    Text(ralley.sport)
-                        .font(.system(size: 12, weight: .semibold))
-                }
-                .foregroundColor(Color(hex: "#2C4F40"))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color(hex: "#E2E4D6"))
-                .cornerRadius(8)
+    private var fillPercent: Double {
+        guard ralley.maxPlayers > 0 else { return 0 }
+        return Double(ralley.currentPlayers) / Double(ralley.maxPlayers)
+    }
 
-                Spacer()
+    private var formattedTime: String {
+        let cal = Calendar.current
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "h:mm a"
+        let time = timeFormatter.string(from: ralley.dateTime)
 
-                if !ralley.isFull {
-                    Text("\(ralley.availableSpots) spots left")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(Color(hex: "#2C4F40"))
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 14)
-            .padding(.bottom, 8)
-
-            // Header
-            HStack(spacing: 12) {
-                AsyncImage(url: URL(string: ralley.organizer.photoURL)) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Circle().fill(Color(hex: "#2C4F40"))
-                }
-                .frame(width: 50, height: 50)
-                .clipShape(Circle())
-
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text(ralley.title)
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.black)
-                            .lineLimit(1)
-
-                        if ralley.isCaptain {
-                            Text("CAPTAIN")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color(hex: "#2C4F40"))
-                                .cornerRadius(4)
-                        }
-                    }
-
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock.fill").font(.system(size: 12))
-                        Text(ralley.dateTime.formatted(date: .abbreviated, time: .shortened))
-                            .font(.system(size: 14, weight: .medium))
-                    }
-                    .foregroundColor(.gray)
-                }
-
-                Spacer()
-            }
-            .padding(16)
-
-            // Players & Location
-            HStack(spacing: 16) {
-                HStack(spacing: 6) {
-                    Image(systemName: "person.2.fill").font(.system(size: 14))
-                    Text("\(ralley.currentPlayers)/\(ralley.maxPlayers)")
-                        .font(.system(size: 14, weight: .semibold))
-
-                    if ralley.isFull {
-                        Text("FULL")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color(hex: "#2C4F40"))
-                            .cornerRadius(4)
-                    }
-                }
-                .foregroundColor(Color(hex: "#2C4F40"))
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    Image(systemName: "location.fill").font(.system(size: 12))
-                    Text(ralley.location.name)
-                        .font(.system(size: 14, weight: .medium))
-                        .lineLimit(1)
-                }
-                .foregroundColor(.gray)
-            }
-            .padding(.horizontal, 16)
-
-            // Privacy indicators
-            HStack(spacing: 12) {
-                HStack(spacing: 4) {
-                    Image(systemName: ralley.visibility.iconName).font(.system(size: 12))
-                    Text(ralley.visibility.displayName).font(.system(size: 12, weight: .medium))
-                }
-                .foregroundColor(.gray)
-
-                HStack(spacing: 4) {
-                    Image(systemName: ralley.joinType.iconName).font(.system(size: 12))
-                    Text(ralley.joinType == .open ? "Open" : "Approval")
-                        .font(.system(size: 12, weight: .medium))
-                }
-                .foregroundColor(.gray)
-
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-
-            // Action Button
-            actionButton.padding(16)
+        if cal.isDateInToday(ralley.dateTime) {
+            return "Today \u{00B7} \(time)"
+        } else if cal.isDateInTomorrow(ralley.dateTime) {
+            return "Tomorrow \u{00B7} \(time)"
+        } else {
+            let dayFormatter = DateFormatter()
+            dayFormatter.dateFormat = "EEE"
+            return "\(dayFormatter.string(from: ralley.dateTime)) \u{00B7} \(time)"
         }
+    }
+
+    private var hostInitial: String {
+        String(ralley.organizer.name.prefix(1)).uppercased()
+    }
+
+    private var skillLabel: String {
+        ralley.requirements.isEmpty ? "All levels" : ralley.requirements
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            topRow
+            titleRow
+            locationRow
+            progressSection
+            hostRow
+        }
+        .padding(18)
         .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .sheet(isPresented: $showingManagement) {
+            RalleyManagementView(ralley: ralley)
+                .environmentObject(ralleyManager)
+        }
         .task {
             await checkUserParticipationStatus()
         }
     }
 
-    // MARK: - Action Button
+    // MARK: - Top Row (sport tag + time + join button)
 
-    @ViewBuilder
-    private var actionButton: some View {
-        if ralley.isCaptain {
-            Button(action: { showingManagement = true }) {
-                HStack(spacing: 8) {
-                    Image(systemName: "gearshape.fill")
-                    Text("Manage Ralley")
-                }
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Color(hex: "#2C4F40"))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color(hex: "#2C4F40").opacity(0.1))
-                .cornerRadius(10)
-            }
-            .sheet(isPresented: $showingManagement) {
-                RalleyManagementView(ralley: ralley)
-                    .environmentObject(ralleyManager)
-            }
-        } else if ralley.isFull && participationStatus != .joined {
-            Button(action: {}) {
-                Text("Ralley Full")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.gray)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(10)
-            }
-            .disabled(true)
-        } else {
-            Button(action: { Task { await handleJoinAction() } }) {
-                HStack(spacing: 8) {
-                    if isLoading {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+    private var topRow: some View {
+        HStack(alignment: .top, spacing: 10) {
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(spacing: 7) {
+                    // Sport tag capsule
+                    HStack(spacing: 5) {
+                        Image(systemName: SportIconMapper.iconName(for: ralley.sport))
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(Color(hex: "#2C4F40"))
+                        Text(ralley.sport)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(Color(hex: "#2C4F40"))
                     }
-                    Text(buttonText)
+                    .padding(.vertical, 4)
+                    .padding(.leading, 7)
+                    .padding(.trailing, 10)
+                    .background(Color(hex: "#E2E4D6"))
+                    .clipShape(Capsule())
+
+                    Text(formattedTime)
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(hex: "#7a9088"))
                 }
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(buttonTextColor)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(buttonBackground)
-                .cornerRadius(10)
             }
-            .disabled(isLoading || participationStatus == .joined)
+            Spacer()
+            joinButton
         }
     }
 
-    private var buttonText: String {
+    // MARK: - Title
+
+    private var titleRow: some View {
+        HStack(spacing: 6) {
+            Text(ralley.title)
+                .font(.custom("Chillax-Semibold", size: 17))
+                .foregroundColor(Color(hex: "#2C4F40"))
+                .lineLimit(1)
+
+            if ralley.isCaptain {
+                Text("CAPTAIN")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color(hex: "#2C4F40"))
+                    .cornerRadius(4)
+            }
+        }
+        .padding(.top, 7)
+    }
+
+    // MARK: - Location
+
+    private var locationRow: some View {
+        HStack(spacing: 5) {
+            Image(systemName: "mappin.circle.fill")
+                .font(.system(size: 11))
+                .foregroundColor(Color(hex: "#5a7268"))
+            Text(ralley.location.name)
+                .font(.system(size: 13))
+                .foregroundColor(Color(hex: "#5a7268"))
+                .lineLimit(1)
+        }
+        .padding(.top, 10)
+    }
+
+    // MARK: - Progress (joined count + bar)
+
+    private var progressSection: some View {
+        VStack(spacing: 7) {
+            HStack {
+                HStack(spacing: 3) {
+                    Text("\(ralley.currentPlayers)")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                    Text("joined")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(hex: "#7a9088"))
+                }
+                Spacer()
+                Text("\(ralley.availableSpots) spots left \u{00B7} \(skillLabel)")
+                    .font(.system(size: 12))
+                    .foregroundColor(Color(hex: "#7a9088"))
+            }
+
+            // Progress bar
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color(hex: "#E2E4D6"))
+                        .frame(height: 4)
+                    Capsule()
+                        .fill(ralley.isFull ? Color(hex: "#b5bdb9") : Color(hex: "#2C4F40"))
+                        .frame(width: geo.size.width * fillPercent, height: 4)
+                }
+            }
+            .frame(height: 4)
+        }
+        .padding(.top, 13)
+    }
+
+    // MARK: - Host
+
+    private var hostRow: some View {
+        HStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "#2C4F40"))
+                    .frame(width: 26, height: 26)
+                Text(hostInitial)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(Color(hex: "#E2E4D6"))
+            }
+            Text("Hosted by ")
+                .font(.system(size: 12))
+                .foregroundColor(Color(hex: "#7a9088"))
+            + Text(ralley.organizer.name)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(Color(hex: "#2C4F40"))
+        }
+        .padding(.top, 13)
+    }
+
+    // MARK: - Join Button
+
+    @ViewBuilder
+    private var joinButton: some View {
+        if ralley.isCaptain {
+            Button(action: { showingManagement = true }) {
+                Text("Manage")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(Color(hex: "#E2E4D6"))
+                    .padding(.vertical, 9)
+                    .padding(.horizontal, 20)
+                    .background(Color(hex: "#2C4F40"))
+                    .clipShape(Capsule())
+            }
+        } else {
+            Button(action: { Task { await handleJoinAction() } }) {
+                Group {
+                    if isLoading {
+                        ProgressView()
+                            .scaleEffect(0.7)
+                            .progressViewStyle(CircularProgressViewStyle(tint: joinButtonTextColor))
+                    } else {
+                        Text(joinButtonText)
+                            .font(.system(size: 13, weight: .bold))
+                    }
+                }
+                .foregroundColor(joinButtonTextColor)
+                .padding(.vertical, 9)
+                .padding(.horizontal, 20)
+                .background(joinButtonBackground)
+                .clipShape(Capsule())
+            }
+            .disabled(isLoading || participationStatus == .joined || (ralley.isFull && participationStatus != .joined))
+        }
+    }
+
+    private var joinButtonText: String {
         switch participationStatus {
         case .notJoined:
-            return ralley.joinType == .open ? "Join Ralley" : "Request to Join"
+            return ralley.isFull ? "Full" : "Join"
         case .pending:
-            return "Request Pending"
+            return "Pending"
         case .joined:
             return "Joined"
         }
     }
 
-    private var buttonTextColor: Color {
+    private var joinButtonTextColor: Color {
         switch participationStatus {
-        case .notJoined: return .white
-        case .pending: return Color(hex: "#2C4F40")
-        case .joined: return Color(hex: "#2C4F40")
+        case .notJoined:
+            return ralley.isFull ? Color(hex: "#7a8578") : Color(hex: "#E2E4D6")
+        case .pending:
+            return Color(hex: "#2C4F40")
+        case .joined:
+            return Color(hex: "#2C4F40")
         }
     }
 
-    private var buttonBackground: Color {
+    private var joinButtonBackground: Color {
         switch participationStatus {
-        case .notJoined: return Color(hex: "#2C4F40")
-        case .pending: return Color(hex: "#E2E4D6")
-        case .joined: return Color(hex: "#2C4F40").opacity(0.1)
+        case .notJoined:
+            return ralley.isFull ? Color(hex: "#c4cabe") : Color(hex: "#2C4F40")
+        case .pending:
+            return Color(hex: "#E2E4D6")
+        case .joined:
+            return Color(hex: "#E2E4D6")
         }
     }
 
@@ -237,7 +271,6 @@ struct RalleyCardView: View {
     private func handleJoinAction() async {
         guard participationStatus == .notJoined else { return }
 
-        // Block non-athletes from joining college-athletes-only ralleys
         if ralley.isCollegeAthletesOnly {
             let isFormerAthlete = SavedUserProfile.loadFromStorage()?.playedCollegeSport == true
             guard isFormerAthlete else { return }
@@ -273,13 +306,15 @@ struct EmptyRalleysView: View {
 
             Text(hasFilters ? "No matching ralleys" : "No ralleys nearby")
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.black)
+                .fontDesign(.rounded)
+                .foregroundColor(Color(hex: "#2C4F40"))
                 .opacity(isVisible ? 1 : 0)
                 .offset(y: isVisible ? 0 : 10)
 
             Text(hasFilters ? "Try adjusting your filters or search" : "Be the first to create a pickup game in your area!")
                 .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.gray)
+                .fontDesign(.rounded)
+                .foregroundColor(Color(hex: "#7a9088"))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
                 .opacity(isVisible ? 1 : 0)
@@ -289,11 +324,12 @@ struct EmptyRalleysView: View {
                 Button(action: onCreateRalley) {
                     Text("Create Ralley")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
+                        .fontDesign(.rounded)
+                        .foregroundColor(Color(hex: "#E2E4D6"))
                         .padding(.horizontal, 32)
                         .padding(.vertical, 14)
                         .background(Color(hex: "#2C4F40"))
-                        .cornerRadius(12)
+                        .clipShape(Capsule())
                 }
                 .opacity(isVisible ? 1 : 0)
                 .offset(y: isVisible ? 0 : 10)
@@ -309,7 +345,7 @@ struct EmptyRalleysView: View {
     }
 }
 
-// MARK: - No Nearby Ralleys View (Empty State without filters)
+// MARK: - No Nearby Ralleys View
 
 struct NoNearbyRalleysView: View {
     var onCreateRalley: () -> Void
@@ -326,13 +362,15 @@ struct NoNearbyRalleysView: View {
 
             Text("No Ralleys near you yet")
                 .font(.system(size: 22, weight: .bold))
-                .foregroundColor(.black)
+                .fontDesign(.rounded)
+                .foregroundColor(Color(hex: "#2C4F40"))
                 .opacity(isVisible ? 1 : 0)
                 .offset(y: isVisible ? 0 : 10)
 
             Text("Be the first to rally! Create a game and invite your friends.")
                 .font(.system(size: 16))
-                .foregroundColor(.gray)
+                .fontDesign(.rounded)
+                .foregroundColor(Color(hex: "#7a9088"))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
                 .opacity(isVisible ? 1 : 0)
@@ -340,17 +378,17 @@ struct NoNearbyRalleysView: View {
 
             Button(action: onCreateRalley) {
                 HStack(spacing: 8) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 18))
+                    Image(systemName: "plus.circle")
+                        .font(.system(size: 18, weight: .semibold))
                     Text("Create a Ralley")
                         .font(.system(size: 18, weight: .semibold))
+                        .fontDesign(.rounded)
                 }
-                .foregroundColor(.white)
+                .foregroundColor(Color(hex: "#E2E4D6"))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(Color(hex: "#2C4F40"))
-                .cornerRadius(14)
-                .shadow(color: Color(hex: "#2C4F40").opacity(0.3), radius: 8, x: 0, y: 4)
+                .clipShape(Capsule())
             }
             .padding(.horizontal, 24)
             .opacity(isVisible ? 1 : 0)

@@ -232,6 +232,12 @@
 		91A0C6852F16B12600D273FC /* EditAccountabilityAnchorsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A0C6842F16B12600D273FC /* EditAccountabilityAnchorsViewModel.swift */; };
 		91A0C6872F16B13600D273FC /* EditAccountabilityAnchorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A0C6862F16B13600D273FC /* EditAccountabilityAnchorsView.swift */; };
 		91A0C6892F16B14000D273FC /* AccountabilityAnchorsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A0C6882F16B14000D273FC /* AccountabilityAnchorsSection.swift */; };
+		CC11AA0720260220000C1110 /* Chillax-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC11AA0120260220000C1110 /* Chillax-Bold.otf */; };
+		CC11AA0820260220000C1110 /* Chillax-Extralight.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC11AA0220260220000C1110 /* Chillax-Extralight.otf */; };
+		CC11AA0920260220000C1110 /* Chillax-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC11AA0320260220000C1110 /* Chillax-Light.otf */; };
+		CC11AA0A20260220000C1110 /* Chillax-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC11AA0420260220000C1110 /* Chillax-Medium.otf */; };
+		CC11AA0B20260220000C1110 /* Chillax-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC11AA0520260220000C1110 /* Chillax-Regular.otf */; };
+		CC11AA0C20260220000C1110 /* Chillax-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC11AA0620260220000C1110 /* Chillax-Semibold.otf */; };
 		91AA5D0E2E4935230050C177 /* Satoshi-BoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D062E4935230050C177 /* Satoshi-BoldItalic.otf */; };
 		91AA5D0F2E4935230050C177 /* Satoshi-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D052E4935230050C177 /* Satoshi-Bold.otf */; };
 		91AA5D102E4935230050C177 /* Satoshi-MediumItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 91AA5D0B2E4935230050C177 /* Satoshi-MediumItalic.otf */; };
@@ -606,6 +612,12 @@
 		91A0C6842F16B12600D273FC /* EditAccountabilityAnchorsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccountabilityAnchorsViewModel.swift; sourceTree = "<group>"; };
 		91A0C6862F16B13600D273FC /* EditAccountabilityAnchorsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccountabilityAnchorsView.swift; sourceTree = "<group>"; };
 		91A0C6882F16B14000D273FC /* AccountabilityAnchorsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityAnchorsSection.swift; sourceTree = "<group>"; };
+		CC11AA0120260220000C1110 /* Chillax-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Chillax-Bold.otf"; sourceTree = "<group>"; };
+		CC11AA0220260220000C1110 /* Chillax-Extralight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Chillax-Extralight.otf"; sourceTree = "<group>"; };
+		CC11AA0320260220000C1110 /* Chillax-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Chillax-Light.otf"; sourceTree = "<group>"; };
+		CC11AA0420260220000C1110 /* Chillax-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Chillax-Medium.otf"; sourceTree = "<group>"; };
+		CC11AA0520260220000C1110 /* Chillax-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Chillax-Regular.otf"; sourceTree = "<group>"; };
+		CC11AA0620260220000C1110 /* Chillax-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Chillax-Semibold.otf"; sourceTree = "<group>"; };
 		91AA5D032E4935230050C177 /* Satoshi-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-Black.otf"; sourceTree = "<group>"; };
 		91AA5D042E4935230050C177 /* Satoshi-BlackItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-BlackItalic.otf"; sourceTree = "<group>"; };
 		91AA5D052E4935230050C177 /* Satoshi-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Satoshi-Bold.otf"; sourceTree = "<group>"; };
@@ -955,6 +967,7 @@
 		9133A01E2E3FFF5400F38A31 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
+				CC11AA0D20260220000C1110 /* Chillax */,
 				91AA5D0D2E4935230050C177 /* Satoshi */,
 			);
 			path = Fonts;
@@ -1645,6 +1658,19 @@
 			path = RevenueCat;
 			sourceTree = "<group>";
 		};
+		CC11AA0D20260220000C1110 /* Chillax */ = {
+			isa = PBXGroup;
+			children = (
+				CC11AA0120260220000C1110 /* Chillax-Bold.otf */,
+				CC11AA0220260220000C1110 /* Chillax-Extralight.otf */,
+				CC11AA0320260220000C1110 /* Chillax-Light.otf */,
+				CC11AA0420260220000C1110 /* Chillax-Medium.otf */,
+				CC11AA0520260220000C1110 /* Chillax-Regular.otf */,
+				CC11AA0620260220000C1110 /* Chillax-Semibold.otf */,
+			);
+			path = Chillax;
+			sourceTree = "<group>";
+		};
 		91AA5D0D2E4935230050C177 /* Satoshi */ = {
 			isa = PBXGroup;
 			children = (
@@ -2156,6 +2182,12 @@
 				91AA5D152E4935230050C177 /* Satoshi-Black.otf in Resources */,
 				91AA5D162E4935230050C177 /* Satoshi-Medium.otf in Resources */,
 				91AA5D172E4935230050C177 /* Satoshi-Italic.otf in Resources */,
+				CC11AA0720260220000C1110 /* Chillax-Bold.otf in Resources */,
+				CC11AA0820260220000C1110 /* Chillax-Extralight.otf in Resources */,
+				CC11AA0920260220000C1110 /* Chillax-Light.otf in Resources */,
+				CC11AA0A20260220000C1110 /* Chillax-Medium.otf in Resources */,
+				CC11AA0B20260220000C1110 /* Chillax-Regular.otf in Resources */,
+				CC11AA0C20260220000C1110 /* Chillax-Semibold.otf in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */

@@ -31,7 +31,28 @@ struct EditProfileView: View {
     @State private var showingImagePicker = false
     @State private var selectedImage: UIImage?
     @State private var showingSaveError = false
-    @State private var showingSportsEditor = false
+
+    // Power Up: Sports & Skills
+    @State private var sportsWithSkills: [SportWithSkill] = []
+    @State private var availableSports: [Sport] = DefaultSports.all
+    @State private var isSportsExpanded: Bool = false
+
+    // Power Up: Availability
+    @State private var isAvailabilityExpanded: Bool = false
+    @State private var daySelection: DaySelection = .weekdays
+    @State private var selectedDays: Set<Int> = []
+    @State private var timePreference: TimePreference = .anytime
+    @State private var maxDistance: Int = 25
+
+    // Power Up: Fun Questions
+    @State private var isFunQuestionsExpanded: Bool = false
+    @State private var favoriteProTeam: String = ""
+    @State private var workoutBrands: [String] = []
+    @State private var workoutClasses: [String] = []
+    @State private var hometown: String = ""
+    @State private var wouldDoHappyHour: Bool? = nil
+
+    private let powerUpService = PowerUpProfileService()
 
     /// Check if form is valid for submission
     private var isFormValid: Bool {
@@ -59,7 +80,11 @@ struct EditProfileView: View {
                 Divider().padding(.vertical, 8)
                 collegeAthleteSection
                 Divider().padding(.vertical, 8)
-                sportsSection
+                sportsAndSkillsSection
+                Divider().padding(.vertical, 8)
+                availabilitySection
+                Divider().padding(.vertical, 8)
+                funQuestionsSection
                 saveButtonSection
                 Spacer(minLength: 50)
             }
@@ -297,54 +322,291 @@ struct EditProfileView: View {
         .transition(.opacity.combined(with: .move(edge: .top)))
     }
 
-    private var sportsSection: some View {
+    // MARK: - Sports & Skills Section (Collapsible)
+
+    private var sportsAndSkillsSection: some View {
         VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            HStack {
-                Text("My Sports")
-                    .font(ClubRalleyTheme.Typography.headline)
-                    .foregroundColor(ClubRalleyTheme.Colors.text)
-                Spacer()
-                Button(action: { showingSportsEditor = true }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "pencil")
-                        Text("Edit")
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isSportsExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    Text("Sports & Skills")
+                        .font(ClubRalleyTheme.Typography.headline)
+                        .foregroundColor(ClubRalleyTheme.Colors.text)
+                    Spacer()
+                    if !isSportsExpanded && !sportsWithSkills.isEmpty {
+                        sportsCollapsedSummary
                     }
-                    .font(ClubRalleyTheme.Typography.caption)
-                    .foregroundColor(ClubRalleyTheme.Colors.accent)
+                    Image(systemName: isSportsExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
                 }
             }
+            .buttonStyle(PlainButtonStyle())
 
-            Text("Add sports and skill levels to help others find you for ralleys")
-                .font(ClubRalleyTheme.Typography.caption)
-                .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+            if isSportsExpanded {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Select your sports")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
 
-            if let profile = SavedUserProfile.loadFromStorage(), !profile.selectedSports.isEmpty {
-                sportsTagsView(sports: profile.selectedSports)
-            } else {
-                Text("No sports added yet")
-                    .font(ClubRalleyTheme.Typography.body)
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                        ForEach(availableSports) { sport in
+                            SportSelectionCardPowerUp(
+                                sport: sport,
+                                isSelected: isSportSelectedByName(sport.name),
+                                onTap: { toggleSportByName(sport) }
+                            )
+                        }
+                    }
+
+                    if !sportsWithSkills.isEmpty {
+                        Text("Set your skill level")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+
+                        ForEach(sportsWithSkills.indices, id: \.self) { index in
+                            SkillLevelPicker(
+                                sport: sportsWithSkills[index].sport,
+                                skillLevel: $sportsWithSkills[index].skillLevel
+                            )
+                        }
+                    }
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: isSportsExpanded)
+    }
+
+    private var sportsCollapsedSummary: some View {
+        HStack(spacing: 4) {
+            ForEach(sportsWithSkills.prefix(3), id: \.id) { sportWithSkill in
+                Text(sportWithSkill.sport.name)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(ClubRalleyTheme.Colors.accent)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(ClubRalleyTheme.Colors.accent.opacity(0.1))
+                    .cornerRadius(10)
+            }
+            if sportsWithSkills.count > 3 {
+                Text("+\(sportsWithSkills.count - 3)")
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                    .padding(.vertical, 8)
             }
         }
     }
 
-    private func sportsTagsView(sports: [String]) -> some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
-            ForEach(sports, id: \.self) { sport in
-                HStack(spacing: 4) {
-                    Image(systemName: "sportscourt.fill")
-                        .font(.system(size: 12))
-                    Text(sport)
-                        .font(.system(size: 13, weight: .medium))
+    // MARK: - Availability Section (Collapsible)
+
+    private var availabilitySection: some View {
+        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isAvailabilityExpanded.toggle()
                 }
-                .foregroundColor(ClubRalleyTheme.Colors.accent)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(ClubRalleyTheme.Colors.accent.opacity(0.1))
-                .cornerRadius(16)
+            }) {
+                HStack {
+                    Text("Availability")
+                        .font(ClubRalleyTheme.Typography.headline)
+                        .foregroundColor(ClubRalleyTheme.Colors.text)
+                    Spacer()
+                    if !isAvailabilityExpanded {
+                        Text(daySelection.displayName + " \u{00B7} " + timePreference.displayName)
+                            .font(.system(size: 12))
+                            .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                    }
+                    Image(systemName: isAvailabilityExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            if isAvailabilityExpanded {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Day selection
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("When are you usually free?")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+
+                        VStack(spacing: 10) {
+                            ForEach(DaySelection.allCases, id: \.self) { option in
+                                DayOptionCard(
+                                    option: option,
+                                    isSelected: daySelection == option,
+                                    onTap: { selectDayOption(option) }
+                                )
+                            }
+                        }
+
+                        if daySelection == .specificDays {
+                            HStack(spacing: 8) {
+                                ForEach(DayOfWeek.days, id: \.id) { day in
+                                    DayCircleButton(
+                                        label: day.shortName,
+                                        isSelected: selectedDays.contains(day.id),
+                                        onTap: { toggleDay(day.id) }
+                                    )
+                                }
+                            }
+                            .padding(.top, 4)
+                        }
+                    }
+
+                    // Time preference
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("What time works best?")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                            ForEach(TimePreference.allCases, id: \.self) { time in
+                                TimePreferenceCard(
+                                    preference: time,
+                                    isSelected: timePreference == time,
+                                    onTap: { timePreference = time }
+                                )
+                            }
+                        }
+                    }
+
+                    // Distance slider
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("How far will you travel?")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+
+                        VStack(spacing: 12) {
+                            HStack {
+                                Text("Up to")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.secondary)
+                                Text("\(maxDistance) miles")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                                Spacer()
+                            }
+
+                            Slider(
+                                value: Binding(
+                                    get: { Double(maxDistance) },
+                                    set: { maxDistance = Int($0) }
+                                ),
+                                in: 5...100,
+                                step: 5
+                            )
+                            .tint(ClubRalleyTheme.Colors.darkGreen)
+
+                            HStack {
+                                Text("5 mi")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("100 mi")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.systemGray6))
+                        )
+                    }
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: isAvailabilityExpanded)
+    }
+
+    // MARK: - Fun Questions Section (Collapsible)
+
+    private var funQuestionsSection: some View {
+        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isFunQuestionsExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    Text("Fun Questions")
+                        .font(ClubRalleyTheme.Typography.headline)
+                        .foregroundColor(ClubRalleyTheme.Colors.text)
+                    Spacer()
+                    Image(systemName: isFunQuestionsExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            if isFunQuestionsExpanded {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Favorite pro team
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Favorite pro sports team?")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+
+                        TextField("e.g. Lakers, Patriots, Yankees...", text: $favoriteProTeam)
+                            .font(.system(size: 16))
+                            .padding(14)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+                    }
+
+                    // Workout brands
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Favorite workout brands?")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+
+                        PowerUpTagGrid(
+                            items: WorkoutBrandOptions.brands,
+                            selectedItems: $workoutBrands
+                        )
+                    }
+
+                    // Workout classes
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Favorite type of workout class?")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+
+                        PowerUpTagGrid(
+                            items: WorkoutClassOptions.classes,
+                            selectedItems: $workoutClasses
+                        )
+                    }
+
+                    // Hometown
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Hometown")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+
+                        TextField("City, State", text: $hometown)
+                            .font(.system(size: 16))
+                            .textInputAutocapitalization(.words)
+                            .padding(14)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+                    }
+
+                    // Happy hour
+                    YesNoToggle(
+                        question: "Would you go to happy hour after a workout?",
+                        value: $wouldDoHappyHour
+                    )
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: isFunQuestionsExpanded)
     }
 
     private var saveButtonSection: some View {
@@ -426,6 +688,38 @@ struct EditProfileView: View {
                 .font(ClubRalleyTheme.Typography.caption)
                 .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
         }
+    }
+
+    // MARK: - Sports Helpers (name-based matching)
+
+    private func isSportSelectedByName(_ name: String) -> Bool {
+        sportsWithSkills.contains { $0.sport.name == name }
+    }
+
+    private func toggleSportByName(_ sport: Sport) {
+        if let index = sportsWithSkills.firstIndex(where: { $0.sport.name == sport.name }) {
+            sportsWithSkills.remove(at: index)
+        } else {
+            sportsWithSkills.append(SportWithSkill(sport: sport, skillLevel: .competitor))
+        }
+    }
+
+    // MARK: - Availability Helpers
+
+    private func selectDayOption(_ option: DaySelection) {
+        daySelection = option
+        if option != .specificDays {
+            selectedDays.removeAll()
+        }
+    }
+
+    private func toggleDay(_ day: Int) {
+        if selectedDays.contains(day) {
+            selectedDays.remove(day)
+        } else {
+            selectedDays.insert(day)
+        }
+        daySelection = .specificDays
     }
 
     // MARK: - Methods
@@ -512,6 +806,47 @@ struct EditProfileView: View {
         } catch {
             print("❌ EDIT_PROFILE loadFromSupabase FAILED: \(error)")
         }
+
+        // Load Power Up JSONB data
+        do {
+            let powerUpData = try await powerUpService.loadExistingProfileData()
+            print("📝 EDIT_PROFILE - Loaded Power Up data: \(powerUpData.sportsWithSkills.count) sports")
+
+            // Match loaded sports against DefaultSports by name for correct icons
+            sportsWithSkills = powerUpData.sportsWithSkills.map { loaded in
+                if let defaultSport = availableSports.first(where: { $0.name == loaded.sport.name }) {
+                    return SportWithSkill(sport: defaultSport, skillLevel: loaded.skillLevel)
+                }
+                return loaded
+            }
+
+            // Availability
+            let loadedDays = powerUpData.selectedDays
+            if !loadedDays.isEmpty {
+                selectedDays = loadedDays
+                // Infer daySelection from loaded days
+                let weekdaySet: Set<Int> = [2, 3, 4, 5, 6]
+                let weekendSet: Set<Int> = [1, 7]
+                if loadedDays == weekdaySet {
+                    daySelection = .weekdays
+                } else if loadedDays == weekendSet {
+                    daySelection = .weekends
+                } else {
+                    daySelection = .specificDays
+                }
+            }
+            timePreference = powerUpData.timePreference
+            maxDistance = powerUpData.maxDistance
+
+            // Fun Questions
+            favoriteProTeam = powerUpData.favoriteProTeam
+            workoutBrands = powerUpData.workoutBrands
+            workoutClasses = powerUpData.workoutClasses
+            hometown = powerUpData.hometown
+            wouldDoHappyHour = powerUpData.wouldDoHappyHour
+        } catch {
+            print("📝 EDIT_PROFILE - Power Up data load failed (non-fatal): \(error)")
+        }
     }
 
     private func saveProfile() async {
@@ -564,6 +899,30 @@ struct EditProfileView: View {
         )
 
         if success {
+            // Save Power Up JSONB data (non-fatal if it fails)
+            do {
+                var powerUpData = PowerUpProfileData()
+                powerUpData.sportsWithSkills = sportsWithSkills
+                powerUpData.daySelection = daySelection
+                powerUpData.selectedDays = selectedDays
+                powerUpData.timePreference = timePreference
+                powerUpData.maxDistance = maxDistance
+                powerUpData.favoriteProTeam = favoriteProTeam
+                powerUpData.workoutBrands = workoutBrands
+                powerUpData.workoutClasses = workoutClasses
+                powerUpData.hometown = hometown
+                powerUpData.wouldDoHappyHour = wouldDoHappyHour
+                // Pass through bio/instagram so JSONB save doesn't clear them
+                powerUpData.bio = bio
+                powerUpData.instagramHandle = instagramHandle
+                powerUpData.profilePhotoURL = photoURL
+
+                try await powerUpService.saveProfileData(powerUpData)
+                print("✅ EDIT_PROFILE Power Up data saved")
+            } catch {
+                print("📝 EDIT_PROFILE Power Up save failed (non-fatal): \(error)")
+            }
+
             print("✅ EDIT_PROFILE saveProfile SUCCESS - dismissing")
             dismiss()
         } else {

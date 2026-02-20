@@ -11,78 +11,139 @@ import SwiftUI
 
 struct HomeTopBar: View {
     @Binding var showingNotifications: Bool
-    @Binding var showingMessages: Bool
     @State private var hasUnreadNotifications = true
 
     var body: some View {
         HStack {
-            Text("Club Ralley")
-                .font(.system(size: 24, weight: .heavy))
-                .fontDesign(.rounded)
-                .foregroundColor(.black)
+            HStack(spacing: 7) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 16))
+                    .foregroundColor(Color(hex: "#2C4F40"))
+
+                Text("Your Upcoming Ralleys")
+                    .font(.custom("Chillax-Bold", size: 22))
+                    .foregroundColor(Color(hex: "#2C4F40"))
+            }
 
             Spacer()
 
-            HStack(spacing: 14) {
-                // Bell with red dot badge
-                Button(action: { showingNotifications = true }) {
-                    ZStack(alignment: .topTrailing) {
-                        Image(systemName: "bell")
-                            .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(Color(hex: "#2C4F40"))
-
-                        if hasUnreadNotifications {
-                            Circle()
-                                .fill(Color(hex: "#E74C3C"))
-                                .frame(width: 7, height: 7)
-                                .overlay(Circle().stroke(Color.white, lineWidth: 1.5))
-                                .offset(x: 2, y: -1)
-                        }
-                    }
-                }
-
-                // Message icon
-                Button(action: { showingMessages = true }) {
-                    Image(systemName: "message")
+            // Bell with red dot badge
+            Button(action: { showingNotifications = true }) {
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: "bell")
                         .font(.system(size: 22, weight: .medium))
                         .foregroundColor(Color(hex: "#2C4F40"))
+
+                    if hasUnreadNotifications {
+                        Circle()
+                            .fill(Color(hex: "#E74C3C"))
+                            .frame(width: 7, height: 7)
+                            .overlay(Circle().stroke(Color.white, lineWidth: 1.5))
+                            .offset(x: 2, y: -1)
+                    }
                 }
             }
         }
         .padding(.horizontal, 22)
-        .padding(.bottom, 14)
+        .padding(.top, 6)
+        .padding(.bottom, 4)
     }
 }
 
 // MARK: - Upcoming Ralleys Section
 
 struct HomeUpcomingSection: View {
+    @EnvironmentObject var ralleyManager: RalleyManager
+    @AppStorage("selectedTab") private var selectedTab: MainTab = .home
+
+    private var upcomingRalleys: [ClubRalley] {
+        ralleyManager.getJoinedUpcomingRalleys()
+    }
+
+    /// Count of players across all ralleys happening this week
+    private var playersThisWeek: Int {
+        let now = Date()
+        let calendar = Calendar.current
+        guard let endOfWeek = calendar.date(byAdding: .day, value: 7, to: now) else { return 0 }
+        return ralleyManager.ralleys
+            .filter { $0.dateTime > now && $0.dateTime <= endOfWeek }
+            .reduce(0) { $0 + max(0, $1.currentPlayers - 1) } // exclude organizer
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Section label
-            HStack(spacing: 7) {
-                Image(systemName: "calendar")
-                    .font(.system(size: 15))
-                    .foregroundColor(Color(hex: "#2C4F40"))
-
-                Text("YOUR UPCOMING RALLEYS")
-                    .font(.system(size: 13, weight: .heavy))
-                    .fontDesign(.rounded)
-                    .foregroundColor(Color(hex: "#7A8A81"))
-                    .textCase(.uppercase)
-                    .tracking(0.91)
-            }
-            .padding(.horizontal, 22)
-            .padding(.bottom, 10)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(HomeSampleData.upcomingRalleys) { ralley in
-                        HomeUpcomingCard(ralley: ralley)
+            if upcomingRalleys.isEmpty {
+                // Empty state card
+                VStack(alignment: .leading, spacing: 16) {
+                    // Teammates pill
+                    if playersThisWeek > 0 {
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(Color(hex: "#4CAF50"))
+                                .frame(width: 8, height: 8)
+                            Text("\(playersThisWeek) \(playersThisWeek == 1 ? "PLAYER" : "PLAYERS") ACTIVE THIS WEEK")
+                                .font(.system(size: 11, weight: .bold))
+                                .fontDesign(.rounded)
+                                .foregroundColor(.white.opacity(0.8))
+                                .tracking(0.5)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.white.opacity(0.15))
+                        .cornerRadius(20)
                     }
+
+                    // Title
+                    Text("No upcoming Ralleys\n— yet. 👀")
+                        .font(.custom("Chillax-Bold", size: 28))
+                        .foregroundColor(.white)
+                        .lineSpacing(2)
+
+                    // Subtitle
+                    Text("Your crew is already out there. Jump into a Ralley and get in on the action.")
+                        .font(.system(size: 15, weight: .medium))
+                        .fontDesign(.rounded)
+                        .foregroundColor(.white.opacity(0.7))
+                        .lineSpacing(3)
+
+                    // CTA button
+                    Button(action: { selectedTab = .ralleys }) {
+                        HStack(spacing: 8) {
+                            Text("Find Ralleys Near Me")
+                                .font(.system(size: 16, weight: .bold))
+                                .fontDesign(.rounded)
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 14, weight: .bold))
+                        }
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 14)
+                        .background(Color.white)
+                        .cornerRadius(28)
+                    }
+                    .padding(.top, 4)
                 }
+                .padding(22)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(hex: "#2C4F40"))
+                .cornerRadius(20)
                 .padding(.horizontal, 22)
+                .padding(.top, 10)
                 .padding(.bottom, 20)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(upcomingRalleys) { ralley in
+                            NavigationLink(destination: RalleyDetailView(ralley: ralley)) {
+                                HomeUpcomingCard(ralley: ralley)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding(.horizontal, 22)
+                    .padding(.top, 10)
+                    .padding(.bottom, 20)
+                }
             }
         }
     }
@@ -91,7 +152,13 @@ struct HomeUpcomingSection: View {
 // MARK: - Upcoming Ralley Card (Dark Green)
 
 struct HomeUpcomingCard: View {
-    let ralley: SampleUpcomingRalley
+    let ralley: ClubRalley
+
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE MMM d 'at' h:mm a"
+        return formatter.string(from: ralley.dateTime)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -109,7 +176,7 @@ struct HomeUpcomingCard: View {
 
                 Spacer()
 
-                Text(ralley.timeUntil)
+                Text(ralley.timeUntilStart)
                     .font(.system(size: 11, weight: .bold))
                     .fontDesign(.rounded)
                     .foregroundColor(.white)
@@ -128,8 +195,8 @@ struct HomeUpcomingCard: View {
 
             // Info rows
             VStack(alignment: .leading, spacing: 4) {
-                infoRow(icon: "clock", text: ralley.dateString)
-                infoRow(icon: "mappin", text: ralley.location)
+                infoRow(icon: "clock", text: formattedDate)
+                infoRow(icon: "mappin", text: ralley.location.name)
                 infoRow(icon: "person.2", text: "\(ralley.currentPlayers)/\(ralley.maxPlayers) joined")
             }
         }

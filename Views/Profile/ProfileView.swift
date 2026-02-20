@@ -16,9 +16,24 @@ struct ProfileView: View {
             ScrollView {
                 if let profile = viewModel.currentUserProfile {
                     VStack(spacing: 0) {
+                        // Custom top bar
+                        ProfileCustomTopBar(
+                            location: profile.user.locationDisplay,
+                            showingSettings: $showingSettings
+                        )
+
+                        // Centered header
                         ProfileHeaderRow(profile: profile)
+
+                        // Bio
                         ProfileBioSection(profile: profile)
-                            .padding(.top, 14)
+                            .padding(.bottom, 14)
+
+                        // Mutual friends
+                        if !profile.mutualFriends.isEmpty {
+                            ProfileFriendsRow(mutualFriends: profile.mutualFriends)
+                                .padding(.bottom, 16)
+                        }
 
                         ProfileDivider()
                             .padding(.top, 16)
@@ -45,22 +60,13 @@ struct ProfileView: View {
             .refreshable {
                 await viewModel.loadCurrentUserProfile()
             }
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingSettings = true }) {
-                        Image(systemName: "gearshape.fill")
-                            .foregroundColor(Color(hex: "#2D4A3E"))
-                    }
-                }
-            }
-            .sheet(isPresented: $showingSettings) {
-                ProfileSettingsView()
-            }
+            .navigationBarHidden(true)
         }
         .task {
             await viewModel.loadCurrentUserProfile()
+        }
+        .sheet(isPresented: $showingSettings) {
+            ProfileSettingsView()
         }
     }
 }

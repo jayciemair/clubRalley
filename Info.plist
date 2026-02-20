@@ -45,6 +45,12 @@
 		<string>Satoshi-Medium.otf</string>
 		<string>Satoshi-MediumItalic.otf</string>
 		<string>Satoshi-Regular.otf</string>
+		<string>Chillax-Bold.otf</string>
+		<string>Chillax-Extralight.otf</string>
+		<string>Chillax-Light.otf</string>
+		<string>Chillax-Medium.otf</string>
+		<string>Chillax-Regular.otf</string>
+		<string>Chillax-Semibold.otf</string>
 	</array>
 	<key>UIApplicationShortcutItems</key>
 	<array>

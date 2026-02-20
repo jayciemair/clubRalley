@@ -21,6 +21,7 @@ struct ProfileTabView: View {
             } else if profileViewModel.currentUserProfile != nil {
                 ProfileTabContentView(
                     profileViewModel: profileViewModel,
+                    showingSettings: $showingSettings,
                     showingEditProfile: $showingEditProfile
                 )
             } else {
@@ -28,15 +29,7 @@ struct ProfileTabView: View {
             }
         }
         .background(Color(hex: "#f6f5f1"))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showingSettings = true }) {
-                    Image(systemName: "gearshape.fill")
-                        .foregroundColor(Color(hex: "#2C4F40"))
-                }
-            }
-        }
+        .navigationBarHidden(true)
         .sheet(isPresented: $showingSettings) {
             ProfileSettingsView()
         }
@@ -65,57 +58,86 @@ struct ProfileTabLoadingView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                // Header skeleton — horizontal
-                HStack(alignment: .top, spacing: 14) {
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 86, height: 86)
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(width: 140, height: 22)
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.gray.opacity(0.15))
-                            .frame(width: 90, height: 14)
-
-                        HStack(spacing: 0) {
-                            ForEach(0..<3, id: \.self) { _ in
-                                VStack(spacing: 4) {
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(Color.gray.opacity(0.2))
-                                        .frame(width: 28, height: 22)
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(Color.gray.opacity(0.12))
-                                        .frame(width: 40, height: 10)
-                                }
-                                .frame(maxWidth: .infinity)
-                            }
-                        }
-                        .padding(.top, 4)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 22)
-                .padding(.top, 16)
-
-                // Bio skeleton
-                VStack(alignment: .leading, spacing: 6) {
+            VStack(spacing: 0) {
+                // Top bar skeleton
+                HStack {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(Color.gray.opacity(0.15))
-                        .frame(height: 13)
+                        .frame(width: 100, height: 14)
+                    Spacer()
+                    Circle()
+                        .fill(Color.gray.opacity(0.15))
+                        .frame(width: 22, height: 22)
+                }
+                .padding(.horizontal, 22)
+                .padding(.top, 6)
+                .padding(.bottom, 10)
+
+                // Avatar skeleton centered
+                Circle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 96, height: 96)
+                    .padding(.top, 10)
+                    .padding(.bottom, 12)
+
+                // Name skeleton centered
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 160, height: 24)
+                    .padding(.bottom, 6)
+
+                // Username skeleton centered
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.15))
+                    .frame(width: 100, height: 13)
+                    .padding(.bottom, 18)
+
+                // Stats skeleton
+                HStack(spacing: 0) {
+                    ForEach(0..<3, id: \.self) { i in
+                        if i > 0 {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.12))
+                                .frame(width: 1, height: 36)
+                        }
+                        VStack(spacing: 4) {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: 32, height: 28)
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.gray.opacity(0.12))
+                                .frame(width: 44, height: 10)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+                .padding(.horizontal, 32)
+                .padding(.bottom, 18)
+
+                // Bio skeleton centered
+                VStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.15))
+                        .frame(width: 260, height: 13)
                     RoundedRectangle(cornerRadius: 4)
                         .fill(Color.gray.opacity(0.12))
                         .frame(width: 120, height: 13)
                 }
-                .padding(.horizontal, 22)
+                .padding(.bottom, 14)
 
                 // Button skeleton
                 RoundedRectangle(cornerRadius: 50)
                     .fill(Color.gray.opacity(0.12))
                     .frame(height: 46)
                     .padding(.horizontal, 22)
+                    .padding(.bottom, 16)
+
+                // Divider skeleton
+                Rectangle()
+                    .fill(Color.gray.opacity(0.08))
+                    .frame(height: 1)
+                    .padding(.horizontal, 22)
+                    .padding(.bottom, 16)
 
                 // Sport cards skeleton
                 HStack(spacing: 12) {
@@ -126,7 +148,6 @@ struct ProfileTabLoadingView: View {
                     }
                 }
                 .padding(.horizontal, 22)
-                .padding(.top, 8)
             }
         }
         .background(Color(hex: "#f6f5f1"))
@@ -186,22 +207,34 @@ struct ProfileEmptyView: View {
 
 struct ProfileTabContentView: View {
     @ObservedObject var profileViewModel: ProfileViewModel
+    @Binding var showingSettings: Bool
     @Binding var showingEditProfile: Bool
 
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
                 if let profile = profileViewModel.currentUserProfile {
-                    // Horizontal header (avatar + name + stats)
+                    // Custom top bar (location + gear)
+                    ProfileCustomTopBar(
+                        location: profile.user.locationDisplay,
+                        showingSettings: $showingSettings
+                    )
+
+                    // Centered header (avatar, name, @username, stats)
                     ProfileHeaderRow(profile: profile)
 
-                    // Bio
+                    // Bio (centered)
                     ProfileBioSection(profile: profile)
-                        .padding(.top, 16)
+                        .padding(.bottom, 14)
+
+                    // Mutual friends
+                    if !profile.mutualFriends.isEmpty {
+                        ProfileFriendsRow(mutualFriends: profile.mutualFriends)
+                            .padding(.bottom, 16)
+                    }
 
                     // Edit Profile button
                     ProfileEditButton(showingEditProfile: $showingEditProfile)
-                        .padding(.top, 14)
 
                     // Divider
                     ProfileDivider()
@@ -231,14 +264,45 @@ struct ProfileTabContentView: View {
     }
 }
 
-// MARK: - Profile Header Row (Horizontal: Avatar Left, Info Right)
+// MARK: - Custom Top Bar (Location + Gear)
+
+struct ProfileCustomTopBar: View {
+    let location: String
+    @Binding var showingSettings: Bool
+
+    var body: some View {
+        HStack {
+            HStack(spacing: 5) {
+                Image(systemName: "mappin.and.ellipse")
+                    .font(.system(size: 14))
+                    .foregroundColor(Color(hex: "#2C4F40"))
+                Text(location)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(hex: "#2C4F40"))
+            }
+
+            Spacer()
+
+            Button(action: { showingSettings = true }) {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(Color(hex: "#2C4F40"))
+            }
+        }
+        .padding(.horizontal, 22)
+        .padding(.top, 6)
+        .padding(.bottom, 10)
+    }
+}
+
+// MARK: - Profile Header (Centered: Avatar, Name, Username, Stats)
 
 struct ProfileHeaderRow: View {
     let profile: UserProfile
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            // Avatar
+        VStack(spacing: 0) {
+            // Avatar — centered, 96pt
             AsyncImage(url: URL(string: profile.user.profilePhotoURL ?? "")) { image in
                 image.resizable().aspectRatio(contentMode: .fill)
             } placeholder: {
@@ -246,38 +310,37 @@ struct ProfileHeaderRow: View {
                     .fill(Color(hex: "#2C4F40"))
                     .overlay(
                         Text(profile.user.initials)
-                            .font(.system(size: 26, weight: .heavy, design: .rounded))
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                     )
             }
-            .frame(width: 86, height: 86)
+            .frame(width: 96, height: 96)
             .clipShape(Circle())
-            .overlay(Circle().stroke(Color(hex: "#2C4F40"), lineWidth: 3))
+            .padding(.top, 10)
+            .padding(.bottom, 12)
 
-            // Name + Location + Stats
-            VStack(alignment: .leading, spacing: 4) {
-                Text(profile.user.fullName)
-                    .font(.system(size: 24, weight: .heavy, design: .rounded))
-                    .foregroundColor(Color(hex: "#2C4F40"))
+            // Name
+            Text(profile.user.fullName)
+                .font(.custom("Chillax-Bold", size: 26))
+                .foregroundColor(Color(hex: "#2C4F40"))
+                .multilineTextAlignment(.center)
 
-                Text(profile.user.locationDisplay)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(hex: "#7a8a81"))
+            // @username
+            Text("@\(profile.user.username)")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(Color(hex: "#7a8a81"))
+                .padding(.top, 2)
+                .padding(.bottom, 18)
 
-                // Stats row
-                ProfileStatsRow(profile: profile)
-                    .padding(.top, 12)
-            }
-            .padding(.top, 6)
-
-            Spacer()
+            // Stats row with dividers
+            ProfileStatsRow(profile: profile)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 18)
         }
-        .padding(.horizontal, 22)
-        .padding(.vertical, 16)
     }
 }
 
-// MARK: - Stats Row (Inline — Friends | Ralleys | Posts)
+// MARK: - Stats Row (Centered with Vertical Dividers)
 
 struct ProfileStatsRow: View {
     let profile: UserProfile
@@ -286,8 +349,18 @@ struct ProfileStatsRow: View {
         HStack(spacing: 0) {
             ProfileStat(value: profile.stats.followersCount, label: "Friends")
                 .frame(maxWidth: .infinity)
+
+            Rectangle()
+                .fill(Color(hex: "#d5d7cb"))
+                .frame(width: 1, height: 36)
+
             ProfileStat(value: profile.stats.ralleysAttended, label: "Ralleys")
                 .frame(maxWidth: .infinity)
+
+            Rectangle()
+                .fill(Color(hex: "#d5d7cb"))
+                .frame(width: 1, height: 36)
+
             ProfileStat(value: profile.stats.postsCount, label: "Posts")
                 .frame(maxWidth: .infinity)
         }
@@ -299,45 +372,51 @@ struct ProfileStat: View {
     let label: String
 
     var body: some View {
-        VStack(spacing: 1) {
+        VStack(spacing: 2) {
             Text("\(value)")
-                .font(.system(size: 22, weight: .black, design: .rounded))
+                .font(.system(size: 30, weight: .heavy, design: .rounded))
                 .foregroundColor(Color(hex: "#2C4F40"))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(label)
-                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundColor(Color(hex: "#7a8a81"))
+                .textCase(.uppercase)
+                .tracking(0.3)
         }
     }
 }
 
-// MARK: - Bio Section
+// MARK: - Bio Section (Centered)
 
 struct ProfileBioSection: View {
     let profile: UserProfile
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(spacing: 3) {
             // College credentials as inline text
             if profile.user.playedCollegeSport, let collegeInfo = profile.user.collegeAthleteInfo {
                 (Text("Former \(collegeInfo.division.shortName) \(collegeInfo.sport.lowercased()) player at ")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .font(.system(size: 13.5, weight: .regular, design: .rounded))
                     .foregroundColor(Color(hex: "#3a3a3a"))
                 +
                 Text(collegeInfo.school)
-                    .font(.system(size: 13, weight: .black, design: .rounded))
-                    .foregroundColor(Color(hex: "#3a3a3a")))
-                .lineSpacing(4)
+                    .font(.system(size: 13.5, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(hex: "#1a1a1a")))
+                .multilineTextAlignment(.center)
+                .lineSpacing(3)
             }
 
             // Bio text
             if let bio = profile.user.bio, !bio.isEmpty {
                 Text(bio)
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .font(.system(size: 13.5, weight: .regular, design: .rounded))
                     .foregroundColor(Color(hex: "#3a3a3a"))
-                    .lineSpacing(4)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
             }
         }
-        .padding(.horizontal, 22)
+        .padding(.horizontal, 36)
     }
 }
 
@@ -346,32 +425,41 @@ struct ProfileBioSection: View {
 struct ProfileFriendsRow: View {
     let mutualFriends: [MutualFriend]
 
+    private let avatarColors: [String] = ["#a8c4b8", "#7a9e8e", "#5a8070"]
+
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             // Overlapping avatar circles
-            HStack(spacing: -8) {
+            ZStack(alignment: .leading) {
                 ForEach(Array(mutualFriends.prefix(3).enumerated()), id: \.offset) { index, friend in
-                    AsyncImage(url: URL(string: friend.profileImageURL ?? "")) { image in
-                        image.resizable().aspectRatio(contentMode: .fill)
-                    } placeholder: {
+                    if let url = friend.profileImageURL, !url.isEmpty {
+                        AsyncImage(url: URL(string: url)) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Circle()
+                                .fill(Color(hex: avatarColors[index % avatarColors.count]))
+                        }
+                        .frame(width: 28, height: 28)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .offset(x: CGFloat(index) * 18)
+                        .zIndex(Double(3 - index))
+                    } else {
                         Circle()
-                            .fill(Color(hex: "#2C4F40").opacity(0.2))
-                            .overlay(
-                                Text(String(friend.displayName.prefix(1)).uppercased())
-                                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(hex: "#2C4F40"))
-                            )
+                            .fill(Color(hex: avatarColors[index % avatarColors.count]))
+                            .frame(width: 28, height: 28)
+                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                            .offset(x: CGFloat(index) * 18)
+                            .zIndex(Double(3 - index))
                     }
-                    .frame(width: 28, height: 28)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color(hex: "#f6f5f1"), lineWidth: 2))
-                    .zIndex(Double(3 - index))
                 }
             }
+            .frame(width: CGFloat(min(mutualFriends.count, 3)) * 18 + 10, alignment: .leading)
 
             friendsText
-                .font(.system(size: 11.5, weight: .medium, design: .rounded))
+                .font(.system(size: 12, weight: .regular, design: .rounded))
                 .foregroundColor(Color(hex: "#7a8a81"))
+                .lineSpacing(2)
 
             Spacer()
         }
@@ -380,21 +468,23 @@ struct ProfileFriendsRow: View {
 
     private var friendsText: Text {
         let friends = mutualFriends
+        let boldFont = Font.system(size: 12, weight: .bold, design: .rounded)
+        let boldColor = Color(hex: "#5a5a5a")
         if friends.count == 1 {
-            return Text("Friends with ") + Text(friends[0].displayName).font(.system(size: 11.5, weight: .black, design: .rounded)).foregroundColor(.black)
+            return Text("Friends with ") + Text(friends[0].displayName).font(boldFont).foregroundColor(boldColor)
         } else if friends.count == 2 {
             return Text("Friends with ") +
-                Text(friends[0].displayName).font(.system(size: 11.5, weight: .black, design: .rounded)).foregroundColor(.black) +
+                Text(friends[0].displayName).font(boldFont).foregroundColor(boldColor) +
                 Text(" and ") +
-                Text(friends[1].displayName).font(.system(size: 11.5, weight: .black, design: .rounded)).foregroundColor(.black)
+                Text(friends[1].displayName).font(boldFont).foregroundColor(boldColor)
         } else {
             let remaining = friends.count - 2
             return Text("Friends with ") +
-                Text(friends[0].displayName).font(.system(size: 11.5, weight: .black, design: .rounded)).foregroundColor(.black) +
+                Text(friends[0].displayName).font(boldFont).foregroundColor(boldColor) +
                 Text(", ") +
-                Text(friends[1].displayName).font(.system(size: 11.5, weight: .black, design: .rounded)).foregroundColor(.black) +
+                Text(friends[1].displayName).font(boldFont).foregroundColor(boldColor) +
                 Text(", and ") +
-                Text("\(remaining) others").font(.system(size: 11.5, weight: .black, design: .rounded)).foregroundColor(.black)
+                Text("\(remaining) others").font(boldFont).foregroundColor(boldColor)
         }
     }
 }
@@ -466,10 +556,10 @@ struct ProfileEditButton: View {
     var body: some View {
         Button(action: { showingEditProfile = true }) {
             Text("Edit Profile")
-                .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundColor(.black)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(Color(hex: "#1a1a1a"))
                 .frame(maxWidth: .infinity)
-                .frame(height: 46)
+                .frame(height: 48)
         }
         .background(Color(hex: "#E2E4D6"))
         .clipShape(Capsule())
@@ -495,7 +585,7 @@ struct ProfileSectionHeader: View {
 
     var body: some View {
         Text(title)
-            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .font(.custom("Chillax-Semibold", size: 13))
             .foregroundColor(.white)
             .padding(.horizontal, 16)
             .padding(.vertical, 8)

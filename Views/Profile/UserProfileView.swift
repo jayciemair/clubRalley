@@ -27,17 +27,17 @@ struct UserProfileView: View {
         ScrollView {
             if let profile = userProfile {
                 VStack(spacing: 0) {
-                    // Horizontal header (avatar + name + stats)
+                    // Centered header (avatar, name, @username, stats)
                     ProfileHeaderRow(profile: profile)
 
-                    // Bio
+                    // Bio (centered)
                     ProfileBioSection(profile: profile)
-                        .padding(.top, 14)
+                        .padding(.bottom, 14)
 
                     // Mutual friends row
                     if !isOwnProfile && !profile.mutualFriends.isEmpty {
                         ProfileFriendsRow(mutualFriends: profile.mutualFriends)
-                            .padding(.top, 14)
+                            .padding(.bottom, 16)
                     }
 
                     // Action buttons
@@ -49,7 +49,6 @@ struct UserProfileView: View {
                             onMessage: { showingMessages = true },
                             onInvite: { /* TODO: Invite to ralley flow */ }
                         )
-                        .padding(.top, 14)
                     }
 
                     // Divider

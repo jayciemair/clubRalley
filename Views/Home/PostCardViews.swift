@@ -11,67 +11,81 @@ import UIKit
 // MARK: - Home Feed Post Card
 
 struct HomeFeedPostCard: View {
-    let post: SampleFeedPost
+    let post: ClubRalleyPost
     @State private var isLiked = false
+
+    private var initials: String {
+        let parts = post.authorName.split(separator: " ")
+        let first = parts.first?.prefix(1) ?? ""
+        let last = parts.count > 1 ? parts.last!.prefix(1) : ""
+        return "\(first)\(last)".uppercased()
+    }
+
+    private var subtitle: String {
+        let location = post.authorLocation ?? ""
+        if location.isEmpty {
+            return post.timeAgo
+        }
+        return "\(post.timeAgo) · \(location)"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // 1. Author row
-            HStack(alignment: .top, spacing: 10) {
-                // Avatar — 42pt green circle with initials
+            HStack(alignment: .center, spacing: 12) {
+                // Avatar — 46pt green circle with initials
                 Circle()
                     .fill(Color(hex: "#2C4F40"))
-                    .frame(width: 42, height: 42)
+                    .frame(width: 46, height: 46)
                     .overlay(
-                        Text(post.initials)
+                        Text(initials)
                             .font(.system(size: 18, weight: .bold))
                             .fontDesign(.rounded)
                             .foregroundColor(.white)
                     )
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(post.authorName)
-                        .font(.system(size: 14, weight: .black))
+                        .font(.system(size: 16, weight: .bold))
                         .fontDesign(.rounded)
-                        .foregroundColor(.black)
+                        .foregroundColor(Color(hex: "#2C4F40"))
 
-                    Text("\(post.time) \u{00B7} \(post.location)")
-                        .font(.system(size: 11, weight: .semibold))
+                    Text(subtitle)
+                        .font(.system(size: 12, weight: .semibold))
                         .fontDesign(.rounded)
-                        .foregroundColor(Color(hex: "#BBBBBB"))
+                        .foregroundColor(Color(hex: "#2C4F40").opacity(0.55))
                 }
 
                 Spacer()
             }
 
             // 2. Post title
-            if let title = post.title {
+            if let title = post.title, !title.isEmpty {
                 Text(title)
-                    .font(.system(size: 15, weight: .black))
-                    .fontDesign(.rounded)
-                    .foregroundColor(.black)
-                    .padding(.top, 10)
+                    .font(.custom("Chillax-Bold", size: 17))
+                    .foregroundColor(Color(hex: "#2C4F40"))
+                    .padding(.top, 14)
                     .padding(.bottom, 4)
             }
 
             // 3. Post text
-            if let body = post.body {
-                Text(body)
-                    .font(.system(size: 13, weight: .medium))
+            if !post.content.isEmpty {
+                Text(post.content)
+                    .font(.system(size: 14, weight: .medium))
                     .fontDesign(.rounded)
-                    .foregroundColor(Color(hex: "#444444"))
-                    .lineSpacing(1.55)
-                    .padding(.bottom, 12)
+                    .foregroundColor(Color(hex: "#2C4F40").opacity(0.7))
+                    .lineSpacing(2)
+                    .padding(.bottom, 14)
             }
 
             // 4. Photos (full bleed)
-            if !post.photoURLs.isEmpty {
-                PostPhotoCollage(photos: post.photoURLs)
+            if !post.images.isEmpty {
+                PostPhotoCollage(photos: post.images)
                     .padding(.horizontal, -22)
             }
 
             // 5. Mutuals row
-            if post.showMutuals {
+            if post.likes > 0 {
                 HomeMutualsRow()
                     .padding(.top, 10)
             }
@@ -89,7 +103,7 @@ struct HomeFeedPostCard: View {
                 .padding(.bottom, 16)
         }
         .padding(.horizontal, 22)
-        .padding(.top, 14)
+        .padding(.top, 18)
     }
 }
 
