@@ -1,0 +1,431 @@
+/* ───────────────── Fonts ───────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=chillax@200,300,400,500,600,700&display=swap');
+
+/* ───────────────── Reset ───────────────── */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ───────────────── Phone Shell ───────────────── */
+
+.phone-shell {
+  width: 390px;
+  height: 844px;
+  border-radius: 50px;
+  background: #E2E4D6;
+  padding: 3px;
+  position: relative;
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 47px;
+  background: #f6f5f1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ───────────────── Status Bar ───────────────── */
+
+.status-bar {
+  height: 54px;
+  padding: 14px 28px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.status-time {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ───────────────── Top Bar ───────────────── */
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 22px 10px;
+  flex-shrink: 0;
+}
+
+.top-bar-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.top-bar-location span {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2C4F40;
+}
+
+.top-bar-gear {
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ───────────────── Scrollable Content ───────────────── */
+
+.scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scroll-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* ───────────────── Avatar ───────────────── */
+
+.avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+  padding-bottom: 12px;
+}
+
+.avatar-circle {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: #2C4F40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-initials {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+/* ───────────────── Name & Username ───────────────── */
+
+.profile-name {
+  font-family: 'Chillax', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #2C4F40;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.profile-username {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #7a8a81;
+  text-align: center;
+  margin-top: 2px;
+  margin-bottom: 18px;
+}
+
+/* ───────────────── Stats Row ───────────────── */
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  margin-bottom: 18px;
+}
+
+.stat-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-value {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  color: #2C4F40;
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #7a8a81;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 36px;
+  background: #d5d7cb;
+  flex-shrink: 0;
+}
+
+/* ───────────────── Bio ───────────────── */
+
+.bio {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: #3a3a3a;
+  text-align: center;
+  padding: 0 36px;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.bio strong {
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* ───────────────── Mutual Friends ───────────────── */
+
+.mutual-friends {
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  margin-bottom: 16px;
+}
+
+.mutual-avatars {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.mutual-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.mutual-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #7a8a81;
+  margin-left: 8px;
+  line-height: 1.35;
+}
+
+.mutual-text strong {
+  font-weight: 700;
+  color: #5a5a5a;
+}
+
+/* ───────────────── Edit Profile Button ───────────────── */
+
+.edit-profile-btn {
+  display: block;
+  width: calc(100% - 44px);
+  margin: 0 22px 16px;
+  padding: 14px 0;
+  border-radius: 50px;
+  background: #E2E4D6;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  transition: opacity 0.15s ease;
+}
+
+.edit-profile-btn:hover {
+  opacity: 0.85;
+}
+
+/* ───────────────── Hairline Divider ───────────────── */
+
+.hairline-divider {
+  height: 1px;
+  background: #d5d7cb;
+  margin: 0 22px 16px;
+}
+
+/* ───────────────── Sections ───────────────── */
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  margin-bottom: 12px;
+}
+
+.section-pill {
+  font-family: 'Chillax', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #2C4F40;
+  padding: 7px 16px;
+  border-radius: 50px;
+  line-height: 1;
+}
+
+.show-all {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7a8a81;
+  cursor: pointer;
+}
+
+.show-all:hover {
+  color: #2C4F40;
+}
+
+/* ───────────────── Sports Scroll ───────────────── */
+
+.sports-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 0 22px 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sports-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.sport-card {
+  width: 130px;
+  min-width: 130px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.06),
+    0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.sport-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #edf0ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sport-name {
+  font-family: 'Chillax', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.sport-level {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #7a8a81;
+}
+
+/* ───────────────── Photos Grid ───────────────── */
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 0 22px;
+}
+
+.photo-cell {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.photo-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ───────────────── Tab Bar ───────────────── */
+
+.tab-bar {
+  height: 72px;
+  background: #fff;
+  border-top: 1px solid #d5d7cb;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-shrink: 0;
+  padding: 0 8px 10px;
+}
+
+.tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 12px 0;
+}
+
+.tab-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #BBBBBB;
+  line-height: 1;
+}
+
+.tab-active .tab-label {
+  color: #2C4F40;
+}
