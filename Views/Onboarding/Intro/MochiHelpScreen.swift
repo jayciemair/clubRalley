@@ -1,6 +1,6 @@
 //
 //  MochiHelpScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Mochi explains how she'll help - features woven naturally
 //

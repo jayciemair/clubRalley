@@ -52,77 +52,31 @@ final class OnboardingCompletionViewModel: ObservableObject {
         print("[debugRefactorFlows] 🔷 User ID extracted: \(userUUID.uuidString)")
         print("🔷 [COMPLETION-VM] User ID: \(userUUID.uuidString)")
 
-        do {
-            // 1. Onboarding is marked complete when user record is created (no UPDATE needed)
-            print("[debugRefactorFlows] ✅ User already created with has_completed_onboarding=true")
-            print("✅ [COMPLETION-VM] Database already has onboarding marked complete")
+        // 1. Onboarding is marked complete when user record is created (no UPDATE needed)
+        print("[debugRefactorFlows] ✅ User already created with has_completed_onboarding=true")
+        print("✅ [COMPLETION-VM] Database already has onboarding marked complete")
 
-            // 2. Refresh onboarding status
-            print("[debugRefactorFlows] 🔄 Calling authService.refreshOnboardingStatus()")
-            print("🔄 [COMPLETION-VM] Refreshing onboarding status...")
-            await authService.refreshOnboardingStatus()
-            print("[debugRefactorFlows] ✅ authService.refreshOnboardingStatus() DONE")
+        // 2. Refresh onboarding status
+        print("[debugRefactorFlows] 🔄 Calling authService.refreshOnboardingStatus()")
+        print("🔄 [COMPLETION-VM] Refreshing onboarding status...")
+        await authService.refreshOnboardingStatus()
+        print("[debugRefactorFlows] ✅ authService.refreshOnboardingStatus() DONE")
 
-            // 3. Log journey_started event for event sourcing
-            if let savingsRate = extractSavingsRate(from: collectedData) {
-                await EventLoggingService.shared.logJourneyStarted(
-                    userId: userUUID,
-                    savingsRate: savingsRate
-                )
-                print("📊 [COMPLETION-VM] Logged journey_started event")
-            }
-
-            // 4. Post-completion tasks moved to AFTER setup completes
-            // (Setup is screens 45-50, so don't call handleOnboardingComplete yet)
-            print("[debugRefactorFlows] ℹ️ Skipping post-completion tasks - will run after setup completes")
-
-            print("[debugRefactorFlows] 🎉 ALL STEPS COMPLETE!")
-            print("🎉 [COMPLETION-VM] Onboarding completion successful!")
-        } catch {
-            print("[debugRefactorFlows] ❌ ERROR in completeOnboarding(): \(error)")
-            print("❌ [COMPLETION-VM] Onboarding completion failed: \(error.localizedDescription)")
-
-            // Build comprehensive error context for debugging
-            let dataKeys = Array(collectedData.keys).sorted()
-            let isCancellationError = (error as? CancellationError) != nil ||
-                                     error.localizedDescription.contains("cancel")
-
-            // Merge flow metadata with error context
-            var errorContext: [String: Any] = [
-                // Data presence checks
-                "has_profile_data": collectedData["user_profile"] != nil,
-                "has_gambling_data": collectedData["gambling_profile"] != nil,
-                "has_risk_data": collectedData["risk_assessment"] != nil,
-                "has_authentication": collectedData["authentication"] != nil,
-                "has_last_gamble_date": collectedData["last_gamble_date"] != nil,
-
-                // What data WAS collected (helps identify where user stopped)
-                "collected_data_keys": dataKeys.joined(separator: ", "),
-                "total_data_keys": dataKeys.count,
-
-                // Error classification
-                "is_cancellation": isCancellationError,
-                "error_type": String(describing: type(of: error)),
-                "error_domain": (error as NSError).domain,
-                "error_code": (error as NSError).code
-            ]
-
-            // Add flow progress metadata if available
-            if let metadata = flowMetadata {
-                errorContext.merge(metadata) { (_, new) in new }
-            }
-
-            // Log error to Supabase for monitoring with enhanced context
-            await errorLoggingService.logError(
+        // 3. Log journey_started event for event sourcing
+        if let savingsRate = extractSavingsRate(from: collectedData) {
+            await EventLoggingService.shared.logJourneyStarted(
                 userId: userUUID,
-                type: .onboardingCompletionFailed,
-                error: error,
-                context: errorContext
+                savingsRate: savingsRate
             )
-
-            // Re-throw error so caller knows it failed
-            throw error
+            print("📊 [COMPLETION-VM] Logged journey_started event")
         }
+
+        // 4. Post-completion tasks moved to AFTER setup completes
+        // (Setup is screens 45-50, so don't call handleOnboardingComplete yet)
+        print("[debugRefactorFlows] ℹ️ Skipping post-completion tasks - will run after setup completes")
+
+        print("[debugRefactorFlows] 🎉 ALL STEPS COMPLETE!")
+        print("🎉 [COMPLETION-VM] Onboarding completion successful!")
     }
 
     // MARK: - Private Methods

@@ -1,6 +1,6 @@
 //
 //  LoveIsADrugScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Explains the science - love is literally addictive
 //

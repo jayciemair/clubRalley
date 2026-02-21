@@ -1,6 +1,6 @@
 //
 //  WhatsHurtingScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Multi-select: What's hurting the most today?
 //

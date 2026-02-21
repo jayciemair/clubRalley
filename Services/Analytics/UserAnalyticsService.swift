@@ -8,6 +8,7 @@
 import Foundation
 import Supabase
 
+@MainActor
 final class UserAnalyticsService {
 
     // MARK: - Singleton

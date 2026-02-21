@@ -127,6 +127,7 @@ enum RosterTab: String, CaseIterable {
 
 struct RosterView: View {
     @StateObject private var userService = UserService()
+    @StateObject private var contactsManager = ContactsManager()
     private var messagingService: MessagingService { ServiceContainer.shared.messagingService }
     @State private var searchText = ""
     @State private var selectedRosterTab: RosterTab = .people
@@ -178,7 +179,12 @@ struct RosterView: View {
                 }
             }
             .background(Color(hex: "#F5F5F5"))
-        .task { await userService.loadUsers(); await userService.loadFollowingStatus() }
+        .task {
+            await userService.loadUsers()
+            await userService.loadFollowingStatus()
+            await contactsManager.fetchContactMatches()
+            await userService.loadSchoolSuggestions()
+        }
         .sheet(item: $activeConversation) { conversation in
             NavigationStack {
                 DirectMessageView(conversation: conversation, messagingService: messagingService)
@@ -188,9 +194,66 @@ struct RosterView: View {
 
     // MARK: - People Content
 
+    /// Combined and deduplicated suggestions from contacts and school
+    private var allSuggestions: [RosterUserData] {
+        var seen: Set<UUID> = []
+        var result: [RosterUserData] = []
+        for user in contactsManager.contactSuggestions {
+            if seen.insert(user.id).inserted { result.append(user) }
+        }
+        for user in userService.schoolSuggestions {
+            if seen.insert(user.id).inserted { result.append(user) }
+        }
+        return result
+    }
+
+    /// Returns the reason string for a suggestion
+    private func suggestionReason(for user: RosterUserData) -> String {
+        if contactsManager.contactSuggestions.contains(where: { $0.id == user.id }) {
+            return "In your contacts"
+        }
+        let school = SavedUserProfile.loadFromStorage()?.collegeAthleteInfo?.school ?? ""
+        let sport = SavedUserProfile.loadFromStorage()?.collegeAthleteInfo?.sport ?? ""
+        if !school.isEmpty && !sport.isEmpty {
+            return "\(school) · \(sport)"
+        } else if !school.isEmpty {
+            return school
+        }
+        return "Suggested"
+    }
+
     private var peopleContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                // Suggested friends section
+                if !allSuggestions.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Suggested Friends")
+                                .font(.system(size: 17, weight: .bold))
+                                .foregroundColor(Color(hex: "#2C4F40"))
+                            Text("From your contacts & school")
+                                .font(.system(size: 13))
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.horizontal, 16)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(allSuggestions) { user in
+                                    SuggestionCard(
+                                        user: user,
+                                        reason: suggestionReason(for: user),
+                                        userService: userService
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                        }
+                    }
+                    .padding(.top, 16)
+                }
+
                 // Search bar
                 HStack {
                     Image(systemName: "magnifyingglass").foregroundColor(.gray)
@@ -313,6 +376,61 @@ struct RosterUserCardView: View {
             }
         }
         .padding(12).background(Color.white).cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+    }
+}
+
+// MARK: - Suggestion Card View
+
+struct SuggestionCard: View {
+    let user: RosterUserData
+    let reason: String
+    @ObservedObject var userService: UserService
+
+    var body: some View {
+        VStack(spacing: 8) {
+            // Avatar
+            AsyncImage(url: URL(string: user.photoURL)) { image in
+                image.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Circle().fill(Color(hex: "#2C4F40").opacity(0.2))
+            }
+            .frame(width: 48, height: 48)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+
+            // Name
+            Text(user.name)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(.black)
+                .lineLimit(1)
+
+            // Reason pill
+            Text(reason)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(Color(hex: "#2C4F40"))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Color(hex: "#2C4F40").opacity(0.1))
+                .cornerRadius(8)
+                .lineLimit(1)
+
+            // Follow button
+            Button(action: { Task { await userService.toggleFollow(userId: user.id) } }) {
+                Text(user.isFollowing ? "Following" : "Follow")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(user.isFollowing ? .white : Color(hex: "#2C4F40"))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(user.isFollowing ? Color(hex: "#2C4F40") : Color.white)
+                    .cornerRadius(8)
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: "#2C4F40"), lineWidth: 1))
+            }
+        }
+        .padding(12)
+        .frame(width: 140)
+        .background(Color.white)
+        .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
     }
 }

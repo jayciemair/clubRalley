@@ -1,6 +1,6 @@
 //
 //  CommitToChangeScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Asks user to commit to the healing process
 //
@@ -16,7 +16,7 @@ struct CommitToChangeScreen: View {
 
     private let phrases = [
         "but here's the thing.",
-        "you have to commit to getting over him.",
+        "you have to commit to rallying.",
         "it won't happen in an hour.",
         "it won't happen in a day.",
         "it won't even happen in a week."
@@ -51,7 +51,7 @@ struct CommitToChangeScreen: View {
                     // Chat bubble - fixed height
                     ZStack(alignment: .topLeading) {
                         // Invisible placeholder for full text size
-                        Text("but here's the thing.\n\nyou have to commit to getting over him.\n\nit won't happen in an hour.\n\nit won't happen in a day.\n\nit won't even happen in a week.")
+                        Text("but here's the thing.\n\nyou have to commit to rallying.\n\nit won't happen in an hour.\n\nit won't happen in a day.\n\nit won't even happen in a week.")
                             .font(.custom("Satoshi-Medium", size: 22))
                             .foregroundColor(.clear)
                             .multilineTextAlignment(.leading)

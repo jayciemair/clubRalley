@@ -233,27 +233,29 @@ final class AnalyticsViewModel: ObservableObject {
 
         // Create animation timer
         Timer.scheduledTimer(withTimeInterval: animationDuration / Double(steps), repeats: true) { [weak self] animTimer in
-            guard let self = self else {
-                animTimer.invalidate()
-                return
-            }
+            MainActor.assumeIsolated {
+                guard let self = self else {
+                    animTimer.invalidate()
+                    return
+                }
 
-            let elapsed = Date().timeIntervalSince(startTime)
-            let progress = min(elapsed / animationDuration, 1.0)
+                let elapsed = Date().timeIntervalSince(startTime)
+                let progress = min(elapsed / animationDuration, 1.0)
 
-            // Ease-out cubic for smooth deceleration
-            let easedProgress = 1 - pow(1 - progress, 3)
+                // Ease-out cubic for smooth deceleration
+                let easedProgress = 1 - pow(1 - progress, 3)
 
-            self.displayedAmount = oldAmount + (difference * easedProgress)
+                self.displayedAmount = oldAmount + (difference * easedProgress)
 
-            if progress >= 1.0 {
-                animTimer.invalidate()
-                self.displayedAmount = newAmount
-                UserDefaults.standard.set(newAmount, forKey: "last_displayed_amount")
-                print("[debugNewUpdate] ✅ Animation complete, final amount: $\(newAmount)")
+                if progress >= 1.0 {
+                    animTimer.invalidate()
+                    self.displayedAmount = newAmount
+                    UserDefaults.standard.set(newAmount, forKey: "last_displayed_amount")
+                    print("[debugNewUpdate] ✅ Animation complete, final amount: $\(newAmount)")
 
-                // Restart the regular increment timer
-                self.startTimer()
+                    // Restart the regular increment timer
+                    self.startTimer()
+                }
             }
         }
     }
@@ -445,14 +447,16 @@ final class AnalyticsViewModel: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            guard let self = self else { return }
+            MainActor.assumeIsolated {
+                guard let self = self else { return }
 
-            // Save current displayed amount to cache
-            UserDefaults.standard.set(self.displayedAmount, forKey: "last_displayed_amount")
+                // Save current displayed amount to cache
+                UserDefaults.standard.set(self.displayedAmount, forKey: "last_displayed_amount")
 
-            // Also save the full cached analytics if available
-            if let cached = self.cachedAnalytics {
-                UserDefaults.standard.cachedAnalytics = cached
+                // Also save the full cached analytics if available
+                if let cached = self.cachedAnalytics {
+                    UserDefaults.standard.cachedAnalytics = cached
+                }
             }
         }
     }

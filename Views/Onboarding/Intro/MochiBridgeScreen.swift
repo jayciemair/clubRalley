@@ -1,6 +1,6 @@
 //
 //  MochiBridgeScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Bridge screen - Mochi acknowledges the user's name and asks about their situation
 //

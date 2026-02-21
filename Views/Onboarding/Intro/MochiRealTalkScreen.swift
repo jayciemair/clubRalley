@@ -1,6 +1,6 @@
 //
 //  MochiRealTalkScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Mochi gets real - "Heartbreak sucks"
 //

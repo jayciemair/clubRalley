@@ -1,6 +1,6 @@
 //
 //  MochiIntroScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Mochi introduces herself and asks for the user's name
 //
@@ -23,7 +23,7 @@ struct MochiIntroScreen: View {
     // Phrases with pauses between them
     private let phrases = [
         "hi, i'm mochi :)",
-        "i'm here to help you get over him.",
+        "i'm here to help you rally.",
         "what should i call you"
     ]
 
@@ -95,7 +95,7 @@ struct MochiIntroScreen: View {
                                 RoundedRectangle(cornerRadius: 20)
                                     .stroke(isTextFieldFocused ? Color(hex: "#FE9CDD") : Color.white.opacity(0.3), lineWidth: 2)
                             )
-                            .onChange(of: nameText) { newValue in
+                            .onChange(of: nameText) { _, newValue in
                                 let lowercased = newValue.lowercased()
                                 if lowercased != newValue || newValue.count > 20 {
                                     nameText = String(lowercased.prefix(20))

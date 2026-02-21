@@ -67,8 +67,8 @@ final class DashboardDataService: ObservableObject {
         }
 
         // Fetch data in parallel for efficiency
-        async let relapsesTask = loadCurrentWeekRelapses(userId: userId)
-        async let streakTask = loadQuitDateAndStreak(userId: userId)
+        async let relapsesTask: Void = loadCurrentWeekRelapses(userId: userId)
+        async let streakTask: Void = loadQuitDateAndStreak(userId: userId)
 
         // Wait for both to complete
         await relapsesTask

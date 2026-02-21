@@ -6,10 +6,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.getoverhim.app</string>
+			<string>com.clubralley.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>getoverhim</string>
+				<string>clubralley</string>
 			</array>
 		</dict>
 		<dict>
@@ -27,12 +27,18 @@
 		<string>App-Prefs</string>
 		<string>mailto</string>
 	</array>
-	<key>NSFamilyControlsUsageDescription</key>
-	<string>Get Over Him uses Screen Time to help you stay focused on your goals.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Club Ralley uses your contacts to help you find friends who are already on the app.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Club Ralley uses your location to find ralleys and venues near you.</string>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>This helps us understand which features are most effective in supporting your recovery journey and measure the impact of our app.</string>
+	<string>This helps us understand which features are most useful and improve Club Ralley for you.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Get Over Him may use the microphone for voice journaling features.</string>
+	<string>Club Ralley may use the microphone for voice messages in group chats.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Club Ralley uses the camera to let you take photos for your posts and profile.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Club Ralley accesses your photos to let you share images in posts and your profile.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Satoshi-Black.otf</string>
@@ -56,27 +62,27 @@
 	<array>
 		<dict>
 			<key>UIApplicationShortcutItemIconSymbolName</key>
-			<string>hand.raised.fill</string>
+			<string>sportscourt.fill</string>
 			<key>UIApplicationShortcutItemTitle</key>
-			<string>GET</string>
+			<string>Find Ralleys</string>
 			<key>UIApplicationShortcutItemType</key>
-			<string>com.getoverhim.get</string>
+			<string>com.clubralley.find</string>
 		</dict>
 		<dict>
 			<key>UIApplicationShortcutItemIconSymbolName</key>
-			<string>checkmark.circle.fill</string>
+			<string>plus.circle.fill</string>
 			<key>UIApplicationShortcutItemTitle</key>
-			<string>OVER</string>
+			<string>Create Ralley</string>
 			<key>UIApplicationShortcutItemType</key>
-			<string>com.getoverhim.over</string>
+			<string>com.clubralley.create</string>
 		</dict>
 		<dict>
 			<key>UIApplicationShortcutItemIconSymbolName</key>
-			<string>trash.fill</string>
+			<string>person.2.fill</string>
 			<key>UIApplicationShortcutItemTitle</key>
-			<string>HIM</string>
+			<string>My Teams</string>
 			<key>UIApplicationShortcutItemType</key>
-			<string>com.getoverhim.him</string>
+			<string>com.clubralley.teams</string>
 		</dict>
 	</array>
 	<key>UILaunchScreen</key>

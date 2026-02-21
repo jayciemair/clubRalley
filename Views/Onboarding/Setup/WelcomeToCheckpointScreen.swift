@@ -37,7 +37,7 @@ struct WelcomeToCheckpointScreen: View {
 
                 VStack(alignment: .center, spacing: AppTheme.Spacing.lg) {
                     // Title
-                    Text("welcome to\nget over him 🩷")
+                    Text("welcome to\nclub ralley 🩷")
                         .font(.custom("Satoshi-Bold", size: 36))
                         .foregroundColor(Color(hex: "#4A2040"))
                         .multilineTextAlignment(.center)

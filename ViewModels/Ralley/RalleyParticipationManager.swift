@@ -110,15 +110,9 @@ class RalleyParticipationManager: ObservableObject {
                 // Track joined ralley locally
                 ralleyManager.markRalleyAsJoined(ralleyId)
 
-                // Check if ralley is now full - auto-create group chat
-                let updatedRalley = ralleyManager.ralleys[index]
-                if updatedRalley.currentPlayers >= updatedRalley.maxPlayers {
-                    await createGroupChatWhenFull(for: ralleyId, at: index)
-                } else if let chatId = updatedRalley.chatId {
-                    // If chat exists, add user to it
-                    if let currentUser = supabase.currentUser {
-                        try? await chatService.addMember(chatId: chatId, userId: currentUser.id)
-                    }
+                // Always add joiner to the ralley chat (ralleyId is the chatId)
+                if let currentUser = supabase.currentUser {
+                    try? await chatService.addMember(chatId: ralleyId, userId: currentUser.id)
                 }
 
                 successMessage = "You've joined the Ralley!"
@@ -293,16 +287,8 @@ class RalleyParticipationManager: ObservableObject {
                     ralleyManager.ralleys[index].currentPlayers += 1
                     ralleyManager.ralleys[index].pendingRequestsCount = max(0, ralleyManager.ralleys[index].pendingRequestsCount - 1)
 
-                    let updatedRalley = ralleyManager.ralleys[index]
-
-                    // Check if this made the ralley full
-                    if updatedRalley.currentPlayers >= updatedRalley.maxPlayers && updatedRalley.chatId == nil {
-                        // Create group chat when full
-                        await createGroupChatWhenFull(for: request.ralleyId, at: index)
-                    } else if let chatId = updatedRalley.chatId {
-                        // Add user to existing group chat
-                        try? await chatService.addMember(chatId: chatId, userId: request.userId)
-                    }
+                    // Always add approved user to the ralley chat (ralleyId is the chatId)
+                    try? await chatService.addMember(chatId: request.ralleyId, userId: request.userId)
                 }
 
                 successMessage = "Request approved!"

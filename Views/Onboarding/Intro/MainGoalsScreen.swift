@@ -1,6 +1,6 @@
 //
 //  MainGoalsScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Multi-select: What are your main goals?
 //

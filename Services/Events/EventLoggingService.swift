@@ -10,6 +10,7 @@ import Foundation
 import Supabase
 
 /// Service for logging user events to enable event sourcing
+@MainActor
 class EventLoggingService {
 
     // MARK: - Singleton
@@ -62,8 +63,7 @@ class EventLoggingService {
         )
 
         do {
-            try await supabase.database
-                .from("user_events")
+            try await supabase.from("user_events")
                 .insert(event)
                 .execute()
 

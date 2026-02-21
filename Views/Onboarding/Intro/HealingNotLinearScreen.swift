@@ -1,6 +1,6 @@
 //
 //  HealingNotLinearScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Mochi explains this is their safe space
 //

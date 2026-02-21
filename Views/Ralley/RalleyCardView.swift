@@ -384,7 +384,7 @@ struct NoNearbyRalleysView: View {
                         .font(.system(size: 18, weight: .semibold))
                         .fontDesign(.rounded)
                 }
-                .foregroundColor(Color(hex: "#E2E4D6"))
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(Color(hex: "#2C4F40"))

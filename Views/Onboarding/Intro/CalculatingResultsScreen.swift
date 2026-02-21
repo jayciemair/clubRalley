@@ -1,6 +1,6 @@
 //
 //  CalculatingResultsScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Loading screen before showing attachment results
 //

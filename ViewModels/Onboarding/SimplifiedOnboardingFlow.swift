@@ -71,7 +71,7 @@ extension OnboardingFlowController {
             ScreenConfig(
                 id: "welcome_splash",
                 type: .welcomeSplash,
-                title: "Welcome to Get Over Him",
+                title: "Welcome to Club Ralley",
                 isSkippable: false,
                 nextScreen: "mochi_intro",
                 skipToScreen: nil,
@@ -314,7 +314,7 @@ extension OnboardingFlowController {
             ScreenConfig(
                 id: "welcome_to_goh",
                 type: .welcomeToCheckpoint,
-                title: "Welcome to Get Over Him",
+                title: "Welcome to Club Ralley",
                 isSkippable: false,
                 nextScreen: "last_contact_date",
                 skipToScreen: nil,

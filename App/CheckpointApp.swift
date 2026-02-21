@@ -155,13 +155,13 @@ struct ClubRalleyApp: App {
         ZStack {
             Color(hex: "#2C4F40").ignoresSafeArea()
 
-            VStack(spacing: 8) {
+            VStack(spacing: 6) {
                 Text("Ralley")
-                    .font(.system(size: 42, weight: .bold, design: .serif))
+                    .font(.custom("Satoshi-BlackItalic", size: 48))
                     .foregroundColor(.white)
 
                 Text("the athletes' network.")
-                    .font(.system(size: 16, weight: .regular))
+                    .font(.custom("Satoshi-Medium", size: 15))
                     .foregroundColor(.white.opacity(0.8))
             }
         }
@@ -198,7 +198,7 @@ struct ClubRalleyApp: App {
             selectedTab = .ralleys
         case "post", "create":
             selectedTab = .post
-        case "teams", "ralleys":
+        case "teams":
             selectedTab = .teams
         case "profile":
             selectedTab = .profile

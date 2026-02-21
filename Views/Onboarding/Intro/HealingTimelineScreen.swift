@@ -1,6 +1,6 @@
 //
 //  HealingTimelineScreen.swift
-//  Get Over Him
+//  Club Ralley
 // d
 //  Shows the research-backed timeline - clean, research-focused design
 //

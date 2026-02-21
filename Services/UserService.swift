@@ -21,6 +21,7 @@ class UserService: ObservableObject {
     @Published var isLoading = false
     @Published var searchQuery = ""
     @Published var error: Error?
+    @Published var schoolSuggestions: [RosterUserData] = []
 
     // MARK: - Load All Users
 
@@ -136,6 +137,67 @@ class UserService: ObservableObject {
             users[index].isFollowing = wasFollowing
             print("❌ UserService: Toggle follow failed: \(error)")
             return false
+        }
+    }
+
+    // MARK: - School Suggestions
+
+    /// Load suggested users from the same school
+    func loadSchoolSuggestions() async {
+        guard let school = SavedUserProfile.loadFromStorage()?.collegeAthleteInfo?.school,
+              !school.isEmpty else {
+            return
+        }
+
+        let currentSport = SavedUserProfile.loadFromStorage()?.collegeAthleteInfo?.sport
+
+        do {
+            // Query users from the same school using JSONB path filter
+            let dbUsers: [DatabaseUserProfile] = try await supabase.query("club_users")
+                .select("*")
+                .eq("athlete_info->>school", value: school)
+                .limit(30)
+                .execute()
+
+            // Get followed user IDs
+            let currentUserId = supabase.currentUser?.id
+            var followedIds: Set<UUID> = []
+
+            if let currentUser = supabase.currentUser {
+                let friendships: [DatabaseFriendship] = try await supabase.query("friendships")
+                    .select("*")
+                    .eq("user_id", value: currentUser.id)
+                    .execute()
+                followedIds = Set(friendships.map { $0.friend_id })
+            }
+
+            // Filter and sort: same sport first, then alphabetical
+            let filtered = dbUsers
+                .filter { $0.id != currentUserId && !followedIds.contains($0.id) }
+
+            let sorted = filtered.sorted { a, b in
+                // Can't sort by sport from athlete_info since it's decoded as nil,
+                // but we can still provide alphabetical ordering
+                "\(a.first_name) \(a.last_name)" < "\(b.first_name) \(b.last_name)"
+            }
+
+            schoolSuggestions = Array(sorted.prefix(20)).map { dbUser in
+                RosterUserData(
+                    id: dbUser.id,
+                    name: "\(dbUser.first_name) \(dbUser.last_name)",
+                    username: dbUser.username,
+                    location: "\(dbUser.city ?? ""), \(dbUser.state ?? "")",
+                    photoURL: dbUser.profile_photo_url ?? "https://picsum.photos/100/100?random=\(dbUser.id.hashValue % 1000)",
+                    mutuals: dbUser.friends_count,
+                    isFollowing: false,
+                    isVerified: dbUser.is_verified_athlete
+                )
+            }
+
+            print("✅ UserService: Found \(schoolSuggestions.count) school suggestions for \(school)")
+
+        } catch {
+            print("❌ UserService: Failed to load school suggestions: \(error)")
         }
     }
 

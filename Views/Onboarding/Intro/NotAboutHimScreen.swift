@@ -1,6 +1,6 @@
 //
 //  NotAboutHimScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Funny screen - we're not asking about his name
 //
@@ -31,7 +31,7 @@ struct NotAboutHimScreen: View {
         [
             "so \(userName)... what's his name?",
             "just kidding 😉",
-            "i mean, the app is called get over him...",
+            "i mean, the app is called club ralley...",
             "but this is about YOU, not him 💕"
         ]
     }
@@ -67,7 +67,7 @@ struct NotAboutHimScreen: View {
                     // Chat bubble with tail - fixed height so content below doesn't shift
                     ZStack(alignment: .topLeading) {
                         // Invisible placeholder for full text size
-                        Text("so name... what's his name?\n\njust kidding 😉\n\ni mean, the app is called get over him...\n\nbut this is about YOU, not him 💕")
+                        Text("so name... what's his name?\n\njust kidding 😉\n\ni mean, the app is called club ralley...\n\nbut this is about YOU, not him 💕")
                             .font(.custom("Satoshi-Medium", size: 22))
                             .foregroundColor(.clear)
                             .multilineTextAlignment(.leading)

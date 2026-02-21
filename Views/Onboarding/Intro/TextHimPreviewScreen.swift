@@ -1,6 +1,6 @@
 //
 //  TextHimPreviewScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Mochi asks about texting him - sets up the demo
 //

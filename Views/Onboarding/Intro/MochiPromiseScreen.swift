@@ -1,8 +1,8 @@
 //
 //  MochiPromiseScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
-//  Mochi's promise - "After X days, you WILL get over him"
+//  Mochi's promise - "After X days, you WILL rally"
 //
 
 import SwiftUI
@@ -19,7 +19,7 @@ struct MochiPromiseScreen: View {
     // Phrases
     private let phrases: [String] = [
         "so... are you ready?",
-        "let's get you over him.",
+        "let's get you rallying.",
         "for good 🩷"
     ]
 
@@ -52,7 +52,7 @@ struct MochiPromiseScreen: View {
                     // Chat bubble - fixed height so content below doesn't shift
                     ZStack(alignment: .topLeading) {
                         // Invisible placeholder for full text size
-                        Text("so... are you ready?\n\nlet's get you over him.\n\nfor good 🩷")
+                        Text("so... are you ready?\n\nlet's get you rallying.\n\nfor good 🩷")
                             .font(.custom("Satoshi-Medium", size: 24))
                             .foregroundColor(.clear)
                             .multilineTextAlignment(.leading)

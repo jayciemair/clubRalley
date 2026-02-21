@@ -171,7 +171,7 @@ class ClubRalleyOnboardingController: ObservableObject {
         // Save profile locally
         MultiProfileManager.shared.addProfile(profile, setAsActive: true)
 
-        if let profileData = try? JSONEncoder().with { $0.dateEncodingStrategy = .iso8601 }.encode(profile) {
+        if let profileData = try? JSONEncoder().with({ $0.dateEncodingStrategy = .iso8601 }).encode(profile) {
             UserDefaults.standard.set(profileData, forKey: "currentUserProfile")
         }
 

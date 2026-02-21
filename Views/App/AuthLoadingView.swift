@@ -1,6 +1,6 @@
 //
 //  AuthLoadingView.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Centralized loading state shown during authentication and app initialization
 //
@@ -16,8 +16,8 @@ struct AuthLoadingView: View {
             Color(hex: "#FE9CDD")
                 .ignoresSafeArea()
 
-            // Get Over Him logo with pulsing animation
-            Image("GetOverHimLogo")
+            // Club Ralley logo with pulsing animation
+            Image("ClubRalleyLogo")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 200, height: 200)

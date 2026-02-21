@@ -20,7 +20,7 @@ enum FlowType: String, CaseIterable {
 
 // MARK: - Screen Types
 /// All possible screen types in the onboarding flow
-/// Get Over Him - Breakup Recovery App
+/// Club Ralley - Breakup Recovery App
 enum ScreenType: String, Codable {
     // MARK: Authentication
     case supabaseAuth = "auth.supabase"

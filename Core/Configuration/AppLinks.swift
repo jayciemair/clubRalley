@@ -22,7 +22,7 @@ struct AppLinks {
     // MARK: - API Configuration
 
     struct API {
-        /// Get Over Him API endpoint (Railway)
+        /// Club Ralley API endpoint (Railway)
         static let baseURL: String = {
             #if DEBUG
             return "https://web-production-86cc2.up.railway.app"

@@ -73,7 +73,7 @@ struct FindRalleysView: View {
                 ralleysSection
             }
         }
-        .background(Color(hex: "#E2E4D6"))
+        .background(Color.white)
         .navigationBarHidden(true)
         .sheet(isPresented: $ralleyManager.showingCreateRalley) {
             RalleyCreationView()
@@ -136,14 +136,14 @@ struct FindRalleysView: View {
                     Text("Create Ralley")
                         .font(.system(size: 15, weight: .semibold))
                 }
-                .foregroundColor(Color(hex: "#E2E4D6"))
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(Color(hex: "#2C4F40"))
                 .clipShape(Capsule())
             }
 
-            // Filter — outlined capsule
+            // Filter — solid green capsule
             Button(action: { showingFilterSheet = true }) {
                 HStack(spacing: 7) {
                     Image(systemName: "line.3.horizontal.decrease")
@@ -151,15 +151,14 @@ struct FindRalleysView: View {
                     Text("Filter")
                         .font(.system(size: 15, weight: .semibold))
                     if hasActiveFilters {
-                        Circle().fill(Color(hex: "#2C4F40")).frame(width: 6, height: 6)
+                        Circle().fill(Color.white).frame(width: 6, height: 6)
                     }
                 }
-                .foregroundColor(Color(hex: "#2C4F40"))
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color.clear)
+                .padding(.vertical, 14)
+                .background(Color(hex: "#2C4F40"))
                 .clipShape(Capsule())
-                .overlay(Capsule().stroke(Color(hex: "#2C4F40"), lineWidth: 2))
             }
         }
         .padding(.horizontal, 22)
@@ -300,7 +299,7 @@ struct FindRalleysView: View {
                 }
                 .font(.system(size: 16, weight: .semibold))
                 .fontDesign(.rounded)
-                .foregroundColor(Color(hex: "#E2E4D6"))
+                .foregroundColor(.white)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
                 .background(Color(hex: "#2C4F40"))

@@ -1,6 +1,6 @@
 //
 //  TheCostsScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Shows what staying stuck costs them
 //
@@ -16,7 +16,7 @@ struct TheCostsScreen: View {
 
     private let phrases = [
         "your friends, your family, everyone around you wants to see you move on.",
-        "but more importantly, you owe it to yourself to get over him"
+        "but more importantly, you owe it to yourself to rally"
     ]
 
     var body: some View {

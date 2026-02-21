@@ -1,6 +1,6 @@
 //
 //  UserProfileService.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Manages user profile data in Supabase (lean version)
 //
@@ -51,6 +51,7 @@ struct OnboardingFieldsUpdate: Encodable {
 }
 
 /// Manages user profile operations with Supabase
+@MainActor
 final class UserProfileService {
 
     // MARK: - Singleton
@@ -60,7 +61,7 @@ final class UserProfileService {
     // MARK: - Properties
 
     private let supabase = SupabaseClientManager.shared
-    private let logger = os.Logger(subsystem: "com.getoverhim", category: "UserProfile")
+    private let logger = os.Logger(subsystem: "com.clubralley", category: "UserProfile")
 
     // MARK: - Initialization
 

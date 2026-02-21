@@ -1,6 +1,6 @@
 //
 //  WelcomeSplashScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Welcome splash screen - simple and elegant
 //
@@ -18,7 +18,7 @@ struct WelcomeSplashScreen: View {
     @State private var buttonOpacity: Double = 0
     @State private var animationsStarted = false
 
-    private let fullTitle = "its time to\nGET OVER HIM"
+    private let fullTitle = "its time to\nJOIN THE RALLEY"
 
     var body: some View {
         ZStack {
@@ -66,7 +66,7 @@ struct WelcomeSplashScreen: View {
                 // Main title with typing animation - fixed height so Mochi doesn't shift
                 ZStack {
                     // Invisible placeholder for full text size
-                    Text("its time to\nGET OVER HIM")
+                    Text("its time to\nJOIN THE RALLEY")
                         .font(.custom("Satoshi-Bold", size: 34))
                         .foregroundColor(.clear)
                         .multilineTextAlignment(.center)

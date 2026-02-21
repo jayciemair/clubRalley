@@ -1,6 +1,6 @@
 //
 //  YouCaredScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Mochi validates their attachment - "It's clear you cared about him"
 //

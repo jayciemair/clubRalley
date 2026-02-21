@@ -1,6 +1,6 @@
 //
 //  LastContactDateScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Allows user to set when they last contacted him
 //

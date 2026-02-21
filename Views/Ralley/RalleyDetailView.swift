@@ -55,7 +55,7 @@ struct RalleyDetailView: View {
                             .foregroundColor(Color(hex: "#2C4F40"))
                     }
 
-                    if ralley.chatId != nil {
+                    if hasJoined || ralley.isCaptain {
                         Button(action: { showingChat = true }) {
                             Image(systemName: "message.fill")
                                 .foregroundColor(Color(hex: "#2C4F40"))
@@ -103,7 +103,7 @@ struct RalleyDetailView: View {
     /// Creates a GroupChat object from the current ralley data
     private func createGroupChat() -> GroupChat {
         GroupChat(
-            id: ralley.chatId ?? UUID(),
+            id: ralley.id,
             ralleyId: ralley.id,
             ralleyTitle: ralley.title,
             ralleySport: ralley.sport,
@@ -122,23 +122,34 @@ struct RalleyDetailView: View {
     private var actionButtonSection: some View {
         VStack(spacing: 12) {
             if ralley.isCaptain {
-                // Captain sees chat button
-                if ralley.chatId != nil {
-                    Button(action: { showingChat = true }) {
-                        HStack {
-                            Image(systemName: "message.fill")
-                            Text("Open Group Chat")
-                        }
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color(hex: "#2C4F40"))
-                        .cornerRadius(12)
+                // Captain always sees chat button
+                Button(action: { showingChat = true }) {
+                    HStack {
+                        Image(systemName: "message.fill")
+                        Text("Open Group Chat")
                     }
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color(hex: "#2C4F40"))
+                    .cornerRadius(12)
                 }
             } else if hasJoined {
-                // Post-join state
+                // Post-join state — show chat + confirmation
+                Button(action: { showingChat = true }) {
+                    HStack {
+                        Image(systemName: "message.fill")
+                        Text("Open Group Chat")
+                    }
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color(hex: "#2C4F40"))
+                    .cornerRadius(12)
+                }
+
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 20))

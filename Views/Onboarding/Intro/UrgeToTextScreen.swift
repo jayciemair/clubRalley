@@ -1,6 +1,6 @@
 //
 //  UrgeToTextScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Acknowledges the urge to text him and introduces the simulation feature
 //

@@ -1,6 +1,6 @@
 //
 //  HowCopingScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Multi-select: How are you coping right now?
 //

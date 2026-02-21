@@ -1,6 +1,6 @@
 //
 //  GrieveAsDeepScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  "You grieve as deeply as you loved"
 //

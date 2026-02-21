@@ -1,6 +1,6 @@
 //
 //  OnboardingCoordinator.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Maps screen types to actual SwiftUI views and handles navigation
 //
@@ -51,7 +51,7 @@ struct OnboardingCoordinator: View {
             flowController.startSimplifiedFlow(type: flowType)
             flowController.checkForSavedProgress()
         }
-        .onChange(of: flowController.isComplete) { isComplete in
+        .onChange(of: flowController.isComplete) { _, isComplete in
             if isComplete {
                 let collectedData = flowController.getAllCollectedData()
 
@@ -93,14 +93,14 @@ struct OnboardingCoordinator: View {
                 }
             }
         }
-        .onChange(of: flowController.shouldExitFlow) { shouldExit in
+        .onChange(of: flowController.shouldExitFlow) { _, shouldExit in
             if shouldExit {
                 OnboardingStateManager.shared.clearProgress()
                 completion?(.cancelled)
                 flowController.resetOnboarding()
             }
         }
-        .onChange(of: flowController.error) { error in
+        .onChange(of: flowController.error) { _, error in
             if let error = error {
                 completion?(.failed(error: error))
             }

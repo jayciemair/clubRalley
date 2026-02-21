@@ -1,6 +1,6 @@
 //
 //  WhoEndedItScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Single-select: Who ended the relationship?
 //

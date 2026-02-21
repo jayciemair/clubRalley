@@ -1,6 +1,6 @@
 //
 //  SocialProofScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Social proof - women who have healed
 //
@@ -17,7 +17,7 @@ struct SocialProofScreen: View {
     private let reviews = [
         (name: "Eliza, 24", review: "I was checking his Instagram 20 times a day. Now I don't even think about it. This app saved my sanity."),
         (name: "Priya, 18", review: "The text simulation feature stopped me from embarrassing myself so many times. Worth it just for that."),
-        (name: "Jordan, 26", review: "I thought I'd never get over him. 30 days later, I barely recognize the girl who was crying every night.")
+        (name: "Jordan, 26", review: "I thought I'd never move on. 30 days later, I barely recognize the girl who was crying every night.")
     ]
 
     var body: some View {

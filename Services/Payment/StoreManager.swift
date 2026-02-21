@@ -179,7 +179,7 @@ final class StoreManager: NSObject, ObservableObject {
                     let transaction = try await self.checkVerified(result)
 
                     // Update purchased products on main thread
-                    await MainActor.run {
+                    _ = await MainActor.run {
                         Task {
                             await self.updatePurchasedProducts()
                         }

@@ -10,6 +10,7 @@ import UIKit
 import Supabase
 
 /// Service for logging critical app errors to Supabase database
+@MainActor
 class ErrorLoggingService {
 
     // MARK: - Singleton
@@ -73,8 +74,7 @@ class ErrorLoggingService {
         )
 
         do {
-            try await supabase.database
-                .from("error_logs")
+            try await supabase.from("error_logs")
                 .insert(log)
                 .execute()
 

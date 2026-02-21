@@ -37,7 +37,7 @@ struct RatingRequestSheet: View {
                         )
                     )
                     .fontWeight(.bold)
-                + Text(" to help other girls get over him too.")
+                + Text(" to help other girls rally too.")
                     .foregroundColor(Color(hex: "#4A2040")))
                     .font(.custom("Satoshi-Regular", size: 16))
                     .multilineTextAlignment(.leading)

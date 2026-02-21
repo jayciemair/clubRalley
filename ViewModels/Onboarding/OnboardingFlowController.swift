@@ -122,7 +122,7 @@ class OnboardingFlowController: ObservableObject {
         }
 
         // Determine the next screen based on conditional logic
-        var nextScreenId = current.nextScreen
+        let nextScreenId = current.nextScreen
 
         // Nuclear-only mode - no conditional navigation needed
         // All users follow the same path
@@ -287,7 +287,7 @@ class OnboardingFlowController: ObservableObject {
         
         let progress = OnboardingProgress(
             flowId: flow.id,
-            flowVersion: flow.version ?? "1.0.0",
+            flowVersion: flow.version,
             currentScreenId: current.id,
             currentScreenIndex: currentScreenIndex,
             completedScreenIds: Set(screenHistory)

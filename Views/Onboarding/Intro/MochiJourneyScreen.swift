@@ -1,6 +1,6 @@
 //
 //  MochiJourneyScreen.swift
-//  Get Over Him
+//  Club Ralley
 // 
 //  Shows the emotional journey graph with Mochi following along
 //   j
@@ -303,7 +303,7 @@ private struct JourneyLinePath: Shape {
     }
 
     func path(in rect: CGRect) -> Path {
-        var path = Path()
+        let path = Path()
         guard points.count > 1 else { return path }
 
         let width = rect.width

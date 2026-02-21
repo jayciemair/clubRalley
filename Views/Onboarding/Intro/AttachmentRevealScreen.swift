@@ -1,6 +1,6 @@
 //
 //  AttachmentRevealScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Shows user's emotional attachment level - compassionate framing
 //

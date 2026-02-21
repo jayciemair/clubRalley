@@ -20,6 +20,7 @@
 		27108209164B44969050F541 /* NameScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7533E1FA1945D7A653D351 /* NameScreen.swift */; };
 		28669F31A38140062F5E8A79 /* PowerUpProfileCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650A0B14EAF2E8BD4EB6152F /* PowerUpProfileCoordinator.swift */; };
 		2C2E01B8E7D884C84EBE97B5 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CBB55571A6182FB06837B6 /* UserService.swift */; };
+		7F4E9A2B3C1D5E6F8A0B7C3D /* ContactsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8D1A5F6B2C4D7E9F0A1B2C /* ContactsManager.swift */; };
 		2F6617379474F9EFDEAA2610 /* BirthdayScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B638E868D03902EC9260F984 /* BirthdayScreen.swift */; };
 		3214675F9C574AD1983D7058 /* Views/Chat/GroupChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5174E8FF82A1453E91D79B69 /* Views/Chat/GroupChatView.swift */; };
 		32D289A3B42B45019F159370 /* SportsOnboardingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0164A95C3AB4E6998432567 /* SportsOnboardingScreen.swift */; };
@@ -744,6 +745,7 @@
 		AA2222222222222222222222 /* Services/Map/VenueService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/Map/VenueService.swift; sourceTree = "<group>"; };
 		AA3333333333333333333333 /* Services/Map/OverpassService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/Map/OverpassService.swift; sourceTree = "<group>"; };
 		F7CBB55571A6182FB06837B6 /* UserService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
+		3E8D1A5F6B2C4D7E9F0A1B2C /* ContactsManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContactsManager.swift; sourceTree = "<group>"; };
 		FD7533E1FA1945D7A653D351 /* NameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NameScreen.swift; path = ClubRalley/NameScreen.swift; sourceTree = "<group>"; };
 		FD97E9A82651DF1940E181A9 /* SettingsComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsComponents.swift; sourceTree = "<group>"; };
 		AA0001000000000000000001 /* Venue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Venue.swift; sourceTree = "<group>"; };
@@ -1750,6 +1752,7 @@
 				85FFE37EC9838501DF5033A6 /* Social */,
 				5F8424D921A859CF88F64054 /* FriendshipService.swift */,
 				F7CBB55571A6182FB06837B6 /* UserService.swift */,
+				3E8D1A5F6B2C4D7E9F0A1B2C /* ContactsManager.swift */,
 				91B017DF2EA1BE960032AF9C /* Notifications */,
 				91B017E02EA1BE960032AF9C /* Onboarding */,
 				91B017E12EA1BE960032AF9C /* Persistence */,
@@ -2508,6 +2511,7 @@
 				376B39316CA7391E352642A9 /* FriendshipService.swift in Sources */,
 				C962916A7C1F65F6A437D51E /* FeedSheetViews.swift in Sources */,
 				2C2E01B8E7D884C84EBE97B5 /* UserService.swift in Sources */,
+				7F4E9A2B3C1D5E6F8A0B7C3D /* ContactsManager.swift in Sources */,
 				5753BA92BBBD1B9C1D46E1D8 /* SettingsSection.swift in Sources */,
 				663ADBF62F704FAE4ED8F3D9 /* PowerUpProfileData.swift in Sources */,
 				E24FF1CADB430793B30FC69C /* PowerUpProfileViewModel.swift in Sources */,

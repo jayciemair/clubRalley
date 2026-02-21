@@ -76,7 +76,7 @@ struct MainView: View {
     private var headerView: some View {
         VStack(spacing: 8) {
             HStack {
-                Text("get over him.")
+                Text("club ralley.")
                     .font(.custom("Satoshi-Bold", size: 34))
                     .foregroundColor(.white)
 

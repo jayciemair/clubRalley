@@ -60,7 +60,7 @@ struct PhoneNumberScreen: View {
 
                 // Error message
                 if let error = controller.error {
-                    Text(error.localizedDescription ?? "An error occurred")
+                    Text(error.localizedDescription)
                         .font(.system(size: 14))
                         .foregroundColor(.red)
                         .multilineTextAlignment(.center)

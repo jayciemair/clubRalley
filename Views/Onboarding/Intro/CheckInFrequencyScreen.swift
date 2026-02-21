@@ -1,6 +1,6 @@
 //
 //  CheckInFrequencyScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Asks how often Mochi should check in - triggers notification permission
 //

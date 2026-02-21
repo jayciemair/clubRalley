@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-import UserNotifications
+@preconcurrency import UserNotifications
 
 /// Manages daily check-in tracking
 @MainActor

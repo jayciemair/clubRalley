@@ -1,6 +1,6 @@
 //
 //  WelcomeCelebrationView.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Confetti celebration shown when user completes onboarding
 //
@@ -34,7 +34,7 @@ struct WelcomeCelebrationView: View {
                         .font(.custom("Satoshi-Bold", size: 32))
                         .foregroundColor(.white)
 
-                    Text("let's get you over him")
+                    Text("let's get you rallying")
                         .font(.custom("Satoshi-Medium", size: 18))
                         .foregroundColor(.white.opacity(0.8))
                 }

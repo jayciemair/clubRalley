@@ -1,6 +1,6 @@
 //
 //  BreakupTimingScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Asks how long since the breakup
 //

@@ -1,6 +1,6 @@
 //
 //  NameInputScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Asks for the user's name - "What should I call you?"
 //
@@ -44,7 +44,7 @@ struct NameInputScreen: View {
                                 .foregroundColor(Color(hex: "#4A2040"))
                                 .multilineTextAlignment(.center)
                                 .focused($isTextFieldFocused)
-                                .onChange(of: nameText) { newValue in
+                                .onChange(of: nameText) { _, newValue in
                                     // Limit to 30 characters
                                     if newValue.count > 30 {
                                         nameText = String(newValue.prefix(30))

@@ -1,6 +1,6 @@
 //
 //  TextHimDemoScreen.swift
-//  Get Over Him
+//  Club Ralley
 //
 //  Shows the mock "hey" text left on read
 //

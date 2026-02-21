@@ -32,7 +32,7 @@ class RecoveryProgressService {
                 if #available(iOS 17.2, *) {
                     if let offer = transaction.offer {
                         print("[debugSubscription] 📦 iOS 17.2+ - Offer found: \(offer.id ?? "no ID")")
-                        print("[debugSubscription] 💳 Payment mode: \(offer.paymentMode)")
+                        print("[debugSubscription] 💳 Payment mode: \(String(describing: offer.paymentMode))")
 
                         if offer.paymentMode == .freeTrial {
                             print("[debugSubscription] 🎟️ DETECTED: User is in FREE TRIAL (iOS 17.2+ API)")
@@ -197,8 +197,7 @@ class RecoveryProgressService {
                 let created_at: String
             }
 
-            let userData: [UserData] = try await client.database
-                .from("users")
+            let userData: [UserData] = try await client.from("users")
                 .select("created_at")
                 .eq("id", value: userId)
                 .execute()
@@ -242,8 +241,7 @@ class RecoveryProgressService {
 
             // Fetch completed modules from database
             print("[debugProgram] 🔍 Fetching completed modules for user: \(userId)")
-            let response: [RecoveryProgress] = try await client.database
-                .from("user_recovery_progress")
+            let response: [RecoveryProgress] = try await client.from("user_recovery_progress")
                 .select()
                 .eq("user_id", value: userId)
                 .execute()
@@ -360,8 +358,7 @@ class RecoveryProgressService {
             moduleType: exercise.slug
         )
 
-        try await client.database
-            .from("user_recovery_progress")
+        try await client.from("user_recovery_progress")
             .upsert(progress)
             .execute()
 
