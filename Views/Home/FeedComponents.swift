@@ -18,11 +18,11 @@ struct HomeTopBar: View {
             HStack(spacing: 7) {
                 Image(systemName: "calendar")
                     .font(.system(size: 16))
-                    .foregroundColor(Color(hex: "#2C4F40"))
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                 Text("Your Upcoming Ralleys")
                     .font(.custom("Chillax-Bold", size: 22))
-                    .foregroundColor(Color(hex: "#2C4F40"))
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
 
             Spacer()
@@ -32,11 +32,11 @@ struct HomeTopBar: View {
                 ZStack(alignment: .topTrailing) {
                     Image(systemName: "bell")
                         .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(Color(hex: "#2C4F40"))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     if hasUnreadNotifications {
                         Circle()
-                            .fill(Color(hex: "#E74C3C"))
+                            .fill(ClubRalleyTheme.Colors.badgeRed)
                             .frame(width: 7, height: 7)
                             .overlay(Circle().stroke(Color.white, lineWidth: 1.5))
                             .offset(x: 2, y: -1)
@@ -79,7 +79,7 @@ struct HomeUpcomingSection: View {
                     if playersThisWeek > 0 {
                         HStack(spacing: 6) {
                             Circle()
-                                .fill(Color(hex: "#4CAF50"))
+                                .fill(ClubRalleyTheme.Colors.success)
                                 .frame(width: 8, height: 8)
                             Text("\(playersThisWeek) \(playersThisWeek == 1 ? "PLAYER" : "PLAYERS") ACTIVE THIS WEEK")
                                 .font(.system(size: 11, weight: .bold))
@@ -115,7 +115,7 @@ struct HomeUpcomingSection: View {
                             Image(systemName: "arrow.right")
                                 .font(.system(size: 14, weight: .bold))
                         }
-                        .foregroundColor(Color(hex: "#2C4F40"))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 14)
                         .background(Color.white)
@@ -125,7 +125,7 @@ struct HomeUpcomingSection: View {
                 }
                 .padding(22)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(hex: "#2C4F40"))
+                .background(ClubRalleyTheme.Colors.darkGreen)
                 .cornerRadius(20)
                 .padding(.horizontal, 22)
                 .padding(.top, 10)
@@ -202,7 +202,7 @@ struct HomeUpcomingCard: View {
         }
         .padding(14)
         .frame(width: 230)
-        .background(Color(hex: "#2C4F40"))
+        .background(ClubRalleyTheme.Colors.darkGreen)
         .cornerRadius(16)
         .shadow(color: .green.opacity(0.25), radius: 12, x: 0, y: 6)
     }
@@ -225,7 +225,7 @@ struct HomeUpcomingCard: View {
 struct FeedSeparator: View {
     var body: some View {
         Rectangle()
-            .fill(Color(hex: "#ECE9E2"))
+            .fill(ClubRalleyTheme.Colors.feedSeparator)
             .frame(height: 10)
     }
 }
@@ -242,7 +242,7 @@ struct HomeMutualsRow: View {
             Text("& your friends loved this post")
                 .font(.system(size: 11, weight: .semibold))
                 .fontDesign(.rounded)
-                .foregroundColor(Color(hex: "#7A8A81"))
+                .foregroundColor(ClubRalleyTheme.Colors.mutedText)
                 .padding(.leading, 12)
 
             Spacer()
@@ -260,9 +260,9 @@ struct HomeMutualsRow: View {
     private func mutualAvatar(index: Int) -> some View {
         let opacity = 0.15 + Double(index) * 0.1
         return Circle()
-            .fill(Color(hex: "#2C4F40").opacity(opacity))
+            .fill(ClubRalleyTheme.Colors.darkGreen.opacity(opacity))
             .frame(width: 20, height: 20)
-            .overlay(Circle().stroke(Color(hex: "#F6F5F1"), lineWidth: 2))
+            .overlay(Circle().stroke(ClubRalleyTheme.Colors.warmBackground, lineWidth: 2))
             .offset(x: CGFloat(index) * 14)
     }
 }
@@ -283,8 +283,6 @@ struct FeedLoadingView: View {
 // MARK: - Post Skeleton View
 
 struct PostSkeletonView: View {
-    @State private var isAnimating = false
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
@@ -300,12 +298,7 @@ struct PostSkeletonView: View {
         }
         .padding(.horizontal, 22)
         .padding(.vertical, 14)
-        .opacity(isAnimating ? 0.6 : 1.0)
-        .onAppear {
-            withAnimation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
-                isAnimating = true
-            }
-        }
+        .shimmer()
     }
 }
 
@@ -319,7 +312,7 @@ struct FeedErrorView: View {
         VStack(spacing: 20) {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 50))
-                .foregroundColor(Color(hex: "#2C4F40").opacity(0.6))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.6))
             Text("Unable to load feed")
                 .font(.system(size: 20, weight: .semibold))
                 .fontDesign(.rounded)
@@ -327,7 +320,7 @@ struct FeedErrorView: View {
             Text("Check your internet connection and try again")
                 .font(.system(size: 15))
                 .fontDesign(.rounded)
-                .foregroundColor(Color(hex: "#7A8A81"))
+                .foregroundColor(ClubRalleyTheme.Colors.mutedText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             Button(action: onRetry) {
@@ -340,7 +333,7 @@ struct FeedErrorView: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
-                .background(Color(hex: "#2C4F40"))
+                .background(ClubRalleyTheme.Colors.darkGreen)
                 .cornerRadius(12)
             }
         }
@@ -357,7 +350,7 @@ struct EmptyFeedView: View {
         VStack(spacing: 20) {
             Image(systemName: "sportscourt")
                 .font(.system(size: 60))
-                .foregroundColor(Color(hex: "#2C4F40").opacity(0.6))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.6))
                 .scaleEffect(isVisible ? 1 : 0.5)
                 .opacity(isVisible ? 1 : 0)
 
@@ -371,7 +364,7 @@ struct EmptyFeedView: View {
             Text("Start following athletes and join ralleys to see posts in your feed")
                 .font(.system(size: 16))
                 .fontDesign(.rounded)
-                .foregroundColor(Color(hex: "#7A8A81"))
+                .foregroundColor(ClubRalleyTheme.Colors.mutedText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
                 .opacity(isVisible ? 1 : 0)
@@ -379,7 +372,7 @@ struct EmptyFeedView: View {
         }
         .padding(.top, 60)
         .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                 isVisible = true
             }
         }

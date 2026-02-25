@@ -50,15 +50,15 @@ struct RalleyDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack(spacing: 16) {
-                    Button(action: { /* TODO: Add ShareUtility.swift to Xcode project */ }) {
+                    Button(action: { ShareUtility.shareRalley(ralley) }) {
                         Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(Color(hex: "#2C4F40"))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     }
 
                     if hasJoined || ralley.isCaptain {
                         Button(action: { showingChat = true }) {
                             Image(systemName: "message.fill")
-                                .foregroundColor(Color(hex: "#2C4F40"))
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         }
                     }
                 }
@@ -91,7 +91,7 @@ struct RalleyDetailView: View {
                             Button("Close") {
                                 showingChat = false
                             }
-                            .foregroundColor(Color(hex: "#2C4F40"))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         }
                     }
             }
@@ -132,7 +132,7 @@ struct RalleyDetailView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color(hex: "#2C4F40"))
+                    .background(ClubRalleyTheme.Colors.darkGreen)
                     .cornerRadius(12)
                 }
             } else if hasJoined {
@@ -146,21 +146,21 @@ struct RalleyDetailView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color(hex: "#2C4F40"))
+                    .background(ClubRalleyTheme.Colors.darkGreen)
                     .cornerRadius(12)
                 }
 
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(Color(hex: "#2C4F40"))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Text("You're In!")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(Color(hex: "#2C4F40"))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color(hex: "#2C4F40").opacity(0.1))
+                .background(ClubRalleyTheme.Colors.darkGreen.opacity(0.1))
                 .cornerRadius(12)
 
                 Button(action: { Task { await leaveRalley() } }) {
@@ -214,7 +214,7 @@ struct RalleyDetailView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(hasPendingRequest ? Color.gray : Color(hex: "#2C4F40"))
+                    .background(hasPendingRequest ? Color.gray : ClubRalleyTheme.Colors.darkGreen)
                     .cornerRadius(12)
                 }
                 .disabled(hasPendingRequest || isJoining)
@@ -236,7 +236,7 @@ struct RalleyDetailView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color(hex: "#2C4F40"))
+                    .background(ClubRalleyTheme.Colors.darkGreen)
                     .cornerRadius(12)
                 }
                 .disabled(isJoining)
@@ -284,6 +284,8 @@ struct RalleyDetailView: View {
             errorMessage = "Failed to join ralley. Please check your connection and try again."
             showingError = true
         } else {
+            let impact = UIImpactFeedbackGenerator(style: .medium)
+            impact.impactOccurred()
             withAnimation(.spring(response: 0.4)) {
                 hasJoined = true
             }
@@ -307,6 +309,8 @@ struct RalleyDetailView: View {
             errorMessage = "Failed to send join request. Please check your connection and try again."
             showingError = true
         } else {
+            let impact = UIImpactFeedbackGenerator(style: .medium)
+            impact.impactOccurred()
             hasPendingRequest = true
         }
         isJoining = false

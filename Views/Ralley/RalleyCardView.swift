@@ -15,6 +15,8 @@ struct RalleyCardView: View {
     @State private var participationStatus: UserParticipationStatus = .notJoined
     @State private var isLoading = false
     @State private var showingManagement = false
+    @State private var joinSuccess = false
+    @State private var animatedFillPercent: Double = 0
 
     private var fillPercent: Double {
         guard ralley.maxPlayers > 0 else { return 0 }
@@ -57,6 +59,13 @@ struct RalleyCardView: View {
         .padding(18)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .contextMenu {
+            Button {
+                ShareUtility.shareRalley(ralley)
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
+            }
+        }
         .sheet(isPresented: $showingManagement) {
             RalleyManagementView(ralley: ralley)
                 .environmentObject(ralleyManager)
@@ -76,20 +85,20 @@ struct RalleyCardView: View {
                     HStack(spacing: 5) {
                         Image(systemName: SportIconMapper.iconName(for: ralley.sport))
                             .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(Color(hex: "#2C4F40"))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         Text(ralley.sport)
                             .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(Color(hex: "#2C4F40"))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     }
                     .padding(.vertical, 4)
                     .padding(.leading, 7)
                     .padding(.trailing, 10)
-                    .background(Color(hex: "#E2E4D6"))
+                    .background(ClubRalleyTheme.Colors.sageGreen)
                     .clipShape(Capsule())
 
                     Text(formattedTime)
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "#7a9088"))
+                        .foregroundColor(ClubRalleyTheme.Colors.mutedText)
                 }
             }
             Spacer()
@@ -103,7 +112,7 @@ struct RalleyCardView: View {
         HStack(spacing: 6) {
             Text(ralley.title)
                 .font(.custom("Chillax-Semibold", size: 17))
-                .foregroundColor(Color(hex: "#2C4F40"))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .lineLimit(1)
 
             if ralley.isCaptain {
@@ -112,7 +121,7 @@ struct RalleyCardView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Color(hex: "#2C4F40"))
+                    .background(ClubRalleyTheme.Colors.darkGreen)
                     .cornerRadius(4)
             }
         }
@@ -125,10 +134,10 @@ struct RalleyCardView: View {
         HStack(spacing: 5) {
             Image(systemName: "mappin.circle.fill")
                 .font(.system(size: 11))
-                .foregroundColor(Color(hex: "#5a7268"))
+                .foregroundColor(ClubRalleyTheme.Colors.subtleText)
             Text(ralley.location.name)
                 .font(.system(size: 13))
-                .foregroundColor(Color(hex: "#5a7268"))
+                .foregroundColor(ClubRalleyTheme.Colors.subtleText)
                 .lineLimit(1)
         }
         .padding(.top, 10)
@@ -142,29 +151,32 @@ struct RalleyCardView: View {
                 HStack(spacing: 3) {
                     Text("\(ralley.currentPlayers)")
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(Color(hex: "#2C4F40"))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Text("joined")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "#7a9088"))
+                        .foregroundColor(ClubRalleyTheme.Colors.mutedText)
                 }
                 Spacer()
                 Text("\(ralley.availableSpots) spots left \u{00B7} \(skillLabel)")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "#7a9088"))
+                    .foregroundColor(ClubRalleyTheme.Colors.mutedText)
             }
 
             // Progress bar
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color(hex: "#E2E4D6"))
+                        .fill(ClubRalleyTheme.Colors.sageGreen)
                         .frame(height: 4)
                     Capsule()
-                        .fill(ralley.isFull ? Color(hex: "#b5bdb9") : Color(hex: "#2C4F40"))
-                        .frame(width: geo.size.width * fillPercent, height: 4)
+                        .fill(ralley.isFull ? ClubRalleyTheme.Colors.disabledButton : ClubRalleyTheme.Colors.darkGreen)
+                        .frame(width: geo.size.width * animatedFillPercent, height: 4)
+                        .animation(.easeInOut(duration: ClubRalleyTheme.Animation.slow), value: animatedFillPercent)
                 }
             }
             .frame(height: 4)
+            .onAppear { animatedFillPercent = fillPercent }
+            .onChange(of: ralley.currentPlayers) { _, _ in animatedFillPercent = fillPercent }
         }
         .padding(.top, 13)
     }
@@ -175,18 +187,18 @@ struct RalleyCardView: View {
         HStack(spacing: 8) {
             ZStack {
                 Circle()
-                    .fill(Color(hex: "#2C4F40"))
+                    .fill(ClubRalleyTheme.Colors.darkGreen)
                     .frame(width: 26, height: 26)
                 Text(hostInitial)
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(Color(hex: "#E2E4D6"))
+                    .foregroundColor(ClubRalleyTheme.Colors.sageGreen)
             }
             Text("Hosted by ")
                 .font(.system(size: 12))
-                .foregroundColor(Color(hex: "#7a9088"))
+                .foregroundColor(ClubRalleyTheme.Colors.mutedText)
             + Text(ralley.organizer.name)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(Color(hex: "#2C4F40"))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
         }
         .padding(.top, 13)
     }
@@ -199,10 +211,10 @@ struct RalleyCardView: View {
             Button(action: { showingManagement = true }) {
                 Text("Manage")
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(Color(hex: "#E2E4D6"))
+                    .foregroundColor(ClubRalleyTheme.Colors.sageGreen)
                     .padding(.vertical, 9)
                     .padding(.horizontal, 20)
-                    .background(Color(hex: "#2C4F40"))
+                    .background(ClubRalleyTheme.Colors.darkGreen)
                     .clipShape(Capsule())
             }
         } else {
@@ -241,22 +253,22 @@ struct RalleyCardView: View {
     private var joinButtonTextColor: Color {
         switch participationStatus {
         case .notJoined:
-            return ralley.isFull ? Color(hex: "#7a8578") : Color(hex: "#E2E4D6")
+            return ralley.isFull ? ClubRalleyTheme.Colors.mutedText : ClubRalleyTheme.Colors.sageGreen
         case .pending:
-            return Color(hex: "#2C4F40")
+            return ClubRalleyTheme.Colors.darkGreen
         case .joined:
-            return Color(hex: "#2C4F40")
+            return ClubRalleyTheme.Colors.darkGreen
         }
     }
 
     private var joinButtonBackground: Color {
         switch participationStatus {
         case .notJoined:
-            return ralley.isFull ? Color(hex: "#c4cabe") : Color(hex: "#2C4F40")
+            return ralley.isFull ? ClubRalleyTheme.Colors.disabledButton : ClubRalleyTheme.Colors.darkGreen
         case .pending:
-            return Color(hex: "#E2E4D6")
+            return ClubRalleyTheme.Colors.sageGreen
         case .joined:
-            return Color(hex: "#E2E4D6")
+            return ClubRalleyTheme.Colors.sageGreen
         }
     }
 
@@ -286,6 +298,17 @@ struct RalleyCardView: View {
 
         await checkUserParticipationStatus()
         isLoading = false
+
+        // Haptic + flash on successful join
+        if participationStatus == .joined || participationStatus == .pending {
+            let impact = UIImpactFeedbackGenerator(style: .medium)
+            impact.impactOccurred()
+            joinSuccess = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                joinSuccess = false
+            }
+            animatedFillPercent = fillPercent
+        }
     }
 }
 
@@ -300,21 +323,21 @@ struct EmptyRalleysView: View {
         VStack(spacing: 20) {
             Image(systemName: hasFilters ? "line.3.horizontal.decrease.circle" : "sportscourt")
                 .font(.system(size: 60))
-                .foregroundColor(Color(hex: "#2C4F40").opacity(0.6))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.6))
                 .scaleEffect(isVisible ? 1 : 0.5)
                 .opacity(isVisible ? 1 : 0)
 
             Text(hasFilters ? "No matching ralleys" : "No ralleys nearby")
                 .font(.system(size: 20, weight: .bold))
                 .fontDesign(.rounded)
-                .foregroundColor(Color(hex: "#2C4F40"))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .opacity(isVisible ? 1 : 0)
                 .offset(y: isVisible ? 0 : 10)
 
             Text(hasFilters ? "Try adjusting your filters or search" : "Be the first to create a pickup game in your area!")
                 .font(.system(size: 16, weight: .regular))
                 .fontDesign(.rounded)
-                .foregroundColor(Color(hex: "#7a9088"))
+                .foregroundColor(ClubRalleyTheme.Colors.mutedText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
                 .opacity(isVisible ? 1 : 0)
@@ -325,10 +348,10 @@ struct EmptyRalleysView: View {
                     Text("Create Ralley")
                         .font(.system(size: 17, weight: .semibold))
                         .fontDesign(.rounded)
-                        .foregroundColor(Color(hex: "#E2E4D6"))
+                        .foregroundColor(ClubRalleyTheme.Colors.sageGreen)
                         .padding(.horizontal, 32)
                         .padding(.vertical, 14)
-                        .background(Color(hex: "#2C4F40"))
+                        .background(ClubRalleyTheme.Colors.darkGreen)
                         .clipShape(Capsule())
                 }
                 .opacity(isVisible ? 1 : 0)
@@ -338,7 +361,7 @@ struct EmptyRalleysView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
         .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                 isVisible = true
             }
         }
@@ -356,21 +379,21 @@ struct NoNearbyRalleysView: View {
         VStack(spacing: 20) {
             Image(systemName: "figure.run.circle")
                 .font(.system(size: 64))
-                .foregroundColor(Color(hex: "#2C4F40").opacity(0.7))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.7))
                 .scaleEffect(isVisible ? 1 : 0.5)
                 .opacity(isVisible ? 1 : 0)
 
             Text("No Ralleys near you yet")
                 .font(.system(size: 22, weight: .bold))
                 .fontDesign(.rounded)
-                .foregroundColor(Color(hex: "#2C4F40"))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .opacity(isVisible ? 1 : 0)
                 .offset(y: isVisible ? 0 : 10)
 
             Text("Be the first to rally! Create a game and invite your friends.")
                 .font(.system(size: 16))
                 .fontDesign(.rounded)
-                .foregroundColor(Color(hex: "#7a9088"))
+                .foregroundColor(ClubRalleyTheme.Colors.mutedText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
                 .opacity(isVisible ? 1 : 0)
@@ -387,7 +410,7 @@ struct NoNearbyRalleysView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color(hex: "#2C4F40"))
+                .background(ClubRalleyTheme.Colors.darkGreen)
                 .clipShape(Capsule())
             }
             .padding(.horizontal, 24)
@@ -397,7 +420,7 @@ struct NoNearbyRalleysView: View {
             Button(action: onNotifyMe) {
                 Text("Notify me when Ralleys appear nearby")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(Color(hex: "#2C4F40"))
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
             .opacity(isVisible ? 1 : 0)
             .offset(y: isVisible ? 0 : 10)
@@ -405,7 +428,7 @@ struct NoNearbyRalleysView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
         .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                 isVisible = true
             }
         }

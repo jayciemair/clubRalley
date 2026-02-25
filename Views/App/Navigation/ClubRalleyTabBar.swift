@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ClubRalleyTabBar: View {
     @Binding var selectedTab: MainTab
+    var unreadChatCount: Int = 0
 
     private let tabs: [(tab: MainTab, icon: String, filledIcon: String, title: String)] = [
         (.home, "house", "house.fill", "Home"),
@@ -26,6 +27,7 @@ struct ClubRalleyTabBar: View {
                     icon: selectedTab == item.tab ? item.filledIcon : item.icon,
                     title: item.title,
                     isSelected: selectedTab == item.tab,
+                    badgeCount: item.tab == .teams ? unreadChatCount : 0,
                     action: { selectedTab = item.tab }
                 )
             }
@@ -36,10 +38,10 @@ struct ClubRalleyTabBar: View {
         .background(
             VStack(spacing: 0) {
                 Rectangle()
-                    .fill(Color(hex: "#d5d7cb"))
+                    .fill(ClubRalleyTheme.Colors.tabDivider)
                     .frame(height: 1)
                 Rectangle()
-                    .fill(Color.white)
+                    .fill(ClubRalleyTheme.Colors.white)
             }
             .ignoresSafeArea(.container, edges: .bottom)
         )
@@ -58,6 +60,7 @@ struct TabBarButton: View {
     let icon: String
     let title: String
     let isSelected: Bool
+    var badgeCount: Int = 0
     let action: () -> Void
 
     var body: some View {
@@ -67,16 +70,30 @@ struct TabBarButton: View {
             action()
         }) {
             VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 20, weight: isSelected ? .semibold : .regular))
-                    .frame(height: 24)
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: icon)
+                        .font(.system(size: 20, weight: isSelected ? .semibold : .regular))
+                        .scaleEffect(isSelected ? 1.15 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isSelected)
+                        .frame(height: 24)
+
+                    if badgeCount > 0 {
+                        Text(badgeCount > 9 ? "9+" : "\(badgeCount)")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(minWidth: 16, minHeight: 16)
+                            .background(ClubRalleyTheme.Colors.badgeRed)
+                            .clipShape(Capsule())
+                            .offset(x: 8, y: -6)
+                    }
+                }
 
                 Text(title)
                     .font(.system(size: 9.5, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
-            .foregroundColor(isSelected ? Color(hex: "#2C4F40") : Color(hex: "#bbbbbb"))
+            .foregroundColor(isSelected ? ClubRalleyTheme.Colors.darkGreen : ClubRalleyTheme.Colors.unselectedTab)
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
@@ -88,7 +105,7 @@ struct TabBarButton: View {
 #Preview {
     VStack {
         Spacer()
-        ClubRalleyTabBar(selectedTab: .constant(.home))
+        ClubRalleyTabBar(selectedTab: .constant(.home), unreadChatCount: 3)
     }
     .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.1))
 }

@@ -34,6 +34,25 @@ struct ClubRalleyTheme {
         static let secondaryButton = sageGreen
         static let textButton = black
 
+        // Surface colors
+        static let warmBackground = Color(hex: "#F6F5F1")
+        static let coolBackground = Color(hex: "#F5F5F5")
+        static let separator = Color(hex: "#ECE9E2")
+        static let feedSeparator = Color(hex: "#ECE9E2")
+
+        // Text variants
+        static let mutedText = Color(hex: "#7a9088")
+        static let subtleText = Color(hex: "#5a7268")
+
+        // Icon / tab colors
+        static let inactiveIcon = Color(hex: "#999999")
+        static let unselectedTab = Color(hex: "#bbbbbb")
+        static let tabDivider = Color(hex: "#d5d7cb")
+
+        // Badges & disabled
+        static let badgeRed = Color(hex: "#E74C3C")
+        static let disabledButton = Color(hex: "#c4cabe")
+
         // System colors (for alerts, validation, settings only — not in profile/home UI)
         static let success = Color(hex: "#4CAF50")
         static let warning = Color(hex: "#FF9800")
@@ -101,6 +120,14 @@ struct ClubRalleyTheme {
         let x: CGFloat
         let y: CGFloat
     }
+
+    // MARK: - Animation Durations
+
+    struct Animation {
+        static let quick: Double = 0.15
+        static let standard: Double = 0.3
+        static let slow: Double = 0.5
+    }
 }
 
 // MARK: - Color Extension
@@ -148,6 +175,40 @@ extension View {
             .background(Color.white)
             .cornerRadius(14)
             .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+    }
+
+    func pressableButton() -> some View {
+        self.buttonStyle(PressableButtonStyle())
+    }
+
+}
+
+// MARK: - Pressable Button Style
+
+struct PressableButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: ClubRalleyTheme.Animation.quick), value: configuration.isPressed)
+    }
+}
+
+// MARK: - Club Ralley Spinner
+
+struct ClubRalleySpinner: View {
+    @State private var isSpinning = false
+
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: 0.7)
+            .stroke(ClubRalleyTheme.Colors.darkGreen, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+            .frame(width: 20, height: 20)
+            .rotationEffect(.degrees(isSpinning ? 360 : 0))
+            .onAppear {
+                withAnimation(.linear(duration: 0.8).repeatForever(autoreverses: false)) {
+                    isSpinning = true
+                }
+            }
     }
 }
 

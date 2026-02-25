@@ -36,7 +36,11 @@ struct HomeFeedView: View {
                 } else {
                     LazyVStack(spacing: 0) {
                         ForEach(postManager.posts) { post in
-                            HomeFeedPostCard(post: post)
+                            NavigationLink(destination: PostDetailView(post: post).environmentObject(postManager)) {
+                                HomeFeedPostCard(post: post)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(PlainButtonStyle())
                             FeedSeparator()
                         }
                     }
@@ -45,7 +49,7 @@ struct HomeFeedView: View {
                 Spacer(minLength: 100)
             }
         }
-        .background(Color(hex: "#F6F5F1"))
+        .background(ClubRalleyTheme.Colors.warmBackground)
         .navigationBarHidden(true)
         .sheet(isPresented: $showingNotifications) {
             SimpleNotificationsView()

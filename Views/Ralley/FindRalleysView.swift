@@ -73,7 +73,7 @@ struct FindRalleysView: View {
                 ralleysSection
             }
         }
-        .background(Color.white)
+        .background(ClubRalleyTheme.Colors.warmBackground)
         .navigationBarHidden(true)
         .sheet(isPresented: $ralleyManager.showingCreateRalley) {
             RalleyCreationView()
@@ -109,15 +109,15 @@ struct FindRalleysView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Find Ralleys")
                 .font(.custom("Chillax-Semibold", size: 34))
-                .foregroundColor(Color(hex: "#2C4F40"))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             HStack(spacing: 4) {
                 Image(systemName: "mappin.circle.fill")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "#5a7268"))
+                    .foregroundColor(ClubRalleyTheme.Colors.subtleText)
                 Text(mapViewModel.selectedCity.displayName)
                     .font(.system(size: 13))
-                    .foregroundColor(Color(hex: "#5a7268"))
+                    .foregroundColor(ClubRalleyTheme.Colors.subtleText)
             }
         }
         .padding(.horizontal, 22)
@@ -139,7 +139,7 @@ struct FindRalleysView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color(hex: "#2C4F40"))
+                .background(ClubRalleyTheme.Colors.darkGreen)
                 .clipShape(Capsule())
             }
 
@@ -157,7 +157,7 @@ struct FindRalleysView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color(hex: "#2C4F40"))
+                .background(ClubRalleyTheme.Colors.darkGreen)
                 .clipShape(Capsule())
             }
         }
@@ -188,7 +188,7 @@ struct FindRalleysView: View {
                 selectedDateFilter = .all
             }
             .font(.system(size: 13, weight: .medium))
-            .foregroundColor(Color(hex: "#2C4F40"))
+            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
         }
         .padding(.horizontal, 22)
         .padding(.top, 16)
@@ -200,12 +200,12 @@ struct FindRalleysView: View {
         HStack {
             Text("Nearby Ralleys")
                 .font(.custom("Chillax-Semibold", size: 18))
-                .foregroundColor(Color(hex: "#2C4F40"))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             Spacer()
             if !ralleyManager.isLoading {
                 Text("\(filteredRalleys.count) found \u{203A}")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(Color(hex: "#7a9088"))
+                    .foregroundColor(ClubRalleyTheme.Colors.mutedText)
             }
         }
         .padding(.horizontal, 22)
@@ -274,17 +274,17 @@ struct FindRalleysView: View {
         VStack(spacing: 20) {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 50))
-                .foregroundColor(Color(hex: "#2C4F40").opacity(0.6))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.6))
 
             Text("Unable to load ralleys")
                 .font(.system(size: 20, weight: .semibold))
                 .fontDesign(.rounded)
-                .foregroundColor(Color(hex: "#2C4F40"))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             Text("Check your internet connection and try again")
                 .font(.system(size: 15))
                 .fontDesign(.rounded)
-                .foregroundColor(Color(hex: "#7a9088"))
+                .foregroundColor(ClubRalleyTheme.Colors.mutedText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
 
@@ -302,7 +302,7 @@ struct FindRalleysView: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
-                .background(Color(hex: "#2C4F40"))
+                .background(ClubRalleyTheme.Colors.darkGreen)
                 .clipShape(Capsule())
             }
         }
@@ -313,8 +313,6 @@ struct FindRalleysView: View {
 // MARK: - Ralley Skeleton View
 
 struct RalleySkeletonView: View {
-    @State private var isAnimating = false
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
@@ -365,11 +363,6 @@ struct RalleySkeletonView: View {
         .padding(18)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .opacity(isAnimating ? 0.6 : 1.0)
-        .onAppear {
-            withAnimation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
-                isAnimating = true
-            }
-        }
+        .shimmer()
     }
 }

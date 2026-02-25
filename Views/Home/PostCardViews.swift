@@ -12,7 +12,22 @@ import UIKit
 
 struct HomeFeedPostCard: View {
     let post: ClubRalleyPost
-    @State private var isLiked = false
+    @EnvironmentObject var postManager: PostManager
+    @State private var isLiked: Bool
+    @State private var isReposted: Bool
+    @State private var likeCount: Int
+    @State private var commentCount: Int
+    @State private var showingComments = false
+    @State private var showingRepostSheet = false
+    @State private var heartScale: CGFloat = 1.0
+
+    init(post: ClubRalleyPost) {
+        self.post = post
+        _isLiked = State(initialValue: post.isLiked)
+        _isReposted = State(initialValue: post.isReposted)
+        _likeCount = State(initialValue: post.likes)
+        _commentCount = State(initialValue: post.comments)
+    }
 
     private var initials: String {
         let parts = post.authorName.split(separator: " ")
@@ -35,7 +50,7 @@ struct HomeFeedPostCard: View {
             HStack(alignment: .center, spacing: 12) {
                 // Avatar — 46pt green circle with initials
                 Circle()
-                    .fill(Color(hex: "#2C4F40"))
+                    .fill(ClubRalleyTheme.Colors.darkGreen)
                     .frame(width: 46, height: 46)
                     .overlay(
                         Text(initials)
@@ -48,12 +63,12 @@ struct HomeFeedPostCard: View {
                     Text(post.authorName)
                         .font(.system(size: 16, weight: .bold))
                         .fontDesign(.rounded)
-                        .foregroundColor(Color(hex: "#2C4F40"))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     Text(subtitle)
                         .font(.system(size: 12, weight: .semibold))
                         .fontDesign(.rounded)
-                        .foregroundColor(Color(hex: "#2C4F40").opacity(0.55))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.55))
                 }
 
                 Spacer()
@@ -63,7 +78,7 @@ struct HomeFeedPostCard: View {
             if let title = post.title, !title.isEmpty {
                 Text(title)
                     .font(.custom("Chillax-Bold", size: 17))
-                    .foregroundColor(Color(hex: "#2C4F40"))
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     .padding(.top, 14)
                     .padding(.bottom, 4)
             }
@@ -73,7 +88,7 @@ struct HomeFeedPostCard: View {
                 Text(post.content)
                     .font(.system(size: 14, weight: .medium))
                     .fontDesign(.rounded)
-                    .foregroundColor(Color(hex: "#2C4F40").opacity(0.7))
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.7))
                     .lineSpacing(2)
                     .padding(.bottom, 14)
             }
@@ -85,25 +100,86 @@ struct HomeFeedPostCard: View {
             }
 
             // 5. Mutuals row
-            if post.likes > 0 {
+            if likeCount > 0 {
                 HomeMutualsRow()
                     .padding(.top, 10)
             }
 
             // 6. Action bar separator (full bleed)
             Rectangle()
-                .fill(Color(hex: "#ECE9E2"))
+                .fill(ClubRalleyTheme.Colors.separator)
                 .frame(height: 1)
                 .padding(.horizontal, -22)
                 .padding(.top, 10)
 
             // 7. Action bar
-            PostActionBar(isLiked: $isLiked)
-                .padding(.top, 10)
-                .padding(.bottom, 16)
+            PostActionBar(
+                post: post,
+                isLiked: $isLiked,
+                isReposted: $isReposted,
+                likeCount: $likeCount,
+                commentCount: $commentCount,
+                heartScale: heartScale,
+                onLike: handleLike,
+                onComment: { showingComments = true },
+                onRepost: { showingRepostSheet = true },
+                onShare: { ShareUtility.sharePost(post) }
+            )
+            .padding(.top, 10)
+            .padding(.bottom, 16)
         }
         .padding(.horizontal, 22)
         .padding(.top, 18)
+        .sheet(isPresented: $showingComments) {
+            CommentsSheetView(post: post)
+                .environmentObject(postManager)
+                .onDisappear {
+                    // Sync comment count after sheet dismisses
+                    if let index = postManager.indexOfPost(post.id) {
+                        commentCount = postManager.posts[index].comments
+                    }
+                }
+        }
+        .sheet(isPresented: $showingRepostSheet) {
+            RepostSheet(post: post)
+                .environmentObject(postManager)
+                .onDisappear {
+                    // Sync repost state after sheet dismisses
+                    if let index = postManager.indexOfPost(post.id) {
+                        isReposted = postManager.posts[index].isReposted
+                    }
+                }
+        }
+    }
+
+    private func handleLike() {
+        let willLike = !isLiked
+        isLiked.toggle()
+        likeCount += isLiked ? 1 : -1
+
+        // Haptic
+        let impact = UIImpactFeedbackGenerator(style: willLike ? .medium : .light)
+        impact.impactOccurred()
+
+        // Heart bounce animation
+        if willLike {
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.5)) {
+                heartScale = 1.3
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    heartScale = 1.0
+                }
+            }
+        }
+
+        Task {
+            await postManager.toggleLike(for: post.id)
+            if let index = postManager.indexOfPost(post.id) {
+                isLiked = postManager.posts[index].isLiked
+                likeCount = postManager.posts[index].likes
+            }
+        }
     }
 }
 
@@ -186,11 +262,11 @@ struct PostPhotoCollage: View {
                 .aspectRatio(contentMode: .fill)
         } placeholder: {
             Rectangle()
-                .fill(Color(hex: "#E2E4D6").opacity(0.5))
+                .fill(ClubRalleyTheme.Colors.sageGreen.opacity(0.5))
                 .overlay(
                     Image(systemName: "photo")
                         .font(.system(size: 20))
-                        .foregroundColor(Color(hex: "#2C4F40").opacity(0.3))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.3))
                 )
         }
     }
@@ -199,66 +275,70 @@ struct PostPhotoCollage: View {
 // MARK: - Action Bar
 
 struct PostActionBar: View {
+    let post: ClubRalleyPost
     @Binding var isLiked: Bool
+    @Binding var isReposted: Bool
+    @Binding var likeCount: Int
+    @Binding var commentCount: Int
+    var heartScale: CGFloat = 1.0
+    var onLike: () -> Void
+    var onComment: () -> Void
+    var onRepost: () -> Void
+    var onShare: () -> Void
 
     var body: some View {
         HStack {
             // Heart
-            Button(action: { isLiked.toggle() }) {
-                Image(systemName: isLiked ? "heart.fill" : "heart")
-                    .font(.system(size: 20))
-                    .foregroundColor(isLiked ? Color(hex: "#E74C3C") : Color(hex: "#999999"))
+            Button(action: onLike) {
+                HStack(spacing: 5) {
+                    Image(systemName: isLiked ? "heart.fill" : "heart")
+                        .font(.system(size: 20))
+                        .foregroundColor(isLiked ? ClubRalleyTheme.Colors.badgeRed : ClubRalleyTheme.Colors.inactiveIcon)
+                        .scaleEffect(heartScale)
+                    if likeCount > 0 {
+                        Text("\(likeCount)")
+                            .font(.system(size: 12, weight: .bold))
+                            .fontDesign(.rounded)
+                            .foregroundColor(isLiked ? ClubRalleyTheme.Colors.badgeRed : ClubRalleyTheme.Colors.inactiveIcon)
+                    }
+                }
             }
 
             Spacer()
 
             // Repost
-            Button(action: {}) {
+            Button(action: onRepost) {
                 Image(systemName: "arrow.2.squarepath")
                     .font(.system(size: 20))
-                    .foregroundColor(Color(hex: "#999999"))
+                    .foregroundColor(isReposted ? ClubRalleyTheme.Colors.darkGreen : ClubRalleyTheme.Colors.inactiveIcon)
             }
 
             Spacer()
 
             // Comment
-            Button(action: {}) {
-                Image(systemName: "bubble.left")
-                    .font(.system(size: 20))
-                    .foregroundColor(Color(hex: "#999999"))
+            Button(action: onComment) {
+                HStack(spacing: 5) {
+                    Image(systemName: "bubble.left")
+                        .font(.system(size: 20))
+                        .foregroundColor(ClubRalleyTheme.Colors.inactiveIcon)
+                    if commentCount > 0 {
+                        Text("\(commentCount)")
+                            .font(.system(size: 12, weight: .bold))
+                            .fontDesign(.rounded)
+                            .foregroundColor(ClubRalleyTheme.Colors.inactiveIcon)
+                    }
+                }
             }
 
             Spacer()
 
             // Share
-            Button(action: {}) {
+            Button(action: onShare) {
                 Image(systemName: "square.and.arrow.up")
                     .font(.system(size: 20))
-                    .foregroundColor(Color(hex: "#999999"))
+                    .foregroundColor(ClubRalleyTheme.Colors.inactiveIcon)
             }
         }
     }
 }
 
-// MARK: - Share Helper
-
-enum ShareHelper {
-    static func sharePost(_ post: ClubRalleyPost) {
-        var content = ""
-        if let title = post.title, !title.isEmpty { content += "\(title)\n\n" }
-        content += post.content + "\n\nShared from Club Ralley"
-
-        let activityVC = UIActivityViewController(activityItems: [content], applicationActivities: nil)
-        DispatchQueue.main.async {
-            guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                  let root = scene.windows.first?.rootViewController else { return }
-            var top = root
-            while let presented = top.presentedViewController { top = presented }
-            if let popover = activityVC.popoverPresentationController {
-                popover.sourceView = top.view
-                popover.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0)
-            }
-            top.present(activityVC, animated: true)
-        }
-    }
-}

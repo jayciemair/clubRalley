@@ -25,6 +25,7 @@ struct ContentView: View {
     @StateObject private var coordinator = AppCoordinator()
     @StateObject private var postManager = PostManager()
     @StateObject private var ralleyManager = RalleyManager()
+    @StateObject private var chatsListViewModel = ChatsListViewModel()
 
     // MARK: - Welcome Celebration State
     @State private var showWelcomeConfetti = false
@@ -70,6 +71,7 @@ struct ContentView: View {
                 case .teams:
                     NavigationStack {
                         RosterView()
+                            .environmentObject(chatsListViewModel)
                     }
                 case .profile:
                     NavigationStack {
@@ -81,7 +83,7 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             if selectedTab != .post {
-                ClubRalleyTabBar(selectedTab: $selectedTab)
+                ClubRalleyTabBar(selectedTab: $selectedTab, unreadChatCount: chatsListViewModel.unreadCount)
             }
         }
         .ignoresSafeArea(.keyboard)
@@ -143,7 +145,7 @@ struct RosterView: View {
                     HStack {
                         Text("Roster")
                             .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(Color(hex: "#2C4F40"))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         Spacer()
                     }
                     .padding(.horizontal, 20)
@@ -156,10 +158,10 @@ struct RosterView: View {
                                 VStack(spacing: 8) {
                                     Text(tab.rawValue)
                                         .font(.system(size: 16, weight: selectedRosterTab == tab ? .semibold : .medium))
-                                        .foregroundColor(selectedRosterTab == tab ? Color(hex: "#2C4F40") : .gray)
+                                        .foregroundColor(selectedRosterTab == tab ? ClubRalleyTheme.Colors.darkGreen : .gray)
 
                                     Rectangle()
-                                        .fill(selectedRosterTab == tab ? Color(hex: "#2C4F40") : Color.clear)
+                                        .fill(selectedRosterTab == tab ? ClubRalleyTheme.Colors.darkGreen : Color.clear)
                                         .frame(height: 3)
                                         .cornerRadius(1.5)
                                 }
@@ -178,7 +180,7 @@ struct RosterView: View {
                     ChatsListView()
                 }
             }
-            .background(Color(hex: "#F5F5F5"))
+            .background(ClubRalleyTheme.Colors.coolBackground)
         .task {
             await userService.loadUsers()
             await userService.loadFollowingStatus()
@@ -231,7 +233,7 @@ struct RosterView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Suggested Friends")
                                 .font(.system(size: 17, weight: .bold))
-                                .foregroundColor(Color(hex: "#2C4F40"))
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                             Text("From your contacts & school")
                                 .font(.system(size: 13))
                                 .foregroundColor(.gray)
@@ -277,7 +279,7 @@ struct RosterView: View {
                     RosterSkeletonView()
                 } else if userService.users.isEmpty {
                     VStack(spacing: 16) {
-                        Image(systemName: "person.3").font(.system(size: 48)).foregroundColor(Color(hex: "#2C4F40").opacity(0.5))
+                        Image(systemName: "person.3").font(.system(size: 48)).foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.5))
                         Text("No athletes found").font(.system(size: 18, weight: .semibold))
                         Text("Try a different search").font(.system(size: 15)).foregroundColor(.gray)
                     }.frame(maxWidth: .infinity).padding(.top, 60)
@@ -331,14 +333,14 @@ struct RosterUserCardView: View {
             ZStack(alignment: .bottomTrailing) {
                 AsyncImage(url: URL(string: user.photoURL)) { image in
                     image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: { Circle().fill(Color(hex: "#2C4F40").opacity(0.2)) }
+                } placeholder: { Circle().fill(ClubRalleyTheme.Colors.darkGreen.opacity(0.2)) }
                 .frame(width: 56, height: 56).clipShape(Circle())
                 .overlay(Circle().stroke(Color.white, lineWidth: 2))
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
 
                 if user.isVerified {
                     Image(systemName: "checkmark.seal.fill").font(.system(size: 14))
-                        .foregroundColor(Color(hex: "#2C4F40")).background(Circle().fill(.white).frame(width: 16, height: 16))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen).background(Circle().fill(.white).frame(width: 16, height: 16))
                 }
             }
 
@@ -350,14 +352,20 @@ struct RosterUserCardView: View {
             Spacer(minLength: 4)
 
             HStack(spacing: 8) {
-                Button(action: { Task { await userService.toggleFollow(userId: user.id) } }) {
+                Button(action: {
+                    let impact = UIImpactFeedbackGenerator(style: .light)
+                    impact.impactOccurred()
+                    Task { await userService.toggleFollow(userId: user.id) }
+                }) {
                     Text(user.isFollowing ? "Following" : "Follow")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(user.isFollowing ? .white : Color(hex: "#2C4F40"))
+                        .foregroundColor(user.isFollowing ? .white : ClubRalleyTheme.Colors.darkGreen)
                         .frame(maxWidth: .infinity).padding(.vertical, 8)
-                        .background(user.isFollowing ? Color(hex: "#2C4F40") : Color.white)
-                        .cornerRadius(6).overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "#2C4F40"), lineWidth: 1))
+                        .background(user.isFollowing ? ClubRalleyTheme.Colors.darkGreen : Color.white)
+                        .cornerRadius(6).overlay(RoundedRectangle(cornerRadius: 6).stroke(ClubRalleyTheme.Colors.darkGreen, lineWidth: 1))
+                        .animation(.easeInOut(duration: ClubRalleyTheme.Animation.quick), value: user.isFollowing)
                 }
+                .pressableButton()
 
                 Button(action: onMessageTapped) {
                     ZStack {
@@ -368,9 +376,9 @@ struct RosterUserCardView: View {
                             Image(systemName: "message").font(.system(size: 12, weight: .medium))
                         }
                     }
-                    .foregroundColor(Color(hex: "#2C4F40")).frame(width: 32, height: 32)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen).frame(width: 32, height: 32)
                     .background(Color.white).cornerRadius(6)
-                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "#2C4F40"), lineWidth: 1))
+                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(ClubRalleyTheme.Colors.darkGreen, lineWidth: 1))
                 }
                 .disabled(isLoadingMessage)
             }
@@ -393,7 +401,7 @@ struct SuggestionCard: View {
             AsyncImage(url: URL(string: user.photoURL)) { image in
                 image.resizable().aspectRatio(contentMode: .fill)
             } placeholder: {
-                Circle().fill(Color(hex: "#2C4F40").opacity(0.2))
+                Circle().fill(ClubRalleyTheme.Colors.darkGreen.opacity(0.2))
             }
             .frame(width: 48, height: 48)
             .clipShape(Circle())
@@ -408,24 +416,30 @@ struct SuggestionCard: View {
             // Reason pill
             Text(reason)
                 .font(.system(size: 11, weight: .medium))
-                .foregroundColor(Color(hex: "#2C4F40"))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 3)
-                .background(Color(hex: "#2C4F40").opacity(0.1))
+                .background(ClubRalleyTheme.Colors.darkGreen.opacity(0.1))
                 .cornerRadius(8)
                 .lineLimit(1)
 
             // Follow button
-            Button(action: { Task { await userService.toggleFollow(userId: user.id) } }) {
+            Button(action: {
+                let impact = UIImpactFeedbackGenerator(style: .light)
+                impact.impactOccurred()
+                Task { await userService.toggleFollow(userId: user.id) }
+            }) {
                 Text(user.isFollowing ? "Following" : "Follow")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(user.isFollowing ? .white : Color(hex: "#2C4F40"))
+                    .foregroundColor(user.isFollowing ? .white : ClubRalleyTheme.Colors.darkGreen)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 6)
-                    .background(user.isFollowing ? Color(hex: "#2C4F40") : Color.white)
+                    .background(user.isFollowing ? ClubRalleyTheme.Colors.darkGreen : Color.white)
                     .cornerRadius(8)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: "#2C4F40"), lineWidth: 1))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(ClubRalleyTheme.Colors.darkGreen, lineWidth: 1))
+                    .animation(.easeInOut(duration: ClubRalleyTheme.Animation.quick), value: user.isFollowing)
             }
+            .pressableButton()
         }
         .padding(12)
         .frame(width: 140)
@@ -438,7 +452,6 @@ struct SuggestionCard: View {
 // MARK: - Roster Skeleton View
 
 private struct RosterSkeletonView: View {
-    @State private var isAnimating = false
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
     var body: some View {
@@ -470,9 +483,7 @@ private struct RosterSkeletonView: View {
             }
         }
         .padding(.horizontal, 16)
-        .opacity(isAnimating ? 1.0 : 0.6)
-        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
-        .onAppear { isAnimating = true }
+        .shimmer()
     }
 }
 

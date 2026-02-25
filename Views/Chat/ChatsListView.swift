@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ChatsListView: View {
-    @StateObject private var viewModel = ChatsListViewModel()
+    @EnvironmentObject var viewModel: ChatsListViewModel
     @State private var isVisible = false
 
     var body: some View {
@@ -38,7 +38,7 @@ struct ChatsListView: View {
         VStack(spacing: 16) {
             Image(systemName: "message.badge.circle")
                 .font(.system(size: 56))
-                .foregroundColor(Color(hex: "#2C4F40").opacity(0.5))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.5))
 
             Text("No Group Chats")
                 .font(.system(size: 20, weight: .semibold))
@@ -104,12 +104,12 @@ private struct ChatListRow: View {
             // Chat icon with sport
             ZStack {
                 Circle()
-                    .fill(Color(hex: "#2C4F40").opacity(0.1))
+                    .fill(ClubRalleyTheme.Colors.darkGreen.opacity(0.1))
                     .frame(width: 52, height: 52)
 
                 Image(systemName: sportIcon)
                     .font(.system(size: 22))
-                    .foregroundColor(Color(hex: "#2C4F40"))
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
 
             // Chat info
@@ -146,7 +146,7 @@ private struct ChatListRow: View {
 
                     if chat.hasUnread {
                         Circle()
-                            .fill(Color(hex: "#2C4F40"))
+                            .fill(ClubRalleyTheme.Colors.darkGreen)
                             .frame(width: 10, height: 10)
                     }
                 }
@@ -160,10 +160,10 @@ private struct ChatListRow: View {
                     if chat.isAdmin {
                         Text("Admin")
                             .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(Color(hex: "#2C4F40"))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color(hex: "#2C4F40").opacity(0.1))
+                            .background(ClubRalleyTheme.Colors.darkGreen.opacity(0.1))
                             .cornerRadius(4)
                     }
                 }
@@ -189,8 +189,6 @@ private struct ChatListRow: View {
 // MARK: - Chats Skeleton View
 
 private struct ChatsSkeletonView: View {
-    @State private var isAnimating = false
-
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
@@ -231,9 +229,7 @@ private struct ChatsSkeletonView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
         }
-        .opacity(isAnimating ? 1.0 : 0.6)
-        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
-        .onAppear { isAnimating = true }
+        .shimmer()
     }
 }
 
@@ -242,5 +238,6 @@ private struct ChatsSkeletonView: View {
 #Preview {
     NavigationStack {
         ChatsListView()
+            .environmentObject(ChatsListViewModel())
     }
 }
