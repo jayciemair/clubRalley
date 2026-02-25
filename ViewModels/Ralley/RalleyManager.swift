@@ -83,6 +83,19 @@ class RalleyManager: ObservableObject {
         }
     }
 
+    // MARK: - Reset (for user switch / sign out)
+
+    /// Clear all cached data so stale content doesn't bleed across accounts
+    func reset() {
+        ralleys = []
+        joinedRalleyIds = []
+        isLoading = false
+        isLoadingMore = false
+        hasMoreRalleys = true
+        error = nil
+        completionManager?.stopMonitoring()
+    }
+
     // MARK: - Ralley Loading
 
     /**

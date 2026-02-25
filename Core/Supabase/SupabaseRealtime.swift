@@ -28,6 +28,7 @@ class RealtimeManager: ObservableObject {
 
     private var directMessageChannel: RealtimeChannelV2?
     private var chatMessageChannel: RealtimeChannelV2?
+    private var allChatMessagesChannel: RealtimeChannelV2?
     private var notificationChannel: RealtimeChannelV2?
     private var participantChannel: RealtimeChannelV2?
     private var feedParticipantChannel: RealtimeChannelV2?
@@ -41,6 +42,7 @@ class RealtimeManager: ObservableObject {
 
     private var onDirectMessage: ((DirectMessagePayload) -> Void)?
     private var onChatMessage: ((ChatMessagePayload) -> Void)?
+    private var onAllChatMessages: ((ChatMessagePayload) -> Void)?
     private var onNotification: ((NotificationPayload) -> Void)?
     private var onParticipantChange: ((ParticipantChangePayload) -> Void)?
     private var onFeedParticipantChange: ((ParticipantChangePayload) -> Void)?
@@ -167,6 +169,60 @@ class RealtimeManager: ObservableObject {
             await channel.unsubscribe()
             chatMessageChannel = nil
             print("RealtimeManager: Unsubscribed from chat messages")
+        }
+    }
+
+    // MARK: - All Chat Messages Subscription (for chat list unread tracking)
+
+    /// Subscribe to all chat_messages inserts (no filter — used by ChatsListViewModel)
+    func subscribeToAllChatMessages(
+        onMessage: @escaping (ChatMessagePayload) -> Void
+    ) {
+        guard let client = client else {
+            print("RealtimeManager: No Supabase client available")
+            return
+        }
+
+        Task {
+            await unsubscribeFromAllChatMessages()
+        }
+
+        self.onAllChatMessages = onMessage
+
+        let channel = client.channel("all_chat_messages")
+
+        let insertions = channel.postgresChange(
+            InsertAction.self,
+            schema: "public",
+            table: "chat_messages"
+        )
+
+        Task {
+            for await insertion in insertions {
+                if let record = insertion.record as? [String: Any],
+                   let payload = ChatMessagePayload(from: record) {
+                    await MainActor.run {
+                        self.onAllChatMessages?(payload)
+                    }
+                }
+            }
+        }
+
+        Task {
+            await channel.subscribe()
+            await MainActor.run {
+                self.allChatMessagesChannel = channel
+                print("RealtimeManager: Subscribed to all chat messages")
+            }
+        }
+    }
+
+    /// Unsubscribe from all chat messages
+    func unsubscribeFromAllChatMessages() async {
+        if let channel = allChatMessagesChannel {
+            await channel.unsubscribe()
+            allChatMessagesChannel = nil
+            print("RealtimeManager: Unsubscribed from all chat messages")
         }
     }
 
@@ -406,15 +462,25 @@ class RealtimeManager: ObservableObject {
 
     // MARK: - Cleanup
 
-    /// Unsubscribe from all channels
+    /// Unsubscribe from all channels and clear callbacks
     func unsubscribeAll() async {
         await unsubscribeFromDirectMessages()
         await unsubscribeFromChatMessages()
+        await unsubscribeFromAllChatMessages()
         await unsubscribeFromNotifications()
         await unsubscribeFromParticipants()
         await unsubscribeFromAllParticipantChanges()
+
+        // Clear all callbacks to prevent stale closures firing
+        onDirectMessage = nil
+        onChatMessage = nil
+        onAllChatMessages = nil
+        onNotification = nil
+        onParticipantChange = nil
+        onFeedParticipantChange = nil
+
         isConnected = false
-        print("RealtimeManager: Unsubscribed from all channels")
+        print("RealtimeManager: Unsubscribed from all channels and cleared callbacks")
     }
 }
 

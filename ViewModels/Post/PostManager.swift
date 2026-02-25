@@ -69,6 +69,17 @@ class PostManager: ObservableObject {
         }
     }
 
+    // MARK: - Reset (for user switch / sign out)
+
+    /// Clear all cached data so stale content doesn't bleed across accounts
+    func reset() {
+        posts = []
+        isLoading = false
+        isLoadingMore = false
+        hasMorePosts = true
+        error = nil
+    }
+
     // MARK: - Post Loading
 
     /**

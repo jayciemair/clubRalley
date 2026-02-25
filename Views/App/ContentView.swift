@@ -45,6 +45,12 @@ struct ContentView: View {
             .onAppear { coordinator.onAppAppear() }
             .onChange(of: coordinator.appState) { _, newState in handleAppStateChange(newState) }
             .onChange(of: selectedTabOverride) { _, newValue in handleTabOverrideChange(newValue) }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ProfileDidSwitch"))) { _ in
+                handleUserSwitch()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("UserDidLogout"))) { _ in
+                handleUserLogout()
+            }
     }
 
     // MARK: - Main Tab View
@@ -115,6 +121,29 @@ struct ContentView: View {
     private func handleTabOverrideChange(_ newValue: MainTab) {
         selectedTab = newValue
         coordinator.updateSelectedTab(newValue)
+    }
+
+    /// Reset all ViewModels and reload for the new user after a profile switch
+    private func handleUserSwitch() {
+        postManager.reset()
+        ralleyManager.reset()
+        chatsListViewModel.reset()
+        selectedTab = .home
+
+        // Reload data for the new user
+        Task {
+            await postManager.loadPosts()
+            await ralleyManager.loadRalleys()
+            chatsListViewModel.reinitialize()
+        }
+    }
+
+    /// Clear all state on logout
+    private func handleUserLogout() {
+        postManager.reset()
+        ralleyManager.reset()
+        chatsListViewModel.reset()
+        selectedTab = .home
     }
 }
 

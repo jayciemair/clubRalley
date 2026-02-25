@@ -12,7 +12,7 @@ import SwiftUI
  * ChatsListViewModel: ViewModel for chats list display
  *
  * Purpose: Manages loading and display of user's group chats
- * Strategy: Uses ChatService for backend operations
+ * Strategy: Uses ChatService for backend operations, realtime for live unread updates
  */
 @MainActor
 class ChatsListViewModel: ObservableObject {
@@ -40,11 +40,76 @@ class ChatsListViewModel: ObservableObject {
     // MARK: - Dependencies
 
     private let chatService: ChatService
+    private let realtimeManager = RealtimeManager.shared
+
+    /// Track which chat is currently open so we don't mark it unread
+    var currentlyOpenChatId: UUID?
 
     // MARK: - Initialization
 
     init(chatService: ChatService? = nil) {
         self.chatService = chatService ?? ServiceContainer.shared.chatService
+        Task {
+            await loadChats()
+        }
+        subscribeToRealtime()
+    }
+
+    deinit {
+        Task { [realtimeManager] in
+            await realtimeManager.unsubscribeFromAllChatMessages()
+        }
+    }
+
+    // MARK: - Realtime
+
+    /// Subscribe to all chat_messages inserts for live unread updates
+    private func subscribeToRealtime() {
+        let currentUserId = SupabaseManager.shared.currentUser?.id
+
+        realtimeManager.subscribeToAllChatMessages { [weak self] payload in
+            guard let self = self else { return }
+
+            // Ignore messages sent by the current user
+            if let currentUserId, payload.senderId == currentUserId {
+                return
+            }
+
+            // Find matching chat in the list
+            if let index = self.chats.firstIndex(where: { $0.ralleyId == payload.ralleyId }) {
+                // Update last message preview
+                self.chats[index].lastMessage = payload.content
+                self.chats[index].lastMessageAt = payload.createdAt
+
+                // Mark as unread unless this chat is currently open
+                if self.currentlyOpenChatId != payload.ralleyId {
+                    self.chats[index].hasUnread = true
+                }
+
+                // Re-sort so most recent is on top
+                self.chats.sort { ($0.lastMessageAt ?? $0.createdAt) > ($1.lastMessageAt ?? $1.createdAt) }
+            }
+        }
+    }
+
+    // MARK: - Reset (for user switch / sign out)
+
+    /// Clear all cached data and tear down subscriptions
+    func reset() {
+        chats = []
+        isLoading = false
+        isLoadingMore = false
+        hasMoreChats = true
+        error = nil
+        currentlyOpenChatId = nil
+        Task {
+            await realtimeManager.unsubscribeFromAllChatMessages()
+        }
+    }
+
+    /// Re-subscribe to realtime and reload for the new user
+    func reinitialize() {
+        subscribeToRealtime()
         Task {
             await loadChats()
         }
@@ -95,6 +160,16 @@ class ChatsListViewModel: ObservableObject {
         }
 
         isLoadingMore = false
+    }
+
+    // MARK: - Unread Management
+
+    /// Mark a specific chat as read (updates both local state and service)
+    func markChatAsRead(chatId: UUID) {
+        if let index = chats.firstIndex(where: { $0.id == chatId }) {
+            chats[index].hasUnread = false
+        }
+        chatService.markChatAsRead(chatId: chatId)
     }
 
     // MARK: - Computed Properties

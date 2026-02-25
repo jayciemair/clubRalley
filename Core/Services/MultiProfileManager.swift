@@ -131,6 +131,9 @@ class MultiProfileManager: ObservableObject {
         error = nil
 
         do {
+            // Tear down all realtime subscriptions before switching
+            await RealtimeManager.shared.unsubscribeAll()
+
             // Update last used timestamp
             if let index = savedProfiles.firstIndex(where: { $0.id == profile.id }) {
                 savedProfiles[index].lastUsed = Date()
@@ -190,6 +193,11 @@ class MultiProfileManager: ObservableObject {
 
     /// Sign out from current profile (keeps in saved profiles but marks as inactive)
     func signOutCurrentProfile() {
+        // Tear down all realtime subscriptions immediately
+        Task {
+            await RealtimeManager.shared.unsubscribeAll()
+        }
+
         if let current = activeProfile,
            let index = savedProfiles.firstIndex(where: { $0.id == current.id }) {
             savedProfiles[index].isLoggedIn = false
