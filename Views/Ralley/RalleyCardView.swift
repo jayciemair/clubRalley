@@ -57,7 +57,7 @@ struct RalleyCardView: View {
             hostRow
         }
         .padding(18)
-        .background(Color.white)
+        .background(ClubRalleyTheme.Colors.sageGreen)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .contextMenu {
             Button {
