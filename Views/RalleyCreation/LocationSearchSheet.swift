@@ -92,7 +92,7 @@ struct LocationSearchSheet: View {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("Enter custom location")
                                             .font(.system(size: 15, weight: .medium))
-                                            .foregroundColor(.black)
+                                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                                         Text("Type any address or place name")
                                             .font(.system(size: 13))
                                             .foregroundColor(.gray)
@@ -121,7 +121,7 @@ struct LocationSearchSheet: View {
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(location.name)
                                                 .font(.system(size: 15, weight: .medium))
-                                                .foregroundColor(.black)
+                                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                                             Text(location.address)
                                                 .font(.system(size: 13))
                                                 .foregroundColor(.gray)

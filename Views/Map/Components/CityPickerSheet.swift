@@ -26,7 +26,7 @@ struct CityPickerSheet: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(city.name)
                                 .font(.system(size: 17, weight: .medium))
-                                .foregroundColor(.black)
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                             Text(city.state)
                                 .font(.system(size: 14))
                                 .foregroundColor(.secondary)

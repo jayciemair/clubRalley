@@ -105,7 +105,7 @@ struct RalleyHistoryCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(ralley.title)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     .lineLimit(1)
 
                 HStack(spacing: 8) {

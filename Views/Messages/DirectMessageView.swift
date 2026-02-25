@@ -105,7 +105,7 @@ struct DirectMessageView: View {
 
             Text("Unable to load messages")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             Text("Check your connection and try again")
                 .font(.system(size: 14))

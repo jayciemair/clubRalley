@@ -63,7 +63,7 @@ struct GenderScreen: View {
 
                     Text("Your privacy matters")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     Text("This information helps us personalize your experience and is never shared publicly.")
                         .font(.system(size: 13))
@@ -122,7 +122,7 @@ private struct GenderOption: View {
                 // Label
                 Text(label)
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                 Spacer()
 

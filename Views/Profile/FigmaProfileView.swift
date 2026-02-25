@@ -58,7 +58,7 @@ struct ProfileHeaderSection: View {
             }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
             
             Spacer()
@@ -101,7 +101,7 @@ struct ProfileInfoSection: View {
             // Name
             Text("Gracie King")
                 .font(.system(size: 24, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             
             // Social Handles (matching Figma icons)
             HStack(spacing: 20) {
@@ -129,7 +129,7 @@ struct ProfileInfoSection: View {
                 Group {
                     Text("130")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Text("followers")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.gray)
@@ -141,7 +141,7 @@ struct ProfileInfoSection: View {
                     
                     Text("20")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Text("games played")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.gray)
@@ -153,7 +153,7 @@ struct ProfileInfoSection: View {
                     
                     Text("10")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Text("wins")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.gray)
@@ -163,7 +163,7 @@ struct ProfileInfoSection: View {
             // Bio
             Text("Former D1 tennis player at Bucknell University\nClass of 2025")
                 .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
             
@@ -241,7 +241,7 @@ struct MyTeamsSection: View {
             HStack {
                 Text("My Teams")
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 Spacer()
             }
             
@@ -263,7 +263,7 @@ struct MyTeamsSection: View {
                     VStack(spacing: 4) {
                         Text("AVS Club")
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.black)
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     }
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
@@ -289,7 +289,7 @@ struct MyTeamsSection: View {
                     VStack(spacing: 4) {
                         Text("Basketball Club")
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.black)
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     }
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
@@ -314,7 +314,7 @@ struct MyPicsSection: View {
             HStack {
                 Text("My Pics")
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 Spacer()
             }
             

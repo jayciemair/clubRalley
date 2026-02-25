@@ -180,7 +180,7 @@ struct SimpleReportSheet: View {
                                 HStack {
                                     Text(reason)
                                         .font(.system(size: 16))
-                                        .foregroundColor(.black)
+                                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                                     Spacer()
                                     Image(systemName: selectedReason == reason ? "checkmark.circle.fill" : "circle")
                                         .foregroundColor(selectedReason == reason ? Color(hex: "#2C4F40") : .gray)
@@ -287,13 +287,13 @@ struct CommentRow: View {
                         NavigationLink(destination: UserProfileView(userId: userId)) {
                             Text(userName)
                                 .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.black)
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         }
                         .buttonStyle(PlainButtonStyle())
                     } else {
                         Text(userName)
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.black)
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     }
 
                     Text(timeAgo)
@@ -303,7 +303,7 @@ struct CommentRow: View {
 
                 Text(comment.content)
                     .font(.system(size: 15))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
             Spacer()
         }

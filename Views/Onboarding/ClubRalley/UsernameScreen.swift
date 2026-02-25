@@ -35,7 +35,7 @@ struct UsernameScreen: View {
                         HStack(spacing: 4) {
                             Text("@")
                                 .font(.system(size: 18))
-                                .foregroundColor(.black)
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                             TextField("username", text: $username)
                                 .textContentType(.username)

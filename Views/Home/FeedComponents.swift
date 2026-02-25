@@ -74,62 +74,61 @@ struct HomeUpcomingSection: View {
         VStack(alignment: .leading, spacing: 0) {
             if upcomingRalleys.isEmpty {
                 // Empty state card
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 10) {
                     // Teammates pill
                     if playersThisWeek > 0 {
                         HStack(spacing: 6) {
                             Circle()
                                 .fill(ClubRalleyTheme.Colors.success)
-                                .frame(width: 8, height: 8)
+                                .frame(width: 6, height: 6)
                             Text("\(playersThisWeek) \(playersThisWeek == 1 ? "PLAYER" : "PLAYERS") ACTIVE THIS WEEK")
-                                .font(.system(size: 11, weight: .bold))
+                                .font(.system(size: 10, weight: .bold))
                                 .fontDesign(.rounded)
                                 .foregroundColor(.white.opacity(0.8))
                                 .tracking(0.5)
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
                         .background(Color.white.opacity(0.15))
                         .cornerRadius(20)
                     }
 
                     // Title
-                    Text("No upcoming Ralleys\n— yet. 👀")
-                        .font(.custom("Chillax-Bold", size: 28))
+                    Text("No upcoming Ralleys — yet. 👀")
+                        .font(.custom("Chillax-Bold", size: 22))
                         .foregroundColor(.white)
-                        .lineSpacing(2)
+                        .lineSpacing(1)
 
                     // Subtitle
-                    Text("Your crew is already out there. Jump into a Ralley and get in on the action.")
-                        .font(.system(size: 15, weight: .medium))
+                    Text("Jump into a Ralley and get in on the action.")
+                        .font(.system(size: 13, weight: .medium))
                         .fontDesign(.rounded)
                         .foregroundColor(.white.opacity(0.7))
-                        .lineSpacing(3)
+                        .lineSpacing(2)
 
                     // CTA button
                     Button(action: { selectedTab = .ralleys }) {
-                        HStack(spacing: 8) {
+                        HStack(spacing: 6) {
                             Text("Find Ralleys Near Me")
-                                .font(.system(size: 16, weight: .bold))
+                                .font(.system(size: 14, weight: .bold))
                                 .fontDesign(.rounded)
                             Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .bold))
+                                .font(.system(size: 12, weight: .bold))
                         }
                         .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 14)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 11)
                         .background(Color.white)
-                        .cornerRadius(28)
+                        .cornerRadius(24)
                     }
-                    .padding(.top, 4)
                 }
-                .padding(22)
+                .padding(18)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(ClubRalleyTheme.Colors.darkGreen)
-                .cornerRadius(20)
+                .cornerRadius(16)
                 .padding(.horizontal, 22)
-                .padding(.top, 10)
-                .padding(.bottom, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 14)
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
@@ -316,7 +315,7 @@ struct FeedErrorView: View {
             Text("Unable to load feed")
                 .font(.system(size: 20, weight: .semibold))
                 .fontDesign(.rounded)
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             Text("Check your internet connection and try again")
                 .font(.system(size: 15))
                 .fontDesign(.rounded)
@@ -357,7 +356,7 @@ struct EmptyFeedView: View {
             Text("Welcome to Club Ralley!")
                 .font(.system(size: 24, weight: .bold))
                 .fontDesign(.rounded)
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .opacity(isVisible ? 1 : 0)
                 .offset(y: isVisible ? 0 : 10)
 

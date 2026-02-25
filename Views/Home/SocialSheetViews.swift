@@ -182,7 +182,7 @@ struct ReportSheetView: View {
                         HStack {
                             Text(reason)
                                 .font(.system(size: 16))
-                                .foregroundColor(.black)
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                             Spacer()
                             Image(systemName: selectedReason == reason ? "checkmark.circle.fill" : "circle")
                                 .foregroundColor(selectedReason == reason ? Color(hex: "#2C4F40") : .gray)
@@ -287,7 +287,7 @@ struct NotificationRowView: View {
 
                 Text(notification.message)
                     .font(.system(size: 15))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                 Spacer()
 

@@ -34,7 +34,7 @@ struct VenueDetailSheet: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(venue.name)
                                 .font(.system(size: 22, weight: .bold))
-                                .foregroundColor(.black)
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                             // Type badge
                             HStack(spacing: 4) {
@@ -85,7 +85,7 @@ struct VenueDetailSheet: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Sports")
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.black)
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
@@ -149,7 +149,7 @@ struct VenueDetailSheet: View {
             HStack {
                 Text("Upcoming Ralleys")
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 Spacer()
                 if !venueRalleys.isEmpty {
                     Text("\(venueRalleys.count)")
@@ -218,7 +218,7 @@ struct VenueRalleyRow: View {
                 HStack(spacing: 6) {
                     Text(ralley.title)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         .lineLimit(1)
 
                     // Sport pill

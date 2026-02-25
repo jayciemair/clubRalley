@@ -23,7 +23,7 @@ struct EmptyStateView: View {
 
             Text(title)
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             Text(message)
                 .font(.system(size: 16))

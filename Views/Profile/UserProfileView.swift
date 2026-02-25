@@ -188,7 +188,7 @@ struct ProfileErrorView: View {
 
             Text("Unable to load profile")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             Text("Please check your connection and try again")
                 .font(.system(size: 15, weight: .medium, design: .rounded))
@@ -303,7 +303,7 @@ struct TappableProfileHeader: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(name)
                         .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     if let subtitle = subtitle {
                         Text(subtitle)

@@ -22,7 +22,7 @@ struct RosterPhotoStep: View {
             VStack(spacing: 12) {
                 Text(PowerUpStep.rosterPhoto.title)
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     .multilineTextAlignment(.center)
 
                 Text(PowerUpStep.rosterPhoto.subtitle)

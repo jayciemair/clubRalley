@@ -510,7 +510,7 @@ struct ProfileActionButtons: View {
                 } else {
                     Text(isFollowing ? "Following" : "Follow")
                         .font(.system(size: 12, weight: .heavy, design: .rounded))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
                 }
@@ -524,7 +524,7 @@ struct ProfileActionButtons: View {
             Button(action: onMessage) {
                 Text("Message")
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     .frame(maxWidth: .infinity)
                     .frame(height: 40)
             }
@@ -536,7 +536,7 @@ struct ProfileActionButtons: View {
             Button(action: onInvite) {
                 Text("Invite to Ralley")
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     .frame(maxWidth: .infinity)
                     .frame(height: 40)
             }

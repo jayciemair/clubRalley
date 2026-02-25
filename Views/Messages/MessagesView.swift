@@ -137,7 +137,7 @@ struct MessagesView: View {
 
             Text("Unable to load messages")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             Text("Check your internet connection and try again")
                 .font(.system(size: 15))
@@ -182,7 +182,7 @@ struct MessagesView: View {
 
             Text("No Messages Yet")
                 .font(.system(size: 22, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .opacity(emptyStateVisible ? 1 : 0)
                 .offset(y: emptyStateVisible ? 0 : 10)
 
@@ -267,7 +267,7 @@ struct ConversationRow: View {
                 HStack {
                     Text(conversation.otherUserName)
                         .font(.system(size: 16, weight: conversation.hasUnread ? .bold : .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     Spacer()
 

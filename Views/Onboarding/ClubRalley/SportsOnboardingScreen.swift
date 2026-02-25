@@ -72,7 +72,7 @@ struct SportsOnboardingScreen: View {
 
                         Text("I love all sports")
                             .font(.system(size: 17, weight: .medium))
-                            .foregroundColor(.black)
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                         Spacer()
                     }
@@ -173,7 +173,7 @@ private struct SportRow: View {
                 // Sport name
                 Text(name)
                     .font(.system(size: 17))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                 Spacer()
 

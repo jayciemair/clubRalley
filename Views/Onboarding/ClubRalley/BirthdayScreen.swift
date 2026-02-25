@@ -45,7 +45,7 @@ struct BirthdayScreen: View {
 
                             Text("You'll be \(age) years old")
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.black)
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 12)

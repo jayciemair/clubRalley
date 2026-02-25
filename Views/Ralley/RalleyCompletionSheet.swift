@@ -115,7 +115,7 @@ struct RalleyCompletionSheet: View {
                 // Content
                 Text(postContent)
                     .font(.system(size: 15))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                 // Tagged users preview
                 if !taggedUserIds.isEmpty {
@@ -196,7 +196,7 @@ struct RalleyCompletionSheet: View {
 
                 Text("Don't share a post")
                     .font(.system(size: 15))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                 Spacer()
             }
@@ -333,7 +333,7 @@ private struct AttendeeRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(attendee.name)
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     Text("@\(attendee.username)")
                         .font(.system(size: 13))

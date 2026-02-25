@@ -21,7 +21,7 @@ struct SocialBioStep: View {
             VStack(spacing: 12) {
                 Text(PowerUpStep.socialBio.title)
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     .multilineTextAlignment(.center)
 
                 Text(PowerUpStep.socialBio.subtitle)

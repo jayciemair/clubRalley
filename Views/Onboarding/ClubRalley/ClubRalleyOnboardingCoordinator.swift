@@ -195,7 +195,7 @@ struct OnboardingCompletionView: View {
                 VStack(spacing: 16) {
                     Text("Congrats!")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         .multilineTextAlignment(.center)
                         .opacity(animateContent ? 1 : 0)
                         .offset(y: animateContent ? 0 : 20)

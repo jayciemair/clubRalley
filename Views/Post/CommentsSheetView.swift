@@ -76,7 +76,7 @@ struct CommentsSheetView: View {
 
             Text("No comments yet")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             Text("Be the first to comment!")
                 .font(.system(size: 15))
@@ -151,7 +151,7 @@ struct CommentRow: View {
                 HStack(spacing: 8) {
                     Text(comment.user?.displayName ?? "User")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     Text(timeAgo(from: comment.createdAt))
                         .font(.system(size: 12))
@@ -171,7 +171,7 @@ struct CommentRow: View {
                 // Comment content
                 Text(comment.content)
                     .font(.system(size: 15))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     .lineSpacing(2)
             }
         }

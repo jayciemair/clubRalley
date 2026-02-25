@@ -42,6 +42,7 @@ struct ChatsListView: View {
 
             Text("No Group Chats")
                 .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             Text("When you join or create a ralley, you'll be added to its group chat.")
                 .font(.system(size: 15))
@@ -117,7 +118,7 @@ private struct ChatListRow: View {
                 HStack {
                     Text(chat.ralleyTitle)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         .lineLimit(1)
 
                     Spacer()

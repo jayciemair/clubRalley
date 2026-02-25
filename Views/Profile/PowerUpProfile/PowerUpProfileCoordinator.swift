@@ -69,14 +69,14 @@ struct PowerUpProfileCoordinator: View {
                 Button(action: { viewModel.goToPreviousStep() }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 }
             } else {
                 // Close button on first step
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 }
             }
 
@@ -241,7 +241,7 @@ struct PowerUpCompletionView: View {
             VStack(spacing: 12) {
                 Text("Profile Powered Up!")
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                 Text("Your profile is now complete and ready to impress your teammates")
                     .font(.system(size: 16))

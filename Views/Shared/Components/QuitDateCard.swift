@@ -277,7 +277,7 @@ struct QuitDateCard: View {
             if !hideDate {
                 Text(formattedQuitDate)
                     .font(.custom("Satoshi-Bold", size: 40))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .lineLimit(2)
@@ -292,7 +292,7 @@ struct QuitDateCard: View {
 
                 Text("Checkpoint Card")
                     .font(.custom("Satoshi-Regular", size: 10))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
         }
         .padding(.vertical, 24)  // Reduced from 32 to 24

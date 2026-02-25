@@ -325,7 +325,7 @@ struct TierCarouselFullscreenView: View {
                 .font(.custom("Satoshi-Bold", size: 12))
                 .tracking(1)
         }
-        .foregroundColor(.black)
+        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
         .background(

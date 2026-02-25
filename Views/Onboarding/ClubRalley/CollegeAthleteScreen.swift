@@ -39,7 +39,7 @@ struct CollegeAthleteScreen: View {
 
                         Text("I played a sport in college")
                             .font(.system(size: 17, weight: .medium))
-                            .foregroundColor(.black)
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                         Spacer()
 

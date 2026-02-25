@@ -84,7 +84,7 @@ struct GroupChatMessageRow: View {
                 // Message bubble
                 Text(message.content)
                     .font(.system(size: 15))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .background(Color.white)

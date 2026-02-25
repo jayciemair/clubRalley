@@ -65,7 +65,7 @@ struct NotificationsView: View {
 
             Text("No notifications yet")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             Text("When you get notifications, they'll show up here")
                 .font(.system(size: 15))
@@ -145,7 +145,7 @@ struct NotificationRow: View {
                     // Message
                     Text(notificationAttributedString)
                         .font(.system(size: 15))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         .lineSpacing(2)
                         .multilineTextAlignment(.leading)
 

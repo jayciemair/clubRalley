@@ -119,7 +119,7 @@ struct RalleyCreationView: View {
                 .foregroundColor(Color(hex: "#2C4F40"))
             Text("Create a Ralley")
                 .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             Text("Organize a pickup game and become the captain")
                 .font(.system(size: 15))
                 .foregroundColor(.gray)
@@ -241,7 +241,7 @@ struct RalleyCreationView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(locationName)
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.black)
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                             if !locationAddress.isEmpty {
                                 Text(locationAddress)
                                     .font(.system(size: 13))
@@ -272,7 +272,7 @@ struct RalleyCreationView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Maximum Players")
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Text("Required")
                         .font(.system(size: 12))
                         .foregroundColor(.gray)
@@ -287,7 +287,7 @@ struct RalleyCreationView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Set Minimum Players")
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Text("Cancel if not enough players join")
                         .font(.system(size: 12))
                         .foregroundColor(.gray)
@@ -302,7 +302,7 @@ struct RalleyCreationView: View {
                 HStack {
                     Text("Minimum Players")
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Spacer()
                     PlayerCountStepper(value: $minPlayers, range: 2...maxPlayers)
                 }
@@ -443,7 +443,7 @@ struct RalleyCreationView: View {
                 .foregroundColor(Color(hex: "#2C4F40"))
             Text(title)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
         }
     }
 
@@ -457,7 +457,7 @@ struct RalleyCreationView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Repeat Every Week")
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Text("This ralley will recur weekly")
                         .font(.system(size: 12))
                         .foregroundColor(.gray)
@@ -474,7 +474,7 @@ struct RalleyCreationView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Share to Feed")
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Text("Auto-post to your followers when created")
                         .font(.system(size: 12))
                         .foregroundColor(.gray)

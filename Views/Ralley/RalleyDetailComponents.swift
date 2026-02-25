@@ -229,7 +229,7 @@ struct RalleyParticipantsSection: View {
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(attendee.name)
                                     .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.black)
+                                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                                 Text("@\(attendee.username)")
                                     .font(.system(size: 12))
                                     .foregroundColor(Color.black.opacity(0.5))
@@ -395,7 +395,7 @@ struct RalleyCaptainControls: View {
                     .background(Color(hex: "#E2E4D6").opacity(0.3))
                     .cornerRadius(12)
                 }
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
 
             // Complete Ralley — only show after ralley end time has passed
@@ -418,7 +418,7 @@ struct RalleyCaptainControls: View {
                     .background(Color(hex: "#E2E4D6").opacity(0.3))
                     .cornerRadius(12)
                 }
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
         }
         .padding(20)

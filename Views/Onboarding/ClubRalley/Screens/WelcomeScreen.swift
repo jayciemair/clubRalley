@@ -45,7 +45,7 @@ struct WelcomeScreen: View {
 
                             Text("Club Ralley")
                                 .font(.system(size: 36, weight: .bold))
-                                .foregroundColor(.black)
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         }
 
                         // Tagline
@@ -153,7 +153,7 @@ private struct WelcomeFeatureRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                 Text(description)
                     .font(.system(size: 14))

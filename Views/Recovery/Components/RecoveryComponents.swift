@@ -17,7 +17,7 @@ struct RecoveryBackButton: View {
             Button(action: action) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
             Spacer()
         }
@@ -36,7 +36,7 @@ struct RecoveryHeader: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.custom("Satoshi-Bold", size: 28))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             Text(subtitle)
                 .font(.custom("Satoshi-Regular", size: 16))
@@ -74,7 +74,7 @@ struct RecoveryCard: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text(title)
                         .font(.custom("Satoshi-Bold", size: 20))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     Text(description)
                         .font(.custom("Satoshi-Regular", size: 16))
@@ -88,7 +88,7 @@ struct RecoveryCard: View {
                 Button(action: practiceAction) {
                     Text("Practice")
                         .font(.custom("Satoshi-Bold", size: 14))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(Color.white)
@@ -122,7 +122,7 @@ struct RecoveryDoneButton: View {
         }) {
             Text("Done")
                 .font(.custom("Satoshi-Bold", size: 16))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(Color.white)

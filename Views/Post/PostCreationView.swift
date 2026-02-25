@@ -102,7 +102,7 @@ struct PostCreationInterfaceView: View {
             Button(action: { selectedTab = .home }) {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
 
             Spacer()
@@ -138,7 +138,7 @@ struct PostCreationInterfaceView: View {
             // Text input
             TextField("What's happening?", text: $postText, axis: .vertical)
                 .font(.system(size: 17))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .lineLimit(20, reservesSpace: false)
                 .focused($isTextFieldFocused)
         }
@@ -343,7 +343,7 @@ struct ThreadComposerView: View {
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 }
 
                 Spacer()
@@ -379,12 +379,12 @@ struct ThreadComposerView: View {
                 if showingTitleOption {
                     TextField("Add a Title", text: $postTitle)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 }
 
                 TextField("What's happening?", text: $postText, axis: .vertical)
                     .font(.system(size: 17))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     .lineLimit(20, reservesSpace: false)
             }
 
@@ -524,7 +524,7 @@ struct PhotoPostView: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     Spacer()
 

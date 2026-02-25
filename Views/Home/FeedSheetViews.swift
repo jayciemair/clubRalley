@@ -146,7 +146,7 @@ struct SimpleReportSheet: View {
                 ForEach(reasons, id: \.self) { reason in
                     Button(action: { selectedReason = reason }) {
                         HStack {
-                            Text(reason).font(.system(size: 16)).foregroundColor(.black)
+                            Text(reason).font(.system(size: 16)).foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                             Spacer()
                             Image(systemName: selectedReason == reason ? "checkmark.circle.fill" : "circle")
                                 .foregroundColor(selectedReason == reason ? Color(hex: "#2C4F40") : .gray)

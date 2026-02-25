@@ -46,7 +46,7 @@ struct ClubRalleyScrollableLayout<Content: View>: View {
                                 Button(action: { onBack?() }) {
                                     Image(systemName: "chevron.left")
                                         .font(.system(size: 20, weight: .medium))
-                                        .foregroundColor(.black)
+                                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                                 }
                                 Spacer()
                             }
@@ -115,7 +115,7 @@ struct ClubRalleyOnboardingHeader: View {
         VStack(spacing: 12) {
             Text(title)
                 .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .multilineTextAlignment(.center)
 
             if let subtitle = subtitle {
@@ -148,7 +148,7 @@ struct RalleyUnderlinedTextField: View {
                 if let prefix = prefix {
                     Text(prefix)
                         .font(.system(size: 18))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 }
 
                 TextField(placeholder, text: $text)

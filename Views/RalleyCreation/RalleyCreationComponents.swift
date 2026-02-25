@@ -136,7 +136,7 @@ struct PrivacyOptionRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Text(description)
                         .font(.system(size: 12))
                         .foregroundColor(.gray)

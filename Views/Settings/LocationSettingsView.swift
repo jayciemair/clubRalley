@@ -130,7 +130,7 @@ struct CityPickerView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(city.name)
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.black)
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                             Text(city.state)
                                 .font(.system(size: 14))
                                 .foregroundColor(.gray)

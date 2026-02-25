@@ -24,7 +24,7 @@ struct ReportPostView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Why are you reporting this post?")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     Text("Your report is anonymous. We'll review this post and take action if it violates our community guidelines.")
                         .font(.system(size: 14))
@@ -178,7 +178,7 @@ struct ReportReasonRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(reason.rawValue)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     Text(reason.description)
                         .font(.system(size: 14))

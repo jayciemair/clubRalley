@@ -144,7 +144,7 @@ struct RosterView: View {
                 VStack(spacing: 16) {
                     HStack {
                         Text("Roster")
-                            .font(.system(size: 28, weight: .bold))
+                            .font(.custom("Chillax-Bold", size: 26))
                             .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         Spacer()
                     }
@@ -280,7 +280,7 @@ struct RosterView: View {
                 } else if userService.users.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "person.3").font(.system(size: 48)).foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.5))
-                        Text("No athletes found").font(.system(size: 18, weight: .semibold))
+                        Text("No athletes found").font(.system(size: 18, weight: .semibold)).foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         Text("Try a different search").font(.system(size: 15)).foregroundColor(.gray)
                     }.frame(maxWidth: .infinity).padding(.top, 60)
                 } else {
@@ -345,7 +345,7 @@ struct RosterUserCardView: View {
             }
 
             // Name
-            Text(user.name).font(.system(size: 13, weight: .bold)).foregroundColor(.black).lineLimit(1)
+            Text(user.name).font(.system(size: 13, weight: .bold)).foregroundColor(ClubRalleyTheme.Colors.darkGreen).lineLimit(1)
 
             Text(user.location).font(.system(size: 11, weight: .medium)).foregroundColor(.gray).lineLimit(1)
             Text("\(user.mutuals) mutuals").font(.system(size: 11)).foregroundColor(.gray)
@@ -410,7 +410,7 @@ struct SuggestionCard: View {
             // Name
             Text(user.name)
                 .font(.system(size: 13, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .lineLimit(1)
 
             // Reason pill

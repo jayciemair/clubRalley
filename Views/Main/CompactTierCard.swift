@@ -30,7 +30,7 @@ struct CompactTierCard: View {
             // Tier name
             Text(tier.rawValue)
                 .font(.custom("Satoshi-Bold", size: 24))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
             // Quit date (compact format)
             Text(formattedQuitDate)

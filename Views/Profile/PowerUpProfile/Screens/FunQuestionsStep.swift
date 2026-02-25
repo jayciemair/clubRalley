@@ -22,7 +22,7 @@ struct FunQuestionsStep: View {
                 VStack(spacing: 12) {
                     Text(PowerUpStep.funQuestions.title)
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         .multilineTextAlignment(.center)
 
                     Text(PowerUpStep.funQuestions.subtitle)

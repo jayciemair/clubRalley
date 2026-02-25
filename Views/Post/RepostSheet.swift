@@ -34,7 +34,7 @@ struct RepostSheet: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Repost")
                                     .font(.system(size: 17, weight: .semibold))
-                                    .foregroundColor(.black)
+                                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                                 Text("Share instantly to your followers")
                                     .font(.system(size: 14))
                                     .foregroundColor(.gray)
@@ -70,7 +70,7 @@ struct RepostSheet: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Quote")
                                     .font(.system(size: 17, weight: .semibold))
-                                    .foregroundColor(.black)
+                                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                                 Text("Add your thoughts to this post")
                                     .font(.system(size: 14))
                                     .foregroundColor(.gray)

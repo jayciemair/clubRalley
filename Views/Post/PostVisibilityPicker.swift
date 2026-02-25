@@ -54,7 +54,7 @@ private struct VisibilityOption: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(visibility.displayName)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                     if showDescription {
                         Text(visibility.description)

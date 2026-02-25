@@ -17,7 +17,7 @@ struct AvailabilityStep: View {
                 VStack(spacing: 12) {
                     Text(PowerUpStep.availability.title)
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         .multilineTextAlignment(.center)
 
                     Text(PowerUpStep.availability.subtitle)

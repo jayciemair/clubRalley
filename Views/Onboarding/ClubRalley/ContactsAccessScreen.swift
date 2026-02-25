@@ -41,7 +41,7 @@ struct ContactsAccessScreen: View {
                 VStack(spacing: 12) {
                     Text(controller.currentStep.title)
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 32)
@@ -180,7 +180,7 @@ private struct ContactBenefitRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                 Text(description)
                     .font(.system(size: 14))

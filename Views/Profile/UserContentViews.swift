@@ -20,7 +20,7 @@ struct UserPostsSection: View {
                 HStack {
                     Text("My Ralleys")
                         .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Spacer()
                     Text("\(ralleyManager.getUserRalleys().count)")
                         .font(.system(size: 16, weight: .semibold))
@@ -39,7 +39,7 @@ struct UserPostsSection: View {
 
                         Text("No ralleys created yet")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.black)
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                         Text("Create your first pickup game to see it here")
                             .font(.system(size: 15, weight: .regular))
@@ -64,7 +64,7 @@ struct UserPostsSection: View {
                 HStack {
                     Text("My Posts")
                         .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                     Spacer()
                     Text("\(postManager.getUserPosts().count)")
                         .font(.system(size: 16, weight: .semibold))
@@ -83,7 +83,7 @@ struct UserPostsSection: View {
 
                         Text("No posts yet")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.black)
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                         Text("Share your athletic journey to see your posts here")
                             .font(.system(size: 15, weight: .regular))
@@ -120,7 +120,7 @@ struct UserRalleyPreview: View {
 
                 Text(ralley.title)
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
 
                 Spacer()
 
@@ -181,12 +181,12 @@ struct UserPostPreview: View {
             if let title = post.title {
                 Text(title)
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
             }
 
             Text(post.content)
                 .font(.system(size: 15, weight: .regular))
-                .foregroundColor(.black)
+                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 .lineLimit(3)
 
             HStack {

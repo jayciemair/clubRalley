@@ -106,7 +106,7 @@ struct PhoneNumberScreen: View {
                         HStack(spacing: 4) {
                             Text(selectedCountryCode)
                                 .font(.system(size: 18))
-                                .foregroundColor(.black)
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                             Image(systemName: "chevron.down")
                                 .font(.system(size: 12))
                                 .foregroundColor(.gray)
