@@ -56,7 +56,7 @@ struct ProfileView: View {
                     }
                 }
             }
-            .background(Color(hex: "#f6f5f1"))
+            .background(ClubRalleyTheme.Colors.warmBackground)
             .refreshable {
                 await viewModel.loadCurrentUserProfile()
             }

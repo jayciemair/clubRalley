@@ -45,7 +45,7 @@ struct RalleyDetailView: View {
                 Spacer(minLength: 100)
             }
         }
-        .background(ClubRalleyTheme.Colors.sageBackground)
+        .background(ClubRalleyTheme.Colors.warmBackground)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

@@ -180,7 +180,7 @@ struct RosterView: View {
                     ChatsListView()
                 }
             }
-            .background(ClubRalleyTheme.Colors.coolBackground)
+            .background(ClubRalleyTheme.Colors.warmBackground)
         .task {
             await userService.loadUsers()
             await userService.loadFollowingStatus()
