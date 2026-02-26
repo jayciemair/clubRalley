@@ -59,13 +59,14 @@ struct ClubRalleyOnboardingCoordinator: View {
             Text(controller.error?.localizedDescription ?? "Unknown error")
         }
         .navigationBarHidden(true)
+        .preferredColorScheme(.light)
     }
 
     @ViewBuilder
     private func screenView(for step: ClubRalleyOnboardingStep) -> some View {
         switch step {
-        case .phoneInput, .otpVerification:
-            PhoneNumberScreen()
+        case .emailSignUp:
+            EmailSignUpScreen()
                 .environmentObject(controller)
 
         case .name:
