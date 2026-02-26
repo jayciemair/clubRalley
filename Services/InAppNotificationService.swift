@@ -74,7 +74,7 @@ class InAppNotificationService: ObservableObject {
 
         do {
             let dbNotifications: [DatabaseNotificationWithUser] = try await supabase.query("notifications")
-                .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
+                .select("*, club_users(first_name, last_name, username, profile_photo_url)")
                 .eq("user_id", value: currentUser.id)
                 .order("created_at", ascending: false)
                 .execute()
@@ -82,12 +82,12 @@ class InAppNotificationService: ObservableObject {
             notifications = dbNotifications.map { $0.toAppNotification() }
             unreadCount = notifications.filter { !$0.isRead }.count
 
-            print("✅ InAppNotificationService: Loaded \(notifications.count) notifications (\(unreadCount) unread)")
+            print("InAppNotificationService: Loaded \(notifications.count) notifications (\(unreadCount) unread)")
             isLoading = false
         } catch {
             self.error = error
             isLoading = false
-            print("❌ InAppNotificationService: Failed to load notifications: \(error)")
+            print("InAppNotificationService: Failed to load notifications: \(error)")
         }
     }
 
@@ -95,70 +95,38 @@ class InAppNotificationService: ObservableObject {
 
     /// Mark a notification as read
     func markAsRead(_ notificationId: UUID) async {
+        // Optimistic update
+        if let index = notifications.firstIndex(where: { $0.id == notificationId }) {
+            notifications[index].isRead = true
+            unreadCount = notifications.filter { !$0.isRead }.count
+        }
+
         guard supabase.isAuthenticated else { return }
 
         do {
             let update = NotificationReadUpdate(is_read: true)
             try await supabase.update(update, in: "notifications", where: "id = '\(notificationId)'")
-
-            // Update local state
-            if let index = notifications.firstIndex(where: { $0.id == notificationId }) {
-                var updated = notifications[index]
-                updated = AppNotification(
-                    id: updated.id,
-                    userId: updated.userId,
-                    type: updated.type,
-                    title: updated.title,
-                    body: updated.body,
-                    isRead: true,
-                    fromUserId: updated.fromUserId,
-                    fromUserName: updated.fromUserName,
-                    fromUserPhotoURL: updated.fromUserPhotoURL,
-                    ralleyId: updated.ralleyId,
-                    postId: updated.postId,
-                    createdAt: updated.createdAt
-                )
-                notifications[index] = updated
-                unreadCount = notifications.filter { !$0.isRead }.count
-            }
-
-            print("✅ InAppNotificationService: Marked notification \(notificationId) as read")
         } catch {
-            print("❌ InAppNotificationService: Failed to mark as read: \(error)")
+            print("InAppNotificationService: Failed to mark as read: \(error)")
         }
     }
 
     /// Mark all notifications as read
     func markAllAsRead() async {
+        // Optimistic update
+        for index in notifications.indices {
+            notifications[index].isRead = true
+        }
+        unreadCount = 0
+
         guard supabase.isAuthenticated else { return }
         guard let currentUser = supabase.currentUser else { return }
 
         do {
             let update = NotificationReadUpdate(is_read: true)
             try await supabase.update(update, in: "notifications", where: "user_id = '\(currentUser.id)' AND is_read = 'false'")
-
-            // Update local state
-            notifications = notifications.map { notification in
-                AppNotification(
-                    id: notification.id,
-                    userId: notification.userId,
-                    type: notification.type,
-                    title: notification.title,
-                    body: notification.body,
-                    isRead: true,
-                    fromUserId: notification.fromUserId,
-                    fromUserName: notification.fromUserName,
-                    fromUserPhotoURL: notification.fromUserPhotoURL,
-                    ralleyId: notification.ralleyId,
-                    postId: notification.postId,
-                    createdAt: notification.createdAt
-                )
-            }
-            unreadCount = 0
-
-            print("✅ InAppNotificationService: Marked all notifications as read")
         } catch {
-            print("❌ InAppNotificationService: Failed to mark all as read: \(error)")
+            print("InAppNotificationService: Failed to mark all as read: \(error)")
         }
     }
 
@@ -167,13 +135,13 @@ class InAppNotificationService: ObservableObject {
     /// Create a notification for a like
     func createLikeNotification(postId: UUID, postOwnerId: UUID) async {
         guard let currentUser = supabase.currentUser else { return }
-        guard postOwnerId != currentUser.id else { return } // Don't notify yourself
+        guard postOwnerId != currentUser.id else { return }
 
         await createNotification(
             userId: postOwnerId,
             type: .like,
-            title: "\(currentUser.displayName) liked your post",
-            fromUserId: currentUser.id,
+            message: "\(currentUser.displayName) liked your post",
+            actorId: currentUser.id,
             postId: postId
         )
     }
@@ -183,13 +151,11 @@ class InAppNotificationService: ObservableObject {
         guard let currentUser = supabase.currentUser else { return }
         guard postOwnerId != currentUser.id else { return }
 
-        let preview = commentPreview.prefix(50)
         await createNotification(
             userId: postOwnerId,
             type: .comment,
-            title: "\(currentUser.displayName) commented on your post",
-            body: String(preview),
-            fromUserId: currentUser.id,
+            message: "\(currentUser.displayName) commented: \(String(commentPreview.prefix(50)))",
+            actorId: currentUser.id,
             postId: postId
         )
     }
@@ -201,9 +167,9 @@ class InAppNotificationService: ObservableObject {
 
         await createNotification(
             userId: followedUserId,
-            type: .follow,
-            title: "\(currentUser.displayName) started following you",
-            fromUserId: currentUser.id
+            type: .newFollower,
+            message: "\(currentUser.displayName) started following you",
+            actorId: currentUser.id
         )
     }
 
@@ -215,9 +181,8 @@ class InAppNotificationService: ObservableObject {
         await createNotification(
             userId: hostId,
             type: .ralleyJoin,
-            title: "\(currentUser.displayName) joined your ralley",
-            body: ralleyTitle,
-            fromUserId: currentUser.id,
+            message: "\(currentUser.displayName) joined your ralley",
+            actorId: currentUser.id,
             ralleyId: ralleyId
         )
     }
@@ -229,9 +194,8 @@ class InAppNotificationService: ObservableObject {
         await createNotification(
             userId: userId,
             type: .ralleyInvite,
-            title: "\(currentUser.displayName) invited you to a ralley",
-            body: ralleyTitle,
-            fromUserId: currentUser.id,
+            message: "\(currentUser.displayName) invited you to a ralley",
+            actorId: currentUser.id,
             ralleyId: ralleyId
         )
     }
@@ -241,44 +205,40 @@ class InAppNotificationService: ObservableObject {
     private func createNotification(
         userId: UUID,
         type: NotificationType,
-        title: String,
-        body: String? = nil,
-        fromUserId: UUID? = nil,
+        message: String,
+        actorId: UUID? = nil,
         postId: UUID? = nil,
         ralleyId: UUID? = nil
     ) async {
-        let notification = DatabaseNotification(
+        let insert = NotificationInsert(
             user_id: userId,
-            type: type,
-            title: title,
-            body: body,
-            from_user_id: fromUserId,
-            ralley_id: ralleyId,
-            post_id: postId
+            type: type.rawValue,
+            actor_id: actorId,
+            message: message,
+            post_id: postId,
+            ralley_id: ralleyId
         )
 
         do {
-            try await supabase.insert(notification, into: "notifications")
-            print("✅ InAppNotificationService: Created \(type.rawValue) notification for user \(userId)")
+            try await supabase.insert(insert, into: "notifications")
+            print("InAppNotificationService: Created \(type.rawValue) notification for user \(userId)")
         } catch {
-            print("❌ InAppNotificationService: Failed to create notification: \(error)")
+            print("InAppNotificationService: Failed to create notification: \(error)")
         }
     }
 
     private func handleNewNotification(_ payload: NotificationPayload) {
-        // Convert payload to AppNotification and add to list
         let notification = AppNotification(
             id: payload.id,
-            userId: payload.userId,
-            type: NotificationType(rawValue: payload.type) ?? .system,
-            title: payload.message,
-            body: nil,
-            isRead: payload.isRead,
-            fromUserId: payload.actorId,
-            fromUserName: nil,
-            fromUserPhotoURL: nil,
-            ralleyId: payload.ralleyId,
+            type: NotificationType(rawValue: payload.type) ?? .general,
+            actorId: payload.actorId,
+            actorName: nil,
+            actorPhotoURL: nil,
+            actorUsername: nil,
             postId: payload.postId,
+            ralleyId: payload.ralleyId,
+            message: payload.message,
+            isRead: payload.isRead,
             createdAt: payload.createdAt
         )
 
@@ -288,7 +248,7 @@ class InAppNotificationService: ObservableObject {
             unreadCount += 1
         }
 
-        print("✅ InAppNotificationService: Received new notification: \(notification.title)")
+        print("InAppNotificationService: Received new notification: \(notification.message)")
     }
 }
 
@@ -296,4 +256,13 @@ class InAppNotificationService: ObservableObject {
 
 struct NotificationReadUpdate: Encodable {
     let is_read: Bool
+}
+
+struct NotificationInsert: Codable {
+    let user_id: UUID
+    let type: String
+    let actor_id: UUID?
+    let message: String
+    let post_id: UUID?
+    let ralley_id: UUID?
 }

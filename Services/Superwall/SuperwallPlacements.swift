@@ -12,38 +12,10 @@ import Foundation
 enum SuperwallPlacements {
 
     // MARK: - Onboarding Placements
-    static let onboardingAccessPlan = "onboarding_access_plan"
     static let onboardingComplete = "onboarding_complete"
-    static let onboardingQuitDateReveal = "onboarding_quit_date_reveal"
-    static let onboardingInvestInYourself = "onboarding_invest_in_yourself"
-
-    // MARK: - Age-Based Onboarding Campaigns
-    static func onboardingAge(for age: Int) -> String {
-        switch age {
-        case ..<18:
-            return "ageUnder18"
-        case 18...22:
-            return "age18to22"
-        case 23...28:
-            return "age23to28"
-        case 29...35:
-            return "age29to35"
-        case 36...49:
-            return "age36to49"
-        default:
-            return "ageOver49"
-        }
-    }
-
-    // MARK: - Main App Placements
-    static let analyticsFrozen = "analytics_frozen"
-    static let mainViewUpgrade = "main_view_upgrade"
-    static let dashboardUpgrade = "dashboard_upgrade"
 
     // MARK: - Feature Limit Placements
     static let featureLimit = "feature_limit"
-    static let strictMode = "strict_mode"
-    static let weeklyPrompt = "weekly_prompt"
 
     // MARK: - Session & Lifecycle Placements
     static let sessionStart = "session_start"

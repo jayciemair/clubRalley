@@ -69,23 +69,73 @@ struct EditProfileView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: ClubRalleyTheme.Spacing.lg) {
-                profilePhotoSection
-                nameSection
-                usernameSection
-                bioSection
-                locationSection
-                instagramSection
+                EditProfilePhotoSection(
+                    showingImagePicker: $showingImagePicker,
+                    selectedImage: $selectedImage,
+                    currentPhotoURL: viewModel.currentPhotoURL
+                )
+                EditProfileNameSection(
+                    firstName: $firstName,
+                    lastName: $lastName,
+                    nameError: viewModel.nameError
+                )
+                EditProfileUsernameSection(
+                    username: $username,
+                    usernameError: viewModel.usernameError
+                )
+                EditProfileBioSection(
+                    bio: $bio,
+                    bioError: viewModel.bioError,
+                    maxBioLength: EditProfileViewModel.maxBioLength
+                )
+                EditProfileLocationSection(
+                    city: $city,
+                    state: $state
+                )
+                EditProfileInstagramSection(
+                    instagramHandle: $instagramHandle
+                )
                 Divider().padding(.vertical, 8)
-                privacySection
+                EditProfilePrivacySection(
+                    isPrivateAccount: $isPrivateAccount
+                )
                 Divider().padding(.vertical, 8)
-                collegeAthleteSection
+                EditProfileCollegeSection(
+                    playedCollegeSport: $playedCollegeSport,
+                    collegeSport: $collegeSport,
+                    collegeSchool: $collegeSchool,
+                    collegeDivision: $collegeDivision,
+                    collegeYears: $collegeYears,
+                    collegePosition: $collegePosition
+                )
                 Divider().padding(.vertical, 8)
-                sportsAndSkillsSection
+                EditProfileSportsSection(
+                    sportsWithSkills: $sportsWithSkills,
+                    availableSports: availableSports,
+                    isSportsExpanded: $isSportsExpanded
+                )
                 Divider().padding(.vertical, 8)
-                availabilitySection
+                EditProfileAvailabilitySection(
+                    isAvailabilityExpanded: $isAvailabilityExpanded,
+                    daySelection: $daySelection,
+                    selectedDays: $selectedDays,
+                    timePreference: $timePreference,
+                    maxDistance: $maxDistance
+                )
                 Divider().padding(.vertical, 8)
-                funQuestionsSection
-                saveButtonSection
+                EditProfileFunQuestionsSection(
+                    isFunQuestionsExpanded: $isFunQuestionsExpanded,
+                    favoriteProTeam: $favoriteProTeam,
+                    workoutBrands: $workoutBrands,
+                    workoutClasses: $workoutClasses,
+                    hometown: $hometown,
+                    wouldDoHappyHour: $wouldDoHappyHour
+                )
+                EditProfileSaveButton(
+                    isSaving: viewModel.isSaving,
+                    isFormValid: isFormValid,
+                    onSave: { Task { await saveProfile() } }
+                )
                 Spacer(minLength: 50)
             }
             .padding(ClubRalleyTheme.Spacing.lg)
@@ -132,597 +182,7 @@ struct EditProfileView: View {
         }
     }
 
-    // MARK: - Body Subsections
-
-    private var nameSection: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Name")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
-            HStack(spacing: ClubRalleyTheme.Spacing.md) {
-                TextField("First Name", text: $firstName)
-                    .textFieldStyle(ClubRalleyTextFieldStyle())
-                TextField("Last Name", text: $lastName)
-                    .textFieldStyle(ClubRalleyTextFieldStyle())
-            }
-
-            if let nameError = viewModel.nameError {
-                Text(nameError)
-                    .font(ClubRalleyTheme.Typography.caption)
-                    .foregroundColor(ClubRalleyTheme.Colors.error)
-            }
-        }
-    }
-
-    private var usernameSection: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Username")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
-            TextField("username", text: $username)
-                .textFieldStyle(ClubRalleyTextFieldStyle())
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
-
-            if let error = viewModel.usernameError {
-                Text(error)
-                    .font(ClubRalleyTheme.Typography.caption)
-                    .foregroundColor(ClubRalleyTheme.Colors.error)
-            }
-        }
-    }
-
-    private var bioSection: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Bio")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
-            TextEditor(text: $bio)
-                .frame(minHeight: 100)
-                .padding(8)
-                .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
-                .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
-                .overlay(
-                    RoundedRectangle(cornerRadius: ClubRalleyTheme.CornerRadius.medium)
-                        .stroke(ClubRalleyTheme.Colors.accent.opacity(0.3), lineWidth: 1)
-                )
-
-            HStack {
-                Text("\(bio.count)/\(EditProfileViewModel.maxBioLength) characters")
-                    .font(ClubRalleyTheme.Typography.caption)
-                    .foregroundColor(bio.count > EditProfileViewModel.maxBioLength ? ClubRalleyTheme.Colors.error : ClubRalleyTheme.Colors.secondaryText)
-                Spacer()
-                if bio.count > EditProfileViewModel.maxBioLength {
-                    Text("Too long")
-                        .font(ClubRalleyTheme.Typography.caption)
-                        .foregroundColor(ClubRalleyTheme.Colors.error)
-                }
-            }
-
-            if let bioError = viewModel.bioError {
-                Text(bioError)
-                    .font(ClubRalleyTheme.Typography.caption)
-                    .foregroundColor(ClubRalleyTheme.Colors.error)
-            }
-        }
-    }
-
-    private var locationSection: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Location")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
-            HStack(spacing: ClubRalleyTheme.Spacing.md) {
-                TextField("City", text: $city)
-                    .textFieldStyle(ClubRalleyTextFieldStyle())
-                TextField("State", text: $state)
-                    .textFieldStyle(ClubRalleyTextFieldStyle())
-                    .frame(width: 80)
-            }
-        }
-    }
-
-    private var instagramSection: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Instagram")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
-            HStack {
-                Text("@")
-                    .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                TextField("username", text: $instagramHandle)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
-            }
-            .padding()
-            .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
-            .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
-        }
-    }
-
-    private var privacySection: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Privacy")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
-            Toggle(isOn: $isPrivateAccount) {
-                HStack(spacing: 12) {
-                    Image(systemName: isPrivateAccount ? "lock.fill" : "lock.open.fill")
-                        .foregroundColor(ClubRalleyTheme.Colors.accent)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Private Account")
-                            .font(ClubRalleyTheme.Typography.body)
-                        Text(isPrivateAccount ? "Only approved followers can see your profile" : "Anyone can see your profile")
-                            .font(ClubRalleyTheme.Typography.caption)
-                            .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                    }
-                }
-            }
-            .tint(ClubRalleyTheme.Colors.accent)
-        }
-    }
-
-    private var collegeAthleteSection: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.md) {
-            Text("College Athlete")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
-            Toggle(isOn: $playedCollegeSport) {
-                HStack(spacing: 12) {
-                    Image(systemName: "graduationcap.fill")
-                        .foregroundColor(ClubRalleyTheme.Colors.accent)
-                    Text("I played a sport in college")
-                        .font(ClubRalleyTheme.Typography.body)
-                }
-            }
-            .tint(ClubRalleyTheme.Colors.accent)
-
-            if playedCollegeSport {
-                collegeFieldsSection
-            }
-        }
-        .animation(.easeInOut(duration: 0.2), value: playedCollegeSport)
-    }
-
-    private var collegeFieldsSection: some View {
-        VStack(spacing: ClubRalleyTheme.Spacing.md) {
-            TextField("Sport (e.g., Tennis, Soccer)", text: $collegeSport)
-                .textFieldStyle(ClubRalleyTextFieldStyle())
-            TextField("School Name", text: $collegeSchool)
-                .textFieldStyle(ClubRalleyTextFieldStyle())
-            HStack {
-                Text("Division")
-                    .font(ClubRalleyTheme.Typography.body)
-                    .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                Spacer()
-                Picker("Division", selection: $collegeDivision) {
-                    ForEach(CollegeDivision.allCases, id: \.self) { division in
-                        Text(division.displayName).tag(division)
-                    }
-                }
-                .pickerStyle(.menu)
-                .tint(ClubRalleyTheme.Colors.accent)
-            }
-            .padding()
-            .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
-            .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
-            TextField("Position (optional)", text: $collegePosition)
-                .textFieldStyle(ClubRalleyTextFieldStyle())
-            TextField("Years played (e.g., 2019-2023)", text: $collegeYears)
-                .textFieldStyle(ClubRalleyTextFieldStyle())
-        }
-        .padding(.leading, 8)
-        .transition(.opacity.combined(with: .move(edge: .top)))
-    }
-
-    // MARK: - Sports & Skills Section (Collapsible)
-
-    private var sportsAndSkillsSection: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isSportsExpanded.toggle()
-                }
-            }) {
-                HStack {
-                    Text("Sports & Skills")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-                    Spacer()
-                    if !isSportsExpanded && !sportsWithSkills.isEmpty {
-                        sportsCollapsedSummary
-                    }
-                    Image(systemName: isSportsExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                }
-            }
-            .buttonStyle(PlainButtonStyle())
-
-            if isSportsExpanded {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Select your sports")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.secondary)
-
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                        ForEach(availableSports) { sport in
-                            SportSelectionCardPowerUp(
-                                sport: sport,
-                                isSelected: isSportSelectedByName(sport.name),
-                                onTap: { toggleSportByName(sport) }
-                            )
-                        }
-                    }
-
-                    if !sportsWithSkills.isEmpty {
-                        Text("Set your skill level")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-
-                        ForEach(sportsWithSkills.indices, id: \.self) { index in
-                            SkillLevelPicker(
-                                sport: sportsWithSkills[index].sport,
-                                skillLevel: $sportsWithSkills[index].skillLevel
-                            )
-                        }
-                    }
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
-        }
-        .animation(.easeInOut(duration: 0.2), value: isSportsExpanded)
-    }
-
-    private var sportsCollapsedSummary: some View {
-        HStack(spacing: 4) {
-            ForEach(sportsWithSkills.prefix(3), id: \.id) { sportWithSkill in
-                Text(sportWithSkill.sport.name)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(ClubRalleyTheme.Colors.accent)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(ClubRalleyTheme.Colors.accent.opacity(0.1))
-                    .cornerRadius(10)
-            }
-            if sportsWithSkills.count > 3 {
-                Text("+\(sportsWithSkills.count - 3)")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-            }
-        }
-    }
-
-    // MARK: - Availability Section (Collapsible)
-
-    private var availabilitySection: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isAvailabilityExpanded.toggle()
-                }
-            }) {
-                HStack {
-                    Text("Availability")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-                    Spacer()
-                    if !isAvailabilityExpanded {
-                        Text(daySelection.displayName + " \u{00B7} " + timePreference.displayName)
-                            .font(.system(size: 12))
-                            .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                    }
-                    Image(systemName: isAvailabilityExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                }
-            }
-            .buttonStyle(PlainButtonStyle())
-
-            if isAvailabilityExpanded {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Day selection
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("When are you usually free?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-
-                        VStack(spacing: 10) {
-                            ForEach(DaySelection.allCases, id: \.self) { option in
-                                DayOptionCard(
-                                    option: option,
-                                    isSelected: daySelection == option,
-                                    onTap: { selectDayOption(option) }
-                                )
-                            }
-                        }
-
-                        if daySelection == .specificDays {
-                            HStack(spacing: 8) {
-                                ForEach(DayOfWeek.days, id: \.id) { day in
-                                    DayCircleButton(
-                                        label: day.shortName,
-                                        isSelected: selectedDays.contains(day.id),
-                                        onTap: { toggleDay(day.id) }
-                                    )
-                                }
-                            }
-                            .padding(.top, 4)
-                        }
-                    }
-
-                    // Time preference
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("What time works best?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                            ForEach(TimePreference.allCases, id: \.self) { time in
-                                TimePreferenceCard(
-                                    preference: time,
-                                    isSelected: timePreference == time,
-                                    onTap: { timePreference = time }
-                                )
-                            }
-                        }
-                    }
-
-                    // Distance slider
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("How far will you travel?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-
-                        VStack(spacing: 12) {
-                            HStack {
-                                Text("Up to")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.secondary)
-                                Text("\(maxDistance) miles")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
-                                Spacer()
-                            }
-
-                            Slider(
-                                value: Binding(
-                                    get: { Double(maxDistance) },
-                                    set: { maxDistance = Int($0) }
-                                ),
-                                in: 5...100,
-                                step: 5
-                            )
-                            .tint(ClubRalleyTheme.Colors.darkGreen)
-
-                            HStack {
-                                Text("5 mi")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text("100 mi")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .padding(16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(.systemGray6))
-                        )
-                    }
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
-        }
-        .animation(.easeInOut(duration: 0.2), value: isAvailabilityExpanded)
-    }
-
-    // MARK: - Fun Questions Section (Collapsible)
-
-    private var funQuestionsSection: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isFunQuestionsExpanded.toggle()
-                }
-            }) {
-                HStack {
-                    Text("Fun Questions")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-                    Spacer()
-                    Image(systemName: isFunQuestionsExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                }
-            }
-            .buttonStyle(PlainButtonStyle())
-
-            if isFunQuestionsExpanded {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Favorite pro team
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Favorite pro sports team?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-
-                        TextField("e.g. Lakers, Patriots, Yankees...", text: $favoriteProTeam)
-                            .font(.system(size: 16))
-                            .padding(14)
-                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-                    }
-
-                    // Workout brands
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Favorite workout brands?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-
-                        PowerUpTagGrid(
-                            items: WorkoutBrandOptions.brands,
-                            selectedItems: $workoutBrands
-                        )
-                    }
-
-                    // Workout classes
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Favorite type of workout class?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-
-                        PowerUpTagGrid(
-                            items: WorkoutClassOptions.classes,
-                            selectedItems: $workoutClasses
-                        )
-                    }
-
-                    // Hometown
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Hometown")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-
-                        TextField("City, State", text: $hometown)
-                            .font(.system(size: 16))
-                            .textInputAutocapitalization(.words)
-                            .padding(14)
-                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-                    }
-
-                    // Happy hour
-                    YesNoToggle(
-                        question: "Would you go to happy hour after a workout?",
-                        value: $wouldDoHappyHour
-                    )
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
-        }
-        .animation(.easeInOut(duration: 0.2), value: isFunQuestionsExpanded)
-    }
-
-    private var saveButtonSection: some View {
-        Button(action: {
-            Task { await saveProfile() }
-        }) {
-            HStack {
-                if viewModel.isSaving {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .padding(.trailing, 8)
-                }
-                Text(viewModel.isSaving ? "Saving..." : "Save Profile")
-                    .font(ClubRalleyTheme.Typography.bodyBold)
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(ClubRalleyTheme.Colors.accent)
-            .foregroundColor(.white)
-            .cornerRadius(ClubRalleyTheme.CornerRadius.large)
-        }
-        .disabled(viewModel.isSaving || !isFormValid)
-        .opacity(isFormValid ? 1.0 : 0.6)
-        .padding(.top, ClubRalleyTheme.Spacing.lg)
-    }
-
-    // MARK: - Profile Photo Section
-
-    private var profilePhotoSection: some View {
-        VStack(spacing: ClubRalleyTheme.Spacing.md) {
-            ZStack(alignment: .bottomTrailing) {
-                if let image = selectedImage {
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 120, height: 120)
-                        .clipShape(Circle())
-                } else if let photoURL = viewModel.currentPhotoURL,
-                          let url = URL(string: photoURL) {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Circle()
-                            .fill(ClubRalleyTheme.Colors.sageGreen)
-                            .overlay(
-                                Image(systemName: "person.fill")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(ClubRalleyTheme.Colors.accent)
-                            )
-                    }
-                    .frame(width: 120, height: 120)
-                    .clipShape(Circle())
-                } else {
-                    Circle()
-                        .fill(ClubRalleyTheme.Colors.sageGreen)
-                        .frame(width: 120, height: 120)
-                        .overlay(
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(ClubRalleyTheme.Colors.accent)
-                        )
-                }
-
-                Button(action: {
-                    showingImagePicker = true
-                }) {
-                    Image(systemName: "camera.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.white)
-                        .padding(8)
-                        .background(ClubRalleyTheme.Colors.accent)
-                        .clipShape(Circle())
-                }
-            }
-
-            Text("Tap to change photo")
-                .font(ClubRalleyTheme.Typography.caption)
-                .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-        }
-    }
-
-    // MARK: - Sports Helpers (name-based matching)
-
-    private func isSportSelectedByName(_ name: String) -> Bool {
-        sportsWithSkills.contains { $0.sport.name == name }
-    }
-
-    private func toggleSportByName(_ sport: Sport) {
-        if let index = sportsWithSkills.firstIndex(where: { $0.sport.name == sport.name }) {
-            sportsWithSkills.remove(at: index)
-        } else {
-            sportsWithSkills.append(SportWithSkill(sport: sport, skillLevel: .competitor))
-        }
-    }
-
-    // MARK: - Availability Helpers
-
-    private func selectDayOption(_ option: DaySelection) {
-        daySelection = option
-        if option != .specificDays {
-            selectedDays.removeAll()
-        }
-    }
-
-    private func toggleDay(_ day: Int) {
-        if selectedDays.contains(day) {
-            selectedDays.remove(day)
-        } else {
-            selectedDays.insert(day)
-        }
-        daySelection = .specificDays
-    }
-
-    // MARK: - Methods
+    // MARK: - Data Lifecycle
 
     private func loadCurrentProfile() {
         print("📝 EDIT_PROFILE loadCurrentProfile START")

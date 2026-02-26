@@ -45,4 +45,20 @@ struct DatabaseNotificationWithUser: Codable {
         case ralley_id, message, is_read, created_at
         case actor = "club_users"
     }
+
+    func toAppNotification() -> AppNotification {
+        AppNotification(
+            id: id,
+            type: NotificationType(rawValue: type) ?? .general,
+            actorId: actor_id,
+            actorName: actor.map { "\($0.first_name) \($0.last_name)" },
+            actorPhotoURL: actor?.profile_photo_url,
+            actorUsername: actor?.username,
+            postId: post_id,
+            ralleyId: ralley_id,
+            message: message,
+            isRead: is_read,
+            createdAt: created_at
+        )
+    }
 }

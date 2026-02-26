@@ -302,7 +302,7 @@ class RalleyCompletionManager: ObservableObject {
 
             // Update local ralley state
             if let ralleyManager = ralleyManager,
-               let index = ralleyManager.indexOfRalley(ralley.id) {
+               let _ = ralleyManager.indexOfRalley(ralley.id) {
                 // Could mark as completed in local state
             }
 

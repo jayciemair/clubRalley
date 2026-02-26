@@ -11,11 +11,9 @@ import Foundation
 // MARK: - Flow Types
 /// Represents different types of onboarding flows available in the app
 enum FlowType: String, CaseIterable {
-    case software = "software_onboarding"  // Main onboarding flow
-    case signIn = "sign_in"               // Sign in flow for returning users
-    case dataRecovery = "data_recovery"   // Recovery flow for orphaned accounts
-    case soberOnlyDeletionPrevention = "sober_only_deletion_prevention"  // Deletion prevention flow
-    case nuclearDeletionPrevention = "nuclear_deletion_prevention"        // Nuclear deletion flow
+    case software = "software_onboarding"
+    case signIn = "sign_in"
+    case dataRecovery = "data_recovery"
 }
 
 // MARK: - Screen Types
@@ -25,46 +23,11 @@ enum ScreenType: String, Codable {
     // MARK: Authentication
     case supabaseAuth = "auth.supabase"
 
-    // MARK: Intro (Hook Screens)
-    case welcomeSplash = "intro.welcome_splash"
-    case mochiIntro = "intro.mochi_intro"
-    case nameInput = "intro.name_input"
-    case notAboutHim = "intro.not_about_him"
-    case mochiBridge = "intro.mochi_bridge"
-    case breakupTiming = "intro.breakup_timing"
-    case whoEndedIt = "intro.who_ended_it"
-    case whatsHurting = "intro.whats_hurting"
-    case howCoping = "intro.how_coping"
-    case mainGoals = "intro.main_goals"
-    case calculatingResults = "intro.calculating_results"
-    case attachmentReveal = "intro.attachment_reveal"
-    case youCared = "intro.you_cared"
-    case healingNotLinear = "intro.healing_not_linear"
-    case mochiJourney = "intro.mochi_journey"
-    case urgeToText = "intro.urge_to_text"
-    case textHimPreview = "intro.text_him_preview"
-    case textHimDemo = "intro.text_him_demo"
-    case mochiRealTalk = "intro.mochi_real_talk"
-    case loveIsADrug = "intro.love_is_a_drug"
-    case grieveAsDeep = "intro.grieve_as_deep"
-    case theCosts = "intro.the_costs"
-    case commitToChange = "intro.commit_to_change"
-    case healingTimeline = "intro.healing_timeline"
-    case mochiHelp = "intro.mochi_help"
-    case checkinFrequency = "intro.checkin_frequency"
-    case mochiPromise = "intro.mochi_promise"
-    case socialProof = "intro.social_proof"
-
     // MARK: Setup
     case welcomeToCheckpoint = "setup.welcome"
-    case lastContactDate = "setup.last_contact_date"
 
     // MARK: Data Recovery
     case dataRecoveryIntro = "recovery.intro"
-
-    // MARK: Deletion Prevention (keep for app functionality)
-    case breathingIntro = "deletion.breathing_intro"
-    case breathingExercise = "deletion.breathing_exercise"
 }
 
 // MARK: - Screen Configuration

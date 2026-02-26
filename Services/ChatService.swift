@@ -39,7 +39,7 @@ class ChatService: ObservableObject, ChatServiceProtocol {
     // MARK: - Dependencies
 
     /// Supabase client for database operations
-    private let supabase = SupabaseManager.shared
+    let supabase = SupabaseManager.shared
 
     // MARK: - Published Properties
 
@@ -50,13 +50,16 @@ class ChatService: ObservableObject, ChatServiceProtocol {
     @Published var lastError: SupabaseManager.SupabaseError?
 
     /// Track last read message timestamps per chat (stored in UserDefaults)
-    private var lastReadTimestamps: [UUID: Date] = [:]
+    var lastReadTimestamps: [UUID: Date] = [:]
     private let lastReadKey = "clubRalley_chatLastRead"
 
     // MARK: - Initialization
 
     init() {
         loadLastReadTimestamps()
+        Task {
+            await syncLastReadFromDatabase()
+        }
     }
 
     // MARK: - Last Read Tracking
@@ -74,7 +77,7 @@ class ChatService: ObservableObject, ChatServiceProtocol {
     }
 
     /// Save last read timestamps to UserDefaults
-    private func saveLastReadTimestamps() {
+    func saveLastReadTimestamps() {
         let stringKeyed = lastReadTimestamps.reduce(into: [String: Date]()) { result, pair in
             result[pair.key.uuidString] = pair.value
         }
@@ -83,11 +86,16 @@ class ChatService: ObservableObject, ChatServiceProtocol {
         }
     }
 
-    /// Mark a chat as read (updates last read timestamp)
+    /// Mark a chat as read (updates last read timestamp locally and in the database)
     func markChatAsRead(chatId: UUID) {
         lastReadTimestamps[chatId] = Date()
         saveLastReadTimestamps()
         print("ChatService: Marked chat \(chatId) as read")
+
+        // Sync to database (fire-and-forget)
+        Task {
+            await syncMarkAsReadToDatabase(chatId: chatId)
+        }
     }
 
     /// Get last read timestamp for a chat
@@ -348,160 +356,6 @@ class ChatService: ObservableObject, ChatServiceProtocol {
         }
     }
 
-    // MARK: - Member Management
-
-    /**
-     * Add a member to a chat (adds to ralley participants)
-     * @param chatId: ID of the ralley
-     * @param userId: ID of the user to add
-     * @param role: Role to assign (default: member)
-     */
-    func addMember(chatId: UUID, userId: UUID, role: ChatMemberRole = .member) async throws {
-        guard supabase.isAuthenticated else {
-            throw SupabaseManager.SupabaseError.notAuthenticated
-        }
-
-        do {
-            // Add to ralley participants
-            let participant = DatabaseRalleyParticipantInsert(
-                ralley_id: chatId,
-                user_id: userId,
-                status: "joined"
-            )
-
-            try await supabase.insert(participant, into: "ralley_participants")
-
-            // Send system message
-            if let currentUser = supabase.currentUser {
-                let systemMessage = DatabaseChatMessageInsertRecord(
-                    ralley_id: chatId,
-                    sender_id: currentUser.id,
-                    content: "A new member joined the ralley!",
-                    message_type: "system"
-                )
-                try await supabase.insert(systemMessage, into: "chat_messages")
-            }
-
-            print("ChatService: Added member \(userId) to ralley \(chatId)")
-
-        } catch {
-            print("ChatService: Add member failed: \(error)")
-            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
-        }
-    }
-
-    /**
-     * Remove a member from a chat (removes from ralley participants)
-     * @param chatId: ID of the ralley
-     * @param userId: ID of the user to remove
-     */
-    func removeMember(chatId: UUID, userId: UUID) async throws {
-        guard supabase.isAuthenticated else {
-            throw SupabaseManager.SupabaseError.notAuthenticated
-        }
-
-        do {
-            try await supabase.delete(
-                from: "ralley_participants",
-                where: "ralley_id = '\(chatId)' AND user_id = '\(userId)'"
-            )
-
-            print("ChatService: Removed member \(userId) from ralley \(chatId)")
-
-        } catch {
-            print("ChatService: Remove member failed: \(error)")
-            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
-        }
-    }
-
-    /**
-     * Load members of a chat (ralley participants)
-     * @param chatId: ID of the ralley
-     * @returns: Array of GroupChatMember models
-     */
-    func loadMembers(chatId: UUID) async throws -> [GroupChatMember] {
-        guard supabase.isAuthenticated else {
-            throw SupabaseManager.SupabaseError.notAuthenticated
-        }
-
-        guard let currentUser = supabase.currentUser else {
-            throw SupabaseManager.SupabaseError.userNotFound
-        }
-
-        do {
-            // Get ralley host
-            let ralleys: [DatabaseRalleyBasic] = try await supabase.query("ralleys")
-                .select("id, host_user_id, title, sport, date_time, current_participants")
-                .eq("id", value: chatId)
-                .execute()
-
-            let hostId = ralleys.first?.host_user_id
-
-            // Get participants with user info
-            let dbParticipants: [DatabaseChatParticipantWithUser] = try await supabase.query("ralley_participants")
-                .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
-                .eq("ralley_id", value: chatId)
-                .execute()
-
-            var members = dbParticipants.map { participant in
-                let isHost = participant.user_id == hostId
-                return GroupChatMember(
-                    id: participant.user_id,
-                    name: "\(participant.user.first_name) \(participant.user.last_name)",
-                    username: participant.user.username,
-                    photoURL: participant.user.profile_photo_url,
-                    role: isHost ? .admin : .member,
-                    joinedAt: participant.joined_at,
-                    isCurrentUser: participant.user_id == currentUser.id
-                )
-            }
-
-            // Also add host if not in participants
-            if let hostId = hostId, !members.contains(where: { $0.id == hostId }) {
-                if let hostInfo = try? await loadHostInfo(hostId: hostId) {
-                    let hostMember = GroupChatMember(
-                        id: hostId,
-                        name: "\(hostInfo.first_name) \(hostInfo.last_name)",
-                        username: hostInfo.username,
-                        photoURL: hostInfo.profile_photo_url,
-                        role: .admin,
-                        joinedAt: Date(),
-                        isCurrentUser: hostId == currentUser.id
-                    )
-                    members.insert(hostMember, at: 0)
-                }
-            }
-
-            print("ChatService: Loaded \(members.count) members for ralley \(chatId)")
-            return members
-
-        } catch {
-            print("ChatService: Load members failed: \(error)")
-            return []
-        }
-    }
-
-    private func loadHostInfo(hostId: UUID) async throws -> DatabaseUserBasic {
-        let users: [DatabaseUserBasic] = try await supabase.query("club_users")
-            .select("id, first_name, last_name, username, profile_photo_url")
-            .eq("id", value: hostId)
-            .execute()
-
-        guard let user = users.first else {
-            throw SupabaseManager.SupabaseError.userNotFound
-        }
-        return user
-    }
-
-    /**
-     * Update last read timestamp (stub - not implemented yet)
-     * @param chatId: ID of the ralley
-     */
-    func markAsRead(chatId: UUID) async throws {
-        // TODO: Implement unread tracking
-        print("ChatService: markAsRead called for chat \(chatId)")
-    }
-
     // MARK: - Mock Data Generation (Fallback)
 
     private func generateMockChats() -> [GroupChat] {
@@ -619,6 +473,7 @@ struct DatabaseRalleyParticipantRecord: Codable {
     let user_id: UUID
     let status: String
     let joined_at: Date
+    let last_read_at: Date?
 }
 
 /// Ralley participant insert

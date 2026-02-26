@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ProfileScreen from "./ProfileScreen";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -131,10 +132,14 @@ function PhotoCollage({ photos }) {
 // ── Home Screen ───────────────────────────────────────────────────────────────
 
 function HomeScreen() {
+  const [selectedRalley, setSelectedRalley] = useState(null);
+
   const upcomingRalleys = [
     { id:1, sport:"Pickleball", title:"Pickleball at Bucknell Turf", date:"Thu, Feb 19 at 6:45 PM", location:"Bucknell Turf Fields", joined:1, total:4, countdown:"in 11m" },
     { id:2, sport:"Soccer", title:"Sunday Pickup Soccer", date:"Sun, Feb 22 at 10:00 AM", location:"Millennium Park", joined:3, total:10, countdown:"in 3d" },
   ];
+
+  const playersThisWeek = upcomingRalleys.reduce((sum, r) => sum + r.joined, 0);
 
   return (
     <div className="screen-body" style={{ background:"#f6f5f1" }}>
@@ -150,39 +155,95 @@ function HomeScreen() {
         </div>
       </div>
 
-      {/* Upcoming scroll cards */}
-      <div style={{ display:"flex", overflowX:"auto", gap:10, padding:"10px 22px 18px", scrollbarWidth:"none" }}>
-        {upcomingRalleys.map(r => (
-          <div key={r.id} style={{
-            background:"#2C4F40", borderRadius:16, padding:"14px 16px",
-            minWidth:230, flexShrink:0,
-            boxShadow:"0 6px 24px rgba(44,79,64,0.25)",
-          }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-              <div style={{ display:"inline-flex", alignItems:"center", gap:5, background:"rgba(255,255,255,0.18)", color:"white", fontFamily:"'DM Sans', sans-serif", fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:50 }}>
-                <SportIcon sport={r.sport} size={11} color="white" /> {r.sport}
-              </div>
-              <div style={{ background:"rgba(255,255,255,0.18)", color:"white", fontFamily:"'DM Sans', sans-serif", fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:50 }}>
-                {r.countdown}
-              </div>
+      {/* Upcoming section — cards or empty state */}
+      {upcomingRalleys.length === 0 ? (
+        /* Empty state card */
+        <div style={{
+          background:"#2C4F40", borderRadius:20, padding:22, margin:"10px 22px 20px",
+        }}>
+          {playersThisWeek > 0 && (
+            <div style={{
+              display:"inline-flex", alignItems:"center", gap:6,
+              background:"rgba(255,255,255,0.15)", padding:"6px 12px", borderRadius:20, marginBottom:16,
+            }}>
+              <div style={{ width:8, height:8, borderRadius:"50%", background:"#4CAF50" }} />
+              <span style={{ fontFamily:"'DM Sans', sans-serif", fontSize:11, fontWeight:700, color:"rgba(255,255,255,0.8)", letterSpacing:0.5 }}>
+                {playersThisWeek} {playersThisWeek === 1 ? "PLAYER" : "PLAYERS"} ACTIVE THIS WEEK
+              </span>
             </div>
-            <div style={{ fontFamily:"'Chillax', sans-serif", fontSize:16, fontWeight:700, color:"white", marginBottom:8, lineHeight:1.25 }}>
-              {r.title}
-            </div>
-            <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-              {[
-                { icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>, text:r.date },
-                { icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>, text:r.location },
-                { icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>, text:`${r.joined}/${r.total} joined` },
-              ].map(({ icon, text }, i) => (
-                <div key={i} style={{ display:"flex", alignItems:"center", gap:5, fontFamily:"'DM Sans', sans-serif", fontSize:11, fontWeight:600, color:"rgba(255,255,255,0.65)" }}>
-                  {icon} {text}
-                </div>
-              ))}
-            </div>
+          )}
+          <div style={{ fontFamily:"'Chillax', sans-serif", fontSize:28, fontWeight:700, color:"white", lineHeight:1.2, marginBottom:12 }}>
+            No upcoming Ralleys<br/>— yet.
           </div>
-        ))}
-      </div>
+          <div style={{ fontFamily:"'DM Sans', sans-serif", fontSize:15, fontWeight:500, color:"rgba(255,255,255,0.7)", lineHeight:1.6, marginBottom:16 }}>
+            Your crew is already out there. Jump into a Ralley and get in on the action.
+          </div>
+          <button style={{
+            display:"inline-flex", alignItems:"center", gap:8,
+            background:"white", color:"#2C4F40", border:"none", borderRadius:28,
+            padding:"14px 24px", fontFamily:"'DM Sans', sans-serif", fontSize:16, fontWeight:700,
+            cursor:"pointer",
+          }}>
+            Find Ralleys Near Me
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C4F40" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      ) : (
+        /* Upcoming scroll cards */
+        <div style={{ display:"flex", overflowX:"auto", gap:10, padding:"10px 22px 18px", scrollbarWidth:"none" }}>
+          {upcomingRalleys.map(r => (
+            <div
+              key={r.id}
+              onClick={() => setSelectedRalley(selectedRalley?.id === r.id ? null : r)}
+              style={{
+                background: selectedRalley?.id === r.id ? "#1a3d30" : "#2C4F40",
+                borderRadius:16, padding:"14px 16px",
+                minWidth:230, flexShrink:0,
+                boxShadow:"0 6px 24px rgba(44,79,64,0.25)",
+                cursor:"pointer",
+                transition:"background 0.15s, transform 0.15s",
+                transform: selectedRalley?.id === r.id ? "scale(0.97)" : "scale(1)",
+              }}
+            >
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+                <div style={{ display:"inline-flex", alignItems:"center", gap:5, background:"rgba(255,255,255,0.18)", color:"white", fontFamily:"'DM Sans', sans-serif", fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:50 }}>
+                  <SportIcon sport={r.sport} size={11} color="white" /> {r.sport}
+                </div>
+                <div style={{ background:"rgba(255,255,255,0.18)", color:"white", fontFamily:"'DM Sans', sans-serif", fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:50 }}>
+                  {r.countdown}
+                </div>
+              </div>
+              <div style={{ fontFamily:"'Chillax', sans-serif", fontSize:16, fontWeight:700, color:"white", marginBottom:8, lineHeight:1.25 }}>
+                {r.title}
+              </div>
+              <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+                {[
+                  { icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>, text:r.date },
+                  { icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>, text:r.location },
+                  { icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>, text:`${r.joined}/${r.total} joined` },
+                ].map(({ icon, text }, i) => (
+                  <div key={i} style={{ display:"flex", alignItems:"center", gap:5, fontFamily:"'DM Sans', sans-serif", fontSize:11, fontWeight:600, color:"rgba(255,255,255,0.65)" }}>
+                    {icon} {text}
+                  </div>
+                ))}
+              </div>
+              {/* Expanded detail when tapped */}
+              {selectedRalley?.id === r.id && (
+                <div style={{ marginTop:12, paddingTop:12, borderTop:"1px solid rgba(255,255,255,0.15)" }}>
+                  <button style={{
+                    width:"100%", padding:"10px 0", borderRadius:10,
+                    background:"white", color:"#2C4F40", border:"none",
+                    fontFamily:"'DM Sans', sans-serif", fontSize:13, fontWeight:800,
+                    cursor:"pointer",
+                  }}>
+                    View Ralley Details
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Warm divider */}
       <div style={{ height:6, background:"linear-gradient(to bottom, #e8e5de, #ece9e2)", margin:"4px 0" }} />
@@ -538,6 +599,13 @@ export default function App() {
         .ni { display:flex; flex-direction:column; align-items:center; gap:3px; padding:5px 8px; cursor:pointer; }
         .nl { font-family:var(--font); font-size:9.5px; font-weight:700; color:#bbb; }
         .nl.on { color:var(--green); font-weight:900; }
+
+        /* ProfileScreen overrides when embedded inside App phone shell */
+        .phone .phone-shell { width:100%; min-height:auto; border-radius:0; box-shadow:none; margin:0; }
+        .phone .phone-shell .screen { height:auto; }
+        .phone .phone-shell .status-bar { display:none; }
+        .phone .phone-shell .tab-bar { display:none; }
+        .phone .phone-shell .scroll-content { height:calc(844px - 58px - 72px); overflow-y:auto; }
       `}</style>
 
       <div className="phone">
@@ -569,7 +637,7 @@ export default function App() {
         {activeTab === "post"    && <PostComposer onClose={() => setActiveTab("home")} />}
         {activeTab === "ralleys" && <PlaceholderScreen label="Discover Ralleys" tabIcon={<SearchIcon on={true}/>} />}
         {activeTab === "teams"   && <PlaceholderScreen label="Your Teams" tabIcon={<TeamsIcon on={true}/>} />}
-        {activeTab === "profile" && <PlaceholderScreen label="Your Profile" tabIcon={<PersonIcon on={true}/>} />}
+        {activeTab === "profile" && <ProfileScreen />}
 
         {/* Bottom nav */}
         <div className="nav">

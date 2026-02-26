@@ -210,7 +210,7 @@ class RalleyParticipationManager: ObservableObject {
 
             // Send system message
             if let currentUser = supabase.currentUser {
-                let welcomeMessage = GroupChatMessage(
+                let _ = GroupChatMessage(
                     id: UUID(),
                     chatId: chatId,
                     senderId: currentUser.id,

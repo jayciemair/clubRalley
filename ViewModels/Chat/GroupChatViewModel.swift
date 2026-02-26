@@ -65,8 +65,9 @@ class GroupChatViewModel: ObservableObject {
 
     deinit {
         // Unsubscribe when view model is deallocated
+        let manager = realtimeManager
         Task { @MainActor in
-            await realtimeManager.unsubscribeFromChatMessages()
+            await manager.unsubscribeFromChatMessages()
         }
     }
 

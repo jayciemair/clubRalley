@@ -475,6 +475,10 @@ class ClubRalleyOnboardingController: ObservableObject {
         // STEP 3: Mark onboarding as complete
         UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
 
+        // Register for push notifications and start listening
+        PushNotificationService.shared.requestPermissionAndRegister()
+        await InAppNotificationService.shared.startListening()
+
         try? await Task.sleep(nanoseconds: 500_000_000)
 
         isComplete = true

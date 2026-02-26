@@ -229,6 +229,7 @@ enum NotificationType: String {
     case like = "like"
     case comment = "comment"
     case ralleyJoin = "ralley_join"
+    case ralleyInvite = "ralley_invite"
     case ralleyReminder = "ralley_reminder"
     case mention = "mention"
     case message = "message"
@@ -240,6 +241,7 @@ enum NotificationType: String {
         case .like: return "heart.fill"
         case .comment: return "message.fill"
         case .ralleyJoin: return "sportscourt.fill"
+        case .ralleyInvite: return "envelope.fill"
         case .ralleyReminder: return "clock.fill"
         case .mention: return "at"
         case .message: return "envelope.fill"
@@ -253,6 +255,7 @@ enum NotificationType: String {
         case .like: return .red
         case .comment: return Color(hex: "#2C4F40")
         case .ralleyJoin: return .orange
+        case .ralleyInvite: return Color(hex: "#2C4F40")
         case .ralleyReminder: return .blue
         case .mention: return .purple
         case .message: return Color(hex: "#2C4F40")
@@ -261,29 +264,3 @@ enum NotificationType: String {
     }
 }
 
-// MARK: - Database Models
-
-struct DatabaseNotificationWithUser: Codable {
-    let id: UUID
-    let user_id: UUID
-    let type: String
-    let message: String
-    let actor_id: UUID?
-    let post_id: UUID?
-    let ralley_id: UUID?
-    let is_read: Bool
-    let created_at: Date
-    let actor: DatabaseNotificationActor?
-
-    enum CodingKeys: String, CodingKey {
-        case id, user_id, type, message, actor_id, post_id, ralley_id, is_read, created_at
-        case actor = "club_users"
-    }
-}
-
-struct DatabaseNotificationActor: Codable {
-    let first_name: String
-    let last_name: String
-    let username: String
-    let profile_photo_url: String?
-}

@@ -143,147 +143,20 @@ struct OnboardingCoordinator: View {
     @ViewBuilder
     private func screenView(for screen: ScreenConfig) -> some View {
         switch screen.type {
-        // MARK: - Intro Screens
-        case .welcomeSplash:
-            WelcomeSplashScreen()
-                .environmentObject(flowController)
-
-        case .mochiIntro:
-            MochiIntroScreen()
-                .environmentObject(flowController)
-
-        case .nameInput:
-            NameInputScreen()
-                .environmentObject(flowController)
-
-        case .notAboutHim:
-            NotAboutHimScreen()
-                .environmentObject(flowController)
-
-        case .mochiBridge:
-            MochiBridgeScreen()
-                .environmentObject(flowController)
-
-        case .breakupTiming:
-            BreakupTimingScreen()
-                .environmentObject(flowController)
-
-        case .whoEndedIt:
-            WhoEndedItScreen()
-                .environmentObject(flowController)
-
-        case .whatsHurting:
-            WhatsHurtingScreen()
-                .environmentObject(flowController)
-
-        case .howCoping:
-            HowCopingScreen()
-                .environmentObject(flowController)
-
-        case .mainGoals:
-            MainGoalsScreen()
-                .environmentObject(flowController)
-
-        case .calculatingResults:
-            CalculatingResultsScreen()
-                .environmentObject(flowController)
-
-        case .attachmentReveal:
-            AttachmentRevealScreen()
-                .environmentObject(flowController)
-
-        case .youCared:
-            YouCaredScreen()
-                .environmentObject(flowController)
-
-        case .healingNotLinear:
-            HealingNotLinearScreen()
-                .environmentObject(flowController)
-
-        case .mochiJourney:
-            MochiJourneyScreen()
-                .environmentObject(flowController)
-
-        case .urgeToText:
-            UrgeToTextScreen()
-                .environmentObject(flowController)
-
-        case .textHimPreview:
-            TextHimPreviewScreen()
-                .environmentObject(flowController)
-
-        case .textHimDemo:
-            TextHimDemoScreen()
-                .environmentObject(flowController)
-
-        case .mochiRealTalk:
-            MochiRealTalkScreen()
-                .environmentObject(flowController)
-
-        case .loveIsADrug:
-            LoveIsADrugScreen()
-                .environmentObject(flowController)
-
-        case .grieveAsDeep:
-            GrieveAsDeepScreen()
-                .environmentObject(flowController)
-
-        case .theCosts:
-            TheCostsScreen()
-                .environmentObject(flowController)
-
-        case .commitToChange:
-            CommitToChangeScreen()
-                .environmentObject(flowController)
-
-        case .healingTimeline:
-            HealingTimelineScreen()
-                .environmentObject(flowController)
-
-        case .mochiHelp:
-            MochiHelpScreen()
-                .environmentObject(flowController)
-
-        case .checkinFrequency:
-            CheckInFrequencyScreen()
-                .environmentObject(flowController)
-
-        case .mochiPromise:
-            MochiPromiseScreen()
-                .environmentObject(flowController)
-
-        case .socialProof:
-            SocialProofScreen()
-                .environmentObject(flowController)
-
         // MARK: - Auth
         case .supabaseAuth:
             UniversalAuthScreen()
                 .environmentObject(flowController)
 
-        // MARK: - Setup Screens
+        // MARK: - Setup Screens (auto-advance legacy screens)
         case .welcomeToCheckpoint:
-            WelcomeToCheckpointScreen()
-                .environmentObject(flowController)
-
-        case .lastContactDate:
-            LastContactDateScreen()
-                .environmentObject(flowController)
+            Color.clear
+                .onAppear { flowController.navigateNext() }
 
         // MARK: - Data Recovery
         case .dataRecoveryIntro:
-            // Placeholder for data recovery intro - uses welcome screen for now
-            WelcomeToCheckpointScreen()
-                .environmentObject(flowController)
-
-        // MARK: - Deletion Prevention
-        case .breathingIntro:
-            BreathingIntroScreen()
-                .environmentObject(flowController)
-
-        case .breathingExercise:
-            BreathingExerciseScreen()
-                .environmentObject(flowController)
+            Color.clear
+                .onAppear { flowController.navigateNext() }
         }
     }
 }

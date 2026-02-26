@@ -68,30 +68,85 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
     }
 
+    // MARK: - APNs Registration
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Task { @MainActor in
+            PushNotificationService.shared.handleDeviceToken(deviceToken)
+        }
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        Task { @MainActor in
+            PushNotificationService.shared.handleRegistrationFailure(error)
+        }
+    }
+
     // MARK: - UNUserNotificationCenterDelegate
 
-    /// Called when notification is delivered (even in background!)
+    /// Called when notification arrives while app is in foreground
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        // Handle notification while app is in foreground
-        handleSessionEndNotification(notification)
+        // If this is a remote push, suppress the banner — in-app Realtime already handles it
+        if notification.request.trigger is UNPushNotificationTrigger {
+            completionHandler([])
+            return
+        }
 
-        // Show notification banner/sound
+        // Local notifications: show banner/sound as before
+        handleSessionEndNotification(notification)
         completionHandler([.banner, .sound])
     }
 
-    /// Called when notification is delivered in background (THIS IS KEY!)
+    /// Called when user taps a notification (local or remote)
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        // Handle notification tap
+        let userInfo = response.notification.request.content.userInfo
+
+        // Handle remote push tap — deep link to the right screen
+        if response.notification.request.trigger is UNPushNotificationTrigger {
+            handlePushNotificationTap(userInfo: userInfo)
+            completionHandler()
+            return
+        }
+
+        // Local notification tap
         handleSessionEndNotification(response.notification)
         completionHandler()
+    }
+
+    // MARK: - Push Deep Linking
+
+    private func handlePushNotificationTap(userInfo: [AnyHashable: Any]) {
+        var info: [String: Any] = [:]
+
+        if let type = userInfo["type"] as? String {
+            info["type"] = type
+        }
+        if let notificationId = userInfo["notification_id"] as? String {
+            info["notification_id"] = notificationId
+        }
+        if let ralleyId = userInfo["ralley_id"] as? String {
+            info["ralley_id"] = ralleyId
+        }
+        if let postId = userInfo["post_id"] as? String {
+            info["post_id"] = postId
+        }
+        if let actorId = userInfo["actor_id"] as? String {
+            info["actor_id"] = actorId
+        }
+
+        NotificationCenter.default.post(
+            name: NSNotification.Name("ClubRalleyPushTap"),
+            object: nil,
+            userInfo: info
+        )
     }
 
     // MARK: - Background Shield Clearing

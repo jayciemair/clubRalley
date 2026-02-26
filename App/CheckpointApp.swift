@@ -123,6 +123,12 @@ struct ClubRalleyApp: App {
                     }
                 }
 
+                // Register for push notifications and start listening for in-app notifications
+                if supabaseManager.isAuthenticated {
+                    PushNotificationService.shared.requestPermissionAndRegister()
+                    await InAppNotificationService.shared.startListening()
+                }
+
                 await MainActor.run {
                     isCheckingSession = false
                     print("🚀 App Launch - isCheckingSession set to false, will show: \(hasCompletedOnboarding ? "ContentView" : "Onboarding")")
@@ -140,12 +146,51 @@ struct ClubRalleyApp: App {
                 // Re-check when app comes to foreground
                 Task {
                     await checkForUpdates()
+                    await PushNotificationService.shared.refreshPermissionStatus()
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("UserDidLogout"))) { _ in
+                // Deactivate push token and stop listening before clearing session
+                Task {
+                    await PushNotificationService.shared.deactivateCurrentToken()
+                    await InAppNotificationService.shared.stopListening()
+                }
                 // User logged out - show onboarding
                 withAnimation(.easeInOut(duration: 0.3)) {
                     hasCompletedOnboarding = false
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ClubRalleyPushTap"))) { notification in
+                // Handle push notification tap — navigate to the right content
+                guard let userInfo = notification.userInfo,
+                      let type = userInfo["type"] as? String else { return }
+
+                switch type {
+                case "ralley_join", "ralley_invite", "ralley_reminder":
+                    if let ralleyIdStr = userInfo["ralley_id"] as? String,
+                       let _ = UUID(uuidString: ralleyIdStr) {
+                        selectedTab = .ralleys
+                        // Post deep link for the ralley detail view to handle
+                        NotificationCenter.default.post(
+                            name: NSNotification.Name("ClubRalleyDeepLink"),
+                            object: nil,
+                            userInfo: userInfo
+                        )
+                    }
+                case "new_follower":
+                    selectedTab = .profile
+                case "like", "comment":
+                    if let postIdStr = userInfo["post_id"] as? String,
+                       let _ = UUID(uuidString: postIdStr) {
+                        selectedTab = .home
+                        NotificationCenter.default.post(
+                            name: NSNotification.Name("ClubRalleyDeepLink"),
+                            object: nil,
+                            userInfo: userInfo
+                        )
+                    }
+                default:
+                    selectedTab = .home
                 }
             }
         }

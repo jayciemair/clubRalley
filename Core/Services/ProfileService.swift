@@ -597,9 +597,3 @@ class ProfileService: ObservableObject {
         )
     }
 }
-
-// Note: Database models (DatabaseUserProfile, DatabaseUserProfileUpdate, DatabaseFriendship)
-// are defined in Models/Database/DatabaseModels.swift
-//
-// UI models (UserProfile, UserStats, SocialInfo, etc.)
-// are defined in Models/User/UserProfile.swift

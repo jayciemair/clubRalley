@@ -35,55 +35,6 @@ struct AppLinks {
         static var verifyCheckpoint: String {
             "\(baseURL)/api/checkpoint/verify"
         }
-
-        /// Mochi AI chat endpoint
-        static var mochiChat: String {
-            "\(baseURL)/api/mochi/chat"
-        }
-
-        /// Ex simulator AI chat endpoint
-        static var exChat: String {
-            "\(baseURL)/api/ex/chat"
-        }
-
-        // MARK: - Accountability Partner
-
-        /// Add accountability partner
-        static var addAccountabilityPartner: String {
-            "\(baseURL)/api/accountability/add-partner"
-        }
-
-        /// Remove accountability partner
-        static var removeAccountabilityPartner: String {
-            "\(baseURL)/api/accountability/remove-partner"
-        }
-
-        /// Get accountability partner info
-        static var getAccountabilityPartner: String {
-            "\(baseURL)/api/accountability/partner"
-        }
-
-        /// Notify partner of relapse
-        static var notifyPartnerRelapse: String {
-            "\(baseURL)/api/accountability/notify-relapse"
-        }
-
-        // MARK: - Text Simulator
-
-        /// Text simulator AI response endpoint
-        static var textSimulatorRespond: String {
-            "\(baseURL)/api/text-simulator/respond"
-        }
-
-        /// Text simulator "currently doing" activity endpoint
-        static var textSimulatorActivity: String {
-            "\(baseURL)/api/text-simulator/activity"
-        }
-
-        /// Text simulator save conversation endpoint
-        static var textSimulatorSave: String {
-            "\(baseURL)/api/text-simulator/save"
-        }
     }
 
     // MARK: - DNS Configuration

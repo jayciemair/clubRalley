@@ -17,20 +17,8 @@ class SettingsViewModel: ObservableObject {
 
     // MARK: - Published Properties
 
-    /// Controls deletion prevention flow presentation
-    @Published var showDeletionPrevention = false
-
-    /// Controls website block request flow presentation
-    @Published var showWebsiteBlockRequest = false
-
     /// Controls feature request flow presentation
     @Published var showFeatureRequest = false
-
-    /// Controls edit accountability anchors sheet presentation
-    @Published var showEditAccountabilityAnchors = false
-
-    /// Controls edit recovery goals sheet presentation
-    @Published var showEditRecoveryGoals = false
 
     /// Controls rating request sheet presentation
     @Published var showRatingRequestSheet = false
