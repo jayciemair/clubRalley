@@ -93,8 +93,12 @@ class SupabaseQueryBuilder {
 
         var query = client.database.from(table).select(selectColumns)
 
-        for filter in filters where filter.op == "eq" {
-            query = query.eq(filter.column, value: filter.value)
+        for filter in filters {
+            if filter.op == "eq" {
+                query = query.eq(filter.column, value: filter.value)
+            } else if filter.op == "lt" {
+                query = query.lt(filter.column, value: filter.value)
+            }
         }
 
         for inFilter in inFilters {
@@ -120,6 +124,8 @@ class SupabaseQueryBuilder {
         for filter in filters {
             if filter.op == "eq" {
                 filterQuery = filterQuery.eq(filter.column, value: filter.value)
+            } else if filter.op == "lt" {
+                filterQuery = filterQuery.lt(filter.column, value: filter.value)
             } else if filter.op == "or" {
                 filterQuery = filterQuery.or(filter.value)
             }

@@ -31,6 +31,7 @@ struct EditProfileView: View {
     @State private var showingImagePicker = false
     @State private var selectedImage: UIImage?
     @State private var showingSaveError = false
+    @State private var saveErrorMessage: String?
 
     // Power Up: Sports & Skills
     @State private var sportsWithSkills: [SportWithSkill] = []
@@ -68,12 +69,19 @@ struct EditProfileView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: ClubRalleyTheme.Spacing.lg) {
+            VStack(spacing: 0) {
+                // Profile photo
                 EditProfilePhotoSection(
                     showingImagePicker: $showingImagePicker,
                     selectedImage: $selectedImage,
                     currentPhotoURL: viewModel.currentPhotoURL
                 )
+                .padding(.top, 8)
+                .padding(.bottom, 4)
+
+                Divider()
+
+                // Basic info fields
                 EditProfileNameSection(
                     firstName: $firstName,
                     lastName: $lastName,
@@ -95,11 +103,13 @@ struct EditProfileView: View {
                 EditProfileInstagramSection(
                     instagramHandle: $instagramHandle
                 )
-                Divider().padding(.vertical, 8)
+
+                // Settings section
+                sectionHeader("Settings")
+
                 EditProfilePrivacySection(
                     isPrivateAccount: $isPrivateAccount
                 )
-                Divider().padding(.vertical, 8)
                 EditProfileCollegeSection(
                     playedCollegeSport: $playedCollegeSport,
                     collegeSport: $collegeSport,
@@ -108,13 +118,15 @@ struct EditProfileView: View {
                     collegeYears: $collegeYears,
                     collegePosition: $collegePosition
                 )
-                Divider().padding(.vertical, 8)
+
+                // Power up section
+                sectionHeader("Power Up Your Profile")
+
                 EditProfileSportsSection(
                     sportsWithSkills: $sportsWithSkills,
                     availableSports: availableSports,
                     isSportsExpanded: $isSportsExpanded
                 )
-                Divider().padding(.vertical, 8)
                 EditProfileAvailabilitySection(
                     isAvailabilityExpanded: $isAvailabilityExpanded,
                     daySelection: $daySelection,
@@ -122,7 +134,6 @@ struct EditProfileView: View {
                     timePreference: $timePreference,
                     maxDistance: $maxDistance
                 )
-                Divider().padding(.vertical, 8)
                 EditProfileFunQuestionsSection(
                     isFunQuestionsExpanded: $isFunQuestionsExpanded,
                     favoriteProTeam: $favoriteProTeam,
@@ -131,15 +142,17 @@ struct EditProfileView: View {
                     hometown: $hometown,
                     wouldDoHappyHour: $wouldDoHappyHour
                 )
+
                 EditProfileSaveButton(
                     isSaving: viewModel.isSaving,
                     isFormValid: isFormValid,
                     onSave: { Task { await saveProfile() } }
                 )
+
                 Spacer(minLength: 50)
             }
-            .padding(ClubRalleyTheme.Spacing.lg)
         }
+        .background(Color(.systemBackground))
         .scrollDismissesKeyboard(.interactively)
         .onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -151,16 +164,18 @@ struct EditProfileView: View {
                 Button("Cancel") {
                     dismiss()
                 }
-                .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                .font(.system(size: 16))
+                .foregroundColor(ClubRalleyTheme.Colors.text)
                 .disabled(viewModel.isSaving)
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Save") {
-                    Task { await saveProfile() }
+                Button(action: { Task { await saveProfile() } }) {
+                    Text("Done")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                 }
-                .font(ClubRalleyTheme.Typography.bodyBold)
-                .foregroundColor(ClubRalleyTheme.Colors.accent)
-                .disabled(viewModel.isSaving)
+                .disabled(viewModel.isSaving || !isFormValid)
+                .opacity(isFormValid ? 1.0 : 0.4)
             }
         }
         .sheet(isPresented: $showingImagePicker) {
@@ -169,20 +184,39 @@ struct EditProfileView: View {
         .alert("Error Saving", isPresented: $showingSaveError) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text(viewModel.saveError ?? "An error occurred while saving your profile.")
+            Text(saveErrorMessage ?? viewModel.saveError ?? "An error occurred while saving your profile.")
         }
         .overlay {
             if viewModel.isSaving {
-                ProgressView("Saving...")
-                    .padding(24)
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.2), radius: 12)
+                Color.black.opacity(0.15)
+                    .ignoresSafeArea()
+                ProgressView()
+                    .scaleEffect(1.2)
+                    .tint(ClubRalleyTheme.Colors.darkGreen)
+                    .padding(28)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(14)
             }
         }
         .allowsHitTesting(!viewModel.isSaving)
         .onAppear {
             loadCurrentProfile()
+        }
+    }
+
+    private func sectionHeader(_ title: String) -> some View {
+        VStack(spacing: 0) {
+            Color(.systemGray6)
+                .frame(height: 20)
+
+            Text(title)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(Color(.systemGray))
+                .textCase(.uppercase)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color(.systemGray6))
         }
     }
 
@@ -329,16 +363,26 @@ struct EditProfileView: View {
         if let image = selectedImage,
            let imageData = image.jpegData(compressionQuality: 0.8) {
             print("📝 EDIT_PROFILE - Uploading new photo...")
-            do {
-                if let userId = SupabaseManager.shared.currentUser?.id {
+            // Use Supabase currentUser, fallback to saved profile ID
+            let userId = SupabaseManager.shared.currentUser?.id ?? SavedUserProfile.loadFromStorage()?.id
+            if let userId = userId {
+                do {
                     photoURL = try await ImageUploadService.shared.uploadProfilePhoto(
                         imageData: imageData,
                         userId: userId
                     )
                     print("✅ EDIT_PROFILE - Photo uploaded: \(photoURL ?? "nil")")
+                } catch {
+                    print("❌ EDIT_PROFILE - Photo upload FAILED: \(error)")
+                    saveErrorMessage = "Failed to upload photo: \(error.localizedDescription)"
+                    showingSaveError = true
+                    return
                 }
-            } catch {
-                print("❌ EDIT_PROFILE - Photo upload FAILED: \(error)")
+            } else {
+                print("❌ EDIT_PROFILE - No userId available for photo upload")
+                saveErrorMessage = "Unable to upload photo. Please try signing out and back in."
+                showingSaveError = true
+                return
             }
         }
 

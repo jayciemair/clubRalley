@@ -11,6 +11,7 @@ struct GroupChatView: View {
     @StateObject private var viewModel: GroupChatViewModel
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isInputFocused: Bool
+    @State private var showingMembers = false
 
     init(chat: GroupChat) {
         _viewModel = StateObject(wrappedValue: GroupChatViewModel(chat: chat))
@@ -31,21 +32,14 @@ struct GroupChatView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-                    Button(action: {}) {
-                        Label("View Members", systemImage: "person.2")
-                    }
-
-                    if viewModel.chat.isAdmin {
-                        Button(action: {}) {
-                            Label("Manage Chat", systemImage: "gearshape")
-                        }
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
+                Button(action: { showingMembers = true }) {
+                    Image(systemName: "person.2")
                         .foregroundColor(Color(hex: "#2C4F40"))
                 }
             }
+        }
+        .sheet(isPresented: $showingMembers) {
+            GroupChatMembersSheet(members: viewModel.members, ralleyTitle: viewModel.chat.ralleyTitle)
         }
     }
 
@@ -142,6 +136,75 @@ struct GroupChatView: View {
         .padding(.vertical, 12)
         .background(Color.white)
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: -2)
+    }
+}
+
+// MARK: - Members Sheet
+
+struct GroupChatMembersSheet: View {
+    let members: [GroupChatMember]
+    let ralleyTitle: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List(members) { member in
+                HStack(spacing: 12) {
+                    AsyncImage(url: URL(string: member.photoURL ?? "")) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Circle()
+                            .fill(Color(hex: "#2C4F40").opacity(0.2))
+                            .overlay(
+                                Image(systemName: "person.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(Color(hex: "#2C4F40"))
+                            )
+                    }
+                    .frame(width: 40, height: 40)
+                    .clipShape(Circle())
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) {
+                            Text(member.name)
+                                .font(.system(size: 16, weight: .medium))
+
+                            if member.isAdmin {
+                                Text("Host")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color(hex: "#2C4F40"))
+                                    .cornerRadius(4)
+                            }
+                        }
+
+                        Text("@\(member.username)")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                    }
+
+                    Spacer()
+
+                    if member.isCurrentUser {
+                        Text("You")
+                            .font(.system(size: 13))
+                            .foregroundColor(.gray)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+            .listStyle(.plain)
+            .navigationTitle("Members")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .foregroundColor(Color(hex: "#2C4F40"))
+                }
+            }
+        }
     }
 }
 

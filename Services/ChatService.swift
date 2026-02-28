@@ -269,9 +269,17 @@ class ChatService: ObservableObject, ChatServiceProtocol {
 
         do {
             // Load messages with sender info
-            let dbMessages: [DatabaseChatMessageWithSender] = try await supabase.query("chat_messages")
+            var query = supabase.query("chat_messages")
                 .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
                 .eq("ralley_id", value: chatId)
+
+            if let before = before {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                query = query.lt("created_at", value: formatter.string(from: before))
+            }
+
+            let dbMessages: [DatabaseChatMessageWithSender] = try await query
                 .order("created_at", ascending: false)
                 .limit(limit)
                 .execute()
@@ -332,18 +340,19 @@ class ChatService: ObservableObject, ChatServiceProtocol {
                 message_type: "text"
             )
 
-            try await supabase.insert(messageInsert, into: "chat_messages")
+            let messageId = try await supabase.insertReturningId(messageInsert, into: "chat_messages")
 
             print("ChatService: Message sent to ralley chat \(chatId)")
 
             // Return the message for immediate UI update
+            let profile = SavedUserProfile.loadFromStorage()
             return GroupChatMessage(
-                id: UUID(),
+                id: messageId,
                 chatId: chatId,
                 senderId: currentUser.id,
-                senderName: currentUser.displayName,
-                senderUsername: currentUser.email.components(separatedBy: "@").first ?? "user",
-                senderPhotoURL: nil,
+                senderName: profile?.fullName ?? currentUser.displayName,
+                senderUsername: profile?.username ?? currentUser.email.components(separatedBy: "@").first ?? "user",
+                senderPhotoURL: profile?.profilePhotoURL,
                 content: trimmedContent,
                 messageType: .text,
                 createdAt: Date(),
@@ -356,68 +365,6 @@ class ChatService: ObservableObject, ChatServiceProtocol {
         }
     }
 
-    // MARK: - Mock Data Generation (Fallback)
-
-    private func generateMockChats() -> [GroupChat] {
-        return [
-            GroupChat(
-                id: UUID(),
-                ralleyId: UUID(),
-                ralleyTitle: "Basketball Pickup",
-                ralleySport: "Basketball",
-                ralleyDateTime: Date().addingTimeInterval(3600 * 2),
-                createdAt: Date().addingTimeInterval(-3600 * 24),
-                memberCount: 6,
-                lastMessage: "Can't wait for tomorrow!",
-                lastMessageAt: Date().addingTimeInterval(-1800),
-                hasUnread: true,
-                currentUserRole: .member
-            ),
-            GroupChat(
-                id: UUID(),
-                ralleyId: UUID(),
-                ralleyTitle: "Tennis Doubles",
-                ralleySport: "Tennis",
-                ralleyDateTime: Date().addingTimeInterval(3600 * 24),
-                createdAt: Date().addingTimeInterval(-3600 * 48),
-                memberCount: 4,
-                lastMessage: "Who's bringing extra balls?",
-                lastMessageAt: Date().addingTimeInterval(-7200),
-                hasUnread: false,
-                currentUserRole: .admin
-            )
-        ]
-    }
-
-    private func generateMockMessages(chatId: UUID) -> [GroupChatMessage] {
-        let now = Date()
-        return [
-            GroupChatMessage(
-                id: UUID(),
-                chatId: chatId,
-                senderId: UUID(),
-                senderName: "Alex Johnson",
-                senderUsername: "alexj",
-                senderPhotoURL: "https://picsum.photos/44/44?random=20",
-                content: "Hey everyone! Excited for the game!",
-                messageType: .text,
-                createdAt: now.addingTimeInterval(-3600),
-                isFromCurrentUser: false
-            ),
-            GroupChatMessage(
-                id: UUID(),
-                chatId: chatId,
-                senderId: UUID(),
-                senderName: "Sarah Chen",
-                senderUsername: "sarahc",
-                senderPhotoURL: "https://picsum.photos/44/44?random=21",
-                content: "Same! I'll bring some water bottles",
-                messageType: .text,
-                createdAt: now.addingTimeInterval(-1800),
-                isFromCurrentUser: false
-            )
-        ]
-    }
 }
 
 // MARK: - Database Models for Chat Messages

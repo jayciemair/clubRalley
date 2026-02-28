@@ -215,7 +215,7 @@
 		C9AABB172F2B1004004D160C /* UserContentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB162F2B1004004D160C /* UserContentViews.swift */; };
 		C9AABB192F2B1005004D160C /* PostCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AABB182F2B1005004D160C /* PostCreationView.swift */; };
 		C9D0E1F2A3B4C5D6E7F8A9B0 /* DatabaseComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E1F2A3B4C5D6E7F8A9B0C1 /* DatabaseComment.swift */; };
-		C9F8617B2F510A3F000C80CE /* EmailSignUpScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F8617A2F510A3E000C80CE /* EmailSignUpScreen.swift */; };
+		C9F8617D2F5287D8000C80CE /* EmailSignUpScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F8617C2F5287D8000C80CE /* EmailSignUpScreen.swift */; };
 		CC0011223344556677880001 /* SharedUserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0011223344556677990001 /* SharedUserState.swift */; };
 		CC0011223344556677880002 /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0011223344556677990002 /* ServiceContainer.swift */; };
 		CC11AA0720260220000C1110 /* Chillax-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC11AA0120260220000C1110 /* Chillax-Bold.otf */; };
@@ -497,7 +497,7 @@
 		C9AABB142F2B1003004D160C /* RalleyCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RalleyCreationView.swift; sourceTree = "<group>"; };
 		C9AABB162F2B1004004D160C /* UserContentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserContentViews.swift; sourceTree = "<group>"; };
 		C9AABB182F2B1005004D160C /* PostCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCreationView.swift; sourceTree = "<group>"; };
-		C9F8617A2F510A3E000C80CE /* EmailSignUpScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailSignUpScreen.swift; sourceTree = "<group>"; };
+		C9F8617C2F5287D8000C80CE /* EmailSignUpScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailSignUpScreen.swift; sourceTree = "<group>"; };
 		CC0011223344556677990001 /* SharedUserState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUserState.swift; sourceTree = "<group>"; };
 		CC0011223344556677990002 /* ServiceContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceContainer.swift; sourceTree = "<group>"; };
 		CC11AA0120260220000C1110 /* Chillax-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Chillax-Bold.otf"; sourceTree = "<group>"; };
@@ -530,31 +530,31 @@
 		FX01BB0001BB0001BB000001 /* PushNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationService.swift; sourceTree = "<group>"; };
 		FX02BB0002BB0002BB000002 /* NotificationSettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsService.swift; sourceTree = "<group>"; };
 		FX03BB0003BB0003BB000003 /* ShareUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareUtility.swift; sourceTree = "<group>"; };
-		FX04BB0004BB0004BB000004 /* ClubRalleyOnboardingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClubRalleyOnboardingCoordinator.swift; path = ClubRalley/ClubRalleyOnboardingCoordinator.swift; sourceTree = "<group>"; };
-		FX05BB0005BB0005BB000005 /* BirthdayScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BirthdayScreen.swift; path = ClubRalley/BirthdayScreen.swift; sourceTree = "<group>"; };
-		FX06BB0006BB0006BB000006 /* CollegeAthleteScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CollegeAthleteScreen.swift; path = ClubRalley/CollegeAthleteScreen.swift; sourceTree = "<group>"; };
-		FX07BB0007BB0007BB000007 /* ContactsAccessScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContactsAccessScreen.swift; path = ClubRalley/ContactsAccessScreen.swift; sourceTree = "<group>"; };
-		FX08BB0008BB0008BB000008 /* GenderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GenderScreen.swift; path = ClubRalley/GenderScreen.swift; sourceTree = "<group>"; };
-		FX09BB0009BB0009BB000009 /* LocationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocationScreen.swift; path = ClubRalley/LocationScreen.swift; sourceTree = "<group>"; };
-		FX10BB0010BB0010BB000010 /* NameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NameScreen.swift; path = ClubRalley/NameScreen.swift; sourceTree = "<group>"; };
-		FX11BB0011BB0011BB000011 /* PhoneNumberScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PhoneNumberScreen.swift; path = ClubRalley/PhoneNumberScreen.swift; sourceTree = "<group>"; };
-		FX12BB0012BB0012BB000012 /* ProfilePhotoScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfilePhotoScreen.swift; path = ClubRalley/ProfilePhotoScreen.swift; sourceTree = "<group>"; };
-		FX13BB0013BB0013BB000013 /* SportsOnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SportsOnboardingScreen.swift; path = ClubRalley/SportsOnboardingScreen.swift; sourceTree = "<group>"; };
-		FX14BB0014BB0014BB000014 /* UsernameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UsernameScreen.swift; path = ClubRalley/UsernameScreen.swift; sourceTree = "<group>"; };
+		FX04BB0004BB0004BB000004 /* ClubRalleyOnboardingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClubRalleyOnboardingCoordinator.swift; path = ClubRalleyOnboardingCoordinator.swift; sourceTree = "<group>"; };
+		FX05BB0005BB0005BB000005 /* BirthdayScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BirthdayScreen.swift; path = BirthdayScreen.swift; sourceTree = "<group>"; };
+		FX06BB0006BB0006BB000006 /* CollegeAthleteScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CollegeAthleteScreen.swift; path = CollegeAthleteScreen.swift; sourceTree = "<group>"; };
+		FX07BB0007BB0007BB000007 /* ContactsAccessScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContactsAccessScreen.swift; path = ContactsAccessScreen.swift; sourceTree = "<group>"; };
+		FX08BB0008BB0008BB000008 /* GenderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GenderScreen.swift; path = GenderScreen.swift; sourceTree = "<group>"; };
+		FX09BB0009BB0009BB000009 /* LocationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocationScreen.swift; path = LocationScreen.swift; sourceTree = "<group>"; };
+		FX10BB0010BB0010BB000010 /* NameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NameScreen.swift; path = NameScreen.swift; sourceTree = "<group>"; };
+		FX11BB0011BB0011BB000011 /* PhoneNumberScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PhoneNumberScreen.swift; path = PhoneNumberScreen.swift; sourceTree = "<group>"; };
+		FX12BB0012BB0012BB000012 /* ProfilePhotoScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfilePhotoScreen.swift; path = ProfilePhotoScreen.swift; sourceTree = "<group>"; };
+		FX13BB0013BB0013BB000013 /* SportsOnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SportsOnboardingScreen.swift; path = SportsOnboardingScreen.swift; sourceTree = "<group>"; };
+		FX14BB0014BB0014BB000014 /* UsernameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UsernameScreen.swift; path = UsernameScreen.swift; sourceTree = "<group>"; };
 		GX01BB0001BB0001BB000001 /* SimpleContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleContentView.swift; sourceTree = "<group>"; };
 		GX02BB0002BB0002BB000002 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EmptyStateView.swift; path = Components/EmptyStateView.swift; sourceTree = "<group>"; };
 		GX03BB0003BB0003BB000003 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NotificationsView.swift; path = Notifications/NotificationsView.swift; sourceTree = "<group>"; };
-		GX04BB0004BB0004BB000004 /* AthleteVerificationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AthleteVerificationScreen.swift; path = ClubRalley/Screens/AthleteVerificationScreen.swift; sourceTree = "<group>"; };
-		GX05BB0005BB0005BB000005 /* AvailabilityScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AvailabilityScreen.swift; path = ClubRalley/Screens/AvailabilityScreen.swift; sourceTree = "<group>"; };
-		GX06BB0006BB0006BB000006 /* InterestsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InterestsScreen.swift; path = ClubRalley/Screens/InterestsScreen.swift; sourceTree = "<group>"; };
-		GX07BB0007BB0007BB000007 /* ProfileDetailsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileDetailsScreen.swift; path = ClubRalley/Screens/ProfileDetailsScreen.swift; sourceTree = "<group>"; };
+		GX04BB0004BB0004BB000004 /* AthleteVerificationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AthleteVerificationScreen.swift; path = Screens/AthleteVerificationScreen.swift; sourceTree = "<group>"; };
+		GX05BB0005BB0005BB000005 /* AvailabilityScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AvailabilityScreen.swift; path = Screens/AvailabilityScreen.swift; sourceTree = "<group>"; };
+		GX06BB0006BB0006BB000006 /* InterestsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InterestsScreen.swift; path = Screens/InterestsScreen.swift; sourceTree = "<group>"; };
+		GX07BB0007BB0007BB000007 /* ProfileDetailsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileDetailsScreen.swift; path = Screens/ProfileDetailsScreen.swift; sourceTree = "<group>"; };
 		GX08BB0008BB0008BB000008 /* CommentsSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsSheetView.swift; sourceTree = "<group>"; };
 		GX09BB0009BB0009BB000009 /* PostDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailView.swift; sourceTree = "<group>"; };
 		GX10BB0010BB0010BB000010 /* FigmaProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FigmaProfileView.swift; sourceTree = "<group>"; };
 		HX01BB0001BB0001BB000001 /* EditProfileBasicSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileBasicSections.swift; sourceTree = "<group>"; };
 		HX02BB0002BB0002BB000002 /* EditProfilePowerUpSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfilePowerUpSections.swift; sourceTree = "<group>"; };
-		HX03BB0003BB0003BB000003 /* ClubRalleyOnboardingLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClubRalleyOnboardingLayout.swift; path = ClubRalley/Components/ClubRalleyOnboardingLayout.swift; sourceTree = "<group>"; };
-		HX04BB0004BB0004BB000004 /* WelcomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WelcomeScreen.swift; path = ClubRalley/Screens/WelcomeScreen.swift; sourceTree = "<group>"; };
+		HX03BB0003BB0003BB000003 /* ClubRalleyOnboardingLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClubRalleyOnboardingLayout.swift; path = Components/ClubRalleyOnboardingLayout.swift; sourceTree = "<group>"; };
+		HX04BB0004BB0004BB000004 /* WelcomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WelcomeScreen.swift; path = Screens/WelcomeScreen.swift; sourceTree = "<group>"; };
 		JX01BB0001BB0001BB000001 /* PostCreationCameraViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCreationCameraViews.swift; sourceTree = "<group>"; };
 		JX02BB0002BB0002BB000002 /* Services/ChatServiceMembers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/ChatServiceMembers.swift; sourceTree = "<group>"; };
 		JX03BB0003BB0003BB000003 /* RalleyDiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RalleyDiscoveryService.swift; path = Services/Ralley/RalleyDiscoveryService.swift; sourceTree = "<group>"; };
@@ -590,7 +590,7 @@
 		023541C884CB12D026003E57 /* ClubRalley */ = {
 			isa = PBXGroup;
 			children = (
-				C9F8617A2F510A3E000C80CE /* EmailSignUpScreen.swift */,
+				C9F8617C2F5287D8000C80CE /* EmailSignUpScreen.swift */,
 				FX04BB0004BB0004BB000004 /* ClubRalleyOnboardingCoordinator.swift */,
 				FX05BB0005BB0005BB000005 /* BirthdayScreen.swift */,
 				FX06BB0006BB0006BB000006 /* CollegeAthleteScreen.swift */,
@@ -606,7 +606,7 @@
 				18ED65957D94FFBB06BE43D1 /* Components */,
 				783F887C54ADDA88B40B6038 /* Screens */,
 			);
-			name = ClubRalley;
+			path = ClubRalley;
 			sourceTree = "<group>";
 		};
 		0605B4FA089A9B6F45A93BAA /* Database */ = {
@@ -900,7 +900,6 @@
 				C9AABB212F2B1007004D160C /* Ralley */,
 				918D2D272ECEA800008ABBC0 /* Debug */,
 				918D2A7A2EC768C1008ABBC0 /* Onboarding */,
-				918D2A592EC7605A008ABBC0 /* Analytics */,
 				918D2A192EC6C364008ABBC0 /* Settings */,
 				7A284F5565007884826D9AE3 /* RalleyCreation */,
 				917267C52EC41A6C0037F74F /* App */,
@@ -1094,27 +1093,11 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
-		918D2A572EC7605A008ABBC0 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Components;
-			sourceTree = "<group>";
-		};
-		918D2A592EC7605A008ABBC0 /* Analytics */ = {
-			isa = PBXGroup;
-			children = (
-				918D2A572EC7605A008ABBC0 /* Components */,
-			);
-			path = Analytics;
-			sourceTree = "<group>";
-		};
 		918D2A7A2EC768C1008ABBC0 /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
 				918D2B2F2EC78308008ABBC0 /* Components */,
 				918D2B312EC78308008ABBC0 /* Core */,
-				918D2B0F2EC77DB4008ABBC0 /* Setup */,
 				023541C884CB12D026003E57 /* ClubRalley */,
 			);
 			path = Onboarding;
@@ -1146,13 +1129,6 @@
 			children = (
 			);
 			path = Paywall;
-			sourceTree = "<group>";
-		};
-		918D2B0F2EC77DB4008ABBC0 /* Setup */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Setup;
 			sourceTree = "<group>";
 		};
 		918D2B152EC77DCF008ABBC0 /* Setup */ = {
@@ -1976,7 +1952,6 @@
 				918D2A232EC6C364008ABBC0 /* AccountSupportSection.swift in Sources */,
 				9160C34A2F19998200016128 /* AppGradientBackground.swift in Sources */,
 				91967F192F031FC9002BF7B5 /* RatingRequestSheet.swift in Sources */,
-				C9F8617B2F510A3F000C80CE /* EmailSignUpScreen.swift in Sources */,
 				C9665BC52F26E80F0055C54F /* NavigationModels.swift in Sources */,
 				91BBFB672ED76B700083AB35 /* OnboardingResult.swift in Sources */,
 				915B1A902F241C4C00D125A7 /* WelcomeCelebrationView.swift in Sources */,
@@ -2057,6 +2032,7 @@
 				C962916A7C1F65F6A437D51E /* FeedSheetViews.swift in Sources */,
 				2C2E01B8E7D884C84EBE97B5 /* UserService.swift in Sources */,
 				7F4E9A2B3C1D5E6F8A0B7C3D /* ContactsManager.swift in Sources */,
+				C9F8617D2F5287D8000C80CE /* EmailSignUpScreen.swift in Sources */,
 				5753BA92BBBD1B9C1D46E1D8 /* SettingsSection.swift in Sources */,
 				663ADBF62F704FAE4ED8F3D9 /* PowerUpProfileData.swift in Sources */,
 				E24FF1CADB430793B30FC69C /* PowerUpProfileViewModel.swift in Sources */,

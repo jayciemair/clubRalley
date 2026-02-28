@@ -182,20 +182,36 @@ class MessagingService: ObservableObject, MessagingServiceProtocol {
         let otherUserId = conversationId // conversationId is the other user's ID
 
         do {
+            // Format the before date for Supabase filtering
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
             // Get messages sent by current user to other user
-            let sentMessages: [DatabaseDirectMessageRecord] = try await supabase.query("direct_messages")
+            var sentQuery = supabase.query("direct_messages")
                 .select("*")
                 .eq("sender_id", value: currentUser.id)
                 .eq("recipient_id", value: otherUserId)
+
+            if let before = before {
+                sentQuery = sentQuery.lt("created_at", value: formatter.string(from: before))
+            }
+
+            let sentMessages: [DatabaseDirectMessageRecord] = try await sentQuery
                 .order("created_at", ascending: false)
                 .limit(limit)
                 .execute()
 
             // Get messages received from other user
-            let receivedMessages: [DatabaseDirectMessageRecord] = try await supabase.query("direct_messages")
+            var receivedQuery = supabase.query("direct_messages")
                 .select("*")
                 .eq("sender_id", value: otherUserId)
                 .eq("recipient_id", value: currentUser.id)
+
+            if let before = before {
+                receivedQuery = receivedQuery.lt("created_at", value: formatter.string(from: before))
+            }
+
+            let receivedMessages: [DatabaseDirectMessageRecord] = try await receivedQuery
                 .order("created_at", ascending: false)
                 .limit(limit)
                 .execute()
@@ -251,7 +267,7 @@ class MessagingService: ObservableObject, MessagingServiceProtocol {
                 content: trimmedContent
             )
 
-            try await supabase.insert(insert, into: "direct_messages")
+            let messageId = try await supabase.insertReturningId(insert, into: "direct_messages")
 
             print("MessagingService: Message sent to \(recipientId)")
 
@@ -266,7 +282,7 @@ class MessagingService: ObservableObject, MessagingServiceProtocol {
 
             // Return the sent message
             return DirectMessage(
-                id: UUID(),
+                id: messageId,
                 conversationId: conversationId,
                 senderId: currentUser.id,
                 recipientId: recipientId,
@@ -347,75 +363,6 @@ class MessagingService: ObservableObject, MessagingServiceProtocol {
         return user
     }
 
-    // MARK: - Mock Data (Fallback)
-
-    private func generateMockConversations() -> [DirectConversation] {
-        return [
-            DirectConversation(
-                id: UUID(),
-                otherUserId: UUID(),
-                otherUserName: "Alex Johnson",
-                otherUserUsername: "alexj",
-                otherUserPhotoURL: "https://picsum.photos/100/100?random=301",
-                isVerified: false,
-                lastMessage: "See you at the game!",
-                lastMessageAt: Date().addingTimeInterval(-1800),
-                unreadCount: 2,
-                createdAt: Date().addingTimeInterval(-86400)
-            ),
-            DirectConversation(
-                id: UUID(),
-                otherUserId: UUID(),
-                otherUserName: "Sarah Chen",
-                otherUserUsername: "sarahc",
-                otherUserPhotoURL: "https://picsum.photos/100/100?random=302",
-                isVerified: true,
-                lastMessage: "Thanks for the invite!",
-                lastMessageAt: Date().addingTimeInterval(-7200),
-                unreadCount: 0,
-                createdAt: Date().addingTimeInterval(-172800)
-            )
-        ]
-    }
-
-    private func generateMockMessages(conversationId: UUID) -> [DirectMessage] {
-        let now = Date()
-        let currentUserId = supabase.currentUser?.id ?? UUID()
-        let otherUserId = conversationId
-
-        return [
-            DirectMessage(
-                id: UUID(),
-                conversationId: conversationId,
-                senderId: otherUserId,
-                recipientId: currentUserId,
-                content: "Hey! Are you coming to the game tomorrow?",
-                createdAt: now.addingTimeInterval(-7200),
-                isRead: true,
-                isFromCurrentUser: false
-            ),
-            DirectMessage(
-                id: UUID(),
-                conversationId: conversationId,
-                senderId: currentUserId,
-                recipientId: otherUserId,
-                content: "Yes! I'll be there around 6pm",
-                createdAt: now.addingTimeInterval(-3600),
-                isRead: true,
-                isFromCurrentUser: true
-            ),
-            DirectMessage(
-                id: UUID(),
-                conversationId: conversationId,
-                senderId: otherUserId,
-                recipientId: currentUserId,
-                content: "Perfect! See you at the game!",
-                createdAt: now.addingTimeInterval(-1800),
-                isRead: true,
-                isFromCurrentUser: false
-            )
-        ]
-    }
 }
 
 // MARK: - Database Models for Direct Messages

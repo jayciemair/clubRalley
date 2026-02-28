@@ -57,25 +57,17 @@ extension SupabaseManager {
             throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
-        // Parse the condition to extract column, operator, and value
-        let parts = condition.components(separatedBy: " = ")
-        guard parts.count == 2 else {
+        let filters = parseWhereCondition(condition)
+        guard !filters.isEmpty else {
             throw SupabaseError.invalidData("Invalid condition format")
         }
 
-        let column = parts[0].trimmingCharacters(in: .whitespaces)
-        var value = parts[1].trimmingCharacters(in: .whitespaces)
-
-        // Remove quotes if present
-        if value.hasPrefix("'") && value.hasSuffix("'") {
-            value = String(value.dropFirst().dropLast())
-        }
-
         do {
-            _ = try await client.client.from(table)
-                .update(data)
-                .eq(column, value: value)
-                .execute()
+            var query = try client.client.from(table).update(data)
+            for (column, value) in filters {
+                query = query.eq(column, value: value)
+            }
+            _ = try await query.execute()
         } catch {
             throw SupabaseError.networkError(error.localizedDescription)
         }
@@ -88,25 +80,17 @@ extension SupabaseManager {
             throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
-        // Parse the condition to extract column and value
-        let parts = condition.components(separatedBy: " = ")
-        guard parts.count >= 2 else {
+        let filters = parseWhereCondition(condition)
+        guard !filters.isEmpty else {
             throw SupabaseError.invalidData("Invalid condition format")
         }
 
-        let column = parts[0].trimmingCharacters(in: .whitespaces)
-        var value = parts[1].trimmingCharacters(in: .whitespaces)
-
-        // Remove quotes if present
-        if value.hasPrefix("'") && value.hasSuffix("'") {
-            value = String(value.dropFirst().dropLast())
-        }
-
         do {
-            _ = try await client.client.from(table)
-                .delete()
-                .eq(column, value: value)
-                .execute()
+            var query = client.client.from(table).delete()
+            for (column, value) in filters {
+                query = query.eq(column, value: value)
+            }
+            _ = try await query.execute()
         } catch {
             throw SupabaseError.networkError(error.localizedDescription)
         }
@@ -149,9 +133,58 @@ extension SupabaseManager {
         }
     }
 
-    /// Update record with dictionary values (mock implementation)
+    /// Update record with dictionary values
+    /// Note: Prefer the typed update<T: Encodable>() overload for compile-time safety.
     func update(table: String, set: [String: Any], where condition: String) async throws {
-        // Not implemented - use typed update instead
+        // Convert dictionary to JSON data, then use raw update
+        guard let client = client, !useFallbackMode else {
+            print("📱 SupabaseDatabase.update(dict): Offline mode - cannot update \(table)")
+            throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
+        }
+
+        let filters = parseWhereCondition(condition)
+        guard !filters.isEmpty else {
+            throw SupabaseError.invalidData("Invalid condition format")
+        }
+
+        // Convert to Codable wrapper
+        let wrapper = DictionaryWrapper(set)
+
+        do {
+            var query = try client.client.from(table).update(wrapper)
+            for (column, value) in filters {
+                query = query.eq(column, value: value)
+            }
+            try await query.execute()
+        } catch {
+            throw SupabaseError.networkError(error.localizedDescription)
+        }
+    }
+
+    /// Parse a SQL-style WHERE condition into (column, value) pairs.
+    /// Supports compound conditions joined by AND, e.g.:
+    ///   "ralley_id = 'abc' AND user_id = 'xyz'" → [("ralley_id", "abc"), ("user_id", "xyz")]
+    ///   "user_id = 'abc' AND is_read = 'false'" → [("user_id", "abc"), ("is_read", "false")]
+    private func parseWhereCondition(_ condition: String) -> [(column: String, value: String)] {
+        let clauses = condition.components(separatedBy: " AND ")
+        var filters: [(String, String)] = []
+
+        for clause in clauses {
+            let parts = clause.trimmingCharacters(in: .whitespaces).components(separatedBy: " = ")
+            guard parts.count == 2 else { continue }
+
+            let column = parts[0].trimmingCharacters(in: .whitespaces)
+            var value = parts[1].trimmingCharacters(in: .whitespaces)
+
+            // Remove quotes if present
+            if value.hasPrefix("'") && value.hasSuffix("'") {
+                value = String(value.dropFirst().dropLast())
+            }
+
+            filters.append((column, value))
+        }
+
+        return filters
     }
 
     /// Update record with Encodable type
@@ -161,25 +194,17 @@ extension SupabaseManager {
             throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
-        // Parse the condition to extract column, operator, and value
-        let parts = condition.components(separatedBy: " = ")
-        guard parts.count == 2 else {
+        let filters = parseWhereCondition(condition)
+        guard !filters.isEmpty else {
             throw SupabaseError.invalidData("Invalid condition format")
         }
 
-        let column = parts[0].trimmingCharacters(in: .whitespaces)
-        var value = parts[1].trimmingCharacters(in: .whitespaces)
-
-        // Remove quotes if present
-        if value.hasPrefix("'") && value.hasSuffix("'") {
-            value = String(value.dropFirst().dropLast())
-        }
-
         do {
-            try await client.client.from(table)
-                .update(data)
-                .eq(column, value: value)
-                .execute()
+            var query = try client.client.from(table).update(data)
+            for (column, value) in filters {
+                query = query.eq(column, value: value)
+            }
+            try await query.execute()
         } catch {
             throw error
         }
@@ -226,6 +251,38 @@ extension SupabaseManager {
 }
 
 // MARK: - Helper Structs
+
+/// Wrapper to make [String: Any] Encodable for Supabase updates
+struct DictionaryWrapper: Encodable {
+    private let values: [String: Any]
+
+    init(_ values: [String: Any]) {
+        self.values = values
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: DynamicCodingKey.self)
+        for (key, value) in values {
+            let codingKey = DynamicCodingKey(stringValue: key)
+            if let boolVal = value as? Bool {
+                try container.encode(boolVal, forKey: codingKey)
+            } else if let intVal = value as? Int {
+                try container.encode(intVal, forKey: codingKey)
+            } else if let doubleVal = value as? Double {
+                try container.encode(doubleVal, forKey: codingKey)
+            } else if let strVal = value as? String {
+                try container.encode(strVal, forKey: codingKey)
+            }
+        }
+    }
+
+    private struct DynamicCodingKey: CodingKey {
+        var stringValue: String
+        var intValue: Int? { nil }
+        init(stringValue: String) { self.stringValue = stringValue }
+        init?(intValue: Int) { nil }
+    }
+}
 
 /// Database model for inserting users (matches users table schema)
 struct ClubUserInsert: Codable {

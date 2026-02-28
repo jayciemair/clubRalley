@@ -274,7 +274,7 @@ struct MessageBubble: View {
             VStack(alignment: message.isFromCurrentUser ? .trailing : .leading, spacing: 4) {
                 Text(message.content)
                     .font(.system(size: 16))
-                    .foregroundColor(message.isFromCurrentUser ? .white : .black)
+                    .foregroundColor(message.isFromCurrentUser ? .white : ClubRalleyTheme.Colors.darkGreen)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
                     .background(
