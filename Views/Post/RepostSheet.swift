@@ -152,6 +152,9 @@ struct RepostSheet: View {
                 Spacer()
             }
             .background(Color(hex: "#F5F5F5"))
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
             .navigationTitle("Repost")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

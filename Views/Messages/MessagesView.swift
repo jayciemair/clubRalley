@@ -42,6 +42,9 @@ struct MessagesView: View {
                 }
             }
             .background(Color(hex: "#F5F5F5"))
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
             .navigationBarHidden(true)
         }
         .task {

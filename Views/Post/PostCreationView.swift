@@ -61,6 +61,9 @@ struct PostCreationInterfaceView: View {
             composerToolbar
         }
         .background(Color.white)
+        .onTapGesture {
+            isTextFieldFocused = false
+        }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 isTextFieldFocused = true
@@ -245,8 +248,8 @@ struct PostCreationInterfaceView: View {
             isPosting = false
 
             // If an error occurred, show it and keep composer open with text preserved
-            if postManager.error != nil {
-                errorMessage = "Failed to create post. Please check your connection and try again."
+            if let error = postManager.error {
+                errorMessage = "Failed to create post: \(error.localizedDescription)"
                 showingError = true
                 return
             }
@@ -304,6 +307,9 @@ struct ThreadComposerView: View {
                 bottomToolbar
             }
             .background(Color.white)
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
             .navigationBarHidden(true)
         }
         .photosPicker(isPresented: $showingPhotosPicker, selection: $selectedItems, maxSelectionCount: 4, matching: .images)
@@ -491,8 +497,8 @@ struct ThreadComposerView: View {
             isPosting = false
 
             // If an error occurred, show it and keep composer open with text preserved
-            if postManager.error != nil {
-                errorMessage = "Failed to create post. Please check your connection and try again."
+            if let error = postManager.error {
+                errorMessage = "Failed to create post: \(error.localizedDescription)"
                 showingError = true
                 return
             }

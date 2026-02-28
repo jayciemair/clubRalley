@@ -138,6 +138,9 @@ struct LocationSearchSheet: View {
                     }
                 }
             }
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
             .navigationTitle("Find Location")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

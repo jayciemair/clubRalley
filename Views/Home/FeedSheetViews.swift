@@ -85,6 +85,9 @@ struct SimpleCommentsSheet: View {
                 }
                 commentInputBar
             }
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
             .navigationTitle("Comments").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .navigationBarLeading) { Button("Close") { dismiss() }.foregroundColor(Color(hex: "#2C4F40")) } }
         }

@@ -201,6 +201,9 @@ struct PostDetailView: View {
             commentInputBar
         }
         .background(ClubRalleyTheme.Colors.warmBackground)
+        .onTapGesture {
+            isInputFocused = false
+        }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle("Post")
         .sheet(isPresented: $showingRepostSheet) {

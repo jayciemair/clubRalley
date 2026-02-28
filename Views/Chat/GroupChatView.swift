@@ -20,6 +20,9 @@ struct GroupChatView: View {
         VStack(spacing: 0) {
             // Messages
             messagesScrollView
+                .onTapGesture {
+                    isInputFocused = false
+                }
 
             // Input bar
             messageInputBar

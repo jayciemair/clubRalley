@@ -60,6 +60,9 @@ struct DirectMessageView: View {
             messageInputBar
         }
         .background(Color(hex: "#F5F5F5"))
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         .navigationTitle(conversation.otherUserName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

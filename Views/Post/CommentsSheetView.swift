@@ -46,6 +46,9 @@ struct CommentsSheetView: View {
                     .padding(.top, 16)
                     .padding(.bottom, 100) // Space for input bar
                 }
+                .onTapGesture {
+                    isInputFocused = false
+                }
 
                 // Input Bar
                 commentInputBar
