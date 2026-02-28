@@ -137,10 +137,10 @@ class RalleyManager: ObservableObject {
         durationMinutes: Int = 60,
         locationName: String,
         address: String = "",
-        city: String = "Lewisburg",
-        state: String = "PA",
-        latitude: Double = 0.0,
-        longitude: Double = 0.0,
+        city: String,
+        state: String,
+        latitude: Double,
+        longitude: Double,
         maxPlayers: Int,
         cost: Double = 0.0,
         description: String,
@@ -160,6 +160,7 @@ class RalleyManager: ObservableObject {
         error = nil
 
         let currentUserId = supabase.currentUser?.id ?? UUID()
+        let savedProfile = SavedUserProfile.loadFromStorage()
 
         // Create local ralley model
         var newRalley = ClubRalley(
@@ -169,9 +170,9 @@ class RalleyManager: ObservableObject {
             description: description,
             organizer: ClubRalleyOrganizer(
                 id: currentUserId,
-                name: supabase.currentUser?.displayName ?? "Your Name",
-                username: "@\(supabase.currentUser?.email.components(separatedBy: "@").first ?? "you")",
-                photoURL: "https://picsum.photos/50/50?random=50"
+                name: supabase.currentUser?.displayName ?? savedProfile?.fullName ?? "Your Name",
+                username: savedProfile?.username ?? "@\(supabase.currentUser?.email.components(separatedBy: "@").first ?? "you")",
+                photoURL: savedProfile?.profilePhotoURL ?? ""
             ),
             dateTime: dateTime,
             location: ClubRalleyLocation(

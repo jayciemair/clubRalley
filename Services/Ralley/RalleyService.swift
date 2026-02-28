@@ -75,24 +75,28 @@ class RalleyService: ObservableObject, RalleyServiceProtocol {
      * @returns: Created ralley with database ID and timestamps
      */
     func createRalley(_ ralley: ClubRalley) async throws -> ClubRalley {
-        // Get user ID from SupabaseManager or fall back to SavedUserProfile
-        var hostUserId: UUID?
+        print("[supaTennis] 🏁 createRalley() called — title: '\(ralley.title)'")
+        print("[supaTennis] 🏁 isAuthenticated: \(supabase.isAuthenticated)")
+        print("[supaTennis] 🏁 currentUser: \(supabase.currentUser?.id.uuidString ?? "nil")")
 
-        if let currentUser = supabase.currentUser {
-            hostUserId = currentUser.id
-        } else if let savedProfile = SavedUserProfile.loadFromStorage() {
-            hostUserId = savedProfile.id
+        guard supabase.isAuthenticated else {
+            print("[supaTennis] ❌ createRalley FAILED — not authenticated")
+            throw SupabaseManager.SupabaseError.notAuthenticated
         }
 
-        guard let userId = hostUserId else {
+        guard let currentUser = supabase.currentUser else {
+            print("[supaTennis] ❌ createRalley FAILED — no currentUser")
             throw SupabaseManager.SupabaseError.userNotFound
         }
+
+        let userId = currentUser.id
+        print("[supaTennis] 🏁 Using Supabase auth userId: \(userId)")
 
         isLoading = true
         lastError = nil
 
         do {
-            print("📝 RalleyService: Creating ralley '\(ralley.title)' for user \(userId)")
+            print("[supaTennis] 🏁 Creating ralley '\(ralley.title)' for user \(userId)")
 
             // Map ClubRalley to database ralley structure
             let dbRalley = DatabaseRalley(
@@ -121,7 +125,7 @@ class RalleyService: ObservableObject, RalleyServiceProtocol {
 
             // Return the ralley with updated database info
             var updatedRalley = ralley
-            // Note: id is let constant, database generates its own ID
+            updatedRalley.id = ralleyId // Use database-generated ID
             updatedRalley.currentPlayers = 1 // Host is first player
 
             isLoading = false

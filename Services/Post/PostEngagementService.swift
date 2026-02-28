@@ -3,7 +3,7 @@
 //  Club Ralley
 //
 //  Service for post engagement operations: likes, comments.
-//  Updated for lean 6-table schema (uses posts.likes JSONB and comments table)
+//  Actual posts table columns: id, user_id, content, image_url, ralley_id, likes_count, liked_by (jsonb), created_at
 //
 
 import Foundation
@@ -13,7 +13,7 @@ import SwiftUI
  * PostEngagementService: Handles post engagement operations
  *
  * Purpose: Manages likes and comments for posts
- * Database: Uses posts.likes JSONB column and comments table
+ * Database: Uses posts.liked_by JSONB column and comments table
  */
 // MARK: - Protocol
 
@@ -50,11 +50,11 @@ class PostEngagementService: ObservableObject, PostEngagementServiceProtocol {
     /// Last operation error for user feedback
     @Published var lastError: SupabaseManager.SupabaseError?
 
-    // MARK: - Like Operations (Using posts.likes JSONB)
+    // MARK: - Like Operations (Using posts.liked_by JSONB)
 
     /**
      * Toggle like status for a post
-     * Uses posts.likes JSONB array instead of separate post_likes table
+     * Uses posts.liked_by JSONB array
      * @param postId: Post ID to like/unlike
      * @returns: New like status (true if liked, false if unliked)
      */
@@ -68,42 +68,41 @@ class PostEngagementService: ObservableObject, PostEngagementServiceProtocol {
         }
 
         do {
-            // Load the post to get current likes array
+            // Load the post to get current liked_by array
             guard let post: PostWithLikes = try await supabase.query("posts")
-                .select("id, likes, likes_count")
+                .select("id, liked_by, likes_count")
                 .eq("id", value: postId)
                 .single() else {
                 throw SupabaseManager.SupabaseError.networkError("Post not found")
             }
 
-            // Parse current likes array
-            var likesArray = post.likes ?? []
+            // Parse current liked_by array
+            var likedByArray = post.liked_by ?? []
             let userIdString = currentUser.id.uuidString
 
             let isLiked: Bool
-            if likesArray.contains(userIdString) {
+            if likedByArray.contains(userIdString) {
                 // Remove like
-                likesArray.removeAll { $0 == userIdString }
+                likedByArray.removeAll { $0 == userIdString }
                 isLiked = false
                 print("PostEngagementService: Removed like for post \(postId)")
             } else {
                 // Add like
-                likesArray.append(userIdString)
+                likedByArray.append(userIdString)
                 isLiked = true
                 print("PostEngagementService: Added like for post \(postId)")
             }
 
-            // Update the post with new likes array
+            // Update the post with new liked_by array and likes_count
             let update = PostLikesUpdate(
-                likes: likesArray,
-                likes_count: likesArray.count
+                liked_by: likedByArray,
+                likes_count: likedByArray.count
             )
 
             try await supabase.update(update, in: "posts", where: "id = '\(postId)'")
 
             // Create notification for like (only if adding a like)
             if isLiked {
-                // We need to get the post owner ID
                 if let fullPost: DatabasePostOwner = try? await supabase.query("posts")
                     .select("user_id")
                     .eq("id", value: postId)
@@ -130,14 +129,14 @@ class PostEngagementService: ObservableObject, PostEngagementServiceProtocol {
 
         do {
             guard let post: PostWithLikes = try await supabase.query("posts")
-                .select("id, likes")
+                .select("id, liked_by")
                 .eq("id", value: postId)
                 .single() else {
                 return false
             }
 
-            let likesArray = post.likes ?? []
-            return likesArray.contains(currentUser.id.uuidString)
+            let likedByArray = post.liked_by ?? []
+            return likedByArray.contains(currentUser.id.uuidString)
         } catch {
             print("PostEngagementService: Check like status failed: \(error)")
             return false
@@ -195,8 +194,7 @@ class PostEngagementService: ObservableObject, PostEngagementServiceProtocol {
             isLoading = false
             print("PostEngagementService: Load comments failed: \(error)")
 
-            // Return mock comments for development
-            return generateMockComments(for: postId)
+            return []
         }
     }
 
@@ -227,14 +225,12 @@ class PostEngagementService: ObservableObject, PostEngagementServiceProtocol {
 
             try await supabase.insert(dbComment, into: "comments")
 
-            // Update comments_count on the post and get post owner
+            // Get post owner for notification
             var postOwnerId: UUID?
-            if let post: DatabasePostWithOwner = try? await supabase.query("posts")
-                .select("id, comments_count, user_id")
+            if let post: DatabasePostOwner = try? await supabase.query("posts")
+                .select("user_id")
                 .eq("id", value: postId)
                 .single() {
-                let updateData = PostCommentsCountUpdate(comments_count: post.comments_count + 1)
-                try? await supabase.update(updateData, in: "posts", where: "id = '\(postId)'")
                 postOwnerId = post.user_id
             }
 
@@ -315,142 +311,26 @@ class PostEngagementService: ObservableObject, PostEngagementServiceProtocol {
         }
     }
 
-    // MARK: - Repost Operations
+    // MARK: - Repost Operations (Not supported by current schema)
+    // The posts table doesn't have original_post_id, post_type, repost_comment, or shares_count columns.
+    // These methods are stubbed out until the schema supports reposts.
 
-    /**
-     * Repost a post by creating a new post with reference to original
-     * @param postId: Original post ID to repost
-     * @param comment: Optional comment to add to the repost
-     * @returns: True if repost was successful
-     */
     func repost(postId: UUID, comment: String? = nil) async throws -> Bool {
-        guard supabase.isAuthenticated else {
-            throw SupabaseManager.SupabaseError.notAuthenticated
-        }
-
-        guard let currentUser = supabase.currentUser else {
-            throw SupabaseManager.SupabaseError.userNotFound
-        }
-
-        do {
-            // Check if already reposted
-            if try await hasReposted(postId: postId) {
-                print("✅ PostEngagementService: Already reposted post \(postId)")
-                return true
-            }
-
-            // Get original post content for the repost
-            guard let originalPost: DatabasePostWithUser = try await supabase.query("posts")
-                .select("*, club_users(first_name, last_name, username, profile_photo_url)")
-                .eq("id", value: postId)
-                .single() else {
-                throw SupabaseManager.SupabaseError.invalidData("Original post not found")
-            }
-
-            // Create repost entry
-            let repost = DatabaseRepostInsert(
-                user_id: currentUser.id,
-                content: comment ?? originalPost.content,
-                post_type: "repost",
-                visibility: "everyone",
-                original_post_id: postId,
-                repost_comment: comment
-            )
-
-            try await supabase.insert(repost, into: "posts")
-
-            // Increment shares_count on original post
-            let update = PostSharesUpdate(shares_count: (originalPost.shares_count ?? 0) + 1)
-            try await supabase.update(update, in: "posts", where: "id = '\(postId)'")
-
-            print("✅ PostEngagementService: Reposted post \(postId)")
-            return true
-
-        } catch {
-            print("❌ PostEngagementService: Repost failed: \(error)")
-            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
-        }
+        print("⚠️ PostEngagementService: Repost not supported by current database schema")
+        return false
     }
 
-    /**
-     * Undo a repost by deleting the repost
-     * @param postId: Original post ID that was reposted
-     * @returns: True if undo was successful
-     */
     func undoRepost(postId: UUID) async throws -> Bool {
-        guard supabase.isAuthenticated else {
-            throw SupabaseManager.SupabaseError.notAuthenticated
-        }
-
-        guard let currentUser = supabase.currentUser else {
-            throw SupabaseManager.SupabaseError.userNotFound
-        }
-
-        do {
-            // Delete the repost
-            try await supabase.delete(
-                from: "posts",
-                where: "user_id = '\(currentUser.id)' AND original_post_id = '\(postId)'"
-            )
-
-            // Decrement shares_count on original post
-            if let originalPost: PostWithLikes = try? await supabase.query("posts")
-                .select("id, shares_count")
-                .eq("id", value: postId)
-                .single(),
-               let sharesCount = originalPost.shares_count {
-                let update = PostSharesUpdate(shares_count: max(0, sharesCount - 1))
-                try await supabase.update(update, in: "posts", where: "id = '\(postId)'")
-            }
-
-            print("✅ PostEngagementService: Undid repost for post \(postId)")
-            return true
-
-        } catch {
-            print("❌ PostEngagementService: Undo repost failed: \(error)")
-            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
-        }
+        print("⚠️ PostEngagementService: Undo repost not supported by current database schema")
+        return false
     }
 
-    /**
-     * Get repost count for a post
-     * @param postId: Post ID to get repost count for
-     * @returns: Number of reposts
-     */
     func getRepostCount(postId: UUID) async throws -> Int {
-        do {
-            let reposts: [DatabaseRepostCount] = try await supabase.query("posts")
-                .select("id")
-                .eq("original_post_id", value: postId)
-                .execute()
-
-            return reposts.count
-        } catch {
-            print("❌ PostEngagementService: Get repost count failed: \(error)")
-            return 0
-        }
+        return 0
     }
 
-    /**
-     * Check if current user has reposted a post
-     * @param postId: Post ID to check
-     * @returns: True if user has reposted this post
-     */
     func hasReposted(postId: UUID) async throws -> Bool {
-        guard let currentUser = supabase.currentUser else { return false }
-
-        do {
-            let reposts: [DatabaseRepostCount] = try await supabase.query("posts")
-                .select("id")
-                .eq("user_id", value: currentUser.id)
-                .eq("original_post_id", value: postId)
-                .execute()
-
-            return !reposts.isEmpty
-        } catch {
-            print("❌ PostEngagementService: Check repost status failed: \(error)")
-            return false
-        }
+        return false
     }
 
     // MARK: - Helper Methods

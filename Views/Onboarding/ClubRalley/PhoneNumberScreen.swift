@@ -3,10 +3,13 @@
 //  Club Ralley
 //
 //  Onboarding screen for phone number entry and OTP verification
+//  Commented out — Twilio not configured. Uncomment when ready to re-enable phone auth.
 //
 
 import SwiftUI
 
+// MARK: - Phone Number Screen (commented out — Twilio not configured)
+/*
 struct PhoneNumberScreen: View {
     @EnvironmentObject var controller: ClubRalleyOnboardingController
 
@@ -310,3 +313,4 @@ struct PhoneNumberScreen_Previews: PreviewProvider {
             .environmentObject(ClubRalleyOnboardingController())
     }
 }
+*/

@@ -9,7 +9,13 @@ import SwiftUI
 
 struct ClubRalleyOnboardingCoordinator: View {
     @StateObject private var controller = ClubRalleyOnboardingController()
+    let reAuthOnly: Bool
     let completion: () -> Void
+
+    init(reAuthOnly: Bool = false, completion: @escaping () -> Void) {
+        self.reAuthOnly = reAuthOnly
+        self.completion = completion
+    }
 
     var body: some View {
         ZStack {
@@ -60,15 +66,14 @@ struct ClubRalleyOnboardingCoordinator: View {
         }
         .navigationBarHidden(true)
         .preferredColorScheme(.light)
+        .onAppear {
+            controller.isReAuthMode = reAuthOnly
+        }
     }
 
     @ViewBuilder
     private func screenView(for step: ClubRalleyOnboardingStep) -> some View {
         switch step {
-        case .emailSignUp:
-            EmailSignUpScreen()
-                .environmentObject(controller)
-
         case .name:
             NameScreen()
                 .environmentObject(controller)

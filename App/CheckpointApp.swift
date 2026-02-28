@@ -19,6 +19,7 @@ struct ClubRalleyApp: App {
     // Track if Club Ralley onboarding has been completed
     // Using @State instead of @AppStorage so we can control when it's read
     @State private var hasCompletedOnboarding = false
+    @State private var needsReAuth = false
 
     init() {
         print("🔵🔵🔵 DEBUG APP_INIT - THIS SHOULD APPEAR IN CONSOLE 🔵🔵🔵")
@@ -60,11 +61,12 @@ struct ClubRalleyApp: App {
                             handleDeepLink(from: url)
                         }
                 } else {
-                    // Not logged in - show onboarding
-                    ClubRalleyOnboardingCoordinator {
+                    // Not logged in - show onboarding (or re-auth sign-in only)
+                    ClubRalleyOnboardingCoordinator(reAuthOnly: needsReAuth) {
                         // Called when onboarding completes
                         withAnimation(.easeInOut(duration: 0.5)) {
                             UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
+                            needsReAuth = false
                             hasCompletedOnboarding = true
                         }
                     }
@@ -106,20 +108,13 @@ struct ClubRalleyApp: App {
                         }
                     }
                 } else if !hasSession && hasCompletedOnboarding {
-                    // No Supabase session but user completed onboarding
-                    // Restore auth state from saved profile so the app works
-                    if let savedProfile = SavedUserProfile.loadFromStorage() {
-                        print("🟡 App Launch - Restoring auth from saved profile: \(savedProfile.firstName) \(savedProfile.lastName)")
-                        await MainActor.run {
-                            supabaseManager.isAuthenticated = true
-                            supabaseManager.currentUser = SupabaseUser(
-                                id: savedProfile.id,
-                                email: savedProfile.email,
-                                firstName: savedProfile.firstName,
-                                lastName: savedProfile.lastName
-                            )
-                        }
-                        print("🟢 App Launch - Auth restored from saved profile, userId: \(savedProfile.id)")
+                    // No Supabase session — user must re-authenticate
+                    // Without a real session, auth.uid() is NULL server-side
+                    // and all writes (create ralley, post, etc.) fail with RLS errors
+                    print("🟡 App Launch - No Supabase session, redirecting to sign-in")
+                    await MainActor.run {
+                        needsReAuth = true
+                        hasCompletedOnboarding = false
                     }
                 }
 
@@ -198,18 +193,24 @@ struct ClubRalleyApp: App {
 
     private var splashView: some View {
         ZStack {
-            Color(hex: "#2C4F40").ignoresSafeArea()
+            Color(red: 58/255, green: 84/255, blue: 65/255)
+                .ignoresSafeArea()
 
-            VStack(spacing: 6) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text("Ralley")
-                    .font(.custom("Satoshi-BlackItalic", size: 48))
+                    .font(.custom("Chillax-Bold", size: 52))
                     .foregroundColor(.white)
+                    .kerning(-0.5)
 
                 Text("the athletes' network.")
-                    .font(.custom("Satoshi-Medium", size: 15))
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.custom("Chillax-Medium", size: 13))
+                    .foregroundColor(.white)
+                    .padding(.leading, 2)
             }
+            .offset(y: 40)
         }
+        .preferredColorScheme(.dark)
+        .statusBarHidden(true)
     }
 
     private func checkForUpdates() async {

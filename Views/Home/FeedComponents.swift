@@ -133,7 +133,7 @@ struct HomeUpcomingSection: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
                         ForEach(upcomingRalleys) { ralley in
-                            NavigationLink(destination: RalleyDetailView(ralley: ralley)) {
+                            NavigationLink(destination: RalleyDetailView(ralley: ralley).environmentObject(ralleyManager)) {
                                 HomeUpcomingCard(ralley: ralley)
                             }
                             .buttonStyle(PlainButtonStyle())

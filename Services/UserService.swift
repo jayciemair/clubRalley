@@ -51,8 +51,7 @@ class UserService: ObservableObject {
             self.error = error
             isLoading = false
 
-            // Use mock data as fallback
-            users = RosterUserData.mockUsers
+            users = []
         }
     }
 
@@ -89,10 +88,7 @@ class UserService: ObservableObject {
             self.error = error
             isLoading = false
 
-            // Filter mock data as fallback
-            users = RosterUserData.mockUsers.filter {
-                $0.name.localizedCaseInsensitiveContains(query)
-            }
+            users = []
         }
     }
 

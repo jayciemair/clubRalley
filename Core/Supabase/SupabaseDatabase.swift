@@ -27,16 +27,25 @@ extension SupabaseManager {
 
     /// Insert new record into database
     func insert<T: Codable>(_ data: T, into table: String) async throws {
+        print("[supaTennis] 💾 insert() called — table: \(table), dataType: \(type(of: data))")
+        print("[supaTennis] 💾 client nil? \(client == nil), fallback? \(useFallbackMode)")
         guard let client = client, !useFallbackMode else {
-            print("📱 SupabaseDatabase.insert: Offline mode - cannot insert to \(table)")
+            print("[supaTennis] ❌ insert BLOCKED — offline/fallback mode, table: \(table)")
             throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
         do {
+            let encoder = JSONEncoder()
+            if let jsonData = try? encoder.encode(data),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("[supaTennis] 💾 insert payload for \(table): \(jsonString)")
+            }
             let _ = try await client.client.from(table).insert(data).execute()
-            print("✅ SupabaseDatabase.insert: Inserted into \(table)")
+            print("[supaTennis] ✅ insert SUCCESS into \(table)")
         } catch {
-            print("❌ SupabaseDatabase.insert: Failed - \(error)")
+            print("[supaTennis] ❌ insert FAILED into \(table): \(error)")
+            print("[supaTennis] ❌ insert error type: \(type(of: error))")
+            print("[supaTennis] ❌ insert localizedDescription: \(error.localizedDescription)")
             throw SupabaseError.networkError(error.localizedDescription)
         }
     }
@@ -105,12 +114,19 @@ extension SupabaseManager {
 
     /// Insert new record and return generated ID
     func insertReturningId<T: Codable>(_ data: T, into table: String) async throws -> UUID {
+        print("[supaTennis] 💾 insertReturningId() called — table: \(table), dataType: \(type(of: data))")
+        print("[supaTennis] 💾 client nil? \(client == nil), fallback? \(useFallbackMode)")
         guard let client = client, !useFallbackMode else {
-            print("📱 SupabaseDatabase.insertReturningId: Offline mode - cannot insert to \(table)")
+            print("[supaTennis] ❌ insertReturningId BLOCKED — offline/fallback mode, table: \(table)")
             throw SupabaseError.networkError("Not connected to database. Please check your connection and try again.")
         }
 
         do {
+            let encoder = JSONEncoder()
+            if let jsonData = try? encoder.encode(data),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("[supaTennis] 💾 insertReturningId payload for \(table): \(jsonString)")
+            }
             let response: [DatabaseIdResponse] = try await client.client.from(table)
                 .insert(data)
                 .select("id")
@@ -120,10 +136,15 @@ extension SupabaseManager {
             guard let id = response.first?.id else {
                 throw SupabaseError.invalidData("No ID returned from insert")
             }
+            print("[supaTennis] ✅ insertReturningId SUCCESS for \(table), id: \(id)")
             return id
         } catch let error as SupabaseError {
+            print("[supaTennis] ❌ insertReturningId FAILED for \(table): \(error)")
             throw error
         } catch {
+            print("[supaTennis] ❌ insertReturningId FAILED for \(table): \(error)")
+            print("[supaTennis] ❌ error type: \(type(of: error))")
+            print("[supaTennis] ❌ error detail: \(error.localizedDescription)")
             throw SupabaseError.networkError(error.localizedDescription)
         }
     }
@@ -175,25 +196,32 @@ extension SupabaseManager {
         username: String,
         city: String,
         state: String,
-        profilePhotoURL: String?,
-        isVerifiedAthlete: Bool = false
+        profilePhotoURL: String?
     ) async throws {
+        print("[supaTennis] 👤 createClubUser() called")
+        print("[supaTennis] 👤   id: \(id)")
+        print("[supaTennis] 👤   authId: \(authId?.uuidString ?? "nil (will use id)")")
+        print("[supaTennis] 👤   email: '\(email)'")
+        print("[supaTennis] 👤   name: '\(firstName) \(lastName)'")
+        print("[supaTennis] 👤   username: '\(username)'")
+        print("[supaTennis] 👤   location: '\(city), \(state)'")
+        print("[supaTennis] 👤   profilePhotoURL: \(profilePhotoURL ?? "nil")")
+
         let userData = ClubUserInsert(
             id: id,
-            auth_id: authId ?? id,  // Use authId if provided, otherwise use id
+            auth_id: authId ?? id,
             email: email,
             first_name: firstName,
             last_name: lastName,
             username: username,
             city: city,
             state: state,
-            profile_photo_url: profilePhotoURL,
-            friends_count: 0,
-            ralleys_count: 0,
-            is_verified_athlete: isVerifiedAthlete
+            profile_photo_url: profilePhotoURL
         )
 
+        print("[supaTennis] 👤 About to insert into club_users...")
         try await insert(userData, into: "club_users")
+        print("[supaTennis] ✅ createClubUser() completed successfully")
     }
 }
 
@@ -210,9 +238,6 @@ struct ClubUserInsert: Codable {
     let city: String
     let state: String
     let profile_photo_url: String?
-    let friends_count: Int
-    let ralleys_count: Int
-    let is_verified_athlete: Bool
 }
 
 /// Helper struct for returning IDs from inserts

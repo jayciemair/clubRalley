@@ -14,25 +14,28 @@ import Contacts
 class ClubRalleyOnboardingController: ObservableObject {
 
     // MARK: - Published Properties
-    @Published var currentStep: ClubRalleyOnboardingStep = .phoneInput
+    @Published var currentStep: ClubRalleyOnboardingStep = .name
     @Published var onboardingData = CompleteOnboardingData()
     @Published var isLoading = false
     @Published var error: ClubRalleyOnboardingError?
     @Published var isComplete = false
     @Published var isReturningUser = false
 
+    /// When true, only shows sign-in (no sign-up, no profile setup)
+    var isReAuthMode = false
+
     // Validation states
     @Published var isUsernameAvailable: Bool?
     @Published var isCheckingUsername = false
-    @Published var isPhoneVerified = false
-    @Published var verificationCode = ""
 
-    // OTP cooldown
-    @Published var resendCooldown: Int = 0
-    private var cooldownTimer: Timer?
-
-    // Authenticated user ID (set after OTP verification)
+    // Email auth
     private var authenticatedUserId: UUID?
+
+    // MARK: - Phone/OTP (commented out — Twilio not configured)
+    // @Published var isPhoneVerified = false
+    // @Published var verificationCode = ""
+    // @Published var resendCooldown: Int = 0
+    // private var cooldownTimer: Timer?
 
     // MARK: - Computed Properties
     var currentProgress: Double {
@@ -45,10 +48,6 @@ class ClubRalleyOnboardingController: ObservableObject {
 
     var canContinue: Bool {
         switch currentStep {
-        case .phoneInput:
-            return onboardingData.profile.isPhoneComplete
-        case .otpVerification:
-            return verificationCode.count == 6
         case .name:
             return !onboardingData.profile.firstName.isEmpty && !onboardingData.profile.lastName.isEmpty
         case .username:
@@ -73,17 +72,21 @@ class ClubRalleyOnboardingController: ObservableObject {
     // MARK: - Navigation Methods
 
     func goToNextStep() {
+        print("[supaTennis] ➡️ goToNextStep() — current: \(currentStep)")
         let allSteps = ClubRalleyOnboardingStep.allCases
         guard let currentIndex = allSteps.firstIndex(of: currentStep),
               currentIndex < allSteps.count - 1 else {
+            print("[supaTennis] ➡️ No more steps — calling completeOnboarding()")
             completeOnboarding()
             return
         }
 
         let nextStep = allSteps[currentIndex + 1]
+        print("[supaTennis] ➡️ Next step: \(nextStep)")
 
         // If we're about to show the completion screen, submit data first
         if nextStep == .completion {
+            print("[supaTennis] 🏁 Next is .completion — triggering completeOnboarding()")
             completeOnboarding()
         }
 
@@ -105,14 +108,25 @@ class ClubRalleyOnboardingController: ObservableObject {
         currentStep = step
     }
 
-    // MARK: - Phone Number Methods
+    // MARK: - Anonymous Auth (Twilio SMS auth coming later)
 
+    /// Sign in anonymously so Supabase RLS works without requiring email/phone
+    private func signInAnonymously() async throws -> UUID {
+        print("[supaTennis] 🔑 signInAnonymously() called")
+        let userId = try await supabaseManager.signInAnonymously()
+        authenticatedUserId = userId
+        print("[supaTennis] ✅ Anonymous sign-in succeeded — userId: \(userId)")
+        return userId
+    }
+
+    // MARK: - Phone Number Methods (commented out — Twilio not configured)
+    // Uncomment when Twilio is set up to re-enable phone auth
+    /*
     func updatePhoneNumber(_ phone: String, countryCode: String = "+1") {
         onboardingData.profile.phoneNumber = phone.filter { $0.isNumber }
         onboardingData.profile.phoneCountryCode = countryCode
     }
 
-    /// Full E.164 phone number for Supabase
     private var e164Phone: String {
         let digits = onboardingData.profile.phoneNumber.filter { $0.isNumber }
         return "\(onboardingData.profile.phoneCountryCode)\(digits)"
@@ -123,15 +137,16 @@ class ClubRalleyOnboardingController: ObservableObject {
         defer { isLoading = false }
 
         let phone = e164Phone
-        print("📱 Sending OTP to: \(phone)")
+        print("[supaTennis] 📱 sendVerificationCode() — phone: \(phone)")
 
         do {
             try await supabaseManager.sendOTP(phone: phone)
+            print("[supaTennis] ✅ sendVerificationCode() — OTP sent OK")
             startResendCooldown()
             return true
         } catch {
-            // TODO: Remove mock fallback once Twilio is configured
-            print("⚠️ OTP send failed, using mock mode: \(error)")
+            print("[supaTennis] ⚠️ sendVerificationCode() FAILED: \(error)")
+            print("[supaTennis] ⚠️ Falling back to mock mode")
             startResendCooldown()
             return true
         }
@@ -141,24 +156,30 @@ class ClubRalleyOnboardingController: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
+        print("[supaTennis] 🔐 verifyPhoneCode() — code length: \(code.count), phone: \(e164Phone)")
+
         do {
             let userId = try await supabaseManager.verifyOTP(phone: e164Phone, code: code)
             isPhoneVerified = true
             authenticatedUserId = userId
+            print("[supaTennis] ✅ verifyPhoneCode() — REAL auth succeeded, userId: \(userId)")
 
-            // Check if returning user has an existing profile
+            print("[supaTennis] 🔍 Checking for existing profile...")
             if let existingProfile = try? await supabaseManager.fetchUserProfile(userId: userId) {
+                print("[supaTennis] 🔄 Found existing profile — returning user: \(existingProfile.username ?? "no username")")
                 handleReturningUser(existingProfile, userId: userId)
                 return true
             }
+            print("[supaTennis] 🆕 No existing profile — new user flow")
 
             return true
         } catch {
-            // TODO: Remove mock fallback once Twilio is configured
-            print("⚠️ OTP verify failed, using mock mode: \(error)")
+            print("[supaTennis] ❌ verifyPhoneCode() REAL auth FAILED: \(error)")
+            print("[supaTennis] ⚠️ Falling back to mock mode")
             if code.count == 6 {
                 isPhoneVerified = true
                 authenticatedUserId = UUID()
+                print("[supaTennis] ⚠️ MOCK userId assigned: \(authenticatedUserId!)")
                 return true
             }
             self.error = .networkError("Please enter a 6-digit code.")
@@ -166,16 +187,13 @@ class ClubRalleyOnboardingController: ObservableObject {
         }
     }
 
-    /// Handle a returning user who already has a profile
     private func handleReturningUser(_ profile: SavedUserProfile, userId: UUID) {
-        // Save profile locally
         MultiProfileManager.shared.addProfile(profile, setAsActive: true)
 
         if let profileData = try? JSONEncoder().with({ $0.dateEncodingStrategy = .iso8601 }).encode(profile) {
             UserDefaults.standard.set(profileData, forKey: "currentUserProfile")
         }
 
-        // Update SupabaseManager
         supabaseManager.currentUser = SupabaseUser(
             id: userId,
             email: profile.email,
@@ -183,13 +201,10 @@ class ClubRalleyOnboardingController: ObservableObject {
             lastName: profile.lastName
         )
 
-        // Mark onboarding complete and jump straight to main app
         UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
         isReturningUser = true
         isComplete = true
     }
-
-    // MARK: - OTP Cooldown
 
     private func startResendCooldown() {
         resendCooldown = 60
@@ -205,11 +220,73 @@ class ClubRalleyOnboardingController: ObservableObject {
             }
         }
     }
+    */
 
     // MARK: - Email Methods
 
     func updateEmail(_ email: String) {
         onboardingData.profile.email = email.trimmingCharacters(in: .whitespaces).lowercased()
+    }
+
+    /// Sign up with email/password, returns true on success
+    func signUpWithEmail() async -> Bool {
+        isLoading = true
+        defer { isLoading = false }
+
+        let email = onboardingData.profile.email
+        let password = onboardingData.profile.password
+
+        do {
+            let userId = try await supabaseManager.signUpWithEmail(email: email, password: password)
+            authenticatedUserId = userId
+            return true
+        } catch {
+            let msg = error.localizedDescription.lowercased()
+            if msg.contains("already") || msg.contains("exists") || msg.contains("registered") {
+                self.error = .emailAlreadyExists
+            } else {
+                self.error = .networkError(error.localizedDescription)
+            }
+            return false
+        }
+    }
+
+    /// Sign in only (re-auth mode), completes onboarding on success
+    func signInOnly() async {
+        isLoading = true
+        defer { isLoading = false }
+
+        let email = onboardingData.profile.email
+        let password = onboardingData.profile.password
+
+        do {
+            let userId = try await supabaseManager.signInWithEmail(email: email, password: password)
+            authenticatedUserId = userId
+
+            // Try to load existing profile
+            if let existingProfile = try? await supabaseManager.fetchUserProfile(userId: userId) {
+                MultiProfileManager.shared.addProfile(existingProfile, setAsActive: true)
+
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                if let profileData = try? encoder.encode(existingProfile) {
+                    UserDefaults.standard.set(profileData, forKey: "currentUserProfile")
+                }
+
+                supabaseManager.currentUser = SupabaseUser(
+                    id: userId,
+                    email: existingProfile.email,
+                    firstName: existingProfile.firstName,
+                    lastName: existingProfile.lastName
+                )
+            }
+
+            UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
+            isReturningUser = true
+            isComplete = true
+        } catch {
+            self.error = .networkError("Invalid email or password. Please try again.")
+        }
     }
 
     // MARK: - Username Methods
@@ -397,6 +474,7 @@ class ClubRalleyOnboardingController: ObservableObject {
     // MARK: - Completion
 
     private func completeOnboarding() {
+        print("[supaTennis] 🏁 completeOnboarding() called — launching submitOnboardingData() task")
         Task {
             await submitOnboardingData()
         }
@@ -406,11 +484,37 @@ class ClubRalleyOnboardingController: ObservableObject {
         isLoading = true
         error = nil
 
-        // User is already authenticated via OTP — use the authenticated user ID
+        print("[supaTennis] 🚀 submitOnboardingData() START")
+
+        // STEP 0: Sign in anonymously (gives us auth.uid() for RLS)
+        if authenticatedUserId == nil && supabaseManager.currentUser == nil {
+            do {
+                let anonId = try await signInAnonymously()
+                print("[supaTennis] 🔑 Anonymous auth succeeded — userId: \(anonId)")
+            } catch {
+                print("[supaTennis] ❌ Anonymous auth failed: \(error)")
+                self.error = .networkError("Failed to create account. Please try again.")
+                isLoading = false
+                return
+            }
+        }
+
         let userId = authenticatedUserId ?? supabaseManager.currentUser?.id ?? UUID()
-        let phone = e164Phone
+
+        print("[supaTennis] 🚀 Resolved userId: \(userId)")
+        print("[supaTennis] 🚀 Onboarding data:")
+        print("[supaTennis]   firstName: '\(onboardingData.profile.firstName)'")
+        print("[supaTennis]   lastName: '\(onboardingData.profile.lastName)'")
+        print("[supaTennis]   username: '\(onboardingData.profile.username)'")
+        print("[supaTennis]   email: '\(onboardingData.profile.email)'")
+        print("[supaTennis]   city: '\(onboardingData.profile.city)'")
+        print("[supaTennis]   state: '\(onboardingData.profile.state)'")
+        print("[supaTennis]   profilePhotoURL: \(onboardingData.profile.profilePhotoURL ?? "nil")")
+        print("[supaTennis]   isAthlete: \(onboardingData.athlete.isAthlete)")
+        print("[supaTennis]   sports: \(onboardingData.interests.selectedSports.map { $0.sport.name })")
 
         // STEP 1: Create profile in club_users table
+        print("[supaTennis] 📝 STEP 1: Creating club_users row...")
         do {
             try await supabaseManager.createClubUser(
                 id: userId,
@@ -420,20 +524,27 @@ class ClubRalleyOnboardingController: ObservableObject {
                 username: onboardingData.profile.username,
                 city: onboardingData.profile.city,
                 state: onboardingData.profile.state,
-                profilePhotoURL: onboardingData.profile.profilePhotoURL,
-                isVerifiedAthlete: onboardingData.athlete.isAthlete
+                profilePhotoURL: onboardingData.profile.profilePhotoURL
             )
+            print("[supaTennis] ✅ STEP 1 SUCCESS — club_users row created")
         } catch {
+            print("[supaTennis] ❌ STEP 1 FAILED: \(error)")
+            print("[supaTennis] ❌ Error localizedDescription: \(error.localizedDescription)")
             let errorMessage = error.localizedDescription.lowercased()
             if errorMessage.contains("already") || errorMessage.contains("duplicate") || errorMessage.contains("unique") {
+                print("[supaTennis] ❌ Duplicate user detected — showing usernameAlreadyTaken error")
                 self.error = .usernameAlreadyTaken
                 isLoading = false
                 return
             }
-            // Non-critical — continue with local-only mode
+            print("[supaTennis] ❌ Non-duplicate Supabase error — showing error to user")
+            self.error = .networkError("Failed to create account: \(error.localizedDescription)")
+            isLoading = false
+            return
         }
 
         // STEP 2: Save local profile backup
+        print("[supaTennis] 💾 STEP 2: Saving local profile backup...")
         do {
             let userProfile = SavedUserProfile(
                 id: userId,
@@ -441,7 +552,7 @@ class ClubRalleyOnboardingController: ObservableObject {
                 firstName: onboardingData.profile.firstName,
                 lastName: onboardingData.profile.lastName,
                 username: onboardingData.profile.username,
-                phoneNumber: phone,
+                phoneNumber: "",
                 locationCity: onboardingData.profile.city,
                 locationState: onboardingData.profile.state,
                 profilePhotoURL: onboardingData.profile.profilePhotoURL,
@@ -456,9 +567,11 @@ class ClubRalleyOnboardingController: ObservableObject {
             encoder.dateEncodingStrategy = .iso8601
             let profileData = try encoder.encode(userProfile)
             UserDefaults.standard.set(profileData, forKey: "currentUserProfile")
+            print("[supaTennis] ✅ STEP 2 — local profile saved to UserDefaults")
 
             if let photoData = onboardingData.profile.profilePhotoData {
                 UserDefaults.standard.set(photoData, forKey: "currentUserProfilePhoto")
+                print("[supaTennis] ✅ STEP 2 — profile photo data saved (\(photoData.count) bytes)")
             }
 
             supabaseManager.currentUser = SupabaseUser(
@@ -467,15 +580,16 @@ class ClubRalleyOnboardingController: ObservableObject {
                 firstName: onboardingData.profile.firstName,
                 lastName: onboardingData.profile.lastName
             )
+            print("[supaTennis] ✅ STEP 2 — supabaseManager.currentUser set")
 
         } catch {
-            print("Failed to save local profile: \(error)")
+            print("[supaTennis] ❌ STEP 2 FAILED — local save error: \(error)")
         }
 
         // STEP 3: Mark onboarding as complete
+        print("[supaTennis] 🏁 STEP 3: Marking onboarding complete...")
         UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
 
-        // Register for push notifications and start listening
         PushNotificationService.shared.requestPermissionAndRegister()
         await InAppNotificationService.shared.startListening()
 
@@ -483,31 +597,35 @@ class ClubRalleyOnboardingController: ObservableObject {
 
         isComplete = true
         isLoading = false
+        print("[supaTennis] 🎉 submitOnboardingData() COMPLETE — isComplete: \(isComplete)")
     }
 
     // MARK: - Reset
 
     func resetOnboarding() {
-        currentStep = .phoneInput
+        currentStep = .name
         onboardingData = CompleteOnboardingData()
         isComplete = false
         error = nil
         isUsernameAvailable = nil
-        isPhoneVerified = false
         authenticatedUserId = nil
-        verificationCode = ""
-        resendCooldown = 0
-        cooldownTimer?.invalidate()
+        // Phone/OTP reset (commented out — Twilio not configured)
+        // isPhoneVerified = false
+        // authenticatedUserId = nil
+        // verificationCode = ""
+        // resendCooldown = 0
+        // cooldownTimer?.invalidate()
         UserDefaults.standard.removeObject(forKey: "hasCompletedClubRalleyOnboarding")
         SavedUserProfile.clearStorage()
     }
 
-    // MARK: - Validation Helpers
-
+    // MARK: - Validation Helpers (phone commented out — Twilio not configured)
+    /*
     func isValidPhoneNumber(_ phone: String) -> Bool {
         let digits = phone.filter { $0.isNumber }
         return digits.count >= 10 && digits.count <= 15
     }
+    */
 }
 
 // MARK: - JSONEncoder Helper

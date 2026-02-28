@@ -89,14 +89,8 @@ class PostService: ObservableObject, PostServiceProtocol {
             let dbPost = DatabasePost(
                 user_id: currentUser.id,
                 content: formatPostContent(post),
-                post_type: post.postType.rawValue,
-                likes_count: 0,
-                comments_count: 0,
-                visibility: visibility.rawValue,
                 ralley_id: post.relatedRalleyId,
-                tagged_user_ids: post.taggedUserIds.isEmpty ? nil : post.taggedUserIds,
-                link_url: post.linkUrl,
-                shares_count: 0
+                image_url: post.images.first
             )
 
             // Insert into Supabase posts table

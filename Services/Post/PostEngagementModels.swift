@@ -3,66 +3,37 @@
 //  Club Ralley
 //
 //  Helper structs for PostEngagementService JSONB operations.
-//  Extracted from PostEngagementService.swift to keep file sizes manageable.
+//  Actual posts table columns: id, user_id, content, image_url, ralley_id, likes_count, liked_by (jsonb), created_at
 //
 
 import Foundation
 
 // MARK: - Helper Structs for JSONB Operations
 
-/// Post with likes JSONB array
+/// Post with liked_by JSONB array (matches actual posts table schema)
 struct PostWithLikes: Codable {
     let id: UUID
-    var likes: [String]?
+    var liked_by: [String]?
     var likes_count: Int
-    var comments_count: Int
-    var shares_count: Int?
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(UUID.self, forKey: .id)
         likes_count = try container.decodeIfPresent(Int.self, forKey: .likes_count) ?? 0
-        comments_count = try container.decodeIfPresent(Int.self, forKey: .comments_count) ?? 0
-        shares_count = try container.decodeIfPresent(Int.self, forKey: .shares_count)
 
-        // Handle likes as either array of strings or nil
-        if let likesArray = try? container.decodeIfPresent([String].self, forKey: .likes) {
-            likes = likesArray
+        // Handle liked_by as either array of strings or nil
+        if let likesArray = try? container.decodeIfPresent([String].self, forKey: .liked_by) {
+            liked_by = likesArray
         } else {
-            likes = []
+            liked_by = []
         }
     }
 }
 
-/// Update struct for post likes
+/// Update struct for post likes (matches actual posts columns: liked_by, likes_count)
 struct PostLikesUpdate: Codable {
-    let likes: [String]
+    let liked_by: [String]
     let likes_count: Int
-}
-
-/// Update struct for post comments count
-struct PostCommentsCountUpdate: Codable {
-    let comments_count: Int
-}
-
-/// Update struct for post shares count
-struct PostSharesUpdate: Codable {
-    let shares_count: Int
-}
-
-/// Insert struct for creating a repost
-struct DatabaseRepostInsert: Codable {
-    let user_id: UUID
-    let content: String
-    let post_type: String
-    let visibility: String
-    let original_post_id: UUID
-    let repost_comment: String?
-}
-
-/// Simple struct for counting reposts
-struct DatabaseRepostCount: Codable {
-    let id: UUID
 }
 
 /// Struct for getting post owner ID
@@ -70,9 +41,8 @@ struct DatabasePostOwner: Codable {
     let user_id: UUID
 }
 
-/// Struct for getting post with owner and comments count
+/// Struct for getting post with owner
 struct DatabasePostWithOwner: Codable {
     let id: UUID
-    let comments_count: Int
     let user_id: UUID
 }

@@ -49,7 +49,9 @@ public class SupabaseClientManager: ObservableObject {
             supabaseKey: key
         )
 
-        print("✅ SupabaseClientManager: Initialized")
+        print("[supaTennis] ✅ SupabaseClientManager initialized")
+        print("[supaTennis] ✅ URL: \(AuthConfiguration.supabaseURL)")
+        print("[supaTennis] ✅ Key prefix: \(String(key.prefix(20)))...")
 
         // Setup auth state listener
         setupAuthStateListener()
@@ -67,16 +69,20 @@ public class SupabaseClientManager: ObservableObject {
     }
 
     private func handleAuthStateChange(event: AuthChangeEvent, session: Session?) async {
+        print("[supaTennis] 🔔 authStateChange: \(event), session userId: \(session?.user.id.uuidString ?? "nil")")
         switch event {
         case .initialSession:
+            print("[supaTennis] 🔔 initialSession — hasSession: \(session != nil)")
             await MainActor.run {
                 hasCompletedInitialSessionCheck = true
             }
 
         case .signedIn:
+            print("[supaTennis] 🔔 signedIn — userId: \(session?.user.id.uuidString ?? "nil")")
             break
 
         case .signedOut:
+            print("[supaTennis] 🔔 signedOut")
             break
 
         case .passwordRecovery:

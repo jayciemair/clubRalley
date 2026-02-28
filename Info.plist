@@ -27,18 +27,6 @@
 		<string>App-Prefs</string>
 		<string>mailto</string>
 	</array>
-	<key>NSContactsUsageDescription</key>
-	<string>Club Ralley uses your contacts to help you find friends who are already on the app.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Club Ralley uses your location to find ralleys and venues near you.</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>This helps us understand which features are most useful and improve Club Ralley for you.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Club Ralley may use the microphone for voice messages in group chats.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Club Ralley uses the camera to let you take photos for your posts and profile.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Club Ralley accesses your photos to let you share images in posts and your profile.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Satoshi-Black.otf</string>

@@ -199,7 +199,7 @@ class ChatService: ObservableObject, ChatServiceProtocol {
 
         } catch {
             print("ChatService: Load chats failed: \(error)")
-            return generateMockChats()
+            return []
         }
     }
 
@@ -298,7 +298,7 @@ class ChatService: ObservableObject, ChatServiceProtocol {
 
         } catch {
             print("ChatService: Load messages failed: \(error)")
-            return generateMockMessages(chatId: chatId)
+            return []
         }
     }
 

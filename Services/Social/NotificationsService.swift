@@ -34,8 +34,8 @@ class NotificationsService: ObservableObject {
 
     func loadNotifications() async {
         guard supabase.isAuthenticated else {
-            notifications = generateMockNotifications()
-            unreadCount = notifications.filter { !$0.isRead }.count
+            notifications = []
+            unreadCount = 0
             return
         }
 
@@ -43,8 +43,8 @@ class NotificationsService: ObservableObject {
         error = nil
 
         guard let userId = supabase.currentUser?.id else {
-            notifications = generateMockNotifications()
-            unreadCount = notifications.filter { !$0.isRead }.count
+            notifications = []
+            unreadCount = 0
             isLoading = false
             return
         }
@@ -65,9 +65,8 @@ class NotificationsService: ObservableObject {
             print("Failed to load notifications: \(error)")
             self.error = error
 
-            // Use mock data for development
-            notifications = generateMockNotifications()
-            unreadCount = notifications.filter { !$0.isRead }.count
+            notifications = []
+            unreadCount = 0
         }
 
         isLoading = false

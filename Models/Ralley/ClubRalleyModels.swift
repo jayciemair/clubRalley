@@ -49,7 +49,7 @@ struct ClubRalley: Identifiable, Codable {
     // MARK: - Core Properties
 
     /// Unique identifier for the ralley (matches database UUID)
-    let id: UUID
+    var id: UUID
 
     /// Display title for the ralley (e.g., "Saturday Morning Hoops")
     var title: String

@@ -38,7 +38,11 @@ struct SupabaseConfig {
         // Supabase anon keys are JWTs that start with "eyJ"
         let hasValidURL = projectURL.contains("supabase.co")
         let hasValidKey = anonKey.hasPrefix("eyJ") && anonKey.count > 100
-        return hasValidURL && hasValidKey
+        let result = hasValidURL && hasValidKey
+        print("[supaTennis] ⚙️ SupabaseConfig.isConfigured = \(result) (hasValidURL: \(hasValidURL), hasValidKey: \(hasValidKey))")
+        print("[supaTennis] ⚙️   projectURL: \(projectURL)")
+        print("[supaTennis] ⚙️   anonKey length: \(anonKey.count), prefix: \(String(anonKey.prefix(10)))")
+        return result
     }
     
     /// Configuration status for debugging

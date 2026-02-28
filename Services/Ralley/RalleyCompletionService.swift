@@ -171,14 +171,7 @@ class RalleyCompletionService: ObservableObject, RalleyCompletionServiceProtocol
             let dbPost = DatabasePost(
                 user_id: currentUser.id,
                 content: formatPostContent(post),
-                post_type: PostType.ralleyCompletion.rawValue,
-                likes_count: 0,
-                comments_count: 0,
-                visibility: post.visibility.rawValue,
-                ralley_id: post.relatedRalleyId,
-                tagged_user_ids: post.taggedUserIds.isEmpty ? nil : post.taggedUserIds,
-                link_url: nil,
-                shares_count: 0
+                ralley_id: post.relatedRalleyId
             )
 
             try await supabase.insert(dbPost, into: "posts")

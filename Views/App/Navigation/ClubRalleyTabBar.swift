@@ -34,7 +34,7 @@ struct ClubRalleyTabBar: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
-        .padding(.bottom, safeAreaBottomInset)
+        .padding(.bottom, 2)
         .background(
             VStack(spacing: 0) {
                 Rectangle()
@@ -48,11 +48,6 @@ struct ClubRalleyTabBar: View {
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selectedTab)
     }
 
-    private var safeAreaBottomInset: CGFloat {
-        let scenes = UIApplication.shared.connectedScenes
-        let windowScene = scenes.first as? UIWindowScene
-        return windowScene?.windows.first?.safeAreaInsets.bottom ?? 0
-    }
 }
 
 struct TabBarButton: View {

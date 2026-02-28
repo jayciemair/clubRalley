@@ -124,8 +124,7 @@ class MessagingService: ObservableObject, MessagingServiceProtocol {
             print("MessagingService: Failed to load conversations: \(error)")
             self.error = error
             isLoading = false
-            // Use mock data as fallback
-            conversations = generateMockConversations()
+            conversations = []
         }
     }
 
@@ -224,7 +223,7 @@ class MessagingService: ObservableObject, MessagingServiceProtocol {
 
         } catch {
             print("MessagingService: Failed to load messages: \(error)")
-            return generateMockMessages(conversationId: conversationId)
+            return []
         }
     }
 

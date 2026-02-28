@@ -11,8 +11,6 @@ import SwiftUI
 // MARK: - Onboarding Flow Steps
 
 enum ClubRalleyOnboardingStep: String, CaseIterable {
-    case phoneInput = "phone_input"
-    case otpVerification = "otp_verification"
     case name = "name"
     case username = "username"
     case profilePhoto = "profile_photo"
@@ -23,10 +21,6 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .phoneInput:
-            return "What's your phone number?"
-        case .otpVerification:
-            return "Enter verification code"
         case .name:
             return "What's your name?"
         case .username:
@@ -46,10 +40,6 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
 
     var subtitle: String? {
         switch self {
-        case .phoneInput:
-            return "We'll send you a verification code"
-        case .otpVerification:
-            return nil
         case .name:
             return "This is how your teammates will see you!"
         case .username:
@@ -74,10 +64,8 @@ enum ClubRalleyOnboardingStep: String, CaseIterable {
 
     var canGoBack: Bool {
         switch self {
-        case .phoneInput, .completion:
+        case .name, .completion:
             return false
-        case .otpVerification:
-            return true
         default:
             return true
         }
@@ -260,7 +248,6 @@ struct CompleteOnboardingData {
     var availability: OnboardingAvailabilityData = OnboardingAvailabilityData()
 
     var isComplete: Bool {
-        profile.isPhoneComplete &&
         profile.isUsernameComplete &&
         profile.isLocationComplete
     }

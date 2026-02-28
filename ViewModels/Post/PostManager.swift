@@ -191,15 +191,20 @@ class PostManager: ObservableObject {
         error = nil
 
         // Create local post model with current user info
+        let savedProfile = SavedUserProfile.loadFromStorage()
+        let userLocation = {
+            guard let p = savedProfile, !p.locationCity.isEmpty else { return "" }
+            return "\(p.locationCity), \(p.locationState)"
+        }()
         let newPost = ClubRalleyPost(
             id: UUID(),
-            authorName: supabase.currentUser?.displayName ?? "Your Name",
-            authorUsername: "@\(supabase.currentUser?.email.components(separatedBy: "@").first ?? "you")",
-            authorPhotoURL: "https://picsum.photos/50/50?random=50",
+            authorName: supabase.currentUser?.displayName ?? savedProfile?.fullName ?? "Your Name",
+            authorUsername: savedProfile?.username ?? "@\(supabase.currentUser?.email.components(separatedBy: "@").first ?? "you")",
+            authorPhotoURL: savedProfile?.profilePhotoURL ?? "",
             authorId: supabase.currentUser?.id,
-            authorSchool: "University",
-            authorLocation: "Chicago, IL",
-            authorSport: "athlete",
+            authorSchool: "",
+            authorLocation: userLocation,
+            authorSport: savedProfile?.selectedSports.first ?? "",
             title: title?.isEmpty == false ? title : nil,
             content: content,
             images: images,

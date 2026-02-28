@@ -48,8 +48,10 @@ class SupabaseManager: ObservableObject {
     // MARK: - Setup Methods
 
     private func setupSupabaseClient() {
+        print("[supaTennis] 🔌 setupSupabaseClient() called")
+        print("[supaTennis] 🔌 SupabaseConfig.isConfigured = \(SupabaseConfig.isConfigured)")
         guard SupabaseConfig.isConfigured else {
-            print("⚠️ SupabaseManager: Config invalid, using fallback mode")
+            print("[supaTennis] ❌ Config invalid — entering fallback mode (NO Supabase calls will work)")
             useFallbackMode = true
             connectionStatus = .fallback
             return
@@ -57,18 +59,18 @@ class SupabaseManager: ObservableObject {
 
         client = SupabaseClientManager.shared
         connectionStatus = .connected
-        print("✅ SupabaseManager: Connected to Supabase")
+        print("[supaTennis] ✅ Client set to SupabaseClientManager.shared, connectionStatus = .connected")
+        print("[supaTennis] ✅ client is nil? \(client == nil), useFallbackMode = \(useFallbackMode)")
     }
 
     private func setupAuthListener() {
+        print("[supaTennis] 📡 setupAuthListener() called — client nil? \(client == nil), fallback? \(useFallbackMode)")
         guard let _ = client, !useFallbackMode else {
-            print("📡 SupabaseManager: Skipping auth listener setup (fallback mode)")
+            print("[supaTennis] ⚠️ Skipping auth listener (fallback mode or no client)")
             return
         }
 
-        // Auth state is restored explicitly via restoreSession() called from app launch
-        // Don't call checkAuthStatus() here to avoid racing with the saved-profile fallback
-        print("📡 SupabaseManager: Auth listener ready (session restored on launch)")
+        print("[supaTennis] 📡 Auth listener ready")
     }
 }
 

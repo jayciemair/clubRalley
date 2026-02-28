@@ -10,66 +10,59 @@ import Foundation
 // MARK: - Post Database Models
 
 /// Database representation of post (matches Supabase posts table schema)
+/// Actual columns: id, user_id, content, image_url, ralley_id, likes_count, liked_by, created_at
 struct DatabasePost: Codable {
     let user_id: UUID
     let content: String
-    let post_type: String
-    let likes_count: Int
-    let comments_count: Int
-    let visibility: String
+    let image_url: String?
     let ralley_id: UUID?
-    let tagged_user_ids: [UUID]?
-    let link_url: String?
-    let shares_count: Int
+    let likes_count: Int
+    let liked_by: [String]
 
     init(
         user_id: UUID,
         content: String,
-        post_type: String,
         likes_count: Int = 0,
-        comments_count: Int = 0,
-        visibility: String = "everyone",
         ralley_id: UUID? = nil,
-        tagged_user_ids: [UUID]? = nil,
-        link_url: String? = nil,
-        shares_count: Int = 0
+        image_url: String? = nil,
+        liked_by: [String] = []
     ) {
         self.user_id = user_id
         self.content = content
-        self.post_type = post_type
-        self.likes_count = likes_count
-        self.comments_count = comments_count
-        self.visibility = visibility
         self.ralley_id = ralley_id
-        self.tagged_user_ids = tagged_user_ids
-        self.link_url = link_url
-        self.shares_count = shares_count
+        self.likes_count = likes_count
+        self.image_url = image_url
+        self.liked_by = liked_by
     }
 }
 
 /// Database post with joined user information
+/// Actual columns: id, user_id, content, image_url, ralley_id, likes_count, liked_by, created_at
 struct DatabasePostWithUser: Codable {
     let id: UUID
     let user_id: UUID
     let content: String
-    let post_type: String
-    let likes_count: Int
-    let comments_count: Int
-    let shares_count: Int?
-    let visibility: String?
+    let image_url: String?
     let ralley_id: UUID?
-    let tagged_user_ids: [UUID]?
-    let link_url: String?
-    let original_post_id: UUID?
-    let repost_comment: String?
+    let likes_count: Int
+    let liked_by: [UUID]?
     let created_at: Date
-    let updated_at: Date
     let user: DatabaseUser
 
+    // Computed properties for backwards compatibility with app models
+    var post_type: String { "text" }
+    var comments_count: Int { 0 }
+    var shares_count: Int? { 0 }
+    var visibility: String? { "everyone" }
+    var tagged_user_ids: [UUID]? { nil }
+    var link_url: String? { nil }
+    var original_post_id: UUID? { nil }
+    var repost_comment: String? { nil }
+    var updated_at: Date { created_at }
+
     enum CodingKeys: String, CodingKey {
-        case id, user_id, content, post_type, likes_count, comments_count
-        case shares_count, visibility, ralley_id, tagged_user_ids, link_url
-        case original_post_id, repost_comment, created_at, updated_at
+        case id, user_id, content, image_url, ralley_id
+        case likes_count, liked_by, created_at
         case user = "club_users"
     }
 }
