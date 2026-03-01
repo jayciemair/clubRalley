@@ -118,7 +118,10 @@ class RalleyManager: ObservableObject {
 
         do {
             let loadedRalleys = try await ralleyService.loadNearbyRalleys()
-            ralleys = loadedRalleys
+            // Only replace cache if we got data, or if nothing is cached yet
+            if !loadedRalleys.isEmpty || ralleys.isEmpty {
+                ralleys = loadedRalleys
+            }
             hasMoreRalleys = loadedRalleys.count >= pageSize
             print("RalleyManager: Loaded \(loadedRalleys.count) ralleys from backend")
         } catch {

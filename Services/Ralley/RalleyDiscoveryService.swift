@@ -164,9 +164,7 @@ extension RalleyService {
         } catch {
             isLoading = false
             print("RalleyService: Load user ralleys failed: \(error)")
-
-            // Return empty array - let UI show empty state
-            return []
+            throw error
         }
     }
 
@@ -211,7 +209,7 @@ extension RalleyService {
         } catch {
             isLoading = false
             print("RalleyService: Load attended ralleys failed: \(error)")
-            return []
+            throw error
         }
     }
 

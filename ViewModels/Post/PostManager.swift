@@ -98,8 +98,11 @@ class PostManager: ObservableObject {
             print("PostManager: Failed to load posts: \(error)")
             self.error = error
 
-            // Fallback to sample posts for development
-            await loadSamplePosts()
+            // Keep existing posts — don't wipe the feed on transient errors
+            // Only fall back to sample data if we have nothing to show
+            if posts.isEmpty {
+                await loadSamplePosts()
+            }
         }
 
         isLoading = false

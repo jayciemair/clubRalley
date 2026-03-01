@@ -118,6 +118,13 @@ class RalleyParticipationManager: ObservableObject {
                     try? await chatService.addMember(chatId: ralleyId, userId: currentUser.id)
                 }
 
+                // Notify the ralley host
+                await notificationService.createRalleyJoinNotification(
+                    ralleyId: ralleyId,
+                    hostId: ralley.organizer.id,
+                    ralleyTitle: ralley.title
+                )
+
                 // Auto-post to feed
                 if let postManager = ralleyManager.postManager {
                     let postContent = "Just joined a \(ralley.sport) ralley — \(ralley.title)! \u{1F64C}"
@@ -298,11 +305,19 @@ class RalleyParticipationManager: ObservableObject {
             if success {
                 // Update local ralley state
                 if let index = ralleyManager.indexOfRalley(request.ralleyId) {
+                    let ralley = ralleyManager.ralleys[index]
                     ralleyManager.ralleys[index].currentPlayers += 1
                     ralleyManager.ralleys[index].pendingRequestsCount = max(0, ralleyManager.ralleys[index].pendingRequestsCount - 1)
 
                     // Always add approved user to the ralley chat (ralleyId is the chatId)
                     try? await chatService.addMember(chatId: request.ralleyId, userId: request.userId)
+
+                    // Notify the approved user
+                    await notificationService.createRalleyInviteNotification(
+                        userId: request.userId,
+                        ralleyId: request.ralleyId,
+                        ralleyTitle: ralley.title
+                    )
                 }
 
                 successMessage = "Request approved!"
