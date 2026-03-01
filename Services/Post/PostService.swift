@@ -157,14 +157,14 @@ class PostService: ObservableObject, PostServiceProtocol {
             isLoading = false
             lastError = error
             print("❌ PostService: Load feed failed: \(error)")
-            return []
+            throw error
 
         } catch {
             isLoading = false
             let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
             lastError = supabaseError
             print("❌ PostService: Load feed failed with network error: \(error)")
-            return []
+            throw supabaseError
         }
     }
 
@@ -209,9 +209,7 @@ class PostService: ObservableObject, PostServiceProtocol {
         } catch {
             isLoading = false
             print("PostService: Load user posts failed: \(error)")
-
-            // Return empty array - let UI show empty state
-            return []
+            throw error
         }
     }
 

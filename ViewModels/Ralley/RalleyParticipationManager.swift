@@ -42,6 +42,9 @@ class RalleyParticipationManager: ObservableObject {
     /// Chat service for creating and managing group chats
     private let chatService: ChatService
 
+    /// Notification service for creating notifications
+    private let notificationService = InAppNotificationService.shared
+
     /// Reference to parent RalleyManager
     private weak var ralleyManager: RalleyManager?
 

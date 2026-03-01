@@ -143,7 +143,6 @@ struct PhoneNumberScreen: View {
                     otpDigitField(index: index)
                 }
             }
-            .padding(.horizontal, 24)
 
             // Resend button with cooldown
             if resendCooldown > 0 {
