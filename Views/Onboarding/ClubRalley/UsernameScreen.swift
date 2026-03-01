@@ -100,9 +100,16 @@ struct UsernameScreen: View {
         }
         .onAppear {
             username = controller.onboardingData.profile.username
-            if username.count >= 3 {
+
+            // If returned here due to a duplicate username error, show taken state
+            if case .usernameAlreadyTaken = controller.error {
+                isAvailable = false
+                controller.isUsernameAvailable = false
+                controller.error = nil
+            } else if username.count >= 3 {
                 checkAvailability(for: username)
             }
+
             isUsernameFocused = true
         }
         .onDisappear {
@@ -169,13 +176,11 @@ struct UsernameScreen: View {
                 return
             }
 
-            let takenUsernames = ["admin", "clubralley", "test", "user", "athlete", "ralley"]
-            let available = !takenUsernames.contains(usernameToCheck.lowercased())
+            let available = await controller.validateUsername(usernameToCheck)
 
             await MainActor.run {
                 isChecking = false
                 isAvailable = available
-                // Also update controller so goToNextStep() works
                 controller.isUsernameAvailable = available
             }
         }

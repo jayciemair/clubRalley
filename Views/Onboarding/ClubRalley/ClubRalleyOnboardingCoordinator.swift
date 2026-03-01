@@ -49,7 +49,11 @@ struct ClubRalleyOnboardingCoordinator: View {
             }
         }
         .alert("Error", isPresented: Binding(
-            get: { controller.error != nil },
+            get: {
+                guard let error = controller.error else { return false }
+                if case .usernameAlreadyTaken = error { return false }
+                return true
+            },
             set: { if !$0 { controller.error = nil } }
         )) {
             Button("OK") {

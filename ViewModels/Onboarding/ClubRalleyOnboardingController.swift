@@ -526,11 +526,24 @@ class ClubRalleyOnboardingController: ObservableObject {
             return false
         }
 
-        // Check if username is available (mock implementation)
-        try? await Task.sleep(nanoseconds: 500_000_000)
+        // Check against reserved usernames
+        let reserved = ["admin", "clubralley", "test", "user", "athlete", "ralley"]
+        guard !reserved.contains(username.lowercased()) else { return false }
 
-        let takenUsernames = ["admin", "clubralley", "test", "user", "athlete"]
-        return !takenUsernames.contains(username.lowercased())
+        // Check availability against Supabase club_users table
+        do {
+            let existing: [DatabaseUser] = try await supabaseManager.query("club_users")
+                .select("first_name, last_name, username, profile_photo_url")
+                .eq("username", value: username.lowercased())
+                .limit(1)
+                .execute()
+            return existing.isEmpty
+        } catch {
+            print("[supaTennis] ⚠️ Username availability check failed: \(error)")
+            // On network error, allow the user to proceed — the server will
+            // catch duplicates at submission time
+            return true
+        }
     }
 
     // MARK: - Image Upload
@@ -630,8 +643,10 @@ class ClubRalleyOnboardingController: ObservableObject {
             print("[supaTennis] ❌ Error localizedDescription: \(error.localizedDescription)")
             let errorMessage = error.localizedDescription.lowercased()
             if errorMessage.contains("already") || errorMessage.contains("duplicate") || errorMessage.contains("unique") {
-                print("[supaTennis] ❌ Duplicate user detected — showing usernameAlreadyTaken error")
+                print("[supaTennis] ❌ Duplicate user detected — navigating back to username screen")
                 self.error = .usernameAlreadyTaken
+                self.isUsernameAvailable = false
+                self.currentStep = .username
                 isLoading = false
                 return
             }
