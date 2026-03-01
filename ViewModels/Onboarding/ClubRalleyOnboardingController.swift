@@ -14,15 +14,12 @@ import Contacts
 class ClubRalleyOnboardingController: ObservableObject {
 
     // MARK: - Published Properties
-    @Published var currentStep: ClubRalleyOnboardingStep = .name
+    @Published var currentStep: ClubRalleyOnboardingStep = .phoneNumber
     @Published var onboardingData = CompleteOnboardingData()
     @Published var isLoading = false
     @Published var error: ClubRalleyOnboardingError?
     @Published var isComplete = false
     @Published var isReturningUser = false
-
-    /// When true, only shows sign-in (no sign-up, no profile setup)
-    var isReAuthMode = false
 
     // Validation states
     @Published var isUsernameAvailable: Bool?
@@ -48,6 +45,8 @@ class ClubRalleyOnboardingController: ObservableObject {
 
     var canContinue: Bool {
         switch currentStep {
+        case .phoneNumber:
+            return onboardingData.profile.isPhoneComplete
         case .name:
             return !onboardingData.profile.firstName.isEmpty && !onboardingData.profile.lastName.isEmpty
         case .username:
@@ -60,6 +59,8 @@ class ClubRalleyOnboardingController: ObservableObject {
             return !onboardingData.interests.selectedSports.isEmpty
         case .collegeAthlete:
             return true
+        case .athleteVerification:
+            return onboardingData.athlete.isComplete
         case .completion:
             return true
         }
@@ -81,7 +82,15 @@ class ClubRalleyOnboardingController: ObservableObject {
             return
         }
 
-        let nextStep = allSteps[currentIndex + 1]
+        var nextStep = allSteps[currentIndex + 1]
+
+        // Skip athleteVerification if user is not an athlete
+        if nextStep == .athleteVerification && !onboardingData.athlete.isAthlete {
+            guard let skipIndex = allSteps.firstIndex(of: nextStep),
+                  skipIndex < allSteps.count - 1 else { return }
+            nextStep = allSteps[skipIndex + 1]
+        }
+
         print("[supaTennis] ➡️ Next step: \(nextStep)")
 
         // If we're about to show the completion screen, submit data first
@@ -100,7 +109,15 @@ class ClubRalleyOnboardingController: ObservableObject {
         guard let currentIndex = allSteps.firstIndex(of: currentStep),
               currentIndex > 0 else { return }
 
-        let previousStep = allSteps[currentIndex - 1]
+        var previousStep = allSteps[currentIndex - 1]
+
+        // Skip athleteVerification going backwards if user is not an athlete
+        if previousStep == .athleteVerification && !onboardingData.athlete.isAthlete {
+            guard let skipIndex = allSteps.firstIndex(of: previousStep),
+                  skipIndex > 0 else { return }
+            previousStep = allSteps[skipIndex - 1]
+        }
+
         currentStep = previousStep
     }
 
@@ -289,6 +306,61 @@ class ClubRalleyOnboardingController: ObservableObject {
         }
     }
 
+    // MARK: - Phone Verification (Mock — Twilio not configured)
+
+    /// Mock phone verification — accepts any 6-digit code.
+    /// Uses anonymous Supabase auth behind the scenes so RLS works.
+    /// TODO: Replace with real Twilio OTP verification.
+    func verifyPhoneCode(_ code: String) async -> Bool {
+        guard code.count == 6 else {
+            self.error = .networkError("Please enter a 6-digit code.")
+            return false
+        }
+
+        isLoading = true
+        defer { isLoading = false }
+
+        // Sign in anonymously so Supabase RLS works
+        if authenticatedUserId == nil && supabaseManager.currentUser == nil {
+            do {
+                let userId = try await signInAnonymously()
+                print("[supaTennis] 🔑 Mock phone verify — anonymous auth succeeded: \(userId)")
+            } catch {
+                print("[supaTennis] ❌ Mock phone verify — anonymous auth failed: \(error)")
+                self.error = .networkError("Failed to create session. Please try again.")
+                return false
+            }
+        }
+
+        // Check for existing profile (returning user)
+        if let userId = authenticatedUserId ?? supabaseManager.currentUser?.id,
+           let existingProfile = try? await supabaseManager.fetchUserProfile(userId: userId) {
+            print("[supaTennis] 🔄 Returning user detected: \(existingProfile.username)")
+            MultiProfileManager.shared.addProfile(existingProfile, setAsActive: true)
+
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            if let profileData = try? encoder.encode(existingProfile) {
+                UserDefaults.standard.set(profileData, forKey: "currentUserProfile")
+            }
+
+            supabaseManager.currentUser = SupabaseUser(
+                id: userId,
+                email: existingProfile.email,
+                firstName: existingProfile.firstName,
+                lastName: existingProfile.lastName
+            )
+
+            UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
+            isReturningUser = true
+            isComplete = true
+            return true
+        }
+
+        // New user — continue to profile setup
+        return true
+    }
+
     // MARK: - Username Methods
 
     func updateUsername(_ username: String) {
@@ -317,9 +389,9 @@ class ClubRalleyOnboardingController: ObservableObject {
 
         onboardingData.profile.profilePhotoData = imageData
 
-        // Mock upload - in real app, upload to cloud storage
-        try await Task.sleep(nanoseconds: 2_000_000_000)
-        let url = "https://example.com/photos/\(UUID().uuidString).jpg"
+        // Upload to Supabase Storage via ImageUploadService
+        let userId = authenticatedUserId ?? supabaseManager.currentUser?.id ?? UUID()
+        let url = try await ImageUploadService.shared.uploadProfilePhoto(imageData: imageData, userId: userId)
         onboardingData.profile.profilePhotoURL = url
         return url
     }
@@ -467,8 +539,9 @@ class ClubRalleyOnboardingController: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-        try await Task.sleep(nanoseconds: 2_000_000_000)
-        return "https://example.com/uploads/verification_\(UUID().uuidString).jpg"
+        // Upload to Supabase Storage (reuse profile-photos bucket with verification path)
+        let userId = authenticatedUserId ?? supabaseManager.currentUser?.id ?? UUID()
+        return try await ImageUploadService.shared.uploadProfilePhoto(imageData: imageData, userId: userId)
     }
 
     // MARK: - Completion
@@ -513,6 +586,28 @@ class ClubRalleyOnboardingController: ObservableObject {
         print("[supaTennis]   isAthlete: \(onboardingData.athlete.isAthlete)")
         print("[supaTennis]   sports: \(onboardingData.interests.selectedSports.map { $0.sport.name })")
 
+        // Build athlete info JSONB if user is an athlete
+        let athleteInfoJSON: ClubUserAthleteInfoJSON? = {
+            guard onboardingData.athlete.isAthlete,
+                  let sport = onboardingData.athlete.sport,
+                  let school = onboardingData.athlete.school else { return nil }
+            return ClubUserAthleteInfoJSON(
+                school: school.name,
+                sport: sport.name,
+                division: nil,
+                years_played: nil,
+                position: nil,
+                played_college: true,
+                verified: false,
+                verification_image_url: onboardingData.athlete.verificationImageURL,
+                verification_notes: onboardingData.athlete.verificationNotes.isEmpty ? nil : onboardingData.athlete.verificationNotes
+            )
+        }()
+
+        let sportsArray: [String]? = onboardingData.interests.selectedSports.isEmpty
+            ? nil
+            : onboardingData.interests.selectedSports.map { $0.sport.name }
+
         // STEP 1: Create profile in club_users table
         print("[supaTennis] 📝 STEP 1: Creating club_users row...")
         do {
@@ -524,7 +619,10 @@ class ClubRalleyOnboardingController: ObservableObject {
                 username: onboardingData.profile.username,
                 city: onboardingData.profile.city,
                 state: onboardingData.profile.state,
-                profilePhotoURL: onboardingData.profile.profilePhotoURL
+                profilePhotoURL: onboardingData.profile.profilePhotoURL,
+                isVerifiedAthlete: onboardingData.athlete.isAthlete ? true : nil,
+                athleteInfo: athleteInfoJSON,
+                sports: sportsArray
             )
             print("[supaTennis] ✅ STEP 1 SUCCESS — club_users row created")
         } catch {
@@ -546,6 +644,20 @@ class ClubRalleyOnboardingController: ObservableObject {
         // STEP 2: Save local profile backup
         print("[supaTennis] 💾 STEP 2: Saving local profile backup...")
         do {
+            // Build saved athlete info for local persistence
+            let savedAthleteInfo: SavedCollegeAthleteInfo? = {
+                guard onboardingData.athlete.isAthlete,
+                      let sport = onboardingData.athlete.sport,
+                      let school = onboardingData.athlete.school else { return nil }
+                return SavedCollegeAthleteInfo(
+                    sport: sport.name,
+                    school: school.name,
+                    division: "",
+                    yearsPlayed: nil,
+                    position: nil
+                )
+            }()
+
             let userProfile = SavedUserProfile(
                 id: userId,
                 email: onboardingData.profile.email,
@@ -558,7 +670,8 @@ class ClubRalleyOnboardingController: ObservableObject {
                 profilePhotoURL: onboardingData.profile.profilePhotoURL,
                 selectedSports: onboardingData.interests.selectedSports.map { $0.sport.name },
                 createdAt: Date(),
-                playedCollegeSport: onboardingData.athlete.isAthlete
+                playedCollegeSport: onboardingData.athlete.isAthlete,
+                collegeAthleteInfo: savedAthleteInfo
             )
 
             MultiProfileManager.shared.addProfile(userProfile, setAsActive: true)
@@ -603,7 +716,7 @@ class ClubRalleyOnboardingController: ObservableObject {
     // MARK: - Reset
 
     func resetOnboarding() {
-        currentStep = .name
+        currentStep = .phoneNumber
         onboardingData = CompleteOnboardingData()
         isComplete = false
         error = nil

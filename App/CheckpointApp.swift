@@ -19,7 +19,7 @@ struct ClubRalleyApp: App {
     // Track if Club Ralley onboarding has been completed
     // Using @State instead of @AppStorage so we can control when it's read
     @State private var hasCompletedOnboarding = false
-    @State private var needsReAuth = false
+    // needsReAuth no longer needed — phone screen handles both sign-up and returning users
 
     init() {
         print("🔵🔵🔵 DEBUG APP_INIT - THIS SHOULD APPEAR IN CONSOLE 🔵🔵🔵")
@@ -61,12 +61,11 @@ struct ClubRalleyApp: App {
                             handleDeepLink(from: url)
                         }
                 } else {
-                    // Not logged in - show onboarding (or re-auth sign-in only)
-                    ClubRalleyOnboardingCoordinator(reAuthOnly: needsReAuth) {
+                    // Not logged in - show onboarding
+                    ClubRalleyOnboardingCoordinator {
                         // Called when onboarding completes
                         withAnimation(.easeInOut(duration: 0.5)) {
                             UserDefaults.standard.set(true, forKey: "hasCompletedClubRalleyOnboarding")
-                            needsReAuth = false
                             hasCompletedOnboarding = true
                         }
                     }
@@ -109,11 +108,9 @@ struct ClubRalleyApp: App {
                     }
                 } else if !hasSession && hasCompletedOnboarding {
                     // No Supabase session — user must re-authenticate
-                    // Without a real session, auth.uid() is NULL server-side
-                    // and all writes (create ralley, post, etc.) fail with RLS errors
-                    print("🟡 App Launch - No Supabase session, redirecting to sign-in")
+                    // Phone screen handles both new users and returning users
+                    print("🟡 App Launch - No Supabase session, redirecting to phone screen")
                     await MainActor.run {
-                        needsReAuth = true
                         hasCompletedOnboarding = false
                     }
                 }
@@ -145,8 +142,9 @@ struct ClubRalleyApp: App {
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("UserDidLogout"))) { _ in
-                // Deactivate push token and stop listening before clearing session
+                // Tear down services before clearing session
                 Task {
+                    await RealtimeManager.shared.unsubscribeAll()
                     await PushNotificationService.shared.deactivateCurrentToken()
                     await InAppNotificationService.shared.stopListening()
                 }
@@ -207,7 +205,6 @@ struct ClubRalleyApp: App {
                     .foregroundColor(.white)
                     .padding(.leading, 2)
             }
-            .offset(y: 40)
         }
         .preferredColorScheme(.dark)
         .statusBarHidden(true)

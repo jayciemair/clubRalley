@@ -17,6 +17,7 @@ struct PostDetailView: View {
     @State private var likeCount: Int
     @State private var commentCount: Int
     @State private var showingRepostSheet = false
+    @State private var showingLikes = false
     @State private var newCommentText = ""
     @State private var heartScale: CGFloat = 1.0
     @FocusState private var isInputFocused: Bool
@@ -54,15 +55,7 @@ struct PostDetailView: View {
 
                     // Author row
                     HStack(alignment: .center, spacing: 12) {
-                        Circle()
-                            .fill(ClubRalleyTheme.Colors.darkGreen)
-                            .frame(width: 46, height: 46)
-                            .overlay(
-                                Text(initials)
-                                    .font(.system(size: 18, weight: .bold))
-                                    .fontDesign(.rounded)
-                                    .foregroundColor(.white)
-                            )
+                        PostAuthorAvatar(photoURL: post.authorPhotoURL, initials: initials, size: 46)
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(post.authorName)
@@ -109,9 +102,11 @@ struct PostDetailView: View {
 
                     // Mutuals row
                     if likeCount > 0 {
-                        HomeMutualsRow()
-                            .padding(.top, 10)
-                            .padding(.horizontal, 22)
+                        HomeMutualsRow(likeCount: likeCount, onTap: {
+                            showingLikes = true
+                        })
+                        .padding(.top, 10)
+                        .padding(.horizontal, 22)
                     }
 
                     // Action bar separator
@@ -206,6 +201,10 @@ struct PostDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle("Post")
+        .sheet(isPresented: $showingLikes) {
+            LikesSheetView(postId: post.id)
+                .environmentObject(postManager)
+        }
         .sheet(isPresented: $showingRepostSheet) {
             RepostSheet(post: post)
                 .environmentObject(postManager)

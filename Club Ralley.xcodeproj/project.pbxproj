@@ -263,6 +263,7 @@
 		GX02AA0002AA0002AA000002 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GX02BB0002BB0002BB000002 /* EmptyStateView.swift */; };
 		GX03AA0003AA0003AA000003 /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GX03BB0003BB0003BB000003 /* NotificationsView.swift */; };
 		GX08AA0008AA0008AA000008 /* CommentsSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GX08BB0008BB0008BB000008 /* CommentsSheetView.swift */; };
+		GX08AA1108AA1108AA110011 /* LikesSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GX08BB1108BB1108BB110011 /* LikesSheetView.swift */; };
 		GX09AA0009AA0009AA000009 /* PostDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GX09BB0009BB0009BB000009 /* PostDetailView.swift */; };
 		HX01AA0001AA0001AA000001 /* EditProfileBasicSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = HX01BB0001BB0001BB000001 /* EditProfileBasicSections.swift */; };
 		HX02AA0002AA0002AA000002 /* EditProfilePowerUpSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = HX02BB0002BB0002BB000002 /* EditProfilePowerUpSections.swift */; };
@@ -549,6 +550,7 @@
 		GX06BB0006BB0006BB000006 /* InterestsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InterestsScreen.swift; path = Screens/InterestsScreen.swift; sourceTree = "<group>"; };
 		GX07BB0007BB0007BB000007 /* ProfileDetailsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileDetailsScreen.swift; path = Screens/ProfileDetailsScreen.swift; sourceTree = "<group>"; };
 		GX08BB0008BB0008BB000008 /* CommentsSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsSheetView.swift; sourceTree = "<group>"; };
+		GX08BB1108BB1108BB110011 /* LikesSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikesSheetView.swift; sourceTree = "<group>"; };
 		GX09BB0009BB0009BB000009 /* PostDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailView.swift; sourceTree = "<group>"; };
 		GX10BB0010BB0010BB000010 /* FigmaProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FigmaProfileView.swift; sourceTree = "<group>"; };
 		HX01BB0001BB0001BB000001 /* EditProfileBasicSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileBasicSections.swift; sourceTree = "<group>"; };
@@ -1641,6 +1643,7 @@
 				C9AABB182F2B1005004D160C /* PostCreationView.swift */,
 				JX01BB0001BB0001BB000001 /* PostCreationCameraViews.swift */,
 				GX08BB0008BB0008BB000008 /* CommentsSheetView.swift */,
+				GX08BB1108BB1108BB110011 /* LikesSheetView.swift */,
 				GX09BB0009BB0009BB000009 /* PostDetailView.swift */,
 			);
 			path = Post;
@@ -2075,6 +2078,7 @@
 				GX02AA0002AA0002AA000002 /* EmptyStateView.swift in Sources */,
 				GX03AA0003AA0003AA000003 /* NotificationsView.swift in Sources */,
 				GX08AA0008AA0008AA000008 /* CommentsSheetView.swift in Sources */,
+				GX08AA1108AA1108AA110011 /* LikesSheetView.swift in Sources */,
 				GX09AA0009AA0009AA000009 /* PostDetailView.swift in Sources */,
 				JX01AA0001AA0001AA000001 /* PostCreationCameraViews.swift in Sources */,
 				JX05AA0005AA0005AA000005 /* ProfileTabComponents.swift in Sources */,

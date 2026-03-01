@@ -27,8 +27,11 @@ class RalleyManager: ObservableObject {
     /// Controls ralley creation sheet presentation
     @Published var showingCreateRalley = false
 
-    /// Loading state for UI feedback
+    /// Loading state for UI feedback (used for feed loading only)
     @Published var isLoading = false
+
+    /// Whether a ralley is currently being created (separate from feed loading)
+    @Published var isCreating = false
 
     /// Error state for user notifications
     @Published var error: Error?
@@ -64,6 +67,9 @@ class RalleyManager: ObservableObject {
     /// Completion manager for ralley completion flow
     @Published var completionManager: RalleyCompletionManager?
 
+    /// Post manager reference for auto-posting from join/create flows
+    weak var postManager: PostManager?
+
     // MARK: - Initialization
 
     init(ralleyService: RalleyService? = nil, chatService: ChatService? = nil) {
@@ -90,6 +96,7 @@ class RalleyManager: ObservableObject {
         ralleys = []
         joinedRalleyIds = []
         isLoading = false
+        isCreating = false
         isLoadingMore = false
         hasMoreRalleys = true
         error = nil
@@ -102,24 +109,28 @@ class RalleyManager: ObservableObject {
      * Load ralleys from Supabase database for discovery feed
      */
     func loadRalleys() async {
+        // Subscribe to live participant count changes before loading
+        // so new ralleys are tracked immediately
+        subscribeToParticipantChanges()
+
         isLoading = true
         error = nil
 
         do {
             let loadedRalleys = try await ralleyService.loadNearbyRalleys()
             ralleys = loadedRalleys
+            hasMoreRalleys = loadedRalleys.count >= pageSize
             print("RalleyManager: Loaded \(loadedRalleys.count) ralleys from backend")
         } catch {
             print("RalleyManager: Failed to load ralleys: \(error)")
             self.error = error
-            // Let UI show empty state - no mock data fallback
-            ralleys = []
+            // Keep existing ralleys if we have them, only clear on first load
+            if ralleys.isEmpty {
+                ralleys = []
+            }
         }
 
         isLoading = false
-
-        // Subscribe to live participant count changes
-        subscribeToParticipantChanges()
 
         // Start monitoring for ended ralleys (for captain completion flow)
         completionManager?.startMonitoring()
@@ -156,7 +167,7 @@ class RalleyManager: ObservableObject {
             return
         }
 
-        isLoading = true
+        isCreating = true
         error = nil
 
         let currentUserId = supabase.currentUser?.id ?? UUID()
@@ -212,6 +223,8 @@ class RalleyManager: ObservableObject {
                 print("RalleyManager: Group chat created for ralley")
             } catch {
                 print("RalleyManager: Failed to create group chat: \(error)")
+                // Surface error so user knows chat is missing
+                self.error = error
             }
 
             // Add to local cache
@@ -226,7 +239,13 @@ class RalleyManager: ObservableObject {
                 dateFormatter.dateStyle = .medium
                 dateFormatter.timeStyle = .short
                 let postContent = "Just created a \(sport) ralley at \(locationName) on \(dateFormatter.string(from: dateTime)). Who's in?"
-                await postManager.createPost(content: postContent, title: title)
+                await postManager.createPost(
+                    content: postContent,
+                    title: title,
+                    postType: .ralleyUpdate,
+                    authorSport: sport,
+                    relatedRalleyId: createdRalley.id
+                )
             }
 
             print("RalleyManager: Ralley created successfully")
@@ -244,7 +263,7 @@ class RalleyManager: ObservableObject {
             print("RalleyManager: Ralley added locally (backend failed)")
         }
 
-        isLoading = false
+        isCreating = false
     }
 
     // MARK: - Participation (Delegated)

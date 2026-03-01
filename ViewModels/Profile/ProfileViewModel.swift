@@ -70,6 +70,7 @@ class ProfileViewModel: ObservableObject {
     private let userService = UserService()
     private let postService: PostService
     private let ralleyService: RalleyService
+    private let powerUpService = PowerUpProfileService()
     private let supabase = SupabaseManager.shared
 
     // MARK: - Initialization
@@ -96,6 +97,7 @@ class ProfileViewModel: ObservableObject {
             var posts: [ClubRalleyPost] = []
             var ralleys: [ClubRalley] = []
             var followCounts: (followers: Int, following: Int) = (0, 0)
+            var powerUpSports: [SportWithSkill] = []
 
             do {
                 posts = try await postService.loadUserPosts(userId: savedProfile.id)
@@ -105,10 +107,19 @@ class ProfileViewModel: ObservableObject {
                 print("ProfileVM: Failed to load stats: \(error)")
             }
 
+            // Load Power Up sports (with skill levels) from Supabase JSONB
+            do {
+                let powerUpData = try await powerUpService.loadExistingProfileData()
+                powerUpSports = powerUpData.sportsWithSkills
+            } catch {
+                print("ProfileVM: Failed to load Power Up sports: \(error)")
+            }
+
             self.userRalleys = ralleys
             currentUserProfile = createProfileFromSavedData(
                 savedProfile, posts: posts, ralleys: ralleys,
-                followersCount: followCounts.followers, followingCount: followCounts.following
+                followersCount: followCounts.followers, followingCount: followCounts.following,
+                powerUpSports: powerUpSports
             )
             lastProfileLoad = Date()
             isLoading = false
@@ -147,15 +158,28 @@ class ProfileViewModel: ObservableObject {
         posts: [ClubRalleyPost] = [],
         ralleys: [ClubRalley] = [],
         followersCount: Int = 0,
-        followingCount: Int = 0
+        followingCount: Int = 0,
+        powerUpSports: [SportWithSkill] = []
     ) -> UserProfile {
-        // Parse sports with skills from saved data
-        let sportsWithSkills = saved.selectedSports.map { sportName in
-            UserSportSkill(
-                sportName: sportName,
-                skillLevel: .intermediate,  // Default, would come from saved data
-                iconName: sportIcon(for: sportName)
-            )
+        // Use Power Up sports (with real skill levels) if available,
+        // otherwise fall back to onboarding sport names
+        let sportsWithSkills: [UserSportSkill]
+        if !powerUpSports.isEmpty {
+            sportsWithSkills = powerUpSports.map { sportWithSkill in
+                UserSportSkill(
+                    sportName: sportWithSkill.sport.name,
+                    skillLevel: mapPowerUpSkillToUserSkill(sportWithSkill.skillLevel),
+                    iconName: sportIcon(for: sportWithSkill.sport.name)
+                )
+            }
+        } else {
+            sportsWithSkills = saved.selectedSports.map { sportName in
+                UserSportSkill(
+                    sportName: sportName,
+                    skillLevel: .intermediate,
+                    iconName: sportIcon(for: sportName)
+                )
+            }
         }
 
         // Convert saved college athlete info to model type
@@ -450,27 +474,25 @@ class ProfileViewModel: ObservableObject {
 
     // MARK: - Database Parsing Helpers
 
-    private func parseSportsFromDatabase(_ sports: [[String: Any]]?) -> [UserSportSkill] {
+    private func parseSportsFromDatabase(_ sports: [String]?) -> [UserSportSkill] {
         guard let sports = sports else { return [] }
-        return sports.compactMap { dict -> UserSportSkill? in
-            guard let name = dict["name"] as? String else { return nil }
-            let skill = SkillLevelType(rawValue: dict["skill"] as? String ?? "intermediate") ?? .intermediate
-            return UserSportSkill(sportName: name, skillLevel: skill, iconName: sportIcon(for: name))
+        return sports.map { name in
+            UserSportSkill(sportName: name, skillLevel: .intermediate, iconName: sportIcon(for: name))
         }
     }
 
-    private func parseCollegeAthleteInfo(_ athleteInfo: [String: Any]?) -> (playedCollege: Bool, info: CollegeAthleteInfo?) {
+    private func parseCollegeAthleteInfo(_ athleteInfo: ClubUserAthleteInfoJSON?) -> (playedCollege: Bool, info: CollegeAthleteInfo?) {
         guard let info = athleteInfo,
-              let playedCollege = info["played_college"] as? Bool, playedCollege else {
+              let playedCollege = info.played_college, playedCollege else {
             return (false, nil)
         }
         return (true, CollegeAthleteInfo(
-            sport: info["sport"] as? String ?? "",
-            school: info["school"] as? String ?? "",
-            division: CollegeDivision(rawValue: info["division"] as? String ?? "club") ?? .club,
-            yearsPlayed: info["years_played"] as? String,
-            position: info["position"] as? String,
-            achievements: info["achievements"] as? [String] ?? []
+            sport: info.sport ?? "",
+            school: info.school ?? "",
+            division: CollegeDivision(rawValue: info.division ?? "club") ?? .club,
+            yearsPlayed: info.years_played,
+            position: info.position,
+            achievements: []
         ))
     }
 
@@ -480,6 +502,10 @@ class ProfileViewModel: ObservableObject {
 
     private func sportIcon(for sport: String) -> String {
         SportIconMapper.iconName(for: sport)
+    }
+
+    private func mapPowerUpSkillToUserSkill(_ level: PowerUpSkillLevel) -> SkillLevelType {
+        SkillLevelType(rawValue: level.rawValue) ?? .intermediate
     }
 }
 

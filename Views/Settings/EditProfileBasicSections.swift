@@ -2,7 +2,7 @@
 //  EditProfileBasicSections.swift
 //  Club Ralley
 //
-//  Extracted basic profile sections for EditProfileView
+//  Instagram-style profile editing sections
 //
 
 import SwiftUI
@@ -15,62 +15,88 @@ struct EditProfilePhotoSection: View {
     var currentPhotoURL: String?
 
     var body: some View {
-        VStack(spacing: ClubRalleyTheme.Spacing.md) {
-            ZStack(alignment: .bottomTrailing) {
-                if let image = selectedImage {
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 120, height: 120)
-                        .clipShape(Circle())
-                } else if let photoURL = currentPhotoURL,
-                          let url = URL(string: photoURL) {
-                    AsyncImage(url: url) { image in
-                        image
+        Button(action: { showingImagePicker = true }) {
+            VStack(spacing: 12) {
+                ZStack {
+                    if let image = selectedImage {
+                        Image(uiImage: image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Circle()
-                            .fill(ClubRalleyTheme.Colors.sageGreen)
-                            .overlay(
-                                Image(systemName: "person.fill")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(ClubRalleyTheme.Colors.accent)
-                            )
-                    }
-                    .frame(width: 120, height: 120)
-                    .clipShape(Circle())
-                } else {
-                    Circle()
-                        .fill(ClubRalleyTheme.Colors.sageGreen)
-                        .frame(width: 120, height: 120)
-                        .overlay(
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(ClubRalleyTheme.Colors.accent)
-                        )
-                }
-
-                Button(action: {
-                    showingImagePicker = true
-                }) {
-                    Image(systemName: "camera.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.white)
-                        .padding(8)
-                        .background(ClubRalleyTheme.Colors.accent)
+                            .frame(width: 96, height: 96)
+                            .clipShape(Circle())
+                    } else if let photoURL = currentPhotoURL,
+                              let url = URL(string: photoURL) {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            profilePlaceholder
+                        }
+                        .frame(width: 96, height: 96)
                         .clipShape(Circle())
+                    } else {
+                        profilePlaceholder
+                    }
                 }
-            }
 
-            Text("Tap to change photo")
-                .font(ClubRalleyTheme.Typography.caption)
-                .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                Text("Edit picture")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    private var profilePlaceholder: some View {
+        Circle()
+            .fill(Color(.systemGray5))
+            .frame(width: 96, height: 96)
+            .overlay(
+                Image(systemName: "person.fill")
+                    .font(.system(size: 36))
+                    .foregroundColor(Color(.systemGray2))
+            )
+    }
+}
+
+// MARK: - Inline Field Row
+
+struct ProfileFieldRow: View {
+    let label: String
+    @Binding var text: String
+    var placeholder: String = ""
+    var keyboardType: UIKeyboardType = .default
+    var autocapitalization: TextInputAutocapitalization = .words
+    var disableAutocorrection: Bool = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .center) {
+                Text(label)
+                    .font(.system(size: 15))
+                    .foregroundColor(ClubRalleyTheme.Colors.text)
+                    .frame(width: 100, alignment: .leading)
+
+                TextField(placeholder.isEmpty ? label : placeholder, text: $text)
+                    .font(.system(size: 15))
+                    .foregroundColor(ClubRalleyTheme.Colors.text)
+                    .textInputAutocapitalization(autocapitalization)
+                    .autocorrectionDisabled(disableAutocorrection)
+                    .keyboardType(keyboardType)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+
+            Divider()
+                .padding(.leading, 16)
         }
     }
 }
 
-// MARK: - Name
+// MARK: - Name Section
 
 struct EditProfileNameSection: View {
     @Binding var firstName: String
@@ -78,22 +104,17 @@ struct EditProfileNameSection: View {
     var nameError: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Name")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
-            HStack(spacing: ClubRalleyTheme.Spacing.md) {
-                TextField("First Name", text: $firstName)
-                    .textFieldStyle(ClubRalleyTextFieldStyle())
-                TextField("Last Name", text: $lastName)
-                    .textFieldStyle(ClubRalleyTextFieldStyle())
-            }
+        VStack(spacing: 0) {
+            ProfileFieldRow(label: "First name", text: $firstName, placeholder: "First name")
+            ProfileFieldRow(label: "Last name", text: $lastName, placeholder: "Last name")
 
             if let nameError = nameError {
                 Text(nameError)
-                    .font(ClubRalleyTheme.Typography.caption)
-                    .foregroundColor(ClubRalleyTheme.Colors.error)
+                    .font(.system(size: 12))
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 4)
             }
         }
     }
@@ -106,20 +127,22 @@ struct EditProfileUsernameSection: View {
     var usernameError: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Username")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
-            TextField("username", text: $username)
-                .textFieldStyle(ClubRalleyTextFieldStyle())
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
+        VStack(spacing: 0) {
+            ProfileFieldRow(
+                label: "Username",
+                text: $username,
+                placeholder: "username",
+                autocapitalization: .never,
+                disableAutocorrection: true
+            )
 
             if let error = usernameError {
                 Text(error)
-                    .font(ClubRalleyTheme.Typography.caption)
-                    .foregroundColor(ClubRalleyTheme.Colors.error)
+                    .font(.system(size: 12))
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 4)
             }
         }
     }
@@ -133,37 +156,40 @@ struct EditProfileBioSection: View {
     var maxBioLength: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Bio")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .top) {
+                    Text("Bio")
+                        .font(.system(size: 15))
+                        .foregroundColor(ClubRalleyTheme.Colors.text)
+                        .frame(width: 100, alignment: .leading)
+                        .padding(.top, 8)
 
-            TextEditor(text: $bio)
-                .frame(minHeight: 100)
-                .padding(8)
-                .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
-                .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
-                .overlay(
-                    RoundedRectangle(cornerRadius: ClubRalleyTheme.CornerRadius.medium)
-                        .stroke(ClubRalleyTheme.Colors.accent.opacity(0.3), lineWidth: 1)
-                )
+                    VStack(alignment: .trailing, spacing: 4) {
+                        TextField("Write something about yourself...", text: $bio, axis: .vertical)
+                            .font(.system(size: 15))
+                            .foregroundColor(ClubRalleyTheme.Colors.text)
+                            .lineLimit(3...6)
 
-            HStack {
-                Text("\(bio.count)/\(maxBioLength) characters")
-                    .font(ClubRalleyTheme.Typography.caption)
-                    .foregroundColor(bio.count > maxBioLength ? ClubRalleyTheme.Colors.error : ClubRalleyTheme.Colors.secondaryText)
-                Spacer()
-                if bio.count > maxBioLength {
-                    Text("Too long")
-                        .font(ClubRalleyTheme.Typography.caption)
-                        .foregroundColor(ClubRalleyTheme.Colors.error)
+                        Text("\(bio.count)/\(maxBioLength)")
+                            .font(.system(size: 11))
+                            .foregroundColor(bio.count > maxBioLength ? .red : Color(.systemGray3))
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 13)
             }
+
+            Divider()
+                .padding(.leading, 16)
 
             if let bioError = bioError {
                 Text(bioError)
-                    .font(ClubRalleyTheme.Typography.caption)
-                    .foregroundColor(ClubRalleyTheme.Colors.error)
+                    .font(.system(size: 12))
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 4)
             }
         }
     }
@@ -176,18 +202,9 @@ struct EditProfileLocationSection: View {
     @Binding var state: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Location")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
-            HStack(spacing: ClubRalleyTheme.Spacing.md) {
-                TextField("City", text: $city)
-                    .textFieldStyle(ClubRalleyTextFieldStyle())
-                TextField("State", text: $state)
-                    .textFieldStyle(ClubRalleyTextFieldStyle())
-                    .frame(width: 80)
-            }
+        VStack(spacing: 0) {
+            ProfileFieldRow(label: "City", text: $city, placeholder: "City")
+            ProfileFieldRow(label: "State", text: $state, placeholder: "State")
         }
     }
 }
@@ -198,21 +215,29 @@ struct EditProfileInstagramSection: View {
     @Binding var instagramHandle: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Instagram")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
+        VStack(spacing: 0) {
+            HStack(alignment: .center) {
+                Text("Instagram")
+                    .font(.system(size: 15))
+                    .foregroundColor(ClubRalleyTheme.Colors.text)
+                    .frame(width: 100, alignment: .leading)
 
-            HStack {
-                Text("@")
-                    .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                TextField("username", text: $instagramHandle)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
+                HStack(spacing: 2) {
+                    Text("@")
+                        .font(.system(size: 15))
+                        .foregroundColor(Color(.systemGray2))
+                    TextField("username", text: $instagramHandle)
+                        .font(.system(size: 15))
+                        .foregroundColor(ClubRalleyTheme.Colors.text)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
             }
-            .padding()
-            .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
-            .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+
+            Divider()
+                .padding(.leading, 16)
         }
     }
 }
@@ -223,25 +248,30 @@ struct EditProfilePrivacySection: View {
     @Binding var isPrivateAccount: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
-            Text("Privacy")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
+        VStack(spacing: 0) {
             Toggle(isOn: $isPrivateAccount) {
                 HStack(spacing: 12) {
                     Image(systemName: isPrivateAccount ? "lock.fill" : "lock.open.fill")
-                        .foregroundColor(ClubRalleyTheme.Colors.accent)
+                        .font(.system(size: 16))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                        .frame(width: 24)
+
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Private Account")
-                            .font(ClubRalleyTheme.Typography.body)
-                        Text(isPrivateAccount ? "Only approved followers can see your profile" : "Anyone can see your profile")
-                            .font(ClubRalleyTheme.Typography.caption)
-                            .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                        Text("Private account")
+                            .font(.system(size: 15))
+                            .foregroundColor(ClubRalleyTheme.Colors.text)
+                        Text(isPrivateAccount ? "Only approved followers can see your posts" : "Anyone can see your profile and posts")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color(.systemGray))
                     }
                 }
             }
-            .tint(ClubRalleyTheme.Colors.accent)
+            .tint(ClubRalleyTheme.Colors.darkGreen)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+
+            Divider()
+                .padding(.leading, 16)
         }
     }
 }
@@ -257,56 +287,57 @@ struct EditProfileCollegeSection: View {
     @Binding var collegePosition: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.md) {
-            Text("College Athlete")
-                .font(ClubRalleyTheme.Typography.headline)
-                .foregroundColor(ClubRalleyTheme.Colors.text)
-
+        VStack(spacing: 0) {
             Toggle(isOn: $playedCollegeSport) {
                 HStack(spacing: 12) {
                     Image(systemName: "graduationcap.fill")
-                        .foregroundColor(ClubRalleyTheme.Colors.accent)
-                    Text("I played a sport in college")
-                        .font(ClubRalleyTheme.Typography.body)
+                        .font(.system(size: 16))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                        .frame(width: 24)
+
+                    Text("College athlete")
+                        .font(.system(size: 15))
+                        .foregroundColor(ClubRalleyTheme.Colors.text)
                 }
             }
-            .tint(ClubRalleyTheme.Colors.accent)
+            .tint(ClubRalleyTheme.Colors.darkGreen)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+
+            Divider()
+                .padding(.leading, 16)
 
             if playedCollegeSport {
-                collegeFieldsSection
+                VStack(spacing: 0) {
+                    ProfileFieldRow(label: "Sport", text: $collegeSport, placeholder: "e.g. Tennis")
+                    ProfileFieldRow(label: "School", text: $collegeSchool, placeholder: "School name")
+
+                    HStack {
+                        Text("Division")
+                            .font(.system(size: 15))
+                            .foregroundColor(ClubRalleyTheme.Colors.text)
+                            .frame(width: 100, alignment: .leading)
+                        Spacer()
+                        Picker("Division", selection: $collegeDivision) {
+                            ForEach(CollegeDivision.allCases, id: \.self) { division in
+                                Text(division.displayName).tag(division)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .tint(ClubRalleyTheme.Colors.darkGreen)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+
+                    Divider()
+                        .padding(.leading, 16)
+
+                    ProfileFieldRow(label: "Position", text: $collegePosition, placeholder: "Optional")
+                    ProfileFieldRow(label: "Years", text: $collegeYears, placeholder: "e.g. 2019-2023")
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .animation(.easeInOut(duration: 0.2), value: playedCollegeSport)
-    }
-
-    private var collegeFieldsSection: some View {
-        VStack(spacing: ClubRalleyTheme.Spacing.md) {
-            TextField("Sport (e.g., Tennis, Soccer)", text: $collegeSport)
-                .textFieldStyle(ClubRalleyTextFieldStyle())
-            TextField("School Name", text: $collegeSchool)
-                .textFieldStyle(ClubRalleyTextFieldStyle())
-            HStack {
-                Text("Division")
-                    .font(ClubRalleyTheme.Typography.body)
-                    .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-                Spacer()
-                Picker("Division", selection: $collegeDivision) {
-                    ForEach(CollegeDivision.allCases, id: \.self) { division in
-                        Text(division.displayName).tag(division)
-                    }
-                }
-                .pickerStyle(.menu)
-                .tint(ClubRalleyTheme.Colors.accent)
-            }
-            .padding()
-            .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.3))
-            .cornerRadius(ClubRalleyTheme.CornerRadius.medium)
-            TextField("Position (optional)", text: $collegePosition)
-                .textFieldStyle(ClubRalleyTextFieldStyle())
-            TextField("Years played (e.g., 2019-2023)", text: $collegeYears)
-                .textFieldStyle(ClubRalleyTextFieldStyle())
-        }
-        .padding(.leading, 8)
-        .transition(.opacity.combined(with: .move(edge: .top)))
     }
 }

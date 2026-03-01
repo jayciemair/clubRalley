@@ -46,3 +46,16 @@ struct DatabasePostWithOwner: Codable {
     let id: UUID
     let user_id: UUID
 }
+
+/// User who liked a post (fetched from club_users table)
+struct PostLiker: Codable, Identifiable {
+    let id: UUID
+    let first_name: String
+    let last_name: String
+    let username: String
+    let profile_photo_url: String?
+
+    var fullName: String {
+        "\(first_name) \(last_name)".trimmingCharacters(in: .whitespaces)
+    }
+}

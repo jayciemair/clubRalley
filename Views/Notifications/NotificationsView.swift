@@ -8,15 +8,15 @@
 import SwiftUI
 
 struct NotificationsView: View {
-    @StateObject private var notificationsService = NotificationsService()
+    @ObservedObject private var notificationService = InAppNotificationService.shared
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if notificationsService.isLoading {
+                if notificationService.isLoading {
                     loadingView
-                } else if notificationsService.notifications.isEmpty {
+                } else if notificationService.notifications.isEmpty {
                     emptyView
                 } else {
                     notificationsList
@@ -24,6 +24,9 @@ struct NotificationsView: View {
             }
             .navigationTitle("Notifications")
             .navigationBarTitleDisplayMode(.inline)
+            .task {
+                await notificationService.loadNotifications()
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Close") {
@@ -33,10 +36,10 @@ struct NotificationsView: View {
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if notificationsService.unreadCount > 0 {
+                    if notificationService.unreadCount > 0 {
                         Button("Mark All Read") {
                             Task {
-                                await notificationsService.markAllAsRead()
+                                await notificationService.markAllAsRead()
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
@@ -79,12 +82,12 @@ struct NotificationsView: View {
     private var notificationsList: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                ForEach(notificationsService.notifications) { notification in
+                ForEach(notificationService.notifications) { notification in
                     NotificationRow(
                         notification: notification,
                         onTap: {
                             Task {
-                                await notificationsService.markAsRead(notification.id)
+                                await notificationService.markAsRead(notification.id)
                             }
                         }
                     )

@@ -23,7 +23,7 @@ protocol RalleyServiceProtocol: ObservableObject {
     var isLoading: Bool { get }
     var lastError: SupabaseManager.SupabaseError? { get }
     func createRalley(_ ralley: ClubRalley) async throws -> ClubRalley
-    func loadNearbyRalleys(latitude: Double, longitude: Double, radius: Double, limit: Int) async throws -> [ClubRalley]
+    func loadNearbyRalleys(latitude: Double, longitude: Double, radius: Double, limit: Int, offset: Int) async throws -> [ClubRalley]
     func loadMoreRalleys(currentCount: Int, limit: Int) async throws -> [ClubRalley]
     func loadUserRalleys(userId: UUID, limit: Int, offset: Int) async throws -> [ClubRalley]
     func loadAttendedRalleys(userId: UUID, limit: Int, offset: Int) async throws -> [ClubRalley]
@@ -110,6 +110,7 @@ class RalleyService: ObservableObject, RalleyServiceProtocol {
                 latitude: ralley.location.latitude,
                 longitude: ralley.location.longitude,
                 date_time: ralley.dateTime,
+                durationMinutes: ralley.durationMinutes,
                 sport_id: nil,
                 category: mapSportToCategory(ralley.sport),
                 max_participants: ralley.maxPlayers,
@@ -430,6 +431,8 @@ struct DatabaseNearbyRalley: Codable {
     let current_participants: Int?
     let is_public: Bool?
     let status: String?
+    let visibility: String?
+    let join_type: String?
     let created_at: Date?
     let updated_at: Date?
     let distance_km: Decimal?

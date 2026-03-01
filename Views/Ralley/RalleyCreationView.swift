@@ -25,8 +25,8 @@ struct RalleyCreationView: View {
     // Location State
     @State private var locationName = ""
     @State private var locationAddress = ""
-    @State private var locationCity = "Lewisburg"
-    @State private var locationState = "PA"
+    @State private var locationCity = SavedUserProfile.loadFromStorage()?.locationCity ?? ""
+    @State private var locationState = SavedUserProfile.loadFromStorage()?.locationState ?? ""
     @State private var locationLatitude: Double = 0.0
     @State private var locationLongitude: Double = 0.0
     @State private var showingLocationSearch = false
@@ -518,6 +518,7 @@ struct RalleyCreationView: View {
                 title: title,
                 sport: selectedSport?.name ?? "",
                 dateTime: selectedDate,
+                durationMinutes: selectedDuration.rawValue,
                 locationName: locationName,
                 address: locationAddress,
                 city: locationCity,
@@ -537,7 +538,7 @@ struct RalleyCreationView: View {
 
             // Check if error was set during operation
             if ralleyManager.error != nil && ralleyManager.error?.localizedDescription != previousError?.localizedDescription {
-                errorMessage = "Failed to create ralley. Please check your connection and try again."
+                errorMessage = ralleyManager.error?.localizedDescription ?? "Failed to create ralley. Please check your connection and try again."
                 showingError = true
                 isCreating = false
                 return

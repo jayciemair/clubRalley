@@ -18,6 +18,8 @@ struct DatabasePost: Codable {
     let ralley_id: UUID?
     let likes_count: Int
     let liked_by: [String]
+    let post_type: String
+    let sport: String?
 
     init(
         user_id: UUID,
@@ -25,7 +27,9 @@ struct DatabasePost: Codable {
         likes_count: Int = 0,
         ralley_id: UUID? = nil,
         image_url: String? = nil,
-        liked_by: [String] = []
+        liked_by: [String] = [],
+        post_type: String = "text",
+        sport: String? = nil
     ) {
         self.user_id = user_id
         self.content = content
@@ -33,6 +37,8 @@ struct DatabasePost: Codable {
         self.likes_count = likes_count
         self.image_url = image_url
         self.liked_by = liked_by
+        self.post_type = post_type
+        self.sport = sport
     }
 }
 
@@ -47,10 +53,12 @@ struct DatabasePostWithUser: Codable {
     let likes_count: Int
     let liked_by: [UUID]?
     let created_at: Date
+    let post_type: String?
+    let sport: String?
     let user: DatabaseUser
 
     // Computed properties for backwards compatibility with app models
-    var post_type: String { "text" }
+    var resolvedPostType: String { post_type ?? (image_url != nil ? "image" : "text") }
     var comments_count: Int { 0 }
     var shares_count: Int? { 0 }
     var visibility: String? { "everyone" }
@@ -62,22 +70,15 @@ struct DatabasePostWithUser: Codable {
 
     enum CodingKeys: String, CodingKey {
         case id, user_id, content, image_url, ralley_id
-        case likes_count, liked_by, created_at
+        case likes_count, liked_by, created_at, post_type, sport
         case user = "club_users"
     }
 }
 
-/// Database representation of a repost
+/// Database representation of a repost (insert model — matches reposts table columns)
 struct DatabaseRepost: Codable {
     let original_post_id: UUID
     let user_id: UUID
-    let comment: String?
-
-    init(original_post_id: UUID, user_id: UUID, comment: String? = nil) {
-        self.original_post_id = original_post_id
-        self.user_id = user_id
-        self.comment = comment
-    }
 }
 
 /// Database repost with joined information

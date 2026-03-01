@@ -27,7 +27,8 @@ extension RalleyService {
         latitude: Double = 37.7749,
         longitude: Double = -122.4194,
         radius: Double = 50.0,
-        limit: Int = 20
+        limit: Int = 20,
+        offset: Int = 0
     ) async throws -> [ClubRalley] {
         isLoading = true
         lastError = nil
@@ -46,18 +47,29 @@ extension RalleyService {
                     limit: limit
                 )
             } catch {
-                // Fallback to client-side filtering if RPC fails
+                // Fallback: same filters (active, ordered, limited) so results are consistent
                 print("⚠️ RalleyService: RPC failed, falling back to client-side filtering: \(error)")
                 ralleys = try await supabase.query("ralleys")
                     .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
                     .eq("status", value: "active")
                     .order("date_time", ascending: true)
+                    .range(from: offset, to: offset + limit - 1)
                     .execute()
             }
 
-            // Map database results to app models and filter blocked users
+            // Check if current user is a verified college athlete
+            let isCollegeAthlete = SavedUserProfile.loadFromStorage()?.playedCollegeSport == true
+
+            // Map database results to app models, filter blocked users and enforce visibility
             let mappedRalleys = ralleys
                 .filter { !self.sharedUserState.isBlocked($0.host_id) }
+                .filter { dbRalley in
+                    // Filter out college_athletes_only ralleys for non-athletes
+                    if dbRalley.visibility == "college_athletes_only" && !isCollegeAthlete {
+                        return false
+                    }
+                    return true
+                }
                 .compactMap { dbRalley in
                     mapDatabaseRalleyToApp(dbRalley)
                 }
@@ -70,14 +82,14 @@ extension RalleyService {
             isLoading = false
             lastError = error
             print("❌ RalleyService: Load nearby ralleys failed: \(error)")
-            return []
+            throw error
 
         } catch {
             isLoading = false
             let supabaseError = SupabaseManager.SupabaseError.networkError(error.localizedDescription)
             lastError = supabaseError
             print("❌ RalleyService: Load nearby ralleys failed with network error: \(error)")
-            return []
+            throw supabaseError
         }
     }
 
@@ -98,23 +110,14 @@ extension RalleyService {
         // Call RPC to get nearby ralleys with distance
         let nearbyRalleys: [DatabaseNearbyRalley] = try await supabase.rpc("get_nearby_ralleys", params: params)
 
-        // We need to fetch full ralley data with user info for each result
-        // The RPC returns basic ralley data, so we fetch full details
-        var fullRalleys: [DatabaseRalleyWithUser] = []
-
-        // If we have ralley IDs, fetch them with user data
+        // Batch fetch full ralley data with user info
         let ralleyIds = nearbyRalleys.map { $0.id }
-        if !ralleyIds.isEmpty {
-            // Fetch ralleys with user info
-            for ralleyId in ralleyIds {
-                if let ralley: DatabaseRalleyWithUser = try? await supabase.query("ralleys")
-                    .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
-                    .eq("id", value: ralleyId)
-                    .single() {
-                    fullRalleys.append(ralley)
-                }
-            }
-        }
+        guard !ralleyIds.isEmpty else { return [] }
+
+        let fullRalleys: [DatabaseRalleyWithUser] = try await supabase.query("ralleys")
+            .select("*, club_users(id, first_name, last_name, username, profile_photo_url)")
+            .in("id", values: ralleyIds)
+            .execute()
 
         return fullRalleys
     }
@@ -131,7 +134,7 @@ extension RalleyService {
      * @returns: Array of additional ralleys
      */
     func loadMoreRalleys(currentCount: Int, limit: Int = 20) async throws -> [ClubRalley] {
-        return try await loadNearbyRalleys(limit: limit)
+        return try await loadNearbyRalleys(limit: limit, offset: currentCount)
     }
 
     /**

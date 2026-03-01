@@ -233,8 +233,37 @@ class ImageUploadService: ObservableObject {
      * @param bucket: Storage bucket name
      * @returns: Public URL of uploaded file
      */
+    /// Set of bucket names we've already verified exist this session
+    private var verifiedBuckets: Set<String> = []
+
+    /// Ensure a storage bucket exists, creating it if needed
+    private func ensureBucketExists(_ bucket: String) async {
+        guard !verifiedBuckets.contains(bucket) else { return }
+
+        let storage = SupabaseClientManager.shared.storage
+        do {
+            // Try to get bucket info — if this succeeds, bucket exists
+            _ = try await storage.getBucket(bucket)
+            verifiedBuckets.insert(bucket)
+            print("✅ ImageUploadService: Bucket '\(bucket)' exists")
+        } catch {
+            // Bucket doesn't exist — create it as public
+            print("⚠️ ImageUploadService: Bucket '\(bucket)' not found, creating...")
+            do {
+                try await storage.createBucket(bucket, options: BucketOptions(public: true))
+                verifiedBuckets.insert(bucket)
+                print("✅ ImageUploadService: Created bucket '\(bucket)'")
+            } catch {
+                print("❌ ImageUploadService: Failed to create bucket '\(bucket)': \(error)")
+            }
+        }
+    }
+
     private func uploadToStorage(data: Data, path: String, bucket: String) async throws -> String {
         let storage = SupabaseClientManager.shared.storage
+
+        // Auto-create bucket if it doesn't exist
+        await ensureBucketExists(bucket)
 
         do {
             // Upload file to Supabase Storage

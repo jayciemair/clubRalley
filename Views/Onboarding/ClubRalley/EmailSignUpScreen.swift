@@ -19,20 +19,18 @@ struct EmailSignUpScreen: View {
         case email, password, confirmPassword
     }
 
-    private var isReAuth: Bool { controller.isReAuthMode }
-
     var body: some View {
         ClubRalleyScrollableLayout(
             canGoBack: false,
             onBack: nil,
-            onContinue: { isReAuth ? handleSignIn() : handleSignUp() },
+            onContinue: { handleSignUp() },
             continueEnabled: canContinue,
-            continueText: isReAuth ? "Sign In" : "Sign Up"
+            continueText: "Sign Up"
         ) {
             VStack(spacing: 32) {
                 ClubRalleyOnboardingHeader(
-                    title: isReAuth ? "Welcome back" : controller.currentStep.title,
-                    subtitle: isReAuth ? "Sign in to continue" : controller.currentStep.subtitle
+                    title: controller.currentStep.title,
+                    subtitle: controller.currentStep.subtitle
                 )
 
                 VStack(spacing: 24) {
@@ -61,7 +59,7 @@ struct EmailSignUpScreen: View {
                             .foregroundColor(.gray)
 
                         RalleyUnderlinedSecureField(
-                            placeholder: isReAuth ? "Enter your password" : "At least 8 characters",
+                            placeholder: "At least 8 characters",
                             text: $password
                         )
                         .focused($focusedField, equals: .password)
@@ -70,28 +68,26 @@ struct EmailSignUpScreen: View {
                         }
                     }
 
-                    // Confirm password (sign-up only)
-                    if !isReAuth {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Confirm password")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.gray)
+                    // Confirm password
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Confirm password")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.gray)
 
-                            RalleyUnderlinedSecureField(
-                                placeholder: "Re-enter password",
-                                text: $confirmPassword
-                            )
-                            .focused($focusedField, equals: .confirmPassword)
-                            .onChange(of: confirmPassword) { _, newValue in
-                                controller.onboardingData.profile.confirmPassword = newValue
-                            }
+                        RalleyUnderlinedSecureField(
+                            placeholder: "Re-enter password",
+                            text: $confirmPassword
+                        )
+                        .focused($focusedField, equals: .confirmPassword)
+                        .onChange(of: confirmPassword) { _, newValue in
+                            controller.onboardingData.profile.confirmPassword = newValue
+                        }
 
-                            // Password mismatch hint
-                            if !confirmPassword.isEmpty && password != confirmPassword {
-                                Text("Passwords don't match")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.red)
-                            }
+                        // Password mismatch hint
+                        if !confirmPassword.isEmpty && password != confirmPassword {
+                            Text("Passwords don't match")
+                                .font(.system(size: 12))
+                                .foregroundColor(.red)
                         }
                     }
                 }
@@ -122,11 +118,6 @@ struct EmailSignUpScreen: View {
 
     private var canContinue: Bool {
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
-        if isReAuth {
-            return trimmedEmail.contains("@") &&
-                   trimmedEmail.contains(".") &&
-                   password.count >= 8
-        }
         return trimmedEmail.contains("@") &&
                trimmedEmail.contains(".") &&
                password.count >= 8 &&
@@ -142,13 +133,6 @@ struct EmailSignUpScreen: View {
             if success && !controller.isComplete {
                 controller.goToNextStep()
             }
-        }
-    }
-
-    private func handleSignIn() {
-        controller.error = nil
-        Task {
-            await controller.signInOnly()
         }
     }
 }

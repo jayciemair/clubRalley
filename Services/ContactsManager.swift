@@ -84,7 +84,10 @@ class ContactsManager: ObservableObject {
                         photoURL: dbUser.profile_photo_url ?? "https://picsum.photos/100/100?random=\(dbUser.id.hashValue % 1000)",
                         mutuals: dbUser.friends_count,
                         isFollowing: false,
-                        isVerified: dbUser.is_verified_athlete
+                        isVerified: dbUser.is_verified_athlete,
+                        school: nil,
+                        sport: nil,
+                        division: nil
                     )
                 }
 

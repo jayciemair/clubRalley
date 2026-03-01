@@ -232,19 +232,37 @@ struct FeedSeparator: View {
 // MARK: - Mutuals Row
 
 struct HomeMutualsRow: View {
+    let likeCount: Int
+    var onTap: (() -> Void)? = nil
+
     var body: some View {
         HStack(spacing: 0) {
             // Overlapping avatar circles
             overlappingAvatars
                 .frame(width: 48)
 
-            Text("& your friends loved this post")
+            Text(likeText)
                 .font(.system(size: 11, weight: .semibold))
                 .fontDesign(.rounded)
                 .foregroundColor(ClubRalleyTheme.Colors.mutedText)
                 .padding(.leading, 12)
 
             Spacer()
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if likeCount >= 2 {
+                onTap?()
+            }
+        }
+    }
+
+    private var likeText: String {
+        switch likeCount {
+        case 1:
+            return "1 person liked this"
+        default:
+            return "\(likeCount) people liked this"
         }
     }
 

@@ -42,7 +42,10 @@ struct ContentView: View {
             .navigationViewStyle(.stack)
             .withErrorHandling()
             .overlay(welcomeOverlay)
-            .onAppear { coordinator.onAppAppear() }
+            .onAppear {
+                coordinator.onAppAppear()
+                ralleyManager.postManager = postManager
+            }
             .onChange(of: coordinator.appState) { _, newState in handleAppStateChange(newState) }
             .onChange(of: selectedTabOverride) { _, newValue in handleTabOverrideChange(newValue) }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ProfileDidSwitch"))) { _ in
@@ -50,6 +53,9 @@ struct ContentView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("UserDidLogout"))) { _ in
                 handleUserLogout()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RecapPostCreated"))) { _ in
+                selectedTab = .home
             }
     }
 
@@ -165,7 +171,9 @@ struct RosterView: View {
     @State private var messageTargetUser: RosterUserData?
     @State private var activeConversation: DirectConversation?
     @State private var isLoadingMessage = false
+    @State private var selectedSportFilter: String?
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+    private let sportFilterOptions: [String] = Array(DefaultSports.all.prefix(8).map { $0.name })
 
     var body: some View {
         VStack(spacing: 0) {
@@ -215,6 +223,19 @@ struct RosterView: View {
             await userService.loadFollowingStatus()
             await contactsManager.fetchContactMatches()
             await userService.loadSchoolSuggestions()
+
+            // Load discovery data if user has college athlete info
+            if let athleteInfo = SavedUserProfile.loadFromStorage()?.collegeAthleteInfo {
+                if !athleteInfo.school.isEmpty {
+                    await userService.loadSchoolUsers()
+                }
+                if !athleteInfo.sport.isEmpty {
+                    await userService.loadSportSuggestions()
+                }
+                if !athleteInfo.division.isEmpty {
+                    await userService.loadDivisionUsers()
+                }
+            }
         }
         .sheet(item: $activeConversation) { conversation in
             NavigationStack {
@@ -253,11 +274,19 @@ struct RosterView: View {
         return "Suggested"
     }
 
+    /// The grid data source — either sport-filtered or all users
+    private var displayedUsers: [RosterUserData] {
+        if selectedSportFilter != nil {
+            return userService.sportUsers
+        }
+        return userService.users
+    }
+
     private var peopleContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 // Suggested friends section
-                if !allSuggestions.isEmpty {
+                if !allSuggestions.isEmpty && searchText.isEmpty && selectedSportFilter == nil {
                     VStack(alignment: .leading, spacing: 8) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Suggested Friends")
@@ -285,16 +314,40 @@ struct RosterView: View {
                     .padding(.top, 16)
                 }
 
+                // Discovery sections (only when not searching and no sport filter)
+                if searchText.isEmpty && selectedSportFilter == nil {
+                    discoverySection(
+                        title: "People from Your School",
+                        subtitle: SavedUserProfile.loadFromStorage()?.collegeAthleteInfo?.school,
+                        users: userService.schoolUsers
+                    )
+                    discoverySection(
+                        title: "Athletes in Your Sport",
+                        subtitle: SavedUserProfile.loadFromStorage()?.collegeAthleteInfo?.sport,
+                        users: userService.sportSuggestions
+                    )
+                    discoverySection(
+                        title: "Your Division",
+                        subtitle: SavedUserProfile.loadFromStorage()?.collegeAthleteInfo?.division,
+                        users: userService.divisionUsers
+                    )
+                }
+
                 // Search bar
                 HStack {
                     Image(systemName: "magnifyingglass").foregroundColor(.gray)
                     TextField("Search athletes...", text: $searchText)
                         .textFieldStyle(PlainTextFieldStyle())
                         .onChange(of: searchText) { _, query in
+                            if !query.isEmpty { selectedSportFilter = nil }
                             Task { await userService.searchUsers(query: query) }
                         }
                     if !searchText.isEmpty {
-                        Button(action: { searchText = ""; Task { await userService.loadUsers() } }) {
+                        Button(action: {
+                            searchText = ""
+                            selectedSportFilter = nil
+                            Task { await userService.loadUsers() }
+                        }) {
                             Image(systemName: "xmark.circle.fill").foregroundColor(.gray)
                         }
                     }
@@ -304,17 +357,35 @@ struct RosterView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
 
+                // Sport filter chips
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        sportChip(label: "All", isSelected: selectedSportFilter == nil) {
+                            selectedSportFilter = nil
+                            Task { await userService.loadUsers() }
+                        }
+                        ForEach(sportFilterOptions, id: \.self) { sport in
+                            sportChip(label: sport, isSelected: selectedSportFilter == sport) {
+                                selectedSportFilter = sport
+                                Task { await userService.loadSportUsers(sport: sport) }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+
                 if userService.isLoading {
                     RosterSkeletonView()
-                } else if userService.users.isEmpty {
+                } else if displayedUsers.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "person.3").font(.system(size: 48)).foregroundColor(ClubRalleyTheme.Colors.darkGreen.opacity(0.5))
                         Text("No athletes found").font(.system(size: 18, weight: .semibold)).foregroundColor(ClubRalleyTheme.Colors.darkGreen)
-                        Text("Try a different search").font(.system(size: 15)).foregroundColor(.gray)
+                        Text(selectedSportFilter != nil ? "No athletes found for this sport" : "Try a different search")
+                            .font(.system(size: 15)).foregroundColor(.gray)
                     }.frame(maxWidth: .infinity).padding(.top, 60)
                 } else {
                     LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(userService.users) { user in
+                        ForEach(displayedUsers) { user in
                             RosterUserCardView(
                                 user: user,
                                 userService: userService,
@@ -326,6 +397,54 @@ struct RosterView: View {
                 }
                 Spacer(minLength: 100)
             }
+        }
+    }
+
+    // MARK: - Sport Filter Chip
+
+    private func sportChip(label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                .foregroundColor(isSelected ? .white : ClubRalleyTheme.Colors.darkGreen)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(isSelected ? ClubRalleyTheme.Colors.darkGreen : Color.white)
+                .cornerRadius(20)
+                .overlay(RoundedRectangle(cornerRadius: 20).stroke(ClubRalleyTheme.Colors.darkGreen.opacity(0.3), lineWidth: 1))
+        }
+    }
+
+    // MARK: - Discovery Section
+
+    @ViewBuilder
+    private func discoverySection(title: String, subtitle: String?, users: [RosterUserData]) -> some View {
+        if !users.isEmpty, let subtitle, !subtitle.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                    Text(subtitle)
+                        .font(.system(size: 13))
+                        .foregroundColor(.gray)
+                }
+                .padding(.horizontal, 16)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(users) { user in
+                            SuggestionCard(
+                                user: user,
+                                reason: user.sport ?? user.school ?? subtitle,
+                                userService: userService
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+            }
+            .padding(.top, 8)
         }
     }
 
@@ -377,6 +496,18 @@ struct RosterUserCardView: View {
             Text(user.name).font(.system(size: 13, weight: .bold)).foregroundColor(ClubRalleyTheme.Colors.darkGreen).lineLimit(1)
 
             Text(user.location).font(.system(size: 11, weight: .medium)).foregroundColor(.gray).lineLimit(1)
+
+            if let sport = user.sport {
+                Text(sport)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(ClubRalleyTheme.Colors.darkGreen.opacity(0.1))
+                    .cornerRadius(6)
+                    .lineLimit(1)
+            }
+
             Text("\(user.mutuals) mutuals").font(.system(size: 11)).foregroundColor(.gray)
             Spacer(minLength: 4)
 

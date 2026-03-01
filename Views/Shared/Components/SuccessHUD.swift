@@ -31,13 +31,15 @@ struct SuccessHUD: View {
                         .frame(width: 64, height: 64)
                     
                     Image(systemName: "checkmark")
-                        .font(.custom("Satoshi-Bold", size: 32))
+                        .font(.system(size: 32, weight: .bold))
+                        .fontDesign(.rounded)
                         .foregroundColor(.green)
                 }
                 
                 // Success message
                 Text(message)
-                    .font(.custom("Satoshi-Medium", size: 18))
+                    .font(.system(size: 18, weight: .medium))
+                    .fontDesign(.rounded)
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
             }

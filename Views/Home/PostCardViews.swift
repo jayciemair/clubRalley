@@ -19,6 +19,7 @@ struct HomeFeedPostCard: View {
     @State private var commentCount: Int
     @State private var showingComments = false
     @State private var showingRepostSheet = false
+    @State private var showingLikes = false
     @State private var heartScale: CGFloat = 1.0
 
     init(post: ClubRalleyPost) {
@@ -48,16 +49,7 @@ struct HomeFeedPostCard: View {
         VStack(alignment: .leading, spacing: 0) {
             // 1. Author row
             HStack(alignment: .center, spacing: 12) {
-                // Avatar — 46pt green circle with initials
-                Circle()
-                    .fill(ClubRalleyTheme.Colors.darkGreen)
-                    .frame(width: 46, height: 46)
-                    .overlay(
-                        Text(initials)
-                            .font(.system(size: 18, weight: .bold))
-                            .fontDesign(.rounded)
-                            .foregroundColor(.white)
-                    )
+                PostAuthorAvatar(photoURL: post.authorPhotoURL, initials: initials, size: 46)
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(post.authorName)
@@ -74,7 +66,28 @@ struct HomeFeedPostCard: View {
                 Spacer()
             }
 
-            // 2. Post title
+            // 2. Sport activity banner (ralley update posts only)
+            if post.postType == .ralleyUpdate, let sport = post.authorSport, !sport.isEmpty {
+                HStack(spacing: 8) {
+                    Image(systemName: SportIconMapper.iconName(for: sport))
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+
+                    Text("\(sport.capitalized) Ralley")
+                        .font(.system(size: 14, weight: .bold))
+                        .fontDesign(.rounded)
+                        .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(ClubRalleyTheme.Colors.sageGreen.opacity(0.6))
+                .cornerRadius(10)
+                .padding(.top, 12)
+            }
+
+            // 3. Post title
             if let title = post.title, !title.isEmpty {
                 Text(title)
                     .font(.custom("Chillax-Bold", size: 17))
@@ -83,7 +96,7 @@ struct HomeFeedPostCard: View {
                     .padding(.bottom, 4)
             }
 
-            // 3. Post text
+            // 4. Post text
             if !post.content.isEmpty {
                 Text(post.content)
                     .font(.system(size: 14, weight: .medium))
@@ -93,26 +106,28 @@ struct HomeFeedPostCard: View {
                     .padding(.bottom, 14)
             }
 
-            // 4. Photos (full bleed)
+            // 5. Photos (full bleed)
             if !post.images.isEmpty {
                 PostPhotoCollage(photos: post.images)
                     .padding(.horizontal, -22)
             }
 
-            // 5. Mutuals row
+            // 6. Mutuals row
             if likeCount > 0 {
-                HomeMutualsRow()
-                    .padding(.top, 10)
+                HomeMutualsRow(likeCount: likeCount, onTap: {
+                    showingLikes = true
+                })
+                .padding(.top, 10)
             }
 
-            // 6. Action bar separator (full bleed)
+            // 7. Action bar separator (full bleed)
             Rectangle()
                 .fill(ClubRalleyTheme.Colors.separator)
                 .frame(height: 1)
                 .padding(.horizontal, -22)
                 .padding(.top, 10)
 
-            // 7. Action bar
+            // 8. Action bar
             PostActionBar(
                 post: post,
                 isLiked: $isLiked,
@@ -139,6 +154,10 @@ struct HomeFeedPostCard: View {
                         commentCount = postManager.posts[index].comments
                     }
                 }
+        }
+        .sheet(isPresented: $showingLikes) {
+            LikesSheetView(postId: post.id)
+                .environmentObject(postManager)
         }
         .sheet(isPresented: $showingRepostSheet) {
             RepostSheet(post: post)
@@ -183,6 +202,40 @@ struct HomeFeedPostCard: View {
     }
 }
 
+// MARK: - Post Author Avatar
+
+struct PostAuthorAvatar: View {
+    let photoURL: String
+    let initials: String
+    let size: CGFloat
+
+    var body: some View {
+        if !photoURL.isEmpty, let url = URL(string: photoURL) {
+            AsyncImage(url: url) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                initialsView
+            }
+            .frame(width: size, height: size)
+            .clipShape(Circle())
+        } else {
+            initialsView
+        }
+    }
+
+    private var initialsView: some View {
+        Text(initials)
+            .font(.system(size: size * 0.39, weight: .bold))
+            .fontDesign(.rounded)
+            .foregroundColor(.white)
+            .frame(width: size, height: size)
+            .background(ClubRalleyTheme.Colors.darkGreen)
+            .clipShape(Circle())
+    }
+}
+
 // MARK: - Photo Collage
 
 struct PostPhotoCollage: View {
@@ -195,6 +248,10 @@ struct PostPhotoCollage: View {
                 singlePhoto
             case 2:
                 twoPhotos
+            case 3:
+                threePhotos
+            case 4:
+                fourPhotos
             default:
                 fivePhotoGrid
             }
@@ -220,9 +277,47 @@ struct PostPhotoCollage: View {
         }
     }
 
+    // 3 photos — 1 large top + 2 small bottom
+    private var threePhotos: some View {
+        VStack(spacing: 2) {
+            photoImage(photos[0])
+                .frame(height: 190)
+                .clipped()
+
+            HStack(spacing: 2) {
+                photoImage(photos[1])
+                    .frame(height: 130)
+                    .clipped()
+                photoImage(photos[2])
+                    .frame(height: 130)
+                    .clipped()
+            }
+        }
+    }
+
+    // 4 photos — 2x2 grid
+    private var fourPhotos: some View {
+        VStack(spacing: 2) {
+            HStack(spacing: 2) {
+                photoImage(photos[0])
+                    .frame(height: 150)
+                    .clipped()
+                photoImage(photos[1])
+                    .frame(height: 150)
+                    .clipped()
+            }
+            HStack(spacing: 2) {
+                photoImage(photos[2])
+                    .frame(height: 150)
+                    .clipped()
+                photoImage(photos[3])
+                    .frame(height: 150)
+                    .clipped()
+            }
+        }
+    }
+
     // 5-photo collage — 290pt total
-    // Left column: 1 tall photo (top) + 2 small photos side by side (bottom)
-    // Right column: 2 stacked photos spanning full height
     private var fivePhotoGrid: some View {
         let p = Array(photos.prefix(5))
         return HStack(spacing: 2) {
@@ -233,10 +328,10 @@ struct PostPhotoCollage: View {
                     .clipped()
 
                 HStack(spacing: 2) {
-                    photoImage(p.count > 1 ? p[1] : p[0])
+                    photoImage(p[1])
                         .frame(height: 144)
                         .clipped()
-                    photoImage(p.count > 2 ? p[2] : p[0])
+                    photoImage(p[2])
                         .frame(height: 144)
                         .clipped()
                 }
@@ -244,10 +339,10 @@ struct PostPhotoCollage: View {
 
             // Right column
             VStack(spacing: 2) {
-                photoImage(p.count > 3 ? p[3] : p[0])
+                photoImage(p[3])
                     .frame(height: 144)
                     .clipped()
-                photoImage(p.count > 4 ? p[4] : p[0])
+                photoImage(p.count > 4 ? p[4] : p[3])
                     .frame(height: 144)
                     .clipped()
             }

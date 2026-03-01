@@ -311,26 +311,99 @@ class PostEngagementService: ObservableObject, PostEngagementServiceProtocol {
         }
     }
 
-    // MARK: - Repost Operations (Not supported by current schema)
-    // The posts table doesn't have original_post_id, post_type, repost_comment, or shares_count columns.
-    // These methods are stubbed out until the schema supports reposts.
+    // MARK: - Repost Operations (Using reposts table)
 
     func repost(postId: UUID, comment: String? = nil) async throws -> Bool {
-        print("⚠️ PostEngagementService: Repost not supported by current database schema")
-        return false
+        guard supabase.isAuthenticated, let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        do {
+            let repost = DatabaseRepost(
+                original_post_id: postId,
+                user_id: currentUser.id
+            )
+            try await supabase.insert(repost, into: "reposts")
+            print("✅ PostEngagementService: Reposted post \(postId)")
+            return true
+        } catch {
+            print("❌ PostEngagementService: Repost failed: \(error)")
+            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
     }
 
     func undoRepost(postId: UUID) async throws -> Bool {
-        print("⚠️ PostEngagementService: Undo repost not supported by current database schema")
-        return false
+        guard supabase.isAuthenticated, let currentUser = supabase.currentUser else {
+            throw SupabaseManager.SupabaseError.notAuthenticated
+        }
+
+        do {
+            try await supabase.delete(
+                from: "reposts",
+                where: "original_post_id = '\(postId)' AND user_id = '\(currentUser.id)'"
+            )
+            print("✅ PostEngagementService: Undo repost for post \(postId)")
+            return true
+        } catch {
+            print("❌ PostEngagementService: Undo repost failed: \(error)")
+            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
     }
 
     func getRepostCount(postId: UUID) async throws -> Int {
-        return 0
+        do {
+            let reposts: [DatabaseRepost] = try await supabase.query("reposts")
+                .select("original_post_id, user_id")
+                .eq("original_post_id", value: postId)
+                .execute()
+            return reposts.count
+        } catch {
+            print("❌ PostEngagementService: Get repost count failed: \(error)")
+            return 0
+        }
     }
 
     func hasReposted(postId: UUID) async throws -> Bool {
-        return false
+        guard let currentUser = supabase.currentUser else { return false }
+
+        do {
+            let reposts: [DatabaseRepost] = try await supabase.query("reposts")
+                .select("original_post_id, user_id")
+                .eq("original_post_id", value: postId)
+                .eq("user_id", value: currentUser.id)
+                .execute()
+            return !reposts.isEmpty
+        } catch {
+            print("❌ PostEngagementService: Check repost status failed: \(error)")
+            return false
+        }
+    }
+
+    // MARK: - Liker Operations
+
+    /// Fetch users who liked a post
+    func getLikers(postId: UUID) async throws -> [PostLiker] {
+        do {
+            guard let post: PostWithLikes = try await supabase.query("posts")
+                .select("id, liked_by")
+                .eq("id", value: postId)
+                .single() else {
+                return []
+            }
+
+            let likedByArray = post.liked_by ?? []
+            guard !likedByArray.isEmpty else { return [] }
+
+            let likers: [PostLiker] = try await supabase.query("club_users")
+                .select("id, first_name, last_name, username, profile_photo_url")
+                .in("id", values: likedByArray)
+                .execute()
+
+            return likers
+        } catch {
+            print("PostEngagementService: Get likers failed: \(error)")
+            throw SupabaseManager.SupabaseError.networkError(error.localizedDescription)
+        }
     }
 
     // MARK: - Helper Methods

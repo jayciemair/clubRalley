@@ -26,6 +26,12 @@ class PostEngagementManager: ObservableObject {
     /// Loading state for comments
     @Published var isLoadingComments = false
 
+    /// Users who liked the selected post
+    @Published var selectedPostLikers: [PostLiker] = []
+
+    /// Loading state for likers
+    @Published var isLoadingLikers = false
+
     /// Error state
     @Published var error: Error?
 
@@ -230,6 +236,29 @@ class PostEngagementManager: ObservableObject {
         } catch {
             return false
         }
+    }
+
+    // MARK: - Liker Operations
+
+    /// Load users who liked a post
+    func loadLikers(for postId: UUID) async {
+        isLoadingLikers = true
+
+        do {
+            let likers = try await engagementService.getLikers(postId: postId)
+            selectedPostLikers = likers
+            print("PostEngagementManager: Loaded \(likers.count) likers")
+        } catch {
+            print("PostEngagementManager: Failed to load likers: \(error)")
+            self.error = error
+        }
+
+        isLoadingLikers = false
+    }
+
+    /// Clear likers when dismissing likes sheet
+    func clearLikers() {
+        selectedPostLikers = []
     }
 
     // MARK: - Clear State

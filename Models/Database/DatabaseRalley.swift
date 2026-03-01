@@ -28,6 +28,8 @@ struct DatabaseRalley: Codable {
     let current_participants: Int
     let is_public: Bool
     let status: String?
+    let visibility: String?
+    let join_type: String?
 
     // Convenience init for creating ralleys
     init(
@@ -41,6 +43,7 @@ struct DatabaseRalley: Codable {
         latitude: Double,
         longitude: Double,
         date_time: Date,
+        durationMinutes: Int,
         sport_id: UUID?,
         category: String,
         max_participants: Int?,
@@ -61,11 +64,13 @@ struct DatabaseRalley: Codable {
         self.latitude = Decimal(latitude)
         self.longitude = Decimal(longitude)
         self.date_time = date_time
-        self.duration_minutes = 120
+        self.duration_minutes = durationMinutes
         self.max_participants = max_participants
         self.current_participants = current_participants
         self.is_public = is_public
         self.status = "active"
+        self.visibility = visibility
+        self.join_type = join_type
     }
 }
 
@@ -89,17 +94,17 @@ struct DatabaseRalleyWithUser: Codable {
     let current_participants: Int
     let is_public: Bool
     let status: String?
+    let visibility: String?
+    let join_type: String?
     let created_at: Date
     let updated_at: Date?
     let organizer: DatabaseRalleyUser
 
     // Computed properties for backwards compatibility with services
-    var host_user_id: UUID { host_id }  // Alias for backwards compatibility
+    var host_user_id: UUID { host_id }
     var location_city: String { city ?? "" }
     var location_state: String { state ?? "" }
     var category: String { sport ?? "sports" }
-    var visibility: String? { is_public ? "anyone" : "friends" }
-    var join_type: String? { "open" }
     var sport_id: UUID? { nil }
 
     enum CodingKeys: String, CodingKey {
@@ -107,7 +112,8 @@ struct DatabaseRalleyWithUser: Codable {
         case location_name, location_address, city, state
         case latitude, longitude, date_time, duration_minutes
         case max_participants, current_participants
-        case is_public, status, created_at, updated_at
+        case is_public, status, visibility, join_type
+        case created_at, updated_at
         case organizer = "club_users"
     }
 }
@@ -154,6 +160,8 @@ struct DatabaseRalleyUpdate: Codable {
     let sport: String
     let max_participants: Int
     let is_public: Bool
+    let visibility: String
+    let join_type: String
 
     // Convenience init for backwards compatibility
     init(
@@ -184,6 +192,8 @@ struct DatabaseRalleyUpdate: Codable {
         self.sport = category
         self.max_participants = max_participants
         self.is_public = is_public
+        self.visibility = visibility
+        self.join_type = join_type
     }
 }
 

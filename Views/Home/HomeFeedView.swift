@@ -58,5 +58,8 @@ struct HomeFeedView: View {
             await postManager.refreshPosts()
             await ralleyManager.refreshRalleys()
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RecapPostCreated"))) { _ in
+            Task { await postManager.refreshPosts() }
+        }
     }
 }

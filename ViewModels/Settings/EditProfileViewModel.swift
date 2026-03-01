@@ -192,6 +192,15 @@ class EditProfileViewModel: ObservableObject {
         if let userId = userIdForSupabase {
             print("VIEWMODEL - Updating Supabase for userId: \(userId)")
             do {
+                let athleteUpdate: AthleteInfoUpdate? = playedCollegeSport ? AthleteInfoUpdate(
+                    played_college: true,
+                    sport: collegeSport.isEmpty ? nil : collegeSport,
+                    school: collegeSchool.isEmpty ? nil : collegeSchool,
+                    division: collegeDivision.rawValue,
+                    years_played: collegeYears.isEmpty ? nil : collegeYears,
+                    position: collegePosition.isEmpty ? nil : collegePosition
+                ) : nil
+
                 let update = DatabaseUserProfileUpdate(
                     first_name: firstName,
                     last_name: lastName,
@@ -200,7 +209,8 @@ class EditProfileViewModel: ObservableObject {
                     city: city.isEmpty ? nil : city,
                     state: state.isEmpty ? nil : state,
                     instagram_handle: instagramHandle.isEmpty ? nil : instagramHandle,
-                    profile_photo_url: profilePhotoURL
+                    profile_photo_url: profilePhotoURL,
+                    athlete_info: athleteUpdate
                 )
 
                 print("VIEWMODEL - Calling supabase.update...")

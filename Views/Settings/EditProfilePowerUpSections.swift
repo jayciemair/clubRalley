@@ -2,7 +2,7 @@
 //  EditProfilePowerUpSections.swift
 //  Club Ralley
 //
-//  Extracted Power Up sections for EditProfileView
+//  Instagram-style power-up profile sections
 //
 
 import SwiftUI
@@ -15,34 +15,56 @@ struct EditProfileSportsSection: View {
     @Binding var isSportsExpanded: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
             Button(action: {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     isSportsExpanded.toggle()
                 }
             }) {
                 HStack {
-                    Text("Sports & Skills")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-                    Spacer()
-                    if !isSportsExpanded && !sportsWithSkills.isEmpty {
-                        collapsedSummary
+                    HStack(spacing: 10) {
+                        Image(systemName: "figure.run")
+                            .font(.system(size: 16))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                            .frame(width: 24)
+
+                        Text("Sports & Skills")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(ClubRalleyTheme.Colors.text)
                     }
-                    Image(systemName: isSportsExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+
+                    Spacer()
+
+                    if !isSportsExpanded && !sportsWithSkills.isEmpty {
+                        Text("\(sportsWithSkills.count) selected")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(.systemGray))
+                    }
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(.systemGray3))
+                        .rotationEffect(.degrees(isSportsExpanded ? 90 : 0))
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 13)
             }
             .buttonStyle(PlainButtonStyle())
+
+            Divider()
+                .padding(.leading, 52)
 
             if isSportsExpanded {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Select your sports")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(Color(.systemGray))
+                        .textCase(.uppercase)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
 
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                         ForEach(availableSports) { sport in
                             SportSelectionCardPowerUp(
                                 sport: sport,
@@ -51,43 +73,34 @@ struct EditProfileSportsSection: View {
                             )
                         }
                     }
+                    .padding(.horizontal, 16)
 
                     if !sportsWithSkills.isEmpty {
-                        Text("Set your skill level")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                        Text("Skill level")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .textCase(.uppercase)
+                            .padding(.horizontal, 16)
 
-                        ForEach(sportsWithSkills.indices, id: \.self) { index in
-                            SkillLevelPicker(
-                                sport: sportsWithSkills[index].sport,
-                                skillLevel: $sportsWithSkills[index].skillLevel
-                            )
+                        VStack(spacing: 0) {
+                            ForEach(sportsWithSkills.indices, id: \.self) { index in
+                                SkillLevelPicker(
+                                    sport: sportsWithSkills[index].sport,
+                                    skillLevel: $sportsWithSkills[index].skillLevel
+                                )
+                                if index < sportsWithSkills.count - 1 {
+                                    Divider()
+                                        .padding(.leading, 16)
+                                }
+                            }
                         }
                     }
                 }
+                .padding(.bottom, 12)
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .animation(.easeInOut(duration: 0.2), value: isSportsExpanded)
-    }
-
-    private var collapsedSummary: some View {
-        HStack(spacing: 4) {
-            ForEach(sportsWithSkills.prefix(3), id: \.id) { sportWithSkill in
-                Text(sportWithSkill.sport.name)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(ClubRalleyTheme.Colors.accent)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(ClubRalleyTheme.Colors.accent.opacity(0.1))
-                    .cornerRadius(10)
-            }
-            if sportsWithSkills.count > 3 {
-                Text("+\(sportsWithSkills.count - 3)")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
-            }
-        }
     }
 
     private func isSportSelectedByName(_ name: String) -> Bool {
@@ -113,38 +126,56 @@ struct EditProfileAvailabilitySection: View {
     @Binding var maxDistance: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
             Button(action: {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     isAvailabilityExpanded.toggle()
                 }
             }) {
                 HStack {
-                    Text("Availability")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
-                    Spacer()
-                    if !isAvailabilityExpanded {
-                        Text(daySelection.displayName + " \u{00B7} " + timePreference.displayName)
-                            .font(.system(size: 12))
-                            .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+                    HStack(spacing: 10) {
+                        Image(systemName: "calendar")
+                            .font(.system(size: 16))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                            .frame(width: 24)
+
+                        Text("Availability")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(ClubRalleyTheme.Colors.text)
                     }
-                    Image(systemName: isAvailabilityExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+
+                    Spacer()
+
+                    if !isAvailabilityExpanded {
+                        Text("\(daySelection.displayName)")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(.systemGray))
+                    }
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(.systemGray3))
+                        .rotationEffect(.degrees(isAvailabilityExpanded ? 90 : 0))
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 13)
             }
             .buttonStyle(PlainButtonStyle())
+
+            Divider()
+                .padding(.leading, 52)
 
             if isAvailabilityExpanded {
                 VStack(alignment: .leading, spacing: 20) {
                     // Day selection
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 10) {
                         Text("When are you usually free?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .textCase(.uppercase)
 
-                        VStack(spacing: 10) {
+                        VStack(spacing: 8) {
                             ForEach(DaySelection.allCases, id: \.self) { option in
                                 DayOptionCard(
                                     option: option,
@@ -169,12 +200,13 @@ struct EditProfileAvailabilitySection: View {
                     }
 
                     // Time preference
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("What time works best?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Best time of day")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .textCase(.uppercase)
 
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                             ForEach(TimePreference.allCases, id: \.self) { time in
                                 TimePreferenceCard(
                                     preference: time,
@@ -185,19 +217,20 @@ struct EditProfileAvailabilitySection: View {
                         }
                     }
 
-                    // Distance slider
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("How far will you travel?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                    // Distance
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Travel distance")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .textCase(.uppercase)
 
-                        VStack(spacing: 12) {
+                        VStack(spacing: 8) {
                             HStack {
                                 Text("Up to")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(Color(.systemGray))
                                 Text("\(maxDistance) miles")
-                                    .font(.system(size: 15, weight: .semibold))
+                                    .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
                                 Spacer()
                             }
@@ -214,21 +247,18 @@ struct EditProfileAvailabilitySection: View {
 
                             HStack {
                                 Text("5 mi")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(Color(.systemGray2))
                                 Spacer()
                                 Text("100 mi")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(Color(.systemGray2))
                             }
                         }
-                        .padding(16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(.systemGray6))
-                        )
                     }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
@@ -263,43 +293,63 @@ struct EditProfileFunQuestionsSection: View {
     @Binding var wouldDoHappyHour: Bool?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ClubRalleyTheme.Spacing.sm) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
             Button(action: {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     isFunQuestionsExpanded.toggle()
                 }
             }) {
                 HStack {
-                    Text("Fun Questions")
-                        .font(ClubRalleyTheme.Typography.headline)
-                        .foregroundColor(ClubRalleyTheme.Colors.text)
+                    HStack(spacing: 10) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 16))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                            .frame(width: 24)
+
+                        Text("Fun Questions")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(ClubRalleyTheme.Colors.text)
+                    }
+
                     Spacer()
-                    Image(systemName: isFunQuestionsExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(ClubRalleyTheme.Colors.secondaryText)
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(.systemGray3))
+                        .rotationEffect(.degrees(isFunQuestionsExpanded ? 90 : 0))
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 13)
             }
             .buttonStyle(PlainButtonStyle())
+
+            Divider()
+                .padding(.leading, 52)
 
             if isFunQuestionsExpanded {
                 VStack(alignment: .leading, spacing: 20) {
                     // Favorite pro team
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Favorite pro sports team?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Favorite pro sports team")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .textCase(.uppercase)
 
-                        TextField("e.g. Lakers, Patriots, Yankees...", text: $favoriteProTeam)
-                            .font(.system(size: 16))
-                            .padding(14)
-                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+                        TextField("e.g. Lakers, Patriots...", text: $favoriteProTeam)
+                            .font(.system(size: 15))
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 14)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
                     }
 
                     // Workout brands
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Favorite workout brands?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Favorite workout brands")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .textCase(.uppercase)
 
                         PowerUpTagGrid(
                             items: WorkoutBrandOptions.brands,
@@ -308,10 +358,11 @@ struct EditProfileFunQuestionsSection: View {
                     }
 
                     // Workout classes
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Favorite type of workout class?")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Favorite workout classes")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .textCase(.uppercase)
 
                         PowerUpTagGrid(
                             items: WorkoutClassOptions.classes,
@@ -320,16 +371,19 @@ struct EditProfileFunQuestionsSection: View {
                     }
 
                     // Hometown
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("Hometown")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .textCase(.uppercase)
 
                         TextField("City, State", text: $hometown)
-                            .font(.system(size: 16))
+                            .font(.system(size: 15))
                             .textInputAutocapitalization(.words)
-                            .padding(14)
-                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 14)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
                     }
 
                     // Happy hour
@@ -338,6 +392,8 @@ struct EditProfileFunQuestionsSection: View {
                         value: $wouldDoHappyHour
                     )
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
@@ -354,23 +410,23 @@ struct EditProfileSaveButton: View {
 
     var body: some View {
         Button(action: onSave) {
-            HStack {
+            HStack(spacing: 8) {
                 if isSaving {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .padding(.trailing, 8)
                 }
-                Text(isSaving ? "Saving..." : "Save Profile")
-                    .font(ClubRalleyTheme.Typography.bodyBold)
+                Text(isSaving ? "Saving..." : "Done")
+                    .font(.system(size: 16, weight: .semibold))
             }
             .frame(maxWidth: .infinity)
-            .padding()
-            .background(ClubRalleyTheme.Colors.accent)
+            .padding(.vertical, 14)
+            .background(ClubRalleyTheme.Colors.darkGreen)
             .foregroundColor(.white)
-            .cornerRadius(ClubRalleyTheme.CornerRadius.large)
+            .cornerRadius(12)
         }
         .disabled(isSaving || !isFormValid)
-        .opacity(isFormValid ? 1.0 : 0.6)
-        .padding(.top, ClubRalleyTheme.Spacing.lg)
+        .opacity(isFormValid ? 1.0 : 0.4)
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
     }
 }

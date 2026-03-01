@@ -29,28 +29,20 @@ struct DatabaseUserProfile: Codable {
     let city: String?
     let state: String?
     let instagram_handle: String?
-    let sports: [[String: Any]]?
+    let sports: [String]?
     let availability: [[String: Any]]?
     let settings: [String: Any]?
-    let athlete_info: [String: Any]?
+    let athlete_info: ClubUserAthleteInfoJSON?
+    let is_verified_athlete: Bool
     let friends_count: Int
     let ralleys_count: Int
     let created_at: Date
-
-    var is_verified_athlete: Bool {
-        // Check athlete_info for verified status
-        if let athleteInfo = athlete_info,
-           let verified = athleteInfo["verified"] as? Bool {
-            return verified
-        }
-        return false
-    }
 
     enum CodingKeys: String, CodingKey {
         case id, email, first_name, last_name, username
         case profile_photo_url, bio, city, state, instagram_handle
         case sports, availability, settings, athlete_info
-        case friends_count, ralleys_count, created_at
+        case is_verified_athlete, friends_count, ralleys_count, created_at
     }
 
     init(from decoder: Decoder) throws {
@@ -65,15 +57,19 @@ struct DatabaseUserProfile: Codable {
         city = try container.decodeIfPresent(String.self, forKey: .city)
         state = try container.decodeIfPresent(String.self, forKey: .state)
         instagram_handle = try container.decodeIfPresent(String.self, forKey: .instagram_handle)
+        is_verified_athlete = try container.decodeIfPresent(Bool.self, forKey: .is_verified_athlete) ?? false
         friends_count = try container.decodeIfPresent(Int.self, forKey: .friends_count) ?? 0
         ralleys_count = try container.decodeIfPresent(Int.self, forKey: .ralleys_count) ?? 0
         created_at = try container.decodeIfPresent(Date.self, forKey: .created_at) ?? Date()
 
-        // JSONB fields are decoded as nil (parsed separately if needed)
-        sports = nil
+        // Decode athlete_info JSONB properly
+        athlete_info = try container.decodeIfPresent(ClubUserAthleteInfoJSON.self, forKey: .athlete_info)
+
+        // Decode sports as simple string array (matches Supabase column type)
+        sports = try container.decodeIfPresent([String].self, forKey: .sports)
+
         availability = nil
         settings = nil
-        athlete_info = nil
     }
 
     func encode(to encoder: Encoder) throws {
@@ -88,6 +84,9 @@ struct DatabaseUserProfile: Codable {
         try container.encodeIfPresent(city, forKey: .city)
         try container.encodeIfPresent(state, forKey: .state)
         try container.encodeIfPresent(instagram_handle, forKey: .instagram_handle)
+        try container.encodeIfPresent(athlete_info, forKey: .athlete_info)
+        try container.encodeIfPresent(sports, forKey: .sports)
+        try container.encode(is_verified_athlete, forKey: .is_verified_athlete)
         try container.encode(friends_count, forKey: .friends_count)
         try container.encode(ralleys_count, forKey: .ralleys_count)
         try container.encode(created_at, forKey: .created_at)
@@ -105,8 +104,8 @@ struct DatabaseUserProfileUpdate: Codable {
     let state: String?
     let instagram_handle: String?
     let profile_photo_url: String?
+    let athlete_info: AthleteInfoUpdate?
 
-    // Convenience init that accepts city/state and maps to city/state
     init(
         first_name: String?,
         last_name: String?,
@@ -115,7 +114,8 @@ struct DatabaseUserProfileUpdate: Codable {
         city: String?,
         state: String?,
         instagram_handle: String?,
-        profile_photo_url: String?
+        profile_photo_url: String?,
+        athlete_info: AthleteInfoUpdate? = nil
     ) {
         self.first_name = first_name
         self.last_name = last_name
@@ -125,5 +125,18 @@ struct DatabaseUserProfileUpdate: Codable {
         self.state = state
         self.instagram_handle = instagram_handle
         self.profile_photo_url = profile_photo_url
+        self.athlete_info = athlete_info
     }
 }
+
+// MARK: - Athlete Info Update (Encodable for writing to Supabase)
+
+struct AthleteInfoUpdate: Codable {
+    let played_college: Bool
+    let sport: String?
+    let school: String?
+    let division: String?
+    let years_played: String?
+    let position: String?
+}
+

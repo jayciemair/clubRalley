@@ -180,7 +180,10 @@ class PostManager: ObservableObject {
         content: String,
         title: String? = nil,
         images: [String] = [],
-        visibility: PostVisibility = .everyone
+        visibility: PostVisibility = .everyone,
+        postType: PostType? = nil,
+        authorSport: String? = nil,
+        relatedRalleyId: UUID? = nil
     ) async {
         guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             print("PostManager: Cannot create post with empty content")
@@ -204,13 +207,14 @@ class PostManager: ObservableObject {
             authorId: supabase.currentUser?.id,
             authorSchool: "",
             authorLocation: userLocation,
-            authorSport: savedProfile?.selectedSports.first ?? "",
+            authorSport: authorSport ?? savedProfile?.selectedSports.first ?? "",
             title: title?.isEmpty == false ? title : nil,
             content: content,
             images: images,
             timestamp: Date(),
-            postType: images.isEmpty ? .text : .image,
+            postType: postType ?? (images.isEmpty ? .text : .image),
             visibility: visibility,
+            relatedRalleyId: relatedRalleyId,
             likes: 0,
             comments: 0,
             shares: 0,
@@ -272,6 +276,26 @@ class PostManager: ObservableObject {
     /// Loading state for comments (delegated)
     var isLoadingComments: Bool {
         engagementManager?.isLoadingComments ?? false
+    }
+
+    /// Likers for the selected post (delegated)
+    var selectedPostLikers: [PostLiker] {
+        engagementManager?.selectedPostLikers ?? []
+    }
+
+    /// Loading state for likers (delegated)
+    var isLoadingLikers: Bool {
+        engagementManager?.isLoadingLikers ?? false
+    }
+
+    /// Load users who liked a post
+    func loadLikers(for postId: UUID) async {
+        await engagementManager?.loadLikers(for: postId)
+    }
+
+    /// Clear likers state
+    func clearLikers() {
+        engagementManager?.clearLikers()
     }
 
     // MARK: - Post Management

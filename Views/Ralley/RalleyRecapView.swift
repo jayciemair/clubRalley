@@ -289,31 +289,49 @@ struct RalleyRecapView: View {
         content += "\n\n#ClubRalley #\(ralley.sport.replacingOccurrences(of: " ", with: ""))"
 
         // Upload photo if provided
-        var imageUrls: [String] = []
+        var imageUrl: String? = nil
         if let image = selectedImage, let imageData = image.jpegData(compressionQuality: 0.8) {
             do {
                 let uploadService = ImageUploadService()
-                let url = try await uploadService.uploadPostImage(imageData: imageData, postId: UUID())
-                imageUrls.append(url)
+                imageUrl = try await uploadService.uploadPostImage(imageData: imageData, postId: UUID())
             } catch {
                 print("RalleyRecapView: Failed to upload image: \(error)")
             }
         }
 
-        // Create the completion post via the completion manager
-        if let completionManager = ralleyManager.completionManager {
-            completionManager.completingRalley = ralley
-            completionManager.attendees = attendees
-            completionManager.taggedUserIds = Set(attendees.map { $0.id })
-            await completionManager.completeAndShare()
+        // Create the recap post directly (the ralley was already marked completed
+        // by the completion sheet — we just need to save this recap post)
+        do {
+            guard let currentUser = SupabaseManager.shared.currentUser else {
+                throw SupabaseManager.SupabaseError.notAuthenticated
+            }
+
+            let dbPost = DatabasePost(
+                user_id: currentUser.id,
+                content: content,
+                ralley_id: ralley.id,
+                image_url: imageUrl,
+                post_type: "ralleyCompletion",
+                sport: ralley.sport
+            )
+
+            try await SupabaseManager.shared.insert(dbPost, into: "posts")
+            print("✅ RalleyRecapView: Recap post saved")
+        } catch {
+            print("❌ RalleyRecapView: Failed to save recap post: \(error)")
         }
+
+        // Clean up completion manager state
+        ralleyManager.completionManager?.dismissSheet()
 
         isSubmitting = false
         showingSuccess = true
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            showingSuccess = false
-            dismiss()
-        }
+        // Notify the home feed to refresh
+        NotificationCenter.default.post(name: NSNotification.Name("RecapPostCreated"), object: nil)
+
+        try? await Task.sleep(nanoseconds: 1_500_000_000)
+        showingSuccess = false
+        dismiss()
     }
 }

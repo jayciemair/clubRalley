@@ -221,7 +221,10 @@ extension SupabaseManager {
         username: String,
         city: String,
         state: String,
-        profilePhotoURL: String?
+        profilePhotoURL: String?,
+        isVerifiedAthlete: Bool? = nil,
+        athleteInfo: ClubUserAthleteInfoJSON? = nil,
+        sports: [String]? = nil
     ) async throws {
         print("[supaTennis] 👤 createClubUser() called")
         print("[supaTennis] 👤   id: \(id)")
@@ -231,6 +234,9 @@ extension SupabaseManager {
         print("[supaTennis] 👤   username: '\(username)'")
         print("[supaTennis] 👤   location: '\(city), \(state)'")
         print("[supaTennis] 👤   profilePhotoURL: \(profilePhotoURL ?? "nil")")
+        print("[supaTennis] 👤   isVerifiedAthlete: \(isVerifiedAthlete?.description ?? "nil")")
+        print("[supaTennis] 👤   athleteInfo: \(athleteInfo != nil ? "present" : "nil")")
+        print("[supaTennis] 👤   sports: \(sports ?? [])")
 
         let userData = ClubUserInsert(
             id: id,
@@ -241,7 +247,10 @@ extension SupabaseManager {
             username: username,
             city: city,
             state: state,
-            profile_photo_url: profilePhotoURL
+            profile_photo_url: profilePhotoURL,
+            is_verified_athlete: isVerifiedAthlete,
+            athlete_info: athleteInfo,
+            sports: sports
         )
 
         print("[supaTennis] 👤 About to insert into club_users...")
@@ -284,6 +293,19 @@ struct DictionaryWrapper: Encodable {
     }
 }
 
+/// Codable struct that maps to the `athlete_info` JSONB column in club_users
+struct ClubUserAthleteInfoJSON: Codable {
+    let school: String?
+    let sport: String?
+    let division: String?
+    let years_played: String?
+    let position: String?
+    let played_college: Bool?
+    let verified: Bool?
+    let verification_image_url: String?
+    let verification_notes: String?
+}
+
 /// Database model for inserting users (matches users table schema)
 struct ClubUserInsert: Codable {
     let id: UUID
@@ -295,6 +317,9 @@ struct ClubUserInsert: Codable {
     let city: String
     let state: String
     let profile_photo_url: String?
+    let is_verified_athlete: Bool?
+    let athlete_info: ClubUserAthleteInfoJSON?
+    let sports: [String]?
 }
 
 /// Helper struct for returning IDs from inserts

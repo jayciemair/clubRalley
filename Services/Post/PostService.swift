@@ -90,7 +90,9 @@ class PostService: ObservableObject, PostServiceProtocol {
                 user_id: currentUser.id,
                 content: formatPostContent(post),
                 ralley_id: post.relatedRalleyId,
-                image_url: post.images.first
+                image_url: post.images.first,
+                post_type: post.postType.rawValue,
+                sport: post.authorSport
             )
 
             // Insert into Supabase posts table
@@ -292,11 +294,12 @@ class PostService: ObservableObject, PostServiceProtocol {
             authorUsername: "@\(dbPost.user.username)",
             authorPhotoURL: dbPost.user.profile_photo_url ?? "",
             authorId: dbPost.user_id,
+            authorSport: dbPost.sport,
             title: extractTitleFromContent(dbPost.content),
             content: extractContentFromContent(dbPost.content),
-            images: [],
+            images: dbPost.image_url.map { [$0] } ?? [],
             timestamp: dbPost.created_at,
-            postType: PostType(rawValue: dbPost.post_type) ?? .text,
+            postType: PostType(rawValue: dbPost.resolvedPostType) ?? .text,
             visibility: PostVisibility(rawValue: dbPost.visibility ?? "everyone") ?? .everyone,
             relatedRalleyId: dbPost.ralley_id,
             taggedUserIds: dbPost.tagged_user_ids ?? [],

@@ -115,6 +115,17 @@ class RalleyParticipationManager: ObservableObject {
                     try? await chatService.addMember(chatId: ralleyId, userId: currentUser.id)
                 }
 
+                // Auto-post to feed
+                if let postManager = ralleyManager.postManager {
+                    let postContent = "Just joined a \(ralley.sport) ralley — \(ralley.title)! \u{1F64C}"
+                    await postManager.createPost(
+                        content: postContent,
+                        postType: .ralleyUpdate,
+                        authorSport: ralley.sport,
+                        relatedRalleyId: ralleyId
+                    )
+                }
+
                 successMessage = "You've joined the Ralley!"
             } else {
                 // Revert optimistic update on failure

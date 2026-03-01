@@ -124,7 +124,18 @@ struct PhotoPostView: View {
             // Clear any previous error before attempting
             postManager.clearError()
 
-            let imageUrls = Array(0..<selectedImages.count).map { "https://picsum.photos/300/300?random=\($0 + 700)" }
+            // Upload selected images to Supabase Storage
+            let postId = UUID()
+            let imageDatas = selectedImages.compactMap { $0.jpegData(compressionQuality: 0.9) }
+            var imageUrls: [String] = []
+            do {
+                imageUrls = try await ImageUploadService.shared.uploadPostImages(imageDatas: imageDatas, postId: postId)
+            } catch {
+                errorMessage = "Failed to upload images: \(error.localizedDescription)"
+                showingError = true
+                isPosting = false
+                return
+            }
 
             await postManager.createPost(
                 content: postText.isEmpty ? "" : postText,
@@ -238,10 +249,25 @@ struct CameraPostView: View {
             // Clear any previous error before attempting
             postManager.clearError()
 
+            // Upload captured image to Supabase Storage
+            var imageUrls: [String] = []
+            if let image = capturedImage, let imageData = image.jpegData(compressionQuality: 0.9) {
+                let postId = UUID()
+                do {
+                    let url = try await ImageUploadService.shared.uploadPostImage(imageData: imageData, postId: postId)
+                    imageUrls = [url]
+                } catch {
+                    errorMessage = "Failed to upload photo: \(error.localizedDescription)"
+                    showingError = true
+                    isPosting = false
+                    return
+                }
+            }
+
             await postManager.createPost(
                 content: "",
                 title: nil,
-                images: ["https://picsum.photos/300/300?random=\(Int.random(in: 800...999))"],
+                images: imageUrls,
                 visibility: .everyone
             )
 

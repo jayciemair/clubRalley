@@ -132,6 +132,19 @@ extension SupabaseManager {
             }
 
             print("[supaTennis] ✅ fetchUserProfile found user: \(userData.username), email: \(userData.email)")
+
+            // Build college athlete info from Supabase JSONB data
+            let collegeAthleteInfo: SavedCollegeAthleteInfo? = {
+                guard let info = userData.athlete_info else { return nil }
+                return SavedCollegeAthleteInfo(
+                    sport: info.sport ?? "",
+                    school: info.school ?? "",
+                    division: info.division ?? "",
+                    yearsPlayed: info.years_played,
+                    position: info.position
+                )
+            }()
+
             return SavedUserProfile(
                 id: userData.id,
                 email: userData.email,
@@ -142,8 +155,10 @@ extension SupabaseManager {
                 locationCity: userData.city ?? "",
                 locationState: userData.state ?? "",
                 profilePhotoURL: userData.profile_photo_url,
-                selectedSports: [],
-                createdAt: userData.created_at ?? Date()
+                selectedSports: userData.sports ?? [],
+                createdAt: userData.created_at ?? Date(),
+                playedCollegeSport: userData.is_verified_athlete,
+                collegeAthleteInfo: collegeAthleteInfo
             )
         } catch {
             print("[supaTennis] ❌ fetchUserProfile FAILED: \(error)")
@@ -305,6 +320,8 @@ struct ClubUserResponse: Codable {
     let state: String?
     let profile_photo_url: String?
     let is_verified_athlete: Bool?
+    let athlete_info: ClubUserAthleteInfoJSON?
+    let sports: [String]?
     let friends_count: Int?
     let ralleys_count: Int?
     let created_at: Date?

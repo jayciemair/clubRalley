@@ -23,6 +23,8 @@ struct PostCreationInterfaceView: View {
     @State private var showingCamera = false
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var showingDiscardConfirmation = false
+    @State private var showingSuccess = false
 
     // Auto-focus
     @FocusState private var isTextFieldFocused: Bool
@@ -38,28 +40,53 @@ struct PostCreationInterfaceView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Top bar
-            composerHeader
+        ZStack {
+            VStack(spacing: 0) {
+                // Top bar
+                composerHeader
 
-            Divider()
+                Divider()
 
-            // Composer area
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    composerInput
+                // Composer area
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        composerInput
 
-                    if !selectedImages.isEmpty {
-                        imagePreviewSection
+                        if !selectedImages.isEmpty {
+                            imagePreviewSection
+                        }
+
+                        Spacer(minLength: 100)
                     }
-
-                    Spacer(minLength: 100)
                 }
+
+                // Bottom toolbar
+                composerToolbar
             }
 
-            // Bottom toolbar
-            composerToolbar
+            // Posting spinner overlay
+            if isPosting {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(true)
+
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .tint(Color(hex: "#2C4F40"))
+                        .scaleEffect(1.2)
+                    Text("Posting...")
+                        .font(.system(size: 15, weight: .semibold))
+                        .fontDesign(.rounded)
+                        .foregroundColor(.white)
+                }
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.black.opacity(0.75))
+                )
+            }
         }
+        .successHUD(isShowing: $showingSuccess, message: "Post shared!")
         .background(Color.white)
         .onTapGesture {
             isTextFieldFocused = false
@@ -102,10 +129,22 @@ struct PostCreationInterfaceView: View {
 
     private var composerHeader: some View {
         HStack {
-            Button(action: { selectedTab = .home }) {
+            Button(action: {
+                if canPost {
+                    showingDiscardConfirmation = true
+                } else {
+                    selectedTab = .home
+                }
+            }) {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+            }
+            .confirmationDialog("Discard post?", isPresented: $showingDiscardConfirmation, titleVisibility: .visible) {
+                Button("Discard", role: .destructive) {
+                    selectedTab = .home
+                }
+                Button("Keep Editing", role: .cancel) {}
             }
 
             Spacer()
@@ -125,18 +164,11 @@ struct PostCreationInterfaceView: View {
 
     private var composerInput: some View {
         HStack(alignment: .top, spacing: 12) {
-            // User profile photo
-            if let photoURL = userProfile?.profilePhotoURL, !photoURL.isEmpty {
-                AsyncImage(url: URL(string: photoURL)) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    profileInitials
-                }
-                .frame(width: 36, height: 36)
-                .clipShape(Circle())
-            } else {
-                profileInitials
-            }
+            PostAuthorAvatar(
+                photoURL: userProfile?.profilePhotoURL ?? "",
+                initials: String(userProfile?.firstName.prefix(1) ?? "?").uppercased(),
+                size: 36
+            )
 
             // Text input
             TextField("What's happening?", text: $postText, axis: .vertical)
@@ -147,20 +179,6 @@ struct PostCreationInterfaceView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
-    }
-
-    private var profileInitials: some View {
-        let initials: String = {
-            let first = userProfile?.firstName.prefix(1) ?? "?"
-            return String(first).uppercased()
-        }()
-
-        return Text(initials)
-            .font(.system(size: 15, weight: .bold))
-            .foregroundColor(.white)
-            .frame(width: 36, height: 36)
-            .background(Color(hex: "#2C4F40"))
-            .clipShape(Circle())
     }
 
     // MARK: - Image Preview
@@ -235,8 +253,20 @@ struct PostCreationInterfaceView: View {
             // Clear any previous error before attempting
             postManager.clearError()
 
-            let imageUrls = selectedImages.isEmpty ? [] :
-                Array(0..<selectedImages.count).map { "https://picsum.photos/300/300?random=\($0 + 600)" }
+            // Upload selected images to Supabase Storage
+            var imageUrls: [String] = []
+            if !selectedImages.isEmpty {
+                let postId = UUID()
+                let imageDatas = selectedImages.compactMap { $0.jpegData(compressionQuality: 0.9) }
+                do {
+                    imageUrls = try await ImageUploadService.shared.uploadPostImages(imageDatas: imageDatas, postId: postId)
+                } catch {
+                    errorMessage = "Failed to upload images: \(error.localizedDescription)"
+                    showingError = true
+                    isPosting = false
+                    return
+                }
+            }
 
             await postManager.createPost(
                 content: postText,
@@ -254,11 +284,18 @@ struct PostCreationInterfaceView: View {
                 return
             }
 
-            // Success — reset state and navigate to home
+            // Success — haptic + HUD, then navigate home
+            let notification = UINotificationFeedbackGenerator()
+            notification.notificationOccurred(.success)
+
             postText = ""
             selectedImages = []
             selectedItems = []
-            selectedTab = .home
+
+            showingSuccess = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                selectedTab = .home
+            }
         }
     }
 }
@@ -279,33 +316,60 @@ struct ThreadComposerView: View {
     @State private var showingCamera = false
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var showingDiscardConfirmation = false
+    @State private var showingSuccess = false
 
     private let supabase = SupabaseManager.shared
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Header
-                headerView
+            ZStack {
+                VStack(spacing: 0) {
+                    // Header
+                    headerView
 
-                // Main content
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        // Profile and text input
-                        textInputSection
+                    // Main content
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 16) {
+                            // Profile and text input
+                            textInputSection
 
-                        // Selected images preview
-                        if !selectedImages.isEmpty {
-                            imagesPreviewSection
+                            // Selected images preview
+                            if !selectedImages.isEmpty {
+                                imagesPreviewSection
+                            }
+
+                            Spacer(minLength: 100)
                         }
-
-                        Spacer(minLength: 100)
                     }
+
+                    // Bottom toolbar
+                    bottomToolbar
                 }
 
-                // Bottom toolbar
-                bottomToolbar
+                // Posting spinner overlay
+                if isPosting {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .allowsHitTesting(true)
+
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .tint(Color(hex: "#2C4F40"))
+                            .scaleEffect(1.2)
+                        Text("Posting...")
+                            .font(.system(size: 15, weight: .semibold))
+                            .fontDesign(.rounded)
+                            .foregroundColor(.white)
+                    }
+                    .padding(24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.black.opacity(0.75))
+                    )
+                }
             }
+            .successHUD(isShowing: $showingSuccess, message: "Post shared!")
             .background(Color.white)
             .onTapGesture {
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -346,10 +410,22 @@ struct ThreadComposerView: View {
     private var headerView: some View {
         VStack(spacing: 0) {
             HStack {
-                Button(action: { dismiss() }) {
+                Button(action: {
+                    if canPost {
+                        showingDiscardConfirmation = true
+                    } else {
+                        dismiss()
+                    }
+                }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                }
+                .confirmationDialog("Discard post?", isPresented: $showingDiscardConfirmation, titleVisibility: .visible) {
+                    Button("Discard", role: .destructive) {
+                        dismiss()
+                    }
+                    Button("Keep Editing", role: .cancel) {}
                 }
 
                 Spacer()
@@ -483,9 +559,20 @@ struct ThreadComposerView: View {
             // Clear any previous error before attempting
             postManager.clearError()
 
-            // In production, upload images and get URLs
-            let imageUrls = selectedImages.isEmpty ? [] :
-                Array(0..<selectedImages.count).map { "https://picsum.photos/300/300?random=\($0 + 600)" }
+            // Upload selected images to Supabase Storage
+            var imageUrls: [String] = []
+            if !selectedImages.isEmpty {
+                let postId = UUID()
+                let imageDatas = selectedImages.compactMap { $0.jpegData(compressionQuality: 0.9) }
+                do {
+                    imageUrls = try await ImageUploadService.shared.uploadPostImages(imageDatas: imageDatas, postId: postId)
+                } catch {
+                    errorMessage = "Failed to upload images: \(error.localizedDescription)"
+                    showingError = true
+                    isPosting = false
+                    return
+                }
+            }
 
             await postManager.createPost(
                 content: postText,
@@ -503,8 +590,14 @@ struct ThreadComposerView: View {
                 return
             }
 
-            // Success — dismiss
-            dismiss()
+            // Success — haptic + HUD, then dismiss
+            let notification = UINotificationFeedbackGenerator()
+            notification.notificationOccurred(.success)
+
+            showingSuccess = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                dismiss()
+            }
         }
     }
 }

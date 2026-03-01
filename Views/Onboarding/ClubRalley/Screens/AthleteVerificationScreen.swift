@@ -19,7 +19,8 @@ struct AthleteVerificationScreen: View {
     @State private var showingSportPicker = false
     @State private var showingSchoolPicker = false
     @State private var isUploading = false
-    
+    @State private var uploadedImageURL: String?
+
     // Mock data - in real app this would come from API
     @State private var availableSports: [Sport] = []
     @State private var availableSchools: [School] = []
@@ -196,9 +197,7 @@ struct AthleteVerificationScreen: View {
     }
     
     private var canContinue: Bool {
-        selectedSport != nil && 
-        selectedSchool != nil && 
-        verificationImage != nil
+        selectedSport != nil && selectedSchool != nil
     }
     
     private func loadMockData() async {
@@ -227,26 +226,25 @@ struct AthleteVerificationScreen: View {
     
     private func uploadImage(_ data: Data) async {
         isUploading = true
-        
+
         do {
             let imageURL = try await controller.uploadVerificationImage(data)
-            // Store the uploaded URL (in real app)
+            uploadedImageURL = imageURL
         } catch {
-            // Handle upload error
             print("Failed to upload image: \(error)")
         }
-        
+
         isUploading = false
     }
     
     private func saveAndContinue() {
         guard let sport = selectedSport,
               let school = selectedSchool else { return }
-        
+
         controller.updateAthleteVerification(
             sport: sport,
             school: school,
-            verificationImageURL: "mock-uploaded-url",
+            verificationImageURL: uploadedImageURL,
             notes: notes
         )
         controller.goToNextStep()
