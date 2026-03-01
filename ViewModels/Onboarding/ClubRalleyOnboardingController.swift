@@ -93,10 +93,14 @@ class ClubRalleyOnboardingController: ObservableObject {
 
         print("[supaTennis] ➡️ Next step: \(nextStep)")
 
-        // If we're about to show the completion screen, submit data first
+        // If we're about to show the completion screen, submit data and
+        // stay on the current step while loading. submitOnboardingData()
+        // will set isComplete = true on success, which the coordinator
+        // observes to show the completion view.
         if nextStep == .completion {
             print("[supaTennis] 🏁 Next is .completion — triggering completeOnboarding()")
             completeOnboarding()
+            return
         }
 
         currentStep = nextStep

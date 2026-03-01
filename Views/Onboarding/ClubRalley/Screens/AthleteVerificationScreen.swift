@@ -2,7 +2,7 @@
 //  AthleteVerificationScreen.swift
 //  Club Ralley
 //
-//  Screen for athlete verification with photo upload and sport/school selection
+//  Screen for athlete verification with sport/school selection and photo upload
 //
 
 import SwiftUI
@@ -12,180 +12,205 @@ struct AthleteVerificationScreen: View {
     @EnvironmentObject var controller: ClubRalleyOnboardingController
     @State private var selectedSport: Sport?
     @State private var selectedSchool: School?
-    @State private var searchText = ""
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var verificationImage: UIImage?
     @State private var notes = ""
-    @State private var showingSportPicker = false
-    @State private var showingSchoolPicker = false
     @State private var isUploading = false
     @State private var uploadedImageURL: String?
+    @State private var showingSportPicker = false
+    @State private var showingSchoolPicker = false
 
-    // Mock data - in real app this would come from API
-    @State private var availableSports: [Sport] = []
-    @State private var availableSchools: [School] = []
-    
+    private var canContinue: Bool {
+        selectedSport != nil && selectedSchool != nil && !isUploading
+    }
+
     var body: some View {
-        OnboardingScrollableLayout {
+        ClubRalleyScrollableLayout(
+            canGoBack: controller.canGoBack,
+            onBack: { controller.goToPreviousStep() },
+            onContinue: { saveAndContinue() },
+            continueEnabled: canContinue,
+            continueText: isUploading ? "Uploading..." : "Continue"
+        ) {
             VStack(spacing: 32) {
-                // Header
-                OnboardingHeader(
+                ClubRalleyOnboardingHeader(
                     title: controller.currentStep.title,
                     subtitle: controller.currentStep.subtitle
                 )
-                
+
                 VStack(spacing: 24) {
                     // Sport selection
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("What sport do/did you play?")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                        
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("What sport did you play?")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                            .padding(.horizontal, 24)
+
                         Button(action: { showingSportPicker = true }) {
-                            HStack {
-                                if let sport = selectedSport {
-                                    HStack {
-                                        Image(systemName: "sportscourt.fill")
-                                            .foregroundColor(.blue)
-                                        Text(sport.name)
-                                            .foregroundColor(.primary)
-                                    }
-                                } else {
-                                    HStack {
-                                        Image(systemName: "sportscourt")
-                                            .foregroundColor(.secondary)
-                                        Text("Select your sport")
-                                            .foregroundColor(.secondary)
+                            HStack(spacing: 12) {
+                                Image(systemName: selectedSport != nil ? "sportscourt.fill" : "sportscourt")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(selectedSport != nil ? Color(hex: "#2C4F40") : .gray)
+
+                                Text(selectedSport?.name ?? "Select your sport")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(selectedSport != nil ? .primary : .gray)
+
+                                Spacer()
+
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(selectedSport != nil ? Color(hex: "#2C4F40") : Color.gray.opacity(0.3), lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .padding(.horizontal, 24)
+                    }
+
+                    // School selection
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("What school did you attend?")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                            .padding(.horizontal, 24)
+
+                        Button(action: { showingSchoolPicker = true }) {
+                            HStack(spacing: 12) {
+                                Image(systemName: selectedSchool != nil ? "graduationcap.fill" : "graduationcap")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(selectedSchool != nil ? Color(hex: "#2C4F40") : .gray)
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(selectedSchool?.name ?? "Select your school")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(selectedSchool != nil ? .primary : .gray)
+
+                                    if let school = selectedSchool {
+                                        Text("\(school.division.displayName) \u{2022} \(school.state)")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(.gray)
                                     }
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.down")
-                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.gray)
                             }
-                            .padding(12)
-                            .background(Color(.systemBackground))
-                            .overlay(
+                            .padding(16)
+                            .background(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color(.systemGray4), lineWidth: 1)
+                                    .stroke(selectedSchool != nil ? Color(hex: "#2C4F40") : Color.gray.opacity(0.3), lineWidth: 1)
                             )
-                            .cornerRadius(12)
                         }
+                        .buttonStyle(PlainButtonStyle())
+                        .padding(.horizontal, 24)
                     }
-                    
-                    // School selection
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("What school do/did you attend?")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                        
-                        Button(action: { showingSchoolPicker = true }) {
-                            HStack {
-                                if let school = selectedSchool {
-                                    HStack {
-                                        Image(systemName: "graduationcap.fill")
-                                            .foregroundColor(.purple)
-                                        VStack(alignment: .leading) {
-                                            Text(school.name)
-                                                .foregroundColor(.primary)
-                                            Text("\(school.division.displayName) • \(school.state)")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
+
+                    // Photo upload
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Verification photo")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                            .padding(.horizontal, 24)
+
+                        Text("Upload a roster, team photo, or athletic ID")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                            .padding(.horizontal, 24)
+
+                        PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                            Group {
+                                if let image = verificationImage {
+                                    ZStack(alignment: .topTrailing) {
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(height: 140)
+                                            .clipped()
+                                            .cornerRadius(12)
+
+                                        if isUploading {
+                                            ProgressView()
+                                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                                .padding(8)
+                                                .background(Color.black.opacity(0.5))
+                                                .cornerRadius(8)
+                                                .padding(8)
                                         }
                                     }
                                 } else {
-                                    HStack {
-                                        Image(systemName: "graduationcap")
-                                            .foregroundColor(.secondary)
-                                        Text("Select your school")
-                                            .foregroundColor(.secondary)
+                                    VStack(spacing: 10) {
+                                        Image(systemName: "photo.badge.plus")
+                                            .font(.system(size: 28))
+                                            .foregroundColor(Color(hex: "#2C4F40"))
+
+                                        Text("Tap to upload")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
                                     }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 120)
+                                    .background(Color.gray.opacity(0.06))
+                                    .cornerRadius(12)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.gray.opacity(0.2), style: StrokeStyle(lineWidth: 1, dash: [6]))
+                                    )
                                 }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.down")
-                                    .foregroundColor(.secondary)
                             }
-                            .padding(12)
-                            .background(Color(.systemBackground))
+                        }
+                        .padding(.horizontal, 24)
+                    }
+
+                    // Optional notes
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Text("Additional notes")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(ClubRalleyTheme.Colors.darkGreen)
+                            Spacer()
+                            Text("Optional")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.horizontal, 24)
+
+                        TextField("Any context about your athletic background...", text: $notes, axis: .vertical)
+                            .font(.system(size: 15))
+                            .lineLimit(3...5)
+                            .padding(14)
+                            .background(Color.gray.opacity(0.06))
+                            .cornerRadius(12)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color(.systemGray4), lineWidth: 1)
+                                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                             )
-                            .cornerRadius(12)
-                        }
-                    }
-                    
-                    // Photo upload
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Upload verification photo")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                        
-                        Text("Upload a photo that shows your athletic involvement (roster, team photo, athletic ID, etc.)")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        PhotosPickerUploadView(
-                            selectedPhoto: $selectedPhoto,
-                            verificationImage: $verificationImage,
-                            isUploading: $isUploading
-                        )
-                    }
-                    
-                    // Optional notes
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Additional notes (optional)")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                        
-                        TextField("Add any additional context about your athletic background...", text: $notes, axis: .vertical)
-                            .lineLimit(3...6)
-                            .textFieldStyle(OnboardingTextFieldStyle())
+                            .padding(.horizontal, 24)
                     }
                 }
-                .padding(.horizontal, 32)
-                
-                Spacer()
-                
-                // Continue button
-                ContinueButton(
-                    title: isUploading ? "Uploading..." : "Continue",
-                    isEnabled: canContinue && !isUploading,
-                    action: {
-                        saveAndContinue()
-                    }
-                )
-                .padding(.horizontal, 32)
-                .padding(.bottom, 32)
+
+                Spacer(minLength: 20)
             }
-        }
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Back") {
-                    controller.goToPreviousStep()
-                }
-            }
+            .padding(.top, 20)
         }
         .sheet(isPresented: $showingSportPicker) {
-            SportPickerView(
-                sports: availableSports,
+            AthleteVerificationSportPicker(
                 selectedSport: $selectedSport
             )
         }
         .sheet(isPresented: $showingSchoolPicker) {
-            SchoolPickerView(
-                schools: availableSchools,
+            AthleteVerificationSchoolPicker(
                 selectedSchool: $selectedSchool
             )
         }
-        .task {
-            await loadMockData()
-        }
-        .onChange(of: selectedPhoto) { newItem in
+        .onChange(of: selectedPhoto) { _, newItem in
             Task {
                 if let data = try? await newItem?.loadTransferable(type: Data.self),
                    let image = UIImage(data: data) {
@@ -195,52 +220,20 @@ struct AthleteVerificationScreen: View {
             }
         }
     }
-    
-    private var canContinue: Bool {
-        selectedSport != nil && selectedSchool != nil
-    }
-    
-    private func loadMockData() async {
-        // Mock sports data
-        availableSports = [
-            Sport(id: UUID(), name: "Basketball", category: .team, iconName: "basketball", isPopular: true),
-            Sport(id: UUID(), name: "Football", category: .team, iconName: "football", isPopular: true),
-            Sport(id: UUID(), name: "Soccer", category: .team, iconName: "soccer", isPopular: true),
-            Sport(id: UUID(), name: "Tennis", category: .individual, iconName: "tennis", isPopular: true),
-            Sport(id: UUID(), name: "Swimming", category: .individual, iconName: "swimming", isPopular: true),
-            Sport(id: UUID(), name: "Track & Field", category: .individual, iconName: "track", isPopular: true),
-            Sport(id: UUID(), name: "Baseball", category: .team, iconName: "baseball", isPopular: true),
-            Sport(id: UUID(), name: "Volleyball", category: .team, iconName: "volleyball", isPopular: true)
-        ]
-        
-        // Mock schools data
-        availableSchools = [
-            School(id: UUID(), name: "University of California, Los Angeles", state: "CA", division: .d1, conference: "Pac-12", logoURL: nil),
-            School(id: UUID(), name: "Stanford University", state: "CA", division: .d1, conference: "Pac-12", logoURL: nil),
-            School(id: UUID(), name: "University of Southern California", state: "CA", division: .d1, conference: "Pac-12", logoURL: nil),
-            School(id: UUID(), name: "Duke University", state: "NC", division: .d1, conference: "ACC", logoURL: nil),
-            School(id: UUID(), name: "University of North Carolina", state: "NC", division: .d1, conference: "ACC", logoURL: nil),
-            School(id: UUID(), name: "Harvard University", state: "MA", division: .d1, conference: "Ivy League", logoURL: nil)
-        ]
-    }
-    
+
     private func uploadImage(_ data: Data) async {
         isUploading = true
-
         do {
             let imageURL = try await controller.uploadVerificationImage(data)
             uploadedImageURL = imageURL
         } catch {
-            print("Failed to upload image: \(error)")
+            print("AthleteVerificationScreen: Failed to upload image: \(error)")
         }
-
         isUploading = false
     }
-    
-    private func saveAndContinue() {
-        guard let sport = selectedSport,
-              let school = selectedSchool else { return }
 
+    private func saveAndContinue() {
+        guard let sport = selectedSport, let school = selectedSchool else { return }
         controller.updateAthleteVerification(
             sport: sport,
             school: school,
@@ -251,101 +244,53 @@ struct AthleteVerificationScreen: View {
     }
 }
 
-// MARK: - Photo Upload Component
-
-struct PhotosPickerUploadView: View {
-    @Binding var selectedPhoto: PhotosPickerItem?
-    @Binding var verificationImage: UIImage?
-    @Binding var isUploading: Bool
-    
-    var body: some View {
-        PhotosPicker(selection: $selectedPhoto, matching: .images) {
-            VStack(spacing: 16) {
-                if let image = verificationImage {
-                    // Show selected image
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(height: 120)
-                        .clipped()
-                        .cornerRadius(12)
-                    
-                    if isUploading {
-                        HStack {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                            Text("Uploading...")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    } else {
-                        Text("Tap to change photo")
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                    }
-                } else {
-                    // Upload placeholder
-                    VStack(spacing: 12) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.blue, style: StrokeStyle(lineWidth: 2, dash: [8]))
-                                .frame(height: 120)
-                            
-                            VStack(spacing: 8) {
-                                Image(systemName: "photo.badge.plus")
-                                    .font(.title)
-                                    .foregroundColor(.blue)
-                                
-                                Text("Upload Photo")
-                                    .font(.subheadline)
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                        
-                        Text("Accepted formats: JPG, PNG, HEIC")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-        }
-    }
-}
-
 // MARK: - Sport Picker
 
-struct SportPickerView: View {
-    let sports: [Sport]
+private struct AthleteVerificationSportPicker: View {
     @Binding var selectedSport: Sport?
     @Environment(\.dismiss) private var dismiss
-    
+    @State private var searchText = ""
+
+    private let sports = DefaultSports.all
+
+    private var filteredSports: [Sport] {
+        if searchText.isEmpty { return sports }
+        return sports.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
+
     var body: some View {
         NavigationStack {
-            List(sports) { sport in
-                Button(action: {
+            List(filteredSports) { sport in
+                Button {
                     selectedSport = sport
                     dismiss()
-                }) {
-                    HStack {
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: sport.iconName)
+                            .font(.system(size: 18))
+                            .foregroundColor(Color(hex: "#2C4F40"))
+                            .frame(width: 28)
+
                         Text(sport.name)
                             .foregroundColor(.primary)
-                        
+
                         Spacer()
-                        
+
                         if selectedSport?.id == sport.id {
                             Image(systemName: "checkmark")
-                                .foregroundColor(.blue)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(Color(hex: "#2C4F40"))
                         }
                     }
                 }
             }
             .navigationTitle("Select Sport")
             .navigationBarTitleDisplayMode(.inline)
+            .searchable(text: $searchText, prompt: "Search sports...")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
+                    Button("Done") { dismiss() }
+                        .foregroundColor(Color(hex: "#2C4F40"))
                 }
             }
         }
@@ -354,50 +299,91 @@ struct SportPickerView: View {
 
 // MARK: - School Picker
 
-struct SchoolPickerView: View {
-    let schools: [School]
+private struct AthleteVerificationSchoolPicker: View {
     @Binding var selectedSchool: School?
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
-    
-    var filteredSchools: [School] {
-        if searchText.isEmpty {
-            return schools
-        } else {
-            return schools.filter { school in
-                school.name.localizedCaseInsensitiveContains(searchText) ||
-                school.state.localizedCaseInsensitiveContains(searchText)
-            }
+
+    // Common colleges — in a real app this would come from an API
+    private let schools: [School] = [
+        School(id: UUID(), name: "University of Alabama", state: "AL", division: .d1, conference: "SEC", logoURL: nil),
+        School(id: UUID(), name: "Arizona State University", state: "AZ", division: .d1, conference: "Big 12", logoURL: nil),
+        School(id: UUID(), name: "Auburn University", state: "AL", division: .d1, conference: "SEC", logoURL: nil),
+        School(id: UUID(), name: "Boston College", state: "MA", division: .d1, conference: "ACC", logoURL: nil),
+        School(id: UUID(), name: "Clemson University", state: "SC", division: .d1, conference: "ACC", logoURL: nil),
+        School(id: UUID(), name: "Duke University", state: "NC", division: .d1, conference: "ACC", logoURL: nil),
+        School(id: UUID(), name: "Florida State University", state: "FL", division: .d1, conference: "ACC", logoURL: nil),
+        School(id: UUID(), name: "Georgetown University", state: "DC", division: .d1, conference: "Big East", logoURL: nil),
+        School(id: UUID(), name: "Harvard University", state: "MA", division: .d1, conference: "Ivy League", logoURL: nil),
+        School(id: UUID(), name: "Indiana University", state: "IN", division: .d1, conference: "Big Ten", logoURL: nil),
+        School(id: UUID(), name: "LSU", state: "LA", division: .d1, conference: "SEC", logoURL: nil),
+        School(id: UUID(), name: "Michigan State University", state: "MI", division: .d1, conference: "Big Ten", logoURL: nil),
+        School(id: UUID(), name: "Northwestern University", state: "IL", division: .d1, conference: "Big Ten", logoURL: nil),
+        School(id: UUID(), name: "Ohio State University", state: "OH", division: .d1, conference: "Big Ten", logoURL: nil),
+        School(id: UUID(), name: "Penn State University", state: "PA", division: .d1, conference: "Big Ten", logoURL: nil),
+        School(id: UUID(), name: "Stanford University", state: "CA", division: .d1, conference: "ACC", logoURL: nil),
+        School(id: UUID(), name: "UCLA", state: "CA", division: .d1, conference: "Big Ten", logoURL: nil),
+        School(id: UUID(), name: "University of Florida", state: "FL", division: .d1, conference: "SEC", logoURL: nil),
+        School(id: UUID(), name: "University of Georgia", state: "GA", division: .d1, conference: "SEC", logoURL: nil),
+        School(id: UUID(), name: "University of Michigan", state: "MI", division: .d1, conference: "Big Ten", logoURL: nil),
+        School(id: UUID(), name: "University of North Carolina", state: "NC", division: .d1, conference: "ACC", logoURL: nil),
+        School(id: UUID(), name: "University of Oregon", state: "OR", division: .d1, conference: "Big Ten", logoURL: nil),
+        School(id: UUID(), name: "University of Southern California", state: "CA", division: .d1, conference: "Big Ten", logoURL: nil),
+        School(id: UUID(), name: "University of Texas", state: "TX", division: .d1, conference: "SEC", logoURL: nil),
+        School(id: UUID(), name: "University of Virginia", state: "VA", division: .d1, conference: "ACC", logoURL: nil),
+        School(id: UUID(), name: "University of Wisconsin", state: "WI", division: .d1, conference: "Big Ten", logoURL: nil),
+        School(id: UUID(), name: "Vanderbilt University", state: "TN", division: .d1, conference: "SEC", logoURL: nil),
+        School(id: UUID(), name: "Villanova University", state: "PA", division: .d1, conference: "Big East", logoURL: nil),
+        School(id: UUID(), name: "Wake Forest University", state: "NC", division: .d1, conference: "ACC", logoURL: nil),
+        School(id: UUID(), name: "Yale University", state: "CT", division: .d1, conference: "Ivy League", logoURL: nil)
+    ]
+
+    private var filteredSchools: [School] {
+        if searchText.isEmpty { return schools }
+        return schools.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.state.localizedCaseInsensitiveContains(searchText) ||
+            ($0.conference?.localizedCaseInsensitiveContains(searchText) ?? false)
         }
     }
-    
+
     var body: some View {
         NavigationStack {
             List(filteredSchools) { school in
-                Button(action: {
+                Button {
                     selectedSchool = school
                     dismiss()
-                }) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(school.name)
-                            .foregroundColor(.primary)
-                        
-                        Text("\(school.division.displayName) • \(school.state)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        if let conference = school.conference {
-                            Text(conference)
-                                .font(.caption)
-                                .foregroundColor(.blue)
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(school.name)
+                                .foregroundColor(.primary)
+                                .font(.system(size: 16))
+
+                            HStack(spacing: 6) {
+                                Text(school.division.displayName)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(Color(hex: "#2C4F40"))
+
+                                if let conference = school.conference {
+                                    Text("\u{2022} \(conference)")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.gray)
+                                }
+
+                                Text("\u{2022} \(school.state)")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.gray)
+                            }
                         }
-                    }
-                    
-                    Spacer()
-                    
-                    if selectedSchool?.id == school.id {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(.blue)
+
+                        Spacer()
+
+                        if selectedSchool?.id == school.id {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(Color(hex: "#2C4F40"))
+                        }
                     }
                 }
             }
@@ -406,22 +392,10 @@ struct SchoolPickerView: View {
             .searchable(text: $searchText, prompt: "Search schools...")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
+                    Button("Done") { dismiss() }
+                        .foregroundColor(Color(hex: "#2C4F40"))
                 }
             }
-        }
-    }
-}
-
-// MARK: - Preview
-
-struct AthleteVerificationScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationStack {
-            AthleteVerificationScreen()
-                .environmentObject(ClubRalleyOnboardingController())
         }
     }
 }

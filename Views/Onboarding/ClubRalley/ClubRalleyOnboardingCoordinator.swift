@@ -98,13 +98,13 @@ struct ClubRalleyOnboardingCoordinator: View {
                 .environmentObject(controller)
 
         case .athleteVerification:
-            // TODO: AthleteVerificationScreen needs compile fixes
-            EmptyView()
+            AthleteVerificationScreen()
+                .environmentObject(controller)
 
         case .completion:
-            OnboardingCompletionView {
-                completion()
-            }
+            // Should not be reached — completeOnboarding() sets isComplete
+            // which is handled by the top-level body check
+            EmptyView()
         }
     }
 }

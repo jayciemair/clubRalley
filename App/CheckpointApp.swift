@@ -107,11 +107,45 @@ struct ClubRalleyApp: App {
                         }
                     }
                 } else if !hasSession && hasCompletedOnboarding {
-                    // No Supabase session — user must re-authenticate
-                    // Phone screen handles both new users and returning users
-                    print("🟡 App Launch - No Supabase session, redirecting to phone screen")
-                    await MainActor.run {
-                        hasCompletedOnboarding = false
+                    // No Supabase session — try to silently re-authenticate
+                    // instead of blowing away onboarding state
+                    print("🟡 App Launch - No Supabase session, attempting silent re-auth")
+                    do {
+                        let userId = try await supabaseManager.signInAnonymously()
+                        print("🟢 Silent re-auth succeeded — userId: \(userId)")
+
+                        // Restore user from local profile (anonymous re-auth
+                        // gives a new UUID, so the remote lookup won't match)
+                        if let saved = SavedUserProfile.loadFromStorage() {
+                            await MainActor.run {
+                                supabaseManager.currentUser = SupabaseUser(
+                                    id: saved.id,
+                                    email: saved.email,
+                                    firstName: saved.firstName,
+                                    lastName: saved.lastName
+                                )
+                            }
+                        }
+                    } catch {
+                        // Even if re-auth fails, let the user into the app
+                        // with whatever local profile we have cached
+                        print("🔴 Silent re-auth failed: \(error) — using cached profile")
+                        if let saved = SavedUserProfile.loadFromStorage() {
+                            await MainActor.run {
+                                supabaseManager.currentUser = SupabaseUser(
+                                    id: saved.id,
+                                    email: saved.email,
+                                    firstName: saved.firstName,
+                                    lastName: saved.lastName
+                                )
+                            }
+                        } else {
+                            // No cached profile at all — must re-onboard
+                            print("🔴 No cached profile — redirecting to onboarding")
+                            await MainActor.run {
+                                hasCompletedOnboarding = false
+                            }
+                        }
                     }
                 }
 
