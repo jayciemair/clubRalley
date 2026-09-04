@@ -1,0 +1,76 @@
+/* Club Ralley design tokens — ported from the original single-file app.
+   Light palette on bare :root. Dark redefines only what changes, once under
+   prefers-color-scheme (system) and once under [data-theme="dark"] (explicit). */
+
+:root {
+  --bg: #fafbf6;
+  --surface: #ffffff;
+  --surface-2: #eff1e7;
+  --ink: #1e2a22;
+  --muted: #5f6b62;
+  --faint: #97a093;
+  --line: #e2e4d6;
+  --line-strong: #cfd3bf;
+  --accent: #2c4f40;
+  --accent-ink: #1c3529;
+  --accent-soft: #e2e4d6;
+  --danger: #b84a3c;
+  --today: #c08a2e;
+  --ok: #2c4f40;
+
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+  --display: "Chillax", "DM Sans", system-ui, sans-serif;
+
+  --shadow: 0 1px 2px rgba(28, 40, 30, 0.06), 0 8px 24px -12px rgba(28, 40, 30, 0.2);
+  --radius: 10px;
+
+  --nav-w: 232px;
+  --rail-w: 270px;
+  --row-h: 46px;
+  --dw: 20px;
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"],
+:root:not([data-theme="light"]) {
+  @media (prefers-color-scheme: dark) {
+    --bg: #131714;
+    --surface: #1b211c;
+    --surface-2: #232a24;
+    --ink: #e6e9df;
+    --muted: #9aa394;
+    --faint: #6e7869;
+    --line: #2e362f;
+    --line-strong: #3c453c;
+    --accent: #8cbba3;
+    --accent-ink: #beddcd;
+    --accent-soft: #233329;
+    --danger: #e0796c;
+    --today: #d9a94a;
+    --ok: #8cbba3;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -12px rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #131714;
+  --surface: #1b211c;
+  --surface-2: #232a24;
+  --ink: #e6e9df;
+  --muted: #9aa394;
+  --faint: #6e7869;
+  --line: #2e362f;
+  --line-strong: #3c453c;
+  --accent: #8cbba3;
+  --accent-ink: #beddcd;
+  --accent-soft: #233329;
+  --danger: #e0796c;
+  --today: #d9a94a;
+  --ok: #8cbba3;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -12px rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
